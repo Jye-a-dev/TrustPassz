@@ -1,0 +1,17 @@
+{
+  "name": "@trustpassz/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Smart contracts for TrustPassz Digital Escrow",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "snapshot": "forge snapshot"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1"
+  },
+  "devDependencies": {
+    "forge-std": "^1.1.2"
+  }
+}

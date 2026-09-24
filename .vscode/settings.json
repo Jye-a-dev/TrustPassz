@@ -1,0 +1,12 @@
+{
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/.metadata/**",
+    "**/archetype-resources/**",
+    "**/META-INF/maven/**",
+    "**/apps/mb_user/android/**"
+  ],
+  "files.exclude": {
+    "**/apps/mb_user/android/.gradle": true
+  }
+}
