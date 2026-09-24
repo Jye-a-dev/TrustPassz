@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "TrustPassz",
+    "slug": "mb-user",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.trustpassz.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a"
+      }
+    },
+    "plugins": [
+      "expo-asset"
+    ],
+    "newArchEnabled": true
+  }
+}
