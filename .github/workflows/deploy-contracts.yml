@@ -36,11 +36,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
-          cache-dependency-path: packages/contracts/package-lock.json
 
-      - name: Install Contracts Dependencies
-        run: npm ci
+      - name: Install NPM Dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          else
+            echo "No package.json found, skipping."
+          fi
 
       - name: Install Foundry Toolchain
         uses: foundry-rs/foundry-toolchain@v1
@@ -108,7 +113,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add apps/server/src/abi/ apps/cl_user/src/abi/ apps/mb_user/src/abi/
-          git add apps/server/.env.example apps/cl_user/.env.example apps/mb_user/.env.example
+          git add apps/server/.env apps/server/.env.example
+          git add apps/cl_user/.env.local apps/cl_user/.env.example
+          git add apps/mb_user/.env apps/mb_user/.env.example
           if git diff --staged --quiet; then
             echo "No ABI or configuration changes detected."
           else
