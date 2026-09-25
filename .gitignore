@@ -40,6 +40,7 @@ next-env.d.ts
 # Smart Contracts / Foundry
 **/cache/
 **/out/
+packages/contracts/lib/
 
 # Python / AI Pipeline
 __pycache__/
