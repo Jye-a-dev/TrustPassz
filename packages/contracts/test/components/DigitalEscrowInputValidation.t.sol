@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.28;
 
 import {EscrowTestBase} from "../helpers/EscrowTestBase.sol";
 import {EscrowTypes} from "../../src/types/EscrowTypes.sol";
 
-/// @title DigitalEscrowRevertsTest
-/// @notice Unhappy path test suite verifying custom error reverts
-contract DigitalEscrowRevertsTest is EscrowTestBase {
+/// @title DigitalEscrowInputValidationTest
+/// @notice Input validation, zero-checks, and access control revert tests
+contract DigitalEscrowInputValidationTest is EscrowTestBase {
     function test_RevertIf_CreateDeal_DuplicateId() external {
         escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
-
-        vm.expectRevert(abi.encodeWithSelector(EscrowTypes.DealAlreadyExists.selector, dealIdEth));
+        vm.expectRevert(EscrowTypes.DealAlreadyExists.selector);
         escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
     }
 
@@ -55,24 +54,6 @@ contract DigitalEscrowRevertsTest is EscrowTestBase {
         escrow.deposit{value: ETH_AMOUNT}(dealIdEth);
     }
 
-    function test_RevertIf_Deposit_InvalidState() external {
-        escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
-
-        vm.prank(buyer);
-        escrow.deposit{value: ETH_AMOUNT}(dealIdEth);
-
-        vm.prank(buyer);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                EscrowTypes.InvalidDealState.selector,
-                dealIdEth,
-                EscrowTypes.DealState.Deposited,
-                EscrowTypes.DealState.Pending
-            )
-        );
-        escrow.deposit{value: ETH_AMOUNT}(dealIdEth);
-    }
-
     function test_RevertIf_StartInspection_UnauthorizedCaller() external {
         escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
 
@@ -84,22 +65,7 @@ contract DigitalEscrowRevertsTest is EscrowTestBase {
         escrow.startInspection(dealIdEth);
     }
 
-    function test_RevertIf_StartInspection_InvalidState() external {
-        escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
-
-        vm.prank(seller);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                EscrowTypes.InvalidDealState.selector,
-                dealIdEth,
-                EscrowTypes.DealState.Pending,
-                EscrowTypes.DealState.Deposited
-            )
-        );
-        escrow.startInspection(dealIdEth);
-    }
-
-    function test_RevertIf_Settle_InspectionPeriodStillActive_NonBuyer() external {
+    function test_RevertIf_RaiseDispute_CallerNotBuyer() external {
         escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
 
         vm.prank(buyer);
@@ -108,53 +74,8 @@ contract DigitalEscrowRevertsTest is EscrowTestBase {
         vm.prank(seller);
         escrow.startInspection(dealIdEth);
 
-        (, EscrowTypes.DealStateData memory stateData) = escrow.getDeal(dealIdEth);
-
-        vm.prank(seller);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                EscrowTypes.InspectionPeriodStillActive.selector,
-                block.timestamp,
-                stateData.inspectionDeadline
-            )
-        );
-        escrow.settle(dealIdEth);
-    }
-
-    function test_RevertIf_RaiseDispute_NonBuyerCaller() external {
-        escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
-
-        vm.prank(buyer);
-        escrow.deposit{value: ETH_AMOUNT}(dealIdEth);
-
-        vm.prank(seller);
-        escrow.startInspection(dealIdEth);
-
-        vm.prank(seller);
-        vm.expectRevert(abi.encodeWithSelector(EscrowTypes.InvalidParticipant.selector, seller));
-        escrow.raiseDispute(dealIdEth);
-    }
-
-    function test_RevertIf_RaiseDispute_InspectionPeriodExpired() external {
-        escrow.createDeal(dealIdEth, _buildConfig(address(0), ETH_AMOUNT));
-
-        vm.prank(buyer);
-        escrow.deposit{value: ETH_AMOUNT}(dealIdEth);
-
-        vm.prank(seller);
-        escrow.startInspection(dealIdEth);
-
-        (, EscrowTypes.DealStateData memory stateData) = escrow.getDeal(dealIdEth);
-        vm.warp(stateData.inspectionDeadline);
-
-        vm.prank(buyer);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                EscrowTypes.InspectionPeriodExpired.selector,
-                stateData.inspectionDeadline,
-                stateData.inspectionDeadline
-            )
-        );
+        vm.prank(stranger);
+        vm.expectRevert(abi.encodeWithSelector(EscrowTypes.InvalidParticipant.selector, stranger));
         escrow.raiseDispute(dealIdEth);
     }
 

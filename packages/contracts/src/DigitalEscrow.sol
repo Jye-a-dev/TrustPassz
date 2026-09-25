@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.28;
 
 import {EscrowTypes} from "./types/EscrowTypes.sol";
 import {IDigitalEscrow} from "./interfaces/IDigitalEscrow.sol";
@@ -15,6 +15,8 @@ contract DigitalEscrow is
     PaymentProcessor,
     EscrowStateMachine
 {
+    uint256 public constant DELIVERY_TIMEOUT = 48 hours;
+
     mapping(bytes32 => EscrowTypes.DealConfig) private _deals;
     mapping(bytes32 => EscrowTypes.DealStateData) private _dealStates;
 
@@ -27,7 +29,7 @@ contract DigitalEscrow is
     /// @inheritdoc IDigitalEscrow
     function createDeal(bytes32 dealId, EscrowTypes.DealConfig calldata config) external override {
         if (_dealStates[dealId].state != EscrowTypes.DealState.Uninitialized) {
-            revert EscrowTypes.DealAlreadyExists(dealId);
+            revert EscrowTypes.DealAlreadyExists();
         }
         if (config.buyer == address(0) || config.seller == address(0)) {
             revert EscrowTypes.ZeroAddress();
@@ -41,6 +43,7 @@ contract DigitalEscrow is
         _deals[dealId] = config;
         _dealStates[dealId] = EscrowTypes.DealStateData({
             state: EscrowTypes.DealState.Pending,
+            depositedAt: 0,
             inspectionDeadline: 0,
             disputeInitiator: address(0),
             createdAt: block.timestamp
@@ -50,18 +53,19 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function deposit(bytes32 dealId) external payable override {
+    function deposit(bytes32 dealId) external payable override nonReentrant {
         EscrowTypes.DealConfig storage config = _deals[dealId];
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
 
-        _validateState(dealId, stateData.state, EscrowTypes.DealState.Pending);
+        _validateState(stateData.state, EscrowTypes.DealState.Pending);
         if (msg.sender != config.buyer) revert EscrowTypes.Unauthorized(msg.sender);
 
-        // CEI: Mutate internal state before executing external asset transfer
+        // CEI: Mutate internal state and emit event before executing external asset transfer
         stateData.state = EscrowTypes.DealState.Deposited;
-        _processDeposit(config.token, msg.sender, config.amount);
-
+        stateData.depositedAt = block.timestamp;
         emit DealDeposited(dealId, msg.sender, config.amount);
+
+        _processDeposit(config.token, msg.sender, config.amount);
     }
 
     /// @inheritdoc IDigitalEscrow
@@ -69,7 +73,7 @@ contract DigitalEscrow is
         EscrowTypes.DealConfig storage config = _deals[dealId];
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
 
-        _validateState(dealId, stateData.state, EscrowTypes.DealState.Deposited);
+        _validateState(stateData.state, EscrowTypes.DealState.Deposited);
         if (msg.sender != config.seller && msg.sender != oracleRelayer) {
             revert EscrowTypes.Unauthorized(msg.sender);
         }
@@ -82,22 +86,44 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function settle(bytes32 dealId) external override {
+    function cancelDepositedDeal(bytes32 dealId) external override nonReentrant {
         EscrowTypes.DealConfig storage config = _deals[dealId];
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
 
-        _validateState(dealId, stateData.state, EscrowTypes.DealState.InInspection);
+        _validateState(stateData.state, EscrowTypes.DealState.Deposited);
+        if (msg.sender != config.buyer && msg.sender != oracleRelayer) {
+            revert EscrowTypes.Unauthorized(msg.sender);
+        }
+
+        uint256 releaseTime = stateData.depositedAt + DELIVERY_TIMEOUT;
+        if (block.timestamp < releaseTime) {
+            revert EscrowTypes.DeliveryTimeoutNotReached(releaseTime, block.timestamp);
+        }
+
+        // CEI: Mutate state and emit event before executing disbursement
+        stateData.state = EscrowTypes.DealState.Refunded;
+        emit DealRefunded(dealId, config.buyer, config.amount);
+
+        _processDisbursement(config.token, config.buyer, config.amount);
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function settle(bytes32 dealId) external override nonReentrant {
+        EscrowTypes.DealConfig storage config = _deals[dealId];
+        EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
+
+        _validateState(stateData.state, EscrowTypes.DealState.InInspection);
 
         // Buyer can settle anytime; any other caller requires the inspection deadline to have passed
         if (msg.sender != config.buyer) {
             _checkInspectionExpired(stateData.inspectionDeadline);
         }
 
-        // CEI: Transition state before transferring value
+        // CEI: Transition state and emit event before transferring value
         stateData.state = EscrowTypes.DealState.Settled;
-        _processDisbursement(config.token, config.seller, config.amount);
-
         emit DealSettled(dealId, config.seller, config.amount);
+
+        _processDisbursement(config.token, config.seller, config.amount);
     }
 
     /// @inheritdoc IDigitalEscrow
@@ -105,7 +131,7 @@ contract DigitalEscrow is
         EscrowTypes.DealConfig storage config = _deals[dealId];
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
 
-        _validateState(dealId, stateData.state, EscrowTypes.DealState.InInspection);
+        _validateState(stateData.state, EscrowTypes.DealState.InInspection);
         if (msg.sender != config.buyer) revert EscrowTypes.InvalidParticipant(msg.sender);
         _checkInspectionActive(stateData.inspectionDeadline);
 
@@ -116,26 +142,26 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function resolveDispute(bytes32 dealId, bool refundBuyer) external override onlyArbitratorOrOracle {
+    function resolveDispute(bytes32 dealId, bool refundBuyer) external override onlyArbitratorOrOracle nonReentrant {
         EscrowTypes.DealConfig storage config = _deals[dealId];
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
 
-        _validateState(dealId, stateData.state, EscrowTypes.DealState.Disputed);
+        _validateState(stateData.state, EscrowTypes.DealState.Disputed);
 
         address recipient = refundBuyer ? config.buyer : config.seller;
         EscrowTypes.DealState finalState = refundBuyer ? EscrowTypes.DealState.Refunded : EscrowTypes.DealState.Settled;
 
-        // CEI: Mutate state before disbursement
+        // CEI: Mutate state and emit events before disbursement
         stateData.state = finalState;
-        _processDisbursement(config.token, recipient, config.amount);
 
         if (refundBuyer) {
             emit DealRefunded(dealId, config.buyer, config.amount);
         } else {
             emit DealSettled(dealId, config.seller, config.amount);
         }
-
         emit DisputeResolved(dealId, finalState, recipient);
+
+        _processDisbursement(config.token, recipient, config.amount);
     }
 
     /// @inheritdoc IDigitalEscrow

@@ -1,0 +1,111 @@
+name: Deploy DigitalEscrow to Base Sepolia & Sync ABI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/deploy-contracts.yml"
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Bypass test check and force deployment"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-and-sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/contracts
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: packages/contracts/package-lock.json
+
+      - name: Install Contracts Dependencies
+        run: npm ci
+
+      - name: Install Foundry Toolchain
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Verify Contract Integrity (Unit & Component Tests)
+        if: ${{ !inputs.force_deploy }}
+        run: forge test -vvv
+
+      - name: Deploy DigitalEscrow to Base Sepolia
+        env:
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ORACLE_RELAYER_ADDRESS: ${{ secrets.ORACLE_RELAYER_ADDRESS }}
+          DISPUTE_RESOLVER_ADDRESS: ${{ secrets.DISPUTE_RESOLVER_ADDRESS }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+        run: |
+          forge script script/DeployEscrow.s.sol:DeployEscrow \
+            --rpc-url "$BASE_SEPOLIA_RPC_URL" \
+            --broadcast \
+            --verify \
+            --etherscan-api-key "$BASESCAN_API_KEY" \
+            -vvvv
+
+      - name: Extract Deployed Contract Address
+        id: extract-address
+        run: |
+          BROADCAST_FILE="broadcast/DeployEscrow.s.sol/84532/run-latest.json"
+          if [ ! -f "$BROADCAST_FILE" ]; then
+            echo "::error::Broadcast log not found at $BROADCAST_FILE"
+            exit 1
+          fi
+          
+          CONTRACT_ADDRESS=$(node -e '
+            const fs = require("fs");
+            const data = JSON.parse(fs.readFileSync("'"$BROADCAST_FILE"'", "utf8"));
+            const tx = data.transactions.find(t => t.contractName === "DigitalEscrow" || t.transactionType === "CREATE");
+            const addr = tx ? (tx.contractAddress || (tx.receipt && tx.receipt.contractAddress)) : null;
+            if (!addr) {
+              console.error("Contract address not found in broadcast JSON");
+              process.exit(1);
+            }
+            console.log(addr);
+          ')
+          
+          echo "DEPLOYED_ESCROW_ADDRESS=$CONTRACT_ADDRESS" >> $GITHUB_ENV
+          echo "contract_address=$CONTRACT_ADDRESS" >> $GITHUB_OUTPUT
+          echo "Successfully extracted DigitalEscrow address: $CONTRACT_ADDRESS"
+
+      - name: Execute Export Artifacts & Sync Pipeline
+        env:
+          DEPLOYED_ESCROW_ADDRESS: ${{ steps.extract-address.outputs.contract_address }}
+        run: node scripts/export-artifacts.js
+
+      - name: Commit and Push Updated ABI & Configurations
+        run: |
+          cd ../..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/server/src/abi/ apps/cl_user/src/abi/ apps/mb_user/src/abi/
+          git add apps/server/.env.example apps/cl_user/.env.example apps/mb_user/.env.example
+          if git diff --staged --quiet; then
+            echo "No ABI or configuration changes detected."
+          else
+            git commit -m "chore(web3): auto-sync DigitalEscrow ABI & contract config [skip ci]"
+            git push origin main
+          fi

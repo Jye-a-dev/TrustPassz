@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.28;
 
 import {EscrowTypes} from "../types/EscrowTypes.sol";
 
@@ -23,6 +23,7 @@ interface IDigitalEscrow {
     function createDeal(bytes32 dealId, EscrowTypes.DealConfig calldata config) external;
     function deposit(bytes32 dealId) external payable;
     function startInspection(bytes32 dealId) external;
+    function cancelDepositedDeal(bytes32 dealId) external;
     function settle(bytes32 dealId) external;
     function raiseDispute(bytes32 dealId) external;
     function resolveDispute(bytes32 dealId, bool refundBuyer) external;

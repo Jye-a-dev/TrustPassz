@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.28;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {EscrowTypes} from "../types/EscrowTypes.sol";
 import {IERC20Minimal} from "../interfaces/IERC20Minimal.sol";
 
 /// @title PaymentProcessor
-/// @notice Manages inbound and outbound transfers of Native ETH and ERC20 tokens with CEI and ReentrancyGuard
+/// @notice Manages inbound and outbound transfers of Native ETH and ERC20 tokens
 abstract contract PaymentProcessor is ReentrancyGuard {
     function _processDeposit(address token, address payer, uint256 expectedAmount) internal {
         if (token == address(0)) {
@@ -21,10 +21,15 @@ abstract contract PaymentProcessor is ReentrancyGuard {
         }
     }
 
-    function _processDisbursement(address token, address recipient, uint256 amount) internal nonReentrant {
+    function _processDisbursement(address token, address recipient, uint256 amount) internal {
         if (token == address(0)) {
-            (bool success, ) = recipient.call{value: amount}("");
+            (bool success, bytes memory data) = recipient.call{value: amount}("");
             if (!success) {
+                if (data.length > 0) {
+                    assembly {
+                        revert(add(32, data), mload(data))
+                    }
+                }
                 revert EscrowTypes.NativeTransferFailed(recipient, amount);
             }
         } else {
@@ -32,7 +37,10 @@ abstract contract PaymentProcessor is ReentrancyGuard {
         }
     }
 
-    function _safeTransfer(address token, address to, uint256 amount) private {
+    function _safeTransfer(address token, address to, uint256 amount) internal {
+        if (token.code.length == 0) {
+            revert EscrowTypes.ERC20TransferFailed(token, to, amount);
+        }
         (bool success, bytes memory data) = token.call(
             abi.encodeWithSelector(IERC20Minimal.transfer.selector, to, amount)
         );
@@ -41,7 +49,10 @@ abstract contract PaymentProcessor is ReentrancyGuard {
         }
     }
 
-    function _safeTransferFrom(address token, address from, address to, uint256 amount) private {
+    function _safeTransferFrom(address token, address from, address to, uint256 amount) internal {
+        if (token.code.length == 0) {
+            revert EscrowTypes.ERC20TransferFailed(token, to, amount);
+        }
         (bool success, bytes memory data) = token.call(
             abi.encodeWithSelector(IERC20Minimal.transferFrom.selector, from, to, amount)
         );

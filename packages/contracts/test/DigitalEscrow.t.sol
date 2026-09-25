@@ -1,18 +1,31 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.28;
 
 import {DigitalEscrowHappyPathTest} from "./components/DigitalEscrowHappyPath.t.sol";
-import {DigitalEscrowRevertsTest} from "./components/DigitalEscrowReverts.t.sol";
-import {DigitalEscrowSecurityEdgeTest} from "./components/DigitalEscrowSecurityEdge.t.sol";
+import {DigitalEscrowInputValidationTest} from "./components/DigitalEscrowInputValidation.t.sol";
+import {DigitalEscrowSecurityTest} from "./components/DigitalEscrowSecurity.t.sol";
+import {DigitalEscrowStateMatrixTest} from "./components/DigitalEscrowStateMatrix.t.sol";
+import {DigitalEscrowTimeoutTest} from "./components/DigitalEscrowTimeout.t.sol";
 
 /// @title DigitalEscrowTest
-/// @notice Aggregated test runner inheriting modular Happy Path, Reverts, and Edge/Security components
+/// @notice Aggregated test runner inheriting modular component test suites
 contract DigitalEscrowTest is
     DigitalEscrowHappyPathTest,
-    DigitalEscrowRevertsTest,
-    DigitalEscrowSecurityEdgeTest
+    DigitalEscrowInputValidationTest,
+    DigitalEscrowSecurityTest,
+    DigitalEscrowStateMatrixTest,
+    DigitalEscrowTimeoutTest
 {
-    function setUp() public override(DigitalEscrowHappyPathTest, DigitalEscrowRevertsTest, DigitalEscrowSecurityEdgeTest) {
+    function setUp()
+        public
+        override(
+            DigitalEscrowHappyPathTest,
+            DigitalEscrowInputValidationTest,
+            DigitalEscrowSecurityTest,
+            DigitalEscrowStateMatrixTest,
+            DigitalEscrowTimeoutTest
+        )
+    {
         super.setUp();
     }
 }

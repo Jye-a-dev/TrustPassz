@@ -6,7 +6,12 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test",
-    "snapshot": "forge snapshot"
+    "snapshot": "forge snapshot",
+    "deploy:base-sepolia": "forge script script/DeployEscrow.s.sol:DeployEscrow --rpc-url base_sepolia --broadcast --verify",
+    "deploy:base-sepolia:dry-run": "forge script script/DeployEscrow.s.sol:DeployEscrow --rpc-url base_sepolia",
+    "verify": "forge verify-contract --chain-id 84532 --verifier-url https://api-sepolia.basescan.org/api --watch",
+    "export-abi": "node scripts/export-artifacts.js",
+    "pipeline:base-sepolia": "npm run build && npm run deploy:base-sepolia && npm run export-abi"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.6.1"

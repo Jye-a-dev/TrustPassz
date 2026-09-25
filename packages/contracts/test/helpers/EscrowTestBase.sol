@@ -1,27 +1,39 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {DigitalEscrow} from "../../src/DigitalEscrow.sol";
 import {EscrowTypes} from "../../src/types/EscrowTypes.sol";
 import {MockUSDC} from "../../src/mocks/MockUSDC.sol";
 
-/// @title MaliciousReentrantReceiver
-/// @notice Mock contract attempting reentrant settle call upon receiving Native ETH
-contract MaliciousReentrantReceiver {
+/// @title ReentrancyAttacker
+/// @notice Malicious contract attempting reentrancy attacks into settle() or cancelDepositedDeal()
+contract ReentrancyAttacker {
     DigitalEscrow public immutable escrow;
     bytes32 public targetDealId;
+
+    enum AttackTarget {
+        Settle,
+        CancelDeposited
+    }
+
+    AttackTarget public attackTarget;
 
     constructor(address payable _escrow) {
         escrow = DigitalEscrow(_escrow);
     }
 
-    function setTargetDealId(bytes32 _dealId) external {
+    function setTarget(bytes32 _dealId, AttackTarget _target) external {
         targetDealId = _dealId;
+        attackTarget = _target;
     }
 
     receive() external payable {
-        escrow.settle(targetDealId);
+        if (attackTarget == AttackTarget.Settle) {
+            escrow.settle(targetDealId);
+        } else {
+            escrow.cancelDepositedDeal(targetDealId);
+        }
     }
 }
 
@@ -66,5 +78,37 @@ abstract contract EscrowTestBase is Test {
             amount: amount,
             inspectionDuration: DURATION
         });
+    }
+
+    function _setupDealAtState(bytes32 dealId, EscrowTypes.DealState targetState) internal {
+        escrow.createDeal(dealId, _buildConfig(address(0), ETH_AMOUNT));
+        if (targetState == EscrowTypes.DealState.Pending) return;
+
+        vm.prank(buyer);
+        escrow.deposit{value: ETH_AMOUNT}(dealId);
+        if (targetState == EscrowTypes.DealState.Deposited) return;
+
+        if (targetState == EscrowTypes.DealState.Refunded) {
+            vm.warp(block.timestamp + escrow.DELIVERY_TIMEOUT() + 1);
+            vm.prank(buyer);
+            escrow.cancelDepositedDeal(dealId);
+            return;
+        }
+
+        vm.prank(seller);
+        escrow.startInspection(dealId);
+        if (targetState == EscrowTypes.DealState.InInspection) return;
+
+        if (targetState == EscrowTypes.DealState.Settled) {
+            vm.prank(buyer);
+            escrow.settle(dealId);
+            return;
+        }
+
+        if (targetState == EscrowTypes.DealState.Disputed) {
+            vm.prank(buyer);
+            escrow.raiseDispute(dealId);
+            return;
+        }
     }
 }
