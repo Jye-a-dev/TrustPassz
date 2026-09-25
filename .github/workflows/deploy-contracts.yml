@@ -29,7 +29,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
           fetch-depth: 0
 
       - name: Setup Node.js Environment
@@ -46,6 +46,12 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Install Foundry Libraries
+        run: |
+          rm -rf lib/forge-std lib/openzeppelin-contracts
+          forge install foundry-rs/forge-std --no-commit
+          forge install OpenZeppelin/openzeppelin-contracts --no-commit
 
       - name: Verify Contract Integrity (Unit & Component Tests)
         if: ${{ !inputs.force_deploy }}
