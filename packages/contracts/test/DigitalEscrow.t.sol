@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
+import {EscrowTestBase} from "./helpers/EscrowTestBase.sol";
 import {DigitalEscrowHappyPathTest} from "./components/DigitalEscrowHappyPath.t.sol";
 import {DigitalEscrowInputValidationTest} from "./components/DigitalEscrowInputValidation.t.sol";
 import {DigitalEscrowSecurityTest} from "./components/DigitalEscrowSecurity.t.sol";
@@ -16,16 +17,7 @@ contract DigitalEscrowTest is
     DigitalEscrowStateMatrixTest,
     DigitalEscrowTimeoutTest
 {
-    function setUp()
-        public
-        override(
-            DigitalEscrowHappyPathTest,
-            DigitalEscrowInputValidationTest,
-            DigitalEscrowSecurityTest,
-            DigitalEscrowStateMatrixTest,
-            DigitalEscrowTimeoutTest
-        )
-    {
+    function setUp() public virtual override(EscrowTestBase) {
         super.setUp();
     }
 }
