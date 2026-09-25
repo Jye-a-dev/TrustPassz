@@ -10,6 +10,6 @@
     "dev:mb": "npm --prefix apps/mb_user run dev",
     "dev:user": "npm --prefix apps/cl_user run dev",
     "dev:admin": "npm --prefix apps/cl_admin run dev",
-    "dev:server": "npm --prefix apps/server run start:dev"
+    "dev:server": "npm --prefix apps/server run dev"
   }
 }

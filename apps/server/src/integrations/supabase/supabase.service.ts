@@ -1,19 +1,23 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class SupabaseService implements OnModuleInit {
   private readonly logger = new Logger(SupabaseService.name);
-  private client: SupabaseClient;
-  private storageBucket: string;
+  private client!: ReturnType<typeof createClient>;
+  private storageBucket!: string;
 
   onModuleInit() {
-    const supabaseUrl = process.env.SUPABASE_URL || 'https://eixscrzogbnjrwfbcqst.supabase.co';
+    const supabaseUrl =
+      process.env.SUPABASE_URL || 'https://eixscrzogbnjrwfbcqst.supabase.co';
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-    this.storageBucket = process.env.SUPABASE_STORAGE_BUCKET || 'dispute-evidences';
+    this.storageBucket =
+      process.env.SUPABASE_STORAGE_BUCKET || 'dispute-evidences';
 
     if (!supabaseServiceKey) {
-      this.logger.warn('SUPABASE_SERVICE_ROLE_KEY is not defined. BaaS features will be restricted.');
+      this.logger.warn(
+        'SUPABASE_SERVICE_ROLE_KEY is not defined. BaaS features will be restricted.',
+      );
     }
 
     this.client = createClient(supabaseUrl, supabaseServiceKey, {
@@ -26,7 +30,7 @@ export class SupabaseService implements OnModuleInit {
     this.logger.log(`Supabase Client initialized against ${supabaseUrl}`);
   }
 
-  getClient(): SupabaseClient {
+  getClient(): ReturnType<typeof createClient> {
     return this.client;
   }
 
@@ -50,8 +54,13 @@ export class SupabaseService implements OnModuleInit {
       });
 
     if (uploadError) {
-      this.logger.error(`Storage upload failed for deal ${dealId}: ${uploadError.message}`, uploadError);
-      throw new Error(`Failed to upload dispute evidence: ${uploadError.message}`);
+      this.logger.error(
+        `Storage upload failed for deal ${dealId}: ${uploadError.message}`,
+        uploadError,
+      );
+      throw new Error(
+        `Failed to upload dispute evidence: ${uploadError.message}`,
+      );
     }
 
     const { data } = this.client.storage
@@ -69,7 +78,10 @@ export class SupabaseService implements OnModuleInit {
   /**
    * Broadcasts realtime bargain slider updates to connected buyer/seller peers.
    */
-  async broadcastBargainPrice(dealId: string, payload: Record<string, any>): Promise<void> {
+  async broadcastBargainPrice(
+    dealId: string,
+    payload: Record<string, any>,
+  ): Promise<void> {
     const channelName = `deal-room:${dealId}`;
     const channel = this.client.channel(channelName);
 
