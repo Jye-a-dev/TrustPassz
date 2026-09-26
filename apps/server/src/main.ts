@@ -18,9 +18,9 @@ async function bootstrap() {
 
   // Configure OpenAPI 3.0 / Swagger Interactive Test Harness
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('TrustPassz Core Escrow & Deals API')
+    .setTitle('TrustPassz Unified Escrow & Social-Commerce API')
     .setDescription(
-      'Interactive Test Playground phục vụ nghiệm thu TASK-04 (Deals CRUD, State Machine, Digital Vault)',
+      'Toàn bộ module REST API của nền tảng TrustPassz: Xác thực Web3/OAuth, Người dùng & Storefront, Sản phẩm Marketplace, Hợp đồng ký quỹ Escrow & Digital Vault, Đơn hàng & Vận chuyển, Trả giá Realtime, Tranh chấp & Trọng tài AI, Cổng thanh toán & Webhook.',
     )
     .setVersion('1.0.0')
     .addBearerAuth(
@@ -34,6 +34,15 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
+    .addTag('System & Health', 'Health check, system status ping')
+    .addTag('Authentication (Passwordless & Web3)', 'Privy Passkey & Google OAuth token verification and JWT issue')
+    .addTag('Users & Social Storefronts', 'User profile management and seller social-commerce storefronts')
+    .addTag('Marketplace Products & Inventory', 'Product listings, pricing, specs, and bargain rule configurations')
+    .addTag('Deals & Digital Vault', 'Escrow lifecycle state machine, encrypted digital asset vault, and access control')
+    .addTag('Orders & Escrow Fulfillment', 'Purchase orders, physical/digital shipping tracking, and deal linkage')
+    .addTag('Bargain & Dynamic Negotiation', 'Realtime buyer price bidding, seller accept/reject counter-offers')
+    .addTag('Disputes & AI Arbitration', 'Dispute submission, evidence audit, AI confidence scoring, and admin resolution')
+    .addTag('Payments & Payment Gateway Webhooks', 'PayOS checkout links and idempotent payment webhook reconciliation')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

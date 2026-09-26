@@ -294,4 +294,37 @@ export class DealsController {
   async remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.dealsService.remove(id);
   }
+
+  /**
+   * Unlocks digital vault asset, tracking access attempts and checking quota.
+   */
+  @Post(':id/vault/unlock')
+  @ApiOperation({
+    summary: 'Unlock and retrieve encrypted Digital Vault asset payload',
+    description:
+      'Increments vault access count, verifies deal escrow funding, and returns encrypted ciphertext with IV and auth tag for client-side decryption.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'UUID của deal chứa digital vault asset',
+    example: 'd0000000-0000-4000-a000-000000000001',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Digital vault asset unlocked successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Deal not deposited or maximum access limit reached.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Deal or digital asset not found.',
+  })
+  async unlockVault(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.dealsService.unlockVault(id);
+  }
 }
+

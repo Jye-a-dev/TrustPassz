@@ -268,4 +268,63 @@ export class DealsService {
       throw new InternalServerErrorException('Failed to delete deal');
     }
   }
+
+  /**
+   * Unlocks digital asset from vault, auditing decryption attempts and enforcing access quota.
+   */
+  async unlockVault(id: string, buyerId?: string) {
+    const deal = await this.prisma.deal.findUnique({
+      where: { id },
+      include: { digitalAsset: true },
+    });
+
+    if (!deal) {
+      throw new NotFoundException(`Deal with ID ${id} not found`);
+    }
+
+    if (!deal.digitalAsset) {
+      throw new NotFoundException(`No digital asset attached to deal ${id}`);
+    }
+
+    if (
+      deal.state === DealState.PENDING ||
+      deal.state === DealState.REFUNDED
+    ) {
+      throw new BadRequestException(
+        `Cannot unlock vault for deal in ${deal.state} state. Escrow deposit required.`,
+      );
+    }
+
+    const asset = deal.digitalAsset;
+    if (asset.accessCount >= asset.maxAccessLimit) {
+      throw new BadRequestException(
+        `Digital Vault access limit reached (${asset.accessCount}/${asset.maxAccessLimit}). Vault locked.`,
+      );
+    }
+
+    const updatedAsset = await this.prisma.digitalAsset.update({
+      where: { id: asset.id },
+      data: {
+        accessCount: { increment: 1 },
+        unlockedAt: new Date(),
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Digital vault asset unlocked successfully',
+      dealId: id,
+      assetType: updatedAsset.assetType,
+      fileName: updatedAsset.fileName,
+      fileSizeBytes: updatedAsset.fileSizeBytes,
+      encryptedContent: updatedAsset.encryptedContent,
+      encryptionIv: updatedAsset.encryptionIv,
+      authTag: updatedAsset.authTag,
+      contentHash: updatedAsset.contentHash,
+      accessCount: updatedAsset.accessCount,
+      maxAccessLimit: updatedAsset.maxAccessLimit,
+      unlockedAt: updatedAsset.unlockedAt,
+    };
+  }
 }
+
