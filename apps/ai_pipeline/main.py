@@ -1,9 +1,10 @@
 """
-main.py — TrustPassz AI Pipeline (TASK-06 — Local sVLM Edition)
-────────────────────────────────────────────────────────────────
+main.py — TrustPassz AI Pipeline (TASK-07 — AI Arbitrator Edition)
+────────────────────────────────────────────────────────────────────
 FastAPI application exposing:
   GET  /health                    → Engine readiness probe
   POST /api/v1/suggest-deal       → Deal pricing + inspection suggestion
+  POST /api/v1/inspect            → AI Arbitrator & Dispute Engine (TASK-07)
 
 Zero Cloud API — all inference runs locally via OutlinesVisionEngine
 (Qwen2-VL-2B-Instruct + Outlines Logit Masking).
@@ -38,6 +39,7 @@ from pydantic import ValidationError
 
 from core.factory import EngineFactory
 from core.interfaces import IConstrainedVisionEngine
+from routers.arbitration import router as arbitration_router
 from schemas.deal_suggestion import (
     DealRuleSuggestion,
     HealthResponse,
@@ -85,10 +87,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="TrustPassz AI Pipeline",
     description=(
-        "Local sVLM-powered deal pricing and inspection time suggestion "
-        "via Outlines Logit Masking. Zero Cloud API dependency."
+        "Local sVLM-powered deal pricing, inspection suggestion, and "
+        "AI Arbitrator & Dispute Engine via Outlines Logit Masking. "
+        "Zero Cloud API dependency."
     ),
-    version="2.0.0",
+    version="3.0.0",
     docs_url="/docs" if _ENVIRONMENT == "development" else None,
     redoc_url="/redoc" if _ENVIRONMENT == "development" else None,
     lifespan=lifespan,
@@ -101,6 +104,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# ── Register routers ───────────────────────────────────────────────────────────
+app.include_router(arbitration_router)
 
 
 # ── Global validation error handler ───────────────────────────────────────────
