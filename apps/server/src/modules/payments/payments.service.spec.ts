@@ -241,7 +241,7 @@ describe('PaymentsService', () => {
       const response = await service.handleWebhook(payload as any);
 
       expect(response.success).toBe(true);
-      expect(response.deal.state).toBe(DealState.DEPOSITED);
+      expect((response as any).deal.state).toBe(DealState.DEPOSITED);
       expect(mockPrismaService.deal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: mockDeal.id },

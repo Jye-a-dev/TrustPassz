@@ -1,4 +1,4 @@
-import { AssetType, DealState, Prisma } from '@prisma/client';
+import { AssetType, DealState, DigitalAsset, Prisma } from '@prisma/client';
 import { CreateDealDto, EncryptedAssetDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
@@ -184,5 +184,26 @@ export function buildDigitalAssetUpsertInput(
         maxAccessLimit: asset.maxAccessLimit,
       }),
     },
+  };
+}
+
+export function formatVaultUnlockResponse(
+  dealId: string,
+  updatedAsset: DigitalAsset,
+) {
+  return {
+    success: true,
+    message: 'Digital vault asset unlocked successfully',
+    dealId,
+    assetType: updatedAsset.assetType,
+    fileName: updatedAsset.fileName,
+    fileSizeBytes: updatedAsset.fileSizeBytes,
+    encryptedContent: updatedAsset.encryptedContent,
+    encryptionIv: updatedAsset.encryptionIv,
+    authTag: updatedAsset.authTag,
+    contentHash: updatedAsset.contentHash,
+    accessCount: updatedAsset.accessCount,
+    maxAccessLimit: updatedAsset.maxAccessLimit,
+    unlockedAt: updatedAsset.unlockedAt,
   };
 }

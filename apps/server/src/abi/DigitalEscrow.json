@@ -561,6 +561,11 @@
     },
     {
       "type": "error",
+      "name": "DealNotFound",
+      "inputs": []
+    },
+    {
+      "type": "error",
       "name": "DeliveryTimeoutNotReached",
       "inputs": [
         {

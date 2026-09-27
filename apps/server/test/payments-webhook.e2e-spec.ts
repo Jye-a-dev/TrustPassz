@@ -2,13 +2,16 @@
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DealState, OrderStatus, Prisma } from '@prisma/client';
-import * as crypto from 'crypto';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import '../src/common/utils/bigint-serializer.util';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
 import { JwtService } from '../src/modules/auth/jwt.service';
+import {
+  createPaymentsWebhookPrismaMock,
+  generatePaymentSignature,
+} from './mocks/payments-webhook.mock';
 
 describe('Payments & Webhooks (e2e)', () => {
   let app: INestApplication<App>;
@@ -21,93 +24,24 @@ describe('Payments & Webhooks (e2e)', () => {
   let dealsStore: any[] = [];
   let ordersStore: any[] = [];
 
-  const generateSignature = (
-    data: Record<string, any>,
-    key: string,
-  ): string => {
-    const sortedKeys = Object.keys(data).sort();
-    const queryParts: string[] = [];
-    for (const k of sortedKeys) {
-      const val = data[k];
-      if (val !== undefined && val !== null) {
-        queryParts.push(`${k}=${val}`);
-      }
-    }
-    return crypto
-      .createHmac('sha256', key)
-      .update(queryParts.join('&'))
-      .digest('hex');
-  };
+  const generateSignature = (data: Record<string, any>, key: string): string =>
+    generatePaymentSignature(data, key);
 
-  const mockPrismaService = {
-    deal: {
-      findUnique: jest.fn().mockImplementation(({ where }) => {
-        const found = dealsStore.find((d) => d.id === where.id);
-        if (!found) return Promise.resolve(null);
-        const order = ordersStore.find((o) => o.dealId === found.id) || null;
-        return Promise.resolve({ ...found, order });
-      }),
-      findFirst: jest.fn().mockImplementation(({ where }) => {
-        if (where.webhookIdempotencyKey !== undefined) {
-          const match = dealsStore.find(
-            (d) => d.webhookIdempotencyKey === where.webhookIdempotencyKey,
-          );
-          return Promise.resolve(match || null);
-        }
-        if (where.OR) {
-          for (const condition of where.OR) {
-            if (condition.webhookIdempotencyKey) {
-              const match = dealsStore.find(
-                (d) =>
-                  d.webhookIdempotencyKey ===
-                  condition.webhookIdempotencyKey,
-              );
-              if (match) return Promise.resolve(match);
-            }
-            if (condition.paymentOrderCode) {
-              const match = dealsStore.find(
-                (d) =>
-                  d.paymentOrderCode === condition.paymentOrderCode &&
-                  condition.state?.in?.includes(d.state),
-              );
-              if (match) return Promise.resolve(match);
-            }
-          }
-          return Promise.resolve(null);
-        }
-        if (where.paymentOrderCode !== undefined) {
-          const match = dealsStore.find(
-            (d) => d.paymentOrderCode === where.paymentOrderCode,
-          );
-          if (!match) return Promise.resolve(null);
-          const order =
-            ordersStore.find((o) => o.dealId === match.id) || null;
-          return Promise.resolve({ ...match, order });
-        }
-        return Promise.resolve(null);
-      }),
-      update: jest.fn().mockImplementation(({ where, data }) => {
-        const index = dealsStore.findIndex((d) => d.id === where.id);
-        if (index === -1) return Promise.resolve(null);
-        dealsStore[index] = { ...dealsStore[index], ...data };
-        return Promise.resolve(dealsStore[index]);
-      }),
-    },
-    order: {
-      update: jest.fn().mockImplementation(({ where, data }) => {
-        const index = ordersStore.findIndex((o) => o.id === where.id);
-        if (index === -1) return Promise.resolve(null);
-        ordersStore[index] = { ...ordersStore[index], ...data };
-        return Promise.resolve(ordersStore[index]);
-      }),
-    },
-    $transaction: jest
-      .fn()
-      .mockImplementation((cb) => cb(mockPrismaService)),
-  };
+  const mockPrismaService = createPaymentsWebhookPrismaMock(
+    () => dealsStore,
+    () => ordersStore,
+  );
 
   beforeAll(async () => {
     process.env.PAYOS_CHECKSUM_KEY = checksumKey;
+    process.env.ORACLE_RELAYER_PRIVATE_KEY =
+      process.env.ORACLE_RELAYER_PRIVATE_KEY ||
+      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+    process.env.ESCROW_CONTRACT_ADDRESS =
+      process.env.ESCROW_CONTRACT_ADDRESS ||
+      '0x165B47291B87569b91696DCE6f1207eE15C9f783';
+    process.env.BASE_SEPOLIA_RPC_URL =
+      process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],

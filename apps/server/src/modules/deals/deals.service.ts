@@ -14,19 +14,23 @@ import {
   buildDealUpdateData,
   buildDealWhereInput,
   buildDigitalAssetCreateData,
-  buildDigitalAssetUpsertInput,
+  formatVaultUnlockResponse,
   DEAL_DETAIL_INCLUDE,
   DEAL_LIST_INCLUDE,
 } from './deals.helper';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
+import { OracleRelayerService } from '../../oracle-relayer/oracle-relayer.service';
 
 @Injectable()
 export class DealsService {
   private readonly logger = new Logger(DealsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly oracleRelayer: OracleRelayerService,
+  ) {}
 
   /**
    * Aggregates total deals and breakdown by state with optional seller/buyer filters.
@@ -271,6 +275,7 @@ export class DealsService {
 
   /**
    * Unlocks digital asset from vault, auditing decryption attempts and enforcing access quota.
+   * On first unlock (accessCount === 0), triggers startInspection on-chain via Oracle Relayer.
    */
   async unlockVault(id: string, buyerId?: string) {
     const deal = await this.prisma.deal.findUnique({
@@ -302,6 +307,8 @@ export class DealsService {
       );
     }
 
+    const isFirstUnlock = asset.accessCount === 0;
+
     const updatedAsset = await this.prisma.digitalAsset.update({
       where: { id: asset.id },
       data: {
@@ -310,21 +317,71 @@ export class DealsService {
       },
     });
 
-    return {
-      success: true,
-      message: 'Digital vault asset unlocked successfully',
-      dealId: id,
-      assetType: updatedAsset.assetType,
-      fileName: updatedAsset.fileName,
-      fileSizeBytes: updatedAsset.fileSizeBytes,
-      encryptedContent: updatedAsset.encryptedContent,
-      encryptionIv: updatedAsset.encryptionIv,
-      authTag: updatedAsset.authTag,
-      contentHash: updatedAsset.contentHash,
-      accessCount: updatedAsset.accessCount,
-      maxAccessLimit: updatedAsset.maxAccessLimit,
-      unlockedAt: updatedAsset.unlockedAt,
-    };
+    // Trigger startInspection on-chain on first vault unlock (fire-and-forget,
+    // errors are logged inside OracleRelayerService and do not fail this response)
+    if (isFirstUnlock && deal.state === DealState.DEPOSITED) {
+      this.logger.log(
+        `[unlockVault] First unlock for deal ${id} — triggering startInspection on-chain`,
+      );
+      // Deliberately not awaited: on-chain is async and must not block the vault unlock response
+      void this.oracleRelayer.startInspection(id).catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.error(
+          `[unlockVault] startInspection oracle call failed for deal ${id}: ${msg}`,
+        );
+      });
+    }
+
+    return formatVaultUnlockResponse(id, updatedAsset);
+  }
+
+  /**
+   * Manually triggers settle on-chain for a deal.
+   * Called when:
+   *  - inspectionDeadline has passed without any dispute, OR
+   *  - buyer explicitly confirms acceptance.
+   * Returns tx result or null if the chain call was skipped/failed.
+   */
+  async triggerSettle(dealId: string) {
+    const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
+
+    if (!deal) {
+      throw new NotFoundException(`Deal ${dealId} not found`);
+    }
+
+    if (
+      deal.state !== DealState.IN_INSPECTION &&
+      deal.state !== DealState.DEPOSITED
+    ) {
+      throw new BadRequestException(
+        `Cannot settle deal in state ${deal.state}. Expected IN_INSPECTION or DEPOSITED.`,
+      );
+    }
+
+    this.logger.log(`[triggerSettle] Initiating settle for deal=${dealId}`);
+    return this.oracleRelayer.settle(dealId);
+  }
+
+  /**
+   * Triggers the oracle relayer to start inspection on-chain explicitly.
+   * Useful when seller marks delivery complete (separate code path from vault unlock).
+   */
+  async triggerStartInspection(dealId: string) {
+    const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
+
+    if (!deal) {
+      throw new NotFoundException(`Deal ${dealId} not found`);
+    }
+
+    if (deal.state !== DealState.DEPOSITED) {
+      throw new BadRequestException(
+        `Cannot start inspection for deal in state ${deal.state}. Expected DEPOSITED.`,
+      );
+    }
+
+    this.logger.log(
+      `[triggerStartInspection] Initiating startInspection for deal=${dealId}`,
+    );
+    return this.oracleRelayer.startInspection(dealId);
   }
 }
-

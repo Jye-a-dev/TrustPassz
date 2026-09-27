@@ -11,6 +11,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { BargainsModule } from './modules/bargains/bargains.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     BargainsModule,
     DisputesModule,
     PaymentsModule,
+    OracleRelayerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
