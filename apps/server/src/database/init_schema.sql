@@ -60,9 +60,10 @@ CREATE TABLE IF NOT EXISTS "users" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "email" VARCHAR(255) UNIQUE,
     "phone" VARCHAR(20) UNIQUE,
-    "wallet_address" VARCHAR(42) UNIQUE,
+    "wallet_address" VARCHAR(100) UNIQUE,
     "display_name" VARCHAR(100),
     "avatar_url" TEXT,
+    "password" VARCHAR(255),
     "role" user_role_enum NOT NULL DEFAULT 'USER',
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP

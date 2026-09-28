@@ -1,12 +1,42 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cookieParser = require('cookie-parser') as () => ReturnType<typeof import('cookie-parser')>;
 import { AppModule } from './app.module';
 import './common/utils/bigint-serializer.util';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+
+  // FIX C2: Parse cookies so AuthGuard can read httpOnly access_token cookie
+  app.use(cookieParser());
+
+  // CORS — allow all local dev ports + production origins
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:4000',
+    'http://localhost:5000', // cl_user dev server
+    'http://localhost:5001',
+    'http://localhost:6000',
+    'https://trustpassz.vercel.app',
+    'https://www.trustpassz.io',
+    'https://trustpassz.io',
+  ];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

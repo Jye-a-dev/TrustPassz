@@ -108,9 +108,10 @@ model User {
   id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   email         String?  @unique @db.VarChar(255)
   phone         String?  @unique @db.VarChar(20)
-  walletAddress String?  @unique @map("wallet_address") @db.VarChar(42)
+  walletAddress String?  @unique @map("wallet_address") @db.VarChar(100)
   displayName   String?  @map("display_name") @db.VarChar(100)
   avatarUrl     String?  @map("avatar_url") @db.Text
+  password      String?  @db.VarChar(255)
   role          UserRole @default(USER)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)

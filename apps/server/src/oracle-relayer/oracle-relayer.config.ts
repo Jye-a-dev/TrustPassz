@@ -4,6 +4,12 @@
  * Throws at bootstrap if any required variable is missing or malformed.
  */
 
+import { Logger } from '@nestjs/common';
+
+const logger = new Logger('OracleRelayerConfig');
+const DEV_FALLBACK_PRIVATE_KEY: `0x${string}` =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
 export interface OracleRelayerConfig {
   /** 0x-prefixed hex private key of the Oracle Relayer wallet */
   privateKey: `0x${string}`;
@@ -46,7 +52,20 @@ function validateAddress(value: string, label: string): `0x${string}` {
  * Call once at module bootstrap — throws on misconfiguration.
  */
 export function loadOracleRelayerConfig(): OracleRelayerConfig {
-  const rawPrivateKey = requireEnv('ORACLE_RELAYER_PRIVATE_KEY');
+  const isDev = process.env.NODE_ENV !== 'production';
+  let rawPrivateKey = process.env.ORACLE_RELAYER_PRIVATE_KEY;
+
+  if (!rawPrivateKey || rawPrivateKey.trim() === '') {
+    if (isDev) {
+      logger.warn(
+        '[OracleRelayer] ORACLE_RELAYER_PRIVATE_KEY is not defined. Using local development fallback wallet key.',
+      );
+      rawPrivateKey = DEV_FALLBACK_PRIVATE_KEY;
+    } else {
+      rawPrivateKey = requireEnv('ORACLE_RELAYER_PRIVATE_KEY');
+    }
+  }
+
   const rawContractAddress = requireEnv('ESCROW_CONTRACT_ADDRESS');
   const rpcUrl = requireEnv('BASE_SEPOLIA_RPC_URL');
 

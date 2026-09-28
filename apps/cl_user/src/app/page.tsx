@@ -1,122 +1,237 @@
 import Link from "next/link";
 import {
-  Sparkles,
-  Zap,
   ShieldCheck,
-  Flame,
+  QrCode,
+  Lock,
+  Bot,
   ArrowRight,
-  Database,
+  Sparkles,
+  CheckCircle2,
+  Clock,
   Layers,
-  Palette,
-  SlidersHorizontal,
+  FileCheck,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const CORE_PILLARS = [
   {
-    icon: Flame,
-    title: "Next.js 15+ & React 19",
+    icon: QrCode,
+    badge: "Thanh Toán Tự Động",
+    badgeColor: "text-cyan-400 border-cyan-500/30 bg-cyan-950/40",
+    title: "VietQR-to-Escrow",
     description:
-      "Kiến trúc App Router hiện đại, khai thác tối đa React Server Components (RSC) cho First Contentful Paint (FCP) và Largest Contentful Paint (LCP) tối ưu.",
+      "Quét mã VietQR ngân hàng bất kỳ, Webhook tự động khóa tiền vào Smart Contract Base Sepolia, không cần ví Web3 phức tạp.",
+    details: [
+      "Sinh mã dynamic VietQR tích hợp mã giao dịch tức thì",
+      "Khóa tiền ký quỹ on-chain trong 30 giây",
+      "Phí giao dịch tối ưu mạng L2 Base Sepolia",
+    ],
   },
   {
-    icon: Palette,
-    title: "Tailwind CSS v4 & Radix UI",
+    icon: Lock,
+    badge: "Bảo Mật Zero-Knowledge",
+    badgeColor: "text-emerald-400 border-emerald-500/30 bg-emerald-950/40",
+    title: "Digital Vault & Time-lock Inspection",
     description:
-      "Tối ưu zero runtime overhead, hệ màu CSS Variables HSL thích ứng Dark/Light mode không giật layout (zero CLS).",
+      "Dữ liệu link/key được mã hóa client-side AES-256-GCM, cấp quyền tải 1 lần kèm đồng hồ đếm ngược đồng kiểm.",
+    details: [
+      "Khóa giải mã 256-bit không lưu plaintext trên server",
+      "Thời gian kiểm thử 6h - 24h tự động khóa quyền truy cập",
+      "Xác thực toàn vẹn bằng mã băm SHA-256",
+    ],
   },
   {
-    icon: SlidersHorizontal,
-    title: "URL as State với Nuqs",
+    icon: Bot,
+    badge: "Phân Xử Công Tâm",
+    badgeColor: "text-amber-400 border-amber-500/30 bg-amber-950/40",
+    title: "AI Arbitrator & Dispute Engine",
     description:
-      "Quản lý search params an toàn kiểu dữ liệu, liên kết chặt chẽ giữa URL, Server Components và Client State.",
+      "Trọng tài số tự động thẩm định log lỗi và ảnh chụp màn hình unbox bằng sVLM khi phát sinh khiếu nại.",
+    details: [
+      "Phân tích bằng chứng ảnh unbox & logs kiểm thử",
+      "Gợi ý hoàn tiền hoặc thanh lý hợp đồng minh bạch",
+      "Loại bỏ 100% gian lận boom hàng và chiếm đoạt tài sản số",
+    ],
+  },
+];
+
+const STAT_BADGES = [
+  {
+    value: "0%",
+    label: "Rủi ro boom hàng",
+    subtext: "Bảo chứng két ký quỹ tự động",
   },
   {
-    icon: Database,
-    title: "TanStack Query v5",
-    description:
-      "Xử lý caching, dynamic polling, và optimistic UI updates mượt mà với cấu hình SSR hydration chuẩn mực.",
+    value: "48h",
+    label: "Bảo đảm hoàn tiền",
+    subtext: "Tự động phân xử tranh chấp",
   },
   {
-    icon: ShieldCheck,
-    title: "Server Actions & Zod",
-    description:
-      "Xác thực dữ liệu 2 đầu (end-to-end type safety) với Zod v4, React Hook Form và useActionState không cần boilerplate API rườm rà.",
+    value: "100%",
+    label: "On-chain Verified",
+    subtext: "Base Sepolia Smart Contract",
+  },
+];
+
+const WORKFLOW_STEPS = [
+  {
+    step: "01",
+    title: "Tạo Giao Dịch & Khóa Vault",
+    desc: "Người bán tải tài sản số (source code, tài khoản, license key, drive link). Web Crypto mã hóa AES-256-GCM ngay tại trình duyệt.",
   },
   {
-    icon: Zap,
-    title: "Tối ưu Core Web Vitals",
-    description:
-      "Interaction to Next Paint (INP) < 50ms, font tự lưu trữ qua next/font, streaming Suspense không chặn luồng hiển thị chính.",
+    step: "02",
+    title: "Người Mua Quét VietQR",
+    desc: "Người mua nạp tiền ký quỹ qua VietQR liên ngân hàng. Webhook kích hoạt khóa tiền vào Smart Contract Base Sepolia.",
+  },
+  {
+    step: "03",
+    title: "Mở Két & Đồng Kiểm 6h - 24h",
+    desc: "Người mua nhận link/key kiểm thử. Đồng hồ đếm ngược bắt đầu. Hết giờ nếu không tranh chấp, smart contract giải phóng tiền cho người bán.",
   },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-[#0B0F17] text-slate-100 overflow-x-hidden">
+      {/* Background Ambience Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-cyan-500/10 via-emerald-500/5 to-transparent blur-[120px] pointer-events-none" />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b bg-radial from-primary/10 via-transparent to-transparent py-20 md:py-32">
+      <section className="relative overflow-hidden border-b border-slate-800/80 py-16 sm:py-24 md:py-32">
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
-            <Badge variant="secondary" className="px-3 py-1 text-xs gap-1.5 rounded-full border">
-              <Sparkles className="size-3.5 text-primary" />
-              <span>Enterprise Ready Template • Next.js 15+</span>
+          <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+            {/* Top Highlight Badge */}
+            <Badge
+              variant="outline"
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold gap-2 rounded-full border-cyan-500/40 bg-cyan-950/40 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.15)]"
+            >
+              <span>🛡️ Giao Thức Ký Quỹ Tự Hành Cho Sản Phẩm Số (Base Sepolia)</span>
             </Badge>
 
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl text-balance">
-              Kiến trúc Client Hiện Đại, Chuẩn SEO &amp; Hiệu Năng Đỉnh Cao
+            {/* Main Headline H1 */}
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white text-balance leading-tight sm:leading-none">
+              Két Giao Dịch Ký Quỹ Thông Minh Cho{" "}
+              <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
+                Giao Dịch Số &amp; Social Commerce
+              </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl text-balance">
-              Template tiêu chuẩn công nghiệp kết hợp Next.js App Router, Tailwind CSS v4, Radix UI, TanStack Query, Nuqs và Server Actions. Thiết kế sẵn sàng mở rộng quy mô.
+            {/* Subtitle */}
+            <p className="text-sm sm:text-lg text-slate-300 leading-relaxed max-w-2xl text-balance">
+              Khóa tiền an toàn qua VietQR tự động. Mở két Digital Vault kiểm thử 6h - 24h. Trọng tài AI phân xử tranh chấp công tâm.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-              <Button size="lg" asChild className="gap-2 shadow-md">
-                <Link href="/dashboard">
-                  Trải nghiệm Dashboard <ArrowRight className="size-4" />
+            {/* Two Primary CTAs (touch target >= 48px) */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 w-full sm:w-auto">
+              {/* Primary CTA */}
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto min-h-[48px] px-7 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all duration-200 border-0"
+              >
+                <Link href="/deals/create" className="flex items-center justify-center gap-2">
+                  <ShieldCheck className="size-5" />
+                  <span>Tạo Giao Dịch Bán Sản Phẩm Số</span>
+                  <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link
-                  href="https://github.com/Jye-a-dev/template_next_client"
-                  target="_blank"
-                  rel="noreferrer"
+
+              {/* Secondary CTA */}
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto min-h-[48px] px-6 rounded-xl border-zinc-700 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-600 text-slate-200 hover:text-white transition-all duration-200 font-semibold"
+              >
+                <Link href="/deals/demo" className="flex items-center justify-center gap-2">
+                  <span>Vào Bàn Đàm Phán Thử Nghiệm</span>
+                  <Sparkles className="size-4 text-cyan-400" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Live Stat Badges */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-8 w-full max-w-3xl">
+              {STAT_BADGES.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-800/90 bg-slate-900/60 backdrop-blur-sm shadow-sm"
                 >
-                  GitHub Source
-                </Link>
-              </Button>
+                  <span className="text-2xl sm:text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-200 mt-0.5">
+                    {stat.label}
+                  </span>
+                  <span className="text-[11px] text-slate-400 text-center">
+                    {stat.subtext}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pillars Grid */}
-      <section className="py-20 bg-muted/20">
+      {/* Feature Grid: 3 Pillars */}
+      <section className="py-20 sm:py-24 relative border-b border-slate-800/80">
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight">Tiêu chuẩn Kỹ thuật Hàng đầu</h2>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Được kiến tạo theo các nguyên lý Clean Architecture và Domain-Driven Design (DDD) để dự án phát triển bền vững.
+            <Badge
+              variant="outline"
+              className="px-3 py-1 text-xs font-semibold border-emerald-500/40 bg-emerald-950/30 text-emerald-300"
+            >
+              Cơ Chế Bảo Vệ 3 Lớp
+            </Badge>
+            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Giao Thức Ký Quỹ Công Nghệ Cao Cho Tài Sản Số
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Loại bỏ hoàn toàn rủi ro chuyển tiền không nhận hàng hoặc gửi hàng không nhận tiền trong giao dịch số.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {CORE_PILLARS.map((pillar) => {
               const Icon = pillar.icon;
               return (
-                <Card key={pillar.title} className="transition-all hover:border-primary/50 hover:shadow-sm">
-                  <CardHeader className="space-y-3">
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon className="size-5" />
+                <Card
+                  key={pillar.title}
+                  className="border-slate-800 bg-slate-900/60 backdrop-blur-sm hover:border-slate-700 hover:bg-slate-900/90 transition-all duration-200 rounded-2xl flex flex-col justify-between"
+                >
+                  <CardHeader className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80 text-cyan-400 shadow-md">
+                        <Icon className="size-6" />
+                      </div>
+                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${pillar.badgeColor}`}>
+                        {pillar.badge}
+                      </span>
                     </div>
-                    <CardTitle className="text-lg">{pillar.title}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm leading-relaxed">
+
+                    <CardTitle className="text-lg sm:text-xl font-bold text-white">
+                      {pillar.title}
+                    </CardTitle>
+
+                    <CardDescription className="text-xs sm:text-sm leading-relaxed text-slate-300">
                       {pillar.description}
                     </CardDescription>
                   </CardHeader>
+
+                  <CardContent className="pt-0 border-t border-slate-800/80 mt-2">
+                    <ul className="space-y-2 pt-4">
+                      {pillar.details.map((detail) => (
+                        <li key={detail} className="flex items-start gap-2 text-xs text-slate-400">
+                          <CheckCircle2 className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
                 </Card>
               );
             })}
@@ -124,31 +239,78 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Live Showcase Banner */}
-      <section className="py-16 border-t">
+      {/* How It Works Workflow */}
+      <section className="py-20 sm:py-24 bg-slate-950/70 border-b border-slate-800/80">
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="rounded-2xl border bg-card p-8 md:p-12 shadow-xs flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="space-y-3 max-w-xl">
-              <div className="flex items-center gap-2 text-primary font-semibold text-sm">
-                <Layers className="size-4" />
-                <span>Thực hành Thực tế</span>
+          <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              Quy Trình Ký Quỹ &amp; Mở Két Trong 3 Bước
+            </h2>
+            <p className="text-slate-400 text-sm">
+              Đơn giản như mua sắm thương mại điện tử, an toàn như hợp đồng thông minh Web3.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {WORKFLOW_STEPS.map((step) => (
+              <div
+                key={step.step}
+                className="relative p-6 rounded-2xl border border-slate-800 bg-slate-900/40 space-y-3"
+              >
+                <div className="text-3xl font-black text-cyan-500/30">
+                  {step.step}
+                </div>
+                <h3 className="text-base font-bold text-white">{step.title}</h3>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{step.desc}</p>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Khám phá Mô-đun Domain Features trực tiếp
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Conversion Box */}
+      <section className="py-16 sm:py-20">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 p-8 sm:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-3 max-w-xl">
+              <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs sm:text-sm">
+                <Zap className="size-4" />
+                <span>Bắt Đầu Giao Dịch Không Lo Rủi Ro</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                Bảo Vệ Thu Nhập Freelancer &amp; Giao Dịch Số Ngay Hôm Nay
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Trải nghiệm sự phối hợp giữa Nuqs (lọc URL), TanStack Query (caching), Server Actions (tạo dữ liệu với useActionState) và Radix Dialog/Sheet có tính trợ năng (A11y) đầy đủ.
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Tạo giao dịch mua bán tài khoản, bản quyền, mã nguồn hoặc hợp đồng freelance. Cài đặt thời gian đồng kiểm và để TrustPassz tự động hóa toàn bộ quá trình ký quỹ.
               </p>
             </div>
-            <Button size="lg" asChild className="shrink-0 gap-2">
-              <Link href="/dashboard">
-                Vào Dashboard ngay <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto shrink-0">
+              <Button
+                size="lg"
+                asChild
+                className="w-full sm:w-auto min-h-[48px] rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg"
+              >
+                <Link href="/deals/create" className="flex items-center justify-center gap-2">
+                  <span>Khởi Tạo Giao Dịch Mới</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="w-full sm:w-auto min-h-[48px] rounded-xl border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white"
+              >
+                <Link href="/deals/demo">
+                  Trải Nghiệm Demo
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
     </div>
   );
 }
-

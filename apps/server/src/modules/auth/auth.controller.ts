@@ -1,27 +1,71 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
+import type { Response } from 'express';
+import { AuthService, generateNonce } from './auth.service';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
+import { Public } from '../../common/decorators/public.decorator';
+
+// Cookie config — centralized để logout dùng lại
+const ACCESS_TOKEN_COOKIE = 'access_token';
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+};
 
 @ApiTags('Authentication (Passwordless & Web3)')
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('verify')
+  /**
+   * FIX C1: Endpoint sinh Nonce cho SIWS (Sign-In With Solana).
+   * Client phải nhúng nonce vào message trước khi ký.
+   */
+  @Public()
+  @Get('nonce')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Verify Google ID Token or Privy Passkey Token & Issue JWT',
+    summary: 'Generate one-time Nonce for SIWS',
     description:
-      'Verifies the authenticity of OAuth tokens from Google or Privy Passkey, upserts the user record into Neon PostgreSQL, and returns an application JWT bearer token.',
+      'Sinh chuỗi nonce ngẫu nhiên 32 hex chars với TTL 5 phút. Client nhúng vào message Solana trước khi ký để chống Replay Attack.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Authentication successful. Returns JWT Bearer token.',
+    description: 'Nonce generated successfully.',
+    schema: { example: { nonce: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4' } },
+  })
+  getNonce(): { nonce: string } {
+    return { nonce: generateNonce() };
+  }
+
+  /**
+   * FIX C2: verify() giờ ghi JWT vào httpOnly cookie thay vì trả về body.
+   * Response body vẫn giữ `user` metadata và `tokenType` nhưng KHÔNG còn `accessToken`.
+   */
+  @Public()
+  @Post('verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify Google ID Token or Privy Passkey Token & Issue JWT Cookie',
+    description:
+      'Verifies the authenticity of OAuth tokens from Google or Privy Passkey, upserts the user record into Neon PostgreSQL, and sets an httpOnly cookie with the JWT. accessToken is no longer returned in the response body.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Authentication successful. JWT written to httpOnly cookie.',
     schema: {
       example: {
-        accessToken:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTExMTExMS0xMTExLTQxMTEtYTExMS0xMTExMTExMTExMTEiLCJlbWFpbCI6InNlbGxlckB0cnVzdHBhc3N6LmlvIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3Mjc0MDAwMDAsImV4cCI6MTcyODAwNDgwMH0.sample_signature',
         tokenType: 'Bearer',
         expiresIn: 604800,
         user: {
@@ -36,21 +80,36 @@ export class AuthController {
   })
   @ApiResponse({
     status: 400,
-    description:
-      'Invalid token format, missing identity claims, or unsupported provider.',
-    schema: {
-      example: {
-        statusCode: 400,
-        message: 'Invalid Google token payload',
-        error: 'Bad Request',
-      },
-    },
+    description: 'Invalid token format, missing identity claims, or unsupported provider.',
   })
   @ApiResponse({
     status: 401,
     description: 'Signature verification failure or expired credentials.',
   })
-  async verify(@Body() verifyAuthDto: VerifyAuthDto) {
-    return this.authService.verifyAuth(verifyAuthDto);
+  async verify(
+    @Body() verifyAuthDto: VerifyAuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.verifyAuth(verifyAuthDto);
+
+    // FIX C2: Ghi JWT vào httpOnly cookie — token không bao giờ lộ ra localStorage
+    res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, COOKIE_OPTIONS);
+
+    // Trả về user metadata (không nhạy cảm) — KHÔNG trả accessToken trong body
+    const { accessToken: _omit, ...safeResult } = result;
+    return safeResult;
+  }
+
+  /**
+   * FIX C2: Logout endpoint xóa httpOnly cookie.
+   */
+  @Public()
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout — clear auth cookie' })
+  @ApiResponse({ status: 200, description: 'Logged out successfully.' })
+  logout(@Res({ passthrough: true }) res: Response): { message: string } {
+    res.clearCookie(ACCESS_TOKEN_COOKIE, { path: '/' });
+    return { message: 'Đã đăng xuất thành công' };
   }
 }

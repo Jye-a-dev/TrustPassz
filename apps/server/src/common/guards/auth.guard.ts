@@ -27,7 +27,10 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request);
+    // FIX C2: Ưu tiên httpOnly cookie, fallback về Authorization header (cho API clients độc lập)
+    const token =
+      this.extractTokenFromCookie(request) ||
+      this.extractTokenFromHeader(request);
 
     if (!token) {
       throw new UnauthorizedException('Authentication token is required');
@@ -45,6 +48,14 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
+  /** FIX C2: Đọc JWT từ httpOnly cookie `access_token` */
+  private extractTokenFromCookie(request: Request): string | undefined {
+    // req.cookies được populate bởi cookie-parser middleware (đăng ký trong main.ts)
+    const cookies = request.cookies as Record<string, string> | undefined;
+    return cookies?.['access_token'] || undefined;
+  }
+
+  /** Fallback: đọc Bearer token từ Authorization header (Postman / mobile clients) */
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;

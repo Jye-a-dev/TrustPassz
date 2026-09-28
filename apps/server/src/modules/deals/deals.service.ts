@@ -17,6 +17,7 @@ import {
   formatVaultUnlockResponse,
   DEAL_DETAIL_INCLUDE,
   DEAL_LIST_INCLUDE,
+  buildDigitalAssetUpsertInput,
 } from './deals.helper';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
@@ -277,7 +278,7 @@ export class DealsService {
    * Unlocks digital asset from vault, auditing decryption attempts and enforcing access quota.
    * On first unlock (accessCount === 0), triggers startInspection on-chain via Oracle Relayer.
    */
-  async unlockVault(id: string, buyerId?: string) {
+  async unlockVault(id: string) {
     const deal = await this.prisma.deal.findUnique({
       where: { id },
       include: { digitalAsset: true },
@@ -291,10 +292,7 @@ export class DealsService {
       throw new NotFoundException(`No digital asset attached to deal ${id}`);
     }
 
-    if (
-      deal.state === DealState.PENDING ||
-      deal.state === DealState.REFUNDED
-    ) {
+    if (deal.state === DealState.PENDING || deal.state === DealState.REFUNDED) {
       throw new BadRequestException(
         `Cannot unlock vault for deal in ${deal.state} state. Escrow deposit required.`,
       );
