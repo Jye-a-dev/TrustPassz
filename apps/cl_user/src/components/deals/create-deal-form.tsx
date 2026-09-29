@@ -31,7 +31,7 @@ export function CreateDealForm() {
   // Core Deal form states
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [assetType, setAssetType] = React.useState<AssetCategory>("SOURCE_CODE");
+  const [assetType, setAssetType] = React.useState<AssetCategory>("DOCUMENT");
   const [amount, setAmount] = React.useState<number | "">("");
   const [inspectionDuration, setInspectionDuration] = React.useState<number>(86400);
   const [rawSecret, setRawSecret] = React.useState("");
@@ -46,6 +46,17 @@ export function CreateDealForm() {
   // Submission & Encryption states
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [vaultAudit, setVaultAudit] = React.useState<VaultAuditData | null>(null);
+
+  // Dynamic UX adjustments when asset type switches
+  const handleAssetTypeChange = (newType: AssetCategory) => {
+    setAssetType(newType);
+
+    // Auto-suggest appropriate inspection window for physical shipping & unboxing
+    if (newType === "PHYSICAL_ITEM" && inspectionDuration < 86400) {
+      setInspectionDuration(86400); // 24h
+      toast.info("Đã điều chỉnh thời gian kiểm thử sang 24 Giờ phù hợp với vận chuyển hàng thực tế.");
+    }
+  };
 
   // Trigger AI Suggestion via Magic Fill
   const handleMagicFill = async () => {
@@ -121,7 +132,11 @@ export function CreateDealForm() {
       return;
     }
     if (!rawSecret.trim()) {
-      toast.error("Vui lòng nhập nội dung nhạy cảm của tài sản số vào Vault.");
+      if (assetType === "PHYSICAL_ITEM") {
+        toast.error("Vui lòng nhập mô tả ngoại quan hoặc số Serial/IMEI vào Vault niêm phong.");
+      } else {
+        toast.error("Vui lòng nhập nội dung nhạy cảm của tài sản số vào Vault.");
+      }
       return;
     }
 
@@ -143,7 +158,11 @@ export function CreateDealForm() {
       setVaultAudit(audit);
 
       const result = await CreateDealService.submitDeal(dealDto);
-      toast.success("Tạo giao dịch ký quỹ số thành công! Tài sản đã được mã hóa an toàn.");
+      toast.success(
+        assetType === "PHYSICAL_ITEM"
+          ? "Khởi tạo kèo ký quỹ thành công! Cam kết ngoại quan đã được niêm phong vào Vault."
+          : "Tạo giao dịch ký quỹ số thành công! Tài sản đã được mã hóa an toàn.",
+      );
       router.push(`/deals/${result.id || "new-deal"}`);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -158,10 +177,10 @@ export function CreateDealForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* 1. Asset Classification Selection */}
+      {/* 1. Asset Classification Selection (6 Modern Cards) */}
       <AssetTypeSelector
         value={assetType}
-        onChange={setAssetType}
+        onChange={handleAssetTypeChange}
         disabled={isSubmitting}
       />
 
@@ -180,9 +199,9 @@ export function CreateDealForm() {
             className="h-8 px-2.5 text-xs font-medium border-cyan-500/50 bg-cyan-950/20 text-cyan-300 hover:bg-cyan-900/40 hover:text-cyan-200 transition-all flex items-center gap-1.5 shadow-sm shadow-cyan-950 cursor-pointer"
           >
             {isAiLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+              <Loader2 className="size-3.5 animate-spin text-cyan-400" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <Sparkles className="size-3.5 text-cyan-400" />
             )}
             AI Gợi ý điều khoản
           </Button>
@@ -190,7 +209,13 @@ export function CreateDealForm() {
 
         <Input
           id="deal-title"
-          placeholder="Ví dụ: Bàn giao Fullstack Escrow Marketplace + Smart Contract"
+          placeholder={
+            assetType === "PHYSICAL_ITEM"
+              ? "Ví dụ: Pass bàn phím cơ Keychron K2 V2 nhôm RGB (Fullbox như mới)"
+              : assetType === "DOCUMENT"
+              ? "Ví dụ: Bộ Ebook & Template Notion quản lý tài chính doanh nghiệp SME"
+              : "Ví dụ: Bàn giao Fullstack Escrow Marketplace + Smart Contract"
+          }
           value={title}
           disabled={isSubmitting}
           onChange={(e) => setTitle(e.target.value)}
@@ -206,7 +231,11 @@ export function CreateDealForm() {
             id="deal-desc"
             rows={4}
             disabled={isSubmitting}
-            placeholder="Liệt kê chi tiết tính năng, checklist kiểm thử, hướng dẫn chạy thử..."
+            placeholder={
+              assetType === "PHYSICAL_ITEM"
+                ? "Mô tả nguồn gốc mua, thời hạn bảo hành còn lại, phụ kiện đi kèm, đơn vị vận chuyển dự kiến..."
+                : "Liệt kê chi tiết tính năng, checklist kiểm thử, hướng dẫn chạy thử..."
+            }
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full rounded-md border border-slate-800 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-y"
@@ -232,11 +261,13 @@ export function CreateDealForm() {
         onInspectionDurationChange={setInspectionDuration}
         buyerId={buyerId}
         onBuyerIdChange={setBuyerId}
+        isPhysical={assetType === "PHYSICAL_ITEM"}
         disabled={isSubmitting}
       />
 
       {/* 4. Digital Vault: Zero-Knowledge AES-256-GCM Section */}
       <DigitalVaultSection
+        assetType={assetType}
         rawSecret={rawSecret}
         onRawSecretChange={setRawSecret}
         passphrase={passphrase}
@@ -253,13 +284,15 @@ export function CreateDealForm() {
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            <Loader2 className="size-5 animate-spin mr-2" />
             Đang mã hóa Vault & Tạo Giao Dịch...
           </>
         ) : (
           <>
-            <ShieldCheck className="w-5 h-5 mr-2" />
-            Khởi Tạo Giao Dịch Ký Quỹ Số
+            <ShieldCheck className="size-5 mr-2" />
+            {assetType === "PHYSICAL_ITEM"
+              ? "Niêm Phong Biên Lai & Tạo Kèo Ký Quỹ"
+              : "Khởi Tạo Giao Dịch Ký Quỹ Số"}
           </>
         )}
       </Button>

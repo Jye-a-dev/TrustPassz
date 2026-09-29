@@ -16,7 +16,7 @@ import { Public } from '../../common/decorators/public.decorator';
 // Cookie config — centralized để logout dùng lại
 const ACCESS_TOKEN_COOKIE = 'access_token';
 const COOKIE_OPTIONS = {
-  httpOnly: true,
+  httpOnly: false,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
@@ -92,12 +92,10 @@ export class AuthController {
   ) {
     const result = await this.authService.verifyAuth(verifyAuthDto);
 
-    // FIX C2: Ghi JWT vào httpOnly cookie — token không bao giờ lộ ra localStorage
+    // FIX C2: Ghi JWT vào cookie và đồng thời trả accessToken trong response body
     res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, COOKIE_OPTIONS);
 
-    // Trả về user metadata (không nhạy cảm) — KHÔNG trả accessToken trong body
-    const { accessToken: _omit, ...safeResult } = result;
-    return safeResult;
+    return result;
   }
 
   /**

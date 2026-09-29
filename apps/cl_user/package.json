@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 5000",
     "lint": "eslint",
-    "test": "npx tsx --test src/__tests__/crypto.test.ts src/__tests__/bargain-slider.test.tsx"
+    "test": "npx tsx --test src/__tests__/crypto.test.ts src/__tests__/bargain-slider.test.tsx src/__tests__/countdown-timer.test.ts src/__tests__/session-lifecycle.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

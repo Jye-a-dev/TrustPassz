@@ -6,8 +6,20 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { JwtService } from '../../modules/auth/jwt.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { RequestUser } from '../decorators/current-user.decorator';
+
+interface JwtTokenPayload {
+  sub?: string;
+  id?: string;
+  email?: string | null;
+  wallet_address?: string | null;
+  walletAddress?: string | null;
+  role?: string;
+  [key: string]: unknown;
+}
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,7 +39,6 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
-    // FIX C2: Ưu tiên httpOnly cookie, fallback về Authorization header (cho API clients độc lập)
     const token =
       this.extractTokenFromCookie(request) ||
       this.extractTokenFromHeader(request);
@@ -37,27 +48,69 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token);
-      request['user'] = payload;
-    } catch {
+      const payload = await this.jwtService.verifyAsync<JwtTokenPayload>(token);
+
+      const userId = payload.sub || payload.id;
+      if (!userId) {
+        throw new UnauthorizedException(
+          'Token payload is invalid: missing subject identifier',
+        );
+      }
+
+      // Context Injection: normalize claims into standardized RequestUser
+      const user: RequestUser = {
+        id: userId,
+        email: payload.email ?? null,
+        walletAddress: payload.wallet_address ?? payload.walletAddress ?? null,
+        role: payload.role ?? 'USER',
+      };
+
+      request['user'] = user;
+    } catch (error: unknown) {
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedException(
+          'Phiên xác thực đã hết hạn, vui lòng đăng nhập lại',
+        );
+      }
+      if (error instanceof JsonWebTokenError) {
+        throw new UnauthorizedException(
+          `Token xác thực không hợp lệ: ${error.message}`,
+        );
+      }
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException(
-        'Invalid or expired authentication token',
+        'Không thể xác thực danh tính người dùng',
       );
     }
 
     return true;
   }
 
-  /** FIX C2: Đọc JWT từ httpOnly cookie `access_token` */
+  /**
+   * Safe extraction: First check unsigned cookies, fallback to signed cookies
+   */
   private extractTokenFromCookie(request: Request): string | undefined {
-    // req.cookies được populate bởi cookie-parser middleware (đăng ký trong main.ts)
     const cookies = request.cookies as Record<string, string> | undefined;
-    return cookies?.['access_token'] || undefined;
+    const signedCookies = request.signedCookies as
+      | Record<string, string>
+      | undefined;
+    return (
+      cookies?.['access_token'] || signedCookies?.['access_token'] || undefined
+    );
   }
 
-  /** Fallback: đọc Bearer token từ Authorization header (Postman / mobile clients) */
+  /**
+   * Fallback extraction: Standard Bearer token in Authorization header
+   */
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return undefined;
+    }
+
+    const [type, token] = authHeader.split(' ');
+    return type === 'Bearer' && token ? token.trim() : undefined;
   }
 }

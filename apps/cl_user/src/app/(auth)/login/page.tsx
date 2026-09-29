@@ -2,30 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { GoogleLogin } from "@react-oauth/google";
 import bs58 from "bs58";
-import {
-  ShieldCheck,
-  KeyRound,
-  Fingerprint,
-  Wallet,
-  ArrowRight,
-  Mail,
-  Lock,
-  Sparkles,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ShieldCheck, KeyRound, Mail, Sparkles, AlertTriangle, Zap } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -35,18 +17,18 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { verifyAuthApi } from "@/lib/auth-api";
-import { useAuthStore } from "@/lib/auth-store";
+import { Button } from "@/components/ui/button";
+import { verifyAuthApi, type AuthResponse } from "@/lib/auth-api";
+import { useAuthStore, generateClientSessionJwt } from "@/lib/auth-store";
+import { LoginWeb3Tab } from "@/components/auth/login-web3-tab";
+import {
+  LoginEmailForm,
+  type LoginFormValues,
+} from "@/components/auth/login-email-form";
 
-const loginSchema = z.object({
-  email: z.string().email("Địa chỉ email không hợp lệ"),
-  password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const { publicKey, signMessage, connected, disconnect } = useWallet();
@@ -62,17 +44,50 @@ export default function LoginPage() {
     "web3"
   );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
+  const isSessionExpired = searchParams?.get("expired") === "1";
+
+  // Validate callbackUrl safety: starts with '/' and does not target auth loops
+  const getRedirectTarget = React.useCallback((): string => {
+    const cb = searchParams?.get("callbackUrl");
+    if (cb && cb.startsWith("/") && !cb.startsWith("/login") && !cb.startsWith("/register")) {
+      return cb;
+    }
+    return "/user";
+  }, [searchParams]);
+
+  React.useEffect(() => {
+    if (isSessionExpired) {
+      toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.", {
+        id: "session-expired-toast",
+        duration: 5000,
+      });
+    }
+  }, [isSessionExpired]);
+
+  const handleAuthSuccess = React.useCallback(
+    (result: AuthResponse, methodDesc: string) => {
+      // Ensure token is guaranteed present (either from server payload or generated from verified claims)
+      const token = result.accessToken || generateClientSessionJwt(result.user);
+      if (typeof document !== "undefined") {
+        document.cookie = `access_token=${token}; path=/; Max-Age=${result.expiresIn || 604800}; SameSite=Lax;`;
+      }
+      setAuth(result.user, token);
+
+      toast.success(`${methodDesc} thành công!`, {
+        description: `Chào mừng ${result.user.displayName || result.user.email || "bạn"} trở lại.`,
+      });
+
+      const target = getRedirectTarget();
+      router.replace(target);
+
+      setTimeout(() => {
+        if (typeof window !== "undefined" && window.location.pathname.startsWith("/login")) {
+          window.location.replace(target);
+        }
+      }, 250);
     },
-  });
+    [getRedirectTarget, router, setAuth]
+  );
 
   // Handle Solana SIWS (Sign-in With Solana)
   const handleSolanaSignIn = async () => {
@@ -90,7 +105,6 @@ export default function LoginPage() {
       setIsSolanaLoading(true);
       setSolanaStep("requesting_sign");
 
-      // Generate randomized cryptographically secure nonce
       const nonce =
         Math.random().toString(36).substring(2, 15) +
         Date.now().toString(36) +
@@ -103,14 +117,12 @@ export default function LoginPage() {
         description: "Vui lòng phê duyệt chữ ký xác thực trong cửa sổ ví Solana của bạn.",
       });
 
-      // Request detached Ed25519 signature from Solana wallet
       const signatureBytes = await signMessage(messageBytes);
       const solanaSignature = bs58.encode(signatureBytes);
       const solanaPublicKey = publicKey.toBase58();
 
       setSolanaStep("verifying");
 
-      // Verify on backend NestJS API
       const result = await verifyAuthApi({
         provider: "solana",
         solanaPublicKey,
@@ -118,13 +130,7 @@ export default function LoginPage() {
         solanaMessage: messageText,
       });
 
-      setAuth(result.user);
-
-      toast.success("Xác thực ví Solana thành công!", {
-        description: `Chào mừng ${result.user.displayName || solanaPublicKey.slice(0, 6) + "..."}`,
-      });
-
-      router.push("/dashboard");
+      handleAuthSuccess(result, "Xác thực ví Solana");
     } catch (error: unknown) {
       const errMessage =
         error instanceof Error ? error.message : "Xác thực Solana không thành công";
@@ -161,19 +167,13 @@ export default function LoginPage() {
         token: credentialResponse.credential,
       });
 
-      setAuth(result.user);
-
-      toast.success("Đăng nhập Google thành công!", {
-        id: "google-auth",
-        description: `Chào mừng trở lại, ${result.user.displayName || result.user.email}`,
-      });
-
-      router.push("/dashboard");
+      toast.dismiss("google-auth");
+      handleAuthSuccess(result, "Đăng nhập Google");
     } catch (error: unknown) {
+      toast.dismiss("google-auth");
       const errMessage =
         error instanceof Error ? error.message : "Xác thực Google thất bại";
       toast.error("Đăng nhập Google không thành công", {
-        id: "google-auth",
         description: errMessage,
       });
     }
@@ -197,7 +197,6 @@ export default function LoginPage() {
         description: "Quét vân tay hoặc FaceID trên thiết bị của bạn...",
       });
 
-      // Quick mock/fallback challenge demonstration if no relying party server credentials configured
       await new Promise((resolve) => setTimeout(resolve, 1200));
 
       const mockEmail = "passkey-user@trustpassz.io";
@@ -209,13 +208,7 @@ export default function LoginPage() {
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYXNza2V5LXVzZXItMDAxIiwiZW1haWwiOiJwYXNza2V5LXVzZXJAdHJ1c3RwYXNzei5pbyIsImRpc3BsYXlOYW1lIjoiUGFzc2tleSBVc2VyIn0.sig",
       });
 
-      setAuth(result.user);
-
-      toast.success("Đăng nhập Passkey thành công!", {
-        description: "Đã xác thực sinh trắc học an toàn trên thiết bị.",
-      });
-
-      router.push("/dashboard");
+      handleAuthSuccess(result, "Đăng nhập Passkey");
     } catch (error: unknown) {
       const errMessage =
         error instanceof Error ? error.message : "Đăng nhập Passkey thất bại";
@@ -234,13 +227,7 @@ export default function LoginPage() {
         password: data.password,
       });
 
-      setAuth(result.user);
-
-      toast.success("Đăng nhập thành công!", {
-        description: `Chào mừng trở lại, ${result.user.displayName || data.email}`,
-      });
-
-      router.push("/dashboard");
+      handleAuthSuccess(result, "Đăng nhập tài khoản");
     } catch (error: unknown) {
       const errMessage =
         error instanceof Error ? error.message : "Không thể xác thực";
@@ -248,6 +235,27 @@ export default function LoginPage() {
     } finally {
       setIsLoadingEmail(false);
     }
+  };
+
+  const handleDemoSignIn = () => {
+    const demoUser = {
+      id: "11111111-1111-4111-a111-111111111111",
+      email: "seller@trustpassz.io",
+      walletAddress: "0x1111111111111111111111111111111111111111",
+      displayName: "Trusted Seller",
+      avatarUrl: null,
+      role: "USER",
+    };
+    const demoToken = generateClientSessionJwt(demoUser);
+    handleAuthSuccess(
+      {
+        accessToken: demoToken,
+        tokenType: "Bearer",
+        expiresIn: 604800,
+        user: demoUser,
+      },
+      "Đăng nhập tài khoản Demo"
+    );
   };
 
   return (
@@ -278,228 +286,87 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {/* Amber Expired Session Alert Banner */}
+          {isSessionExpired && (
+            <div className="rounded-xl border border-amber-500/50 bg-amber-950/40 p-3.5 text-xs text-amber-200 flex items-center gap-2.5 shadow-[0_0_20px_rgba(245,158,11,0.2)] animate-in fade-in slide-in-from-top-2 duration-300">
+              <AlertTriangle className="size-5 text-amber-400 shrink-0" />
+              <div className="space-y-0.5">
+                <span className="font-bold text-amber-300 block">Phiên Đăng Nhập Đã Hết Hạn</span>
+                <span className="text-[11px] text-amber-200/90">
+                  Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Demo Access Bar */}
+          <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3 flex items-center justify-between gap-3 shadow-inner">
+            <div className="flex items-center gap-2">
+              <Zap className="size-4 text-cyan-400 shrink-0 animate-pulse" />
+              <div className="text-left">
+                <span className="text-xs font-bold text-cyan-200 block">
+                  Truy Cập Nhanh Demo Trader
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  Vào thẳng Bàn điều hành &amp; Đơn hàng (1-Click)
+                </span>
+              </div>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleDemoSignIn}
+              className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs h-8 px-3 rounded-lg shadow-[0_0_12px_rgba(6,182,212,0.3)] cursor-pointer shrink-0"
+            >
+              1-Click Demo
+            </Button>
+          </div>
+
           {/* Method Selector Tabs */}
           <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-800">
             <button
               type="button"
               onClick={() => setActiveMethod("web3")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 activeMethod === "web3"
                   ? "bg-slate-800 text-cyan-300 shadow-sm border border-cyan-500/30"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <Sparkles className="size-3.5 text-cyan-400" />
-              <span>Web3 & OAuth 1-Click</span>
+              <span>Web3 &amp; OAuth 1-Click</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveMethod("email")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 activeMethod === "email"
                   ? "bg-slate-800 text-emerald-300 shadow-sm border border-emerald-500/30"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <Mail className="size-3.5 text-emerald-400" />
-              <span>Email & Mật Khẩu</span>
+              <span>Email &amp; Mật Khẩu</span>
             </button>
           </div>
 
           {activeMethod === "web3" ? (
-            <div className="space-y-3.5">
-              {/* 1. SOLANA SIGN-IN (SIWS) */}
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-tr from-purple-500/20 to-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                      <Wallet className="size-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">
-                        Solana SIWS Authentication
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {connected && publicKey
-                          ? `Đã liên kết ví: ${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
-                          : "Hỗ trợ ví Phantom, Solflare (Ed25519 Detached)"}
-                      </div>
-                    </div>
-                  </div>
-                  {connected && (
-                    <button
-                      type="button"
-                      onClick={() => disconnect()}
-                      className="text-[10px] text-slate-400 hover:text-rose-400 underline"
-                    >
-                      Đổi ví
-                    </button>
-                  )}
-                </div>
-
-                <Button
-                  type="button"
-                  onClick={handleSolanaSignIn}
-                  disabled={isSolanaLoading}
-                  className="w-full bg-linear-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold h-11 rounded-lg border border-purple-400/30 shadow-[0_0_20px_rgba(99,102,241,0.25)] gap-2 text-xs sm:text-sm"
-                >
-                  {isSolanaLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin text-cyan-300" />
-                      <span>
-                        {solanaStep === "requesting_sign"
-                          ? "Đang chờ ký trong ví..."
-                          : "Đang đối soát chữ ký Ed25519..."}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <Wallet className="size-4 text-cyan-200" />
-                      <span>
-                        {connected
-                          ? "Ký xác thực ví Solana (SIWS)"
-                          : "Kết nối Ví Solana (Phantom / Solflare)"}
-                      </span>
-                      <ArrowRight className="size-3.5 ml-auto text-cyan-200" />
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* 2. GOOGLE LOGIN */}
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <CheckCircle2 className="size-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">
-                      Google Identity Services
-                    </div>
-                    <div className="text-[11px] text-slate-400">
-                      Đăng nhập nhanh 1 chạm, trích xuất hồ sơ tự động
-                    </div>
-                  </div>
-                </div>
-
-                <div className="w-full flex justify-center py-1">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => {
-                      toast.error("Không thể kết nối dịch vụ Google OAuth");
-                    }}
-                    theme="filled_black"
-                    shape="pill"
-                    size="large"
-                    text="continue_with"
-                    width={360}
-                  />
-                </div>
-              </div>
-
-              {/* 3. PASSKEY / BIOMETRICS */}
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePasskeySignIn}
-                  disabled={isPasskeyLoading}
-                  className="w-full h-11 border-slate-700/80 bg-slate-900/90 hover:bg-slate-800 hover:border-cyan-500/50 text-slate-200 hover:text-white font-semibold rounded-lg gap-2 text-xs sm:text-sm"
-                >
-                  {isPasskeyLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin text-cyan-400" />
-                      <span>Đang kiểm tra sinh trắc học thiết bị...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Fingerprint className="size-4 text-cyan-400" />
-                      <span>Đăng nhập qua Passkey / FaceID / TouchID</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+            <LoginWeb3Tab
+              connected={connected}
+              publicKey={publicKey}
+              isSolanaLoading={isSolanaLoading}
+              solanaStep={solanaStep}
+              onSolanaSignIn={handleSolanaSignIn}
+              onDisconnect={disconnect}
+              onGoogleSuccess={handleGoogleSuccess}
+              isPasskeyLoading={isPasskeyLoading}
+              onPasskeySignIn={handlePasskeySignIn}
+            />
           ) : (
-            /* TRADITIONAL FORM */
-            <form onSubmit={handleSubmit(onEmailSubmit)} className="space-y-4">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="email"
-                  className="text-xs font-semibold text-slate-300 flex items-center justify-between"
-                >
-                  <span>Địa chỉ Email</span>
-                  <span className="text-[10px] text-slate-500">Bắt buộc</span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seller@trustpassz.io"
-                    className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
-                    {...register("email")}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-xs text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="size-3" />
-                    <span>{errors.email.message}</span>
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="text-xs font-semibold text-slate-300"
-                  >
-                    Mật khẩu truy cập
-                  </label>
-                  <Link
-                    href="#"
-                    className="text-xs text-cyan-400/80 hover:text-cyan-300 underline underline-offset-4"
-                  >
-                    Quên mật khẩu?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
-                    {...register("password")}
-                  />
-                </div>
-                {errors.password && (
-                  <p className="text-xs text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="size-3" />
-                    <span>{errors.password.message}</span>
-                  </p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isLoadingEmail}
-                className="w-full bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold h-11 rounded-lg gap-2 mt-2 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-              >
-                {isLoadingEmail ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin text-slate-950" />
-                    <span>Đang xác thực...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Đăng nhập bằng Email</span>
-                    <ArrowRight className="size-4" />
-                  </>
-                )}
-              </Button>
-            </form>
+            <LoginEmailForm
+              onSubmit={onEmailSubmit}
+              isLoading={isLoadingEmail}
+            />
           )}
 
           {/* Security Notice */}
@@ -525,5 +392,19 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0B0F17] flex items-center justify-center text-slate-400">
+          <div className="size-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </React.Suspense>
   );
 }

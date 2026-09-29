@@ -10,6 +10,7 @@
     "user": "npm --prefix apps/cl_user run dev",
     "admin": "npm --prefix apps/cl_admin run dev",
     "server": "npm --prefix apps/server run dev",
-    "pipe": "npm --prefix apps/ai_pipeline run dev"
+    "pipe": "npm --prefix apps/ai_pipeline run dev",
+    "structure": "node scripts/draw-structure.js"
   }
 }

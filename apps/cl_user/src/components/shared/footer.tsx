@@ -1,7 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShieldCheck, Lock, ExternalLink } from "lucide-react";
 
 export function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/user")) {
+    return null;
+  }
+
   return (
     <footer className="border-t border-slate-800/80 bg-slate-950/90 text-slate-400">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6 py-8 px-4 sm:px-8 max-w-7xl text-xs">
@@ -31,14 +40,14 @@ export function Footer() {
           </Link>
           <span className="text-slate-700">•</span>
           <Link
-            href="/deals/create"
+            href="/user/deals/create"
             className="hover:text-emerald-300 transition-colors"
           >
             Bảo mật Digital Vault
           </Link>
           <span className="text-slate-700">•</span>
           <Link
-            href="/dashboard"
+            href="/user"
             className="hover:text-cyan-300 transition-colors"
           >
             Tài liệu API/Webhook

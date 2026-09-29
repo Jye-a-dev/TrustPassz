@@ -1,18 +1,52 @@
 import type * as React from "react";
-import { FileCode, Key, Database, Palette, HelpCircle } from "lucide-react";
+import {
+  BookOpen,
+  Code2,
+  KeyRound,
+  Palette,
+  PackageCheck,
+  HelpCircle,
+} from "lucide-react";
 
-export type AssetCategory =
+export type BackendAssetType =
   | "SOURCE_CODE"
   | "LICENSE_KEY"
   | "ACCOUNT_CREDENTIAL"
   | "DESIGN_ASSET"
   | "OTHER";
 
+export type AssetCategory =
+  | "DOCUMENT"
+  | "SOURCE_CODE"
+  | "LICENSE_KEY"
+  | "DESIGN_ASSET"
+  | "PHYSICAL_ITEM"
+  | "OTHER"
+  | "ACCOUNT_CREDENTIAL";
+
+export function mapAssetCategoryToBackend(type: AssetCategory): BackendAssetType {
+  switch (type) {
+    case "SOURCE_CODE":
+      return "SOURCE_CODE";
+    case "LICENSE_KEY":
+      return "LICENSE_KEY";
+    case "DESIGN_ASSET":
+      return "DESIGN_ASSET";
+    case "ACCOUNT_CREDENTIAL":
+      return "ACCOUNT_CREDENTIAL";
+    case "DOCUMENT":
+    case "PHYSICAL_ITEM":
+    case "OTHER":
+    default:
+      return "OTHER";
+  }
+}
+
 export interface DealRuleSuggestion {
   category: AssetCategory;
   suggested_min_price: number;
   suggested_max_price: number;
-  suggested_inspection_hours: 6 | 12 | 24;
+  suggested_inspection_hours: 6 | 12 | 24 | 48;
   risk_level: "LOW" | "MEDIUM" | "HIGH";
   recommended_rules: string[];
   reasoning: string;
@@ -28,40 +62,67 @@ export interface VaultAuditData {
 export interface AssetTypeOption {
   value: AssetCategory;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
   description: string;
+  deliveryMethod: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: "cyan" | "emerald" | "indigo" | "violet" | "amber" | "slate";
+  badgeText?: string;
 }
 
 export const ASSET_TYPE_OPTIONS: AssetTypeOption[] = [
   {
+    value: "DOCUMENT",
+    label: "Tài Liệu / File Số",
+    description: "Ebook, giáo trình, template Notion, Excel, checklist PDF",
+    deliveryMethod: "Link tải 1 lần từ Vault",
+    icon: BookOpen,
+    accentColor: "cyan",
+    badgeText: "PDF / Sheet",
+  },
+  {
     value: "SOURCE_CODE",
     label: "Source Code",
-    icon: FileCode,
-    description: "Kho mã nguồn Git, file nén dự án",
+    description: "Kho mã nguồn Git, file nén dự án, script tự động",
+    deliveryMethod: "Repo link / Token truy cập",
+    icon: Code2,
+    accentColor: "indigo",
+    badgeText: "Code / Git",
   },
   {
     value: "LICENSE_KEY",
-    label: "License Key",
-    icon: Key,
-    description: "Khóa kích hoạt bản quyền phần mềm",
-  },
-  {
-    value: "ACCOUNT_CREDENTIAL",
-    label: "Tài Khoản / API Key",
-    icon: Database,
-    description: "Thông tin đăng nhập, token bảo mật",
+    label: "License Key / Bản Quyền",
+    description: "Khóa kích hoạt phần mềm, SaaS token, tài khoản số",
+    deliveryMethod: "Mã kích hoạt mã hóa một lần",
+    icon: KeyRound,
+    accentColor: "violet",
+    badgeText: "Bản Quyền",
   },
   {
     value: "DESIGN_ASSET",
-    label: "Design Asset",
+    label: "Design Asset / Media",
+    description: "Figma UI Kit, file 3D, Vector, preset Lightroom/CapCut",
+    deliveryMethod: "Link kho tài nguyên nén",
     icon: Palette,
-    description: "Figma UI Kit, file 3D, Vector",
+    accentColor: "emerald",
+    badgeText: "Media / 3D",
+  },
+  {
+    value: "PHYSICAL_ITEM",
+    label: "Hàng Thực Tế (Pass Đồ)",
+    description: "Quần áo dọn tủ, tai nghe, phím cơ, đồ công nghệ cũ",
+    deliveryMethod: "Vận chuyển bưu cục + Đồng kiểm",
+    icon: PackageCheck,
+    accentColor: "amber",
+    badgeText: "Pass Đồ",
   },
   {
     value: "OTHER",
     label: "Tài Sản Khác",
+    description: "Dữ liệu số, gói Prompt AI, sở hữu trí tuệ tự do",
+    deliveryMethod: "Mở khóa theo thỏa thuận riêng",
     icon: HelpCircle,
-    description: "Dữ liệu số và tài sản trí tuệ khác",
+    accentColor: "slate",
+    badgeText: "Thỏa Thuận",
   },
 ];
 

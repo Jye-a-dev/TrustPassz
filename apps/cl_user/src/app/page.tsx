@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -7,14 +9,13 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
-  Clock,
-  Layers,
-  FileCheck,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAuthStore } from "@/lib/auth-store";
+import { useMounted } from "@/hooks/use-mounted";
 
 const CORE_PILLARS = [
   {
@@ -95,10 +96,20 @@ const WORKFLOW_STEPS = [
 ];
 
 export default function HomePage() {
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const mounted = useMounted();
+
+  // Dynamic Auth-Aware routing to eliminate hardcoded private routes for guests
+  const isAuthed = Boolean(mounted && isAuthenticated && user);
+  const createDealHref = isAuthed
+    ? "/user/deals/create"
+    : "/login?callbackUrl=/user/deals/create";
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0B0F17] text-slate-100 overflow-x-hidden">
       {/* Background Ambience Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-cyan-500/10 via-emerald-500/5 to-transparent blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-linear-to-b from-cyan-500/10 via-emerald-500/5 to-transparent blur-[120px] pointer-events-none" />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-slate-800/80 py-16 sm:py-24 md:py-32">
@@ -115,7 +126,7 @@ export default function HomePage() {
             {/* Main Headline H1 */}
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white text-balance leading-tight sm:leading-none">
               Két Giao Dịch Ký Quỹ Thông Minh Cho{" "}
-              <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-emerald-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
                 Giao Dịch Số &amp; Social Commerce
               </span>
             </h1>
@@ -125,27 +136,27 @@ export default function HomePage() {
               Khóa tiền an toàn qua VietQR tự động. Mở két Digital Vault kiểm thử 6h - 24h. Trọng tài AI phân xử tranh chấp công tâm.
             </p>
 
-            {/* Two Primary CTAs (touch target >= 48px) */}
+            {/* Auth-Aware Primary & Public Secondary CTAs (min-height >= 48px) */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 w-full sm:w-auto">
-              {/* Primary CTA */}
+              {/* Primary Auth-Aware CTA */}
               <Button
                 asChild
                 size="lg"
-                className="w-full sm:w-auto min-h-[48px] px-7 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all duration-200 border-0"
+                className="w-full sm:w-auto min-h-12 px-7 rounded-xl bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all duration-200 border-0"
               >
-                <Link href="/deals/create" className="flex items-center justify-center gap-2">
+                <Link href={createDealHref} className="flex items-center justify-center gap-2">
                   <ShieldCheck className="size-5" />
                   <span>Tạo Giao Dịch Bán Sản Phẩm Số</span>
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
 
-              {/* Secondary CTA */}
+              {/* Public Demo Secondary CTA */}
               <Button
                 asChild
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto min-h-[48px] px-6 rounded-xl border-zinc-700 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-600 text-slate-200 hover:text-white transition-all duration-200 font-semibold"
+                className="w-full sm:w-auto min-h-12 px-6 rounded-xl border-zinc-700 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-600 text-slate-200 hover:text-white transition-all duration-200 font-semibold"
               >
                 <Link href="/deals/demo" className="flex items-center justify-center gap-2">
                   <span>Vào Bàn Đàm Phán Thử Nghiệm</span>
@@ -161,7 +172,7 @@ export default function HomePage() {
                   key={stat.label}
                   className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-800/90 bg-slate-900/60 backdrop-blur-sm shadow-sm"
                 >
-                  <span className="text-2xl sm:text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text">
+                  <span className="text-2xl sm:text-3xl font-black text-transparent bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text">
                     {stat.value}
                   </span>
                   <span className="text-xs sm:text-sm font-semibold text-slate-200 mt-0.5">
@@ -178,7 +189,7 @@ export default function HomePage() {
       </section>
 
       {/* Feature Grid: 3 Pillars */}
-      <section className="py-20 sm:py-24 relative border-b border-slate-800/80">
+      <section id="pillars" className="py-20 sm:py-24 relative border-b border-slate-800/80">
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
             <Badge
@@ -190,7 +201,7 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
               Giao Thức Ký Quỹ Công Nghệ Cao Cho Tài Sản Số
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base">
+            <p className="text-slate-400 text-sm sm:base">
               Loại bỏ hoàn toàn rủi ro chuyển tiền không nhận hàng hoặc gửi hàng không nhận tiền trong giao dịch số.
             </p>
           </div>
@@ -205,7 +216,7 @@ export default function HomePage() {
                 >
                   <CardHeader className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80 text-cyan-400 shadow-md">
+                      <div className="flex size-12 items-center justify-center rounded-xl bg-linear-to-br from-slate-800 to-slate-900 border border-slate-700/80 text-cyan-400 shadow-md">
                         <Icon className="size-6" />
                       </div>
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${pillar.badgeColor}`}>
@@ -240,7 +251,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Workflow */}
-      <section className="py-20 sm:py-24 bg-slate-950/70 border-b border-slate-800/80">
+      <section id="how-it-works" className="py-20 sm:py-24 bg-slate-950/70 border-b border-slate-800/80">
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
@@ -271,7 +282,7 @@ export default function HomePage() {
       {/* CTA Conversion Box */}
       <section className="py-16 sm:py-20">
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 p-8 sm:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="rounded-2xl border border-slate-800 bg-linear-to-r from-slate-900 via-slate-900/90 to-slate-950 p-8 sm:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="space-y-3 max-w-xl">
               <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs sm:text-sm">
                 <Zap className="size-4" />
@@ -289,9 +300,9 @@ export default function HomePage() {
               <Button
                 size="lg"
                 asChild
-                className="w-full sm:w-auto min-h-[48px] rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg"
+                className="w-full sm:w-auto min-h-12 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg"
               >
-                <Link href="/deals/create" className="flex items-center justify-center gap-2">
+                <Link href={createDealHref} className="flex items-center justify-center gap-2">
                   <span>Khởi Tạo Giao Dịch Mới</span>
                   <ArrowRight className="size-4" />
                 </Link>
@@ -301,7 +312,7 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="w-full sm:w-auto min-h-[48px] rounded-xl border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white"
+                className="w-full sm:w-auto min-h-12 rounded-xl border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white"
               >
                 <Link href="/deals/demo">
                   Trải Nghiệm Demo

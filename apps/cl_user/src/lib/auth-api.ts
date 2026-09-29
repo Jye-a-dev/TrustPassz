@@ -40,6 +40,7 @@ export async function verifyAuthApi(
       "Content-Type": "application/json",
       Accept: "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 

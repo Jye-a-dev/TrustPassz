@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -23,17 +24,24 @@ import { DealsService } from './deals.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Public } from '../../common/decorators/public.decorator';
+import { Role, Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser, RequestUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Deals & Digital Vault')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('api/v1/deals')
 export class DealsController {
   constructor(private readonly dealsService: DealsService) {}
 
   /**
    * Aggregates total deals and state breakdown.
-   * Placed prior to `:id` endpoint to prevent route collision.
+   * Public route: placed prior to `:id` endpoint to prevent route collision.
    */
+  @Public()
   @Get('count')
   @ApiOperation({
     summary: 'Count deals with state breakdown',
@@ -84,8 +92,10 @@ export class DealsController {
 
   /**
    * Creates a new deal and associates an encrypted digital vault asset.
+   * Protected route: Requires authenticated participant role.
    */
   @Post()
+  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new deal with encrypted Digital Vault asset',
@@ -139,13 +149,23 @@ export class DealsController {
     status: 404,
     description: 'Người bán (sellerId) hoặc người mua (buyerId) không tồn tại.',
   })
-  async create(@Body() createDealDto: CreateDealDto) {
-    return this.dealsService.create(createDealDto);
+  async create(
+    @Body() createDealDto: CreateDealDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    // If sellerId not supplied, fallback to authenticated caller's identity
+    const payload: CreateDealDto = {
+      ...createDealDto,
+      sellerId: createDealDto.sellerId || user.id,
+    };
+    return this.dealsService.create(payload);
   }
 
   /**
    * Retrieves paginated deals with filter and search capabilities.
+   * Public route: Bargain Room / marketplace discovery.
    */
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'List deals with pagination, filter and search',
@@ -192,7 +212,9 @@ export class DealsController {
 
   /**
    * Retrieves deal details by ID.
+   * Public route: Enables viewing deal information and public bargain rooms.
    */
+  @Public()
   @Get(':id')
   @ApiOperation({
     summary: 'Get deal details by ID with Digital Vault metadata',
@@ -223,8 +245,10 @@ export class DealsController {
 
   /**
    * Updates deal fields partially. Rejects modifications on terminal states.
+   * Protected route: Requires authenticated participant role.
    */
   @Patch(':id')
+  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Partial update deal & upsert Digital Vault asset',
     description:
@@ -252,14 +276,17 @@ export class DealsController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateDealDto: UpdateDealDto,
+    @CurrentUser('userId') _userId: string,
   ) {
     return this.dealsService.update(id, updateDealDto);
   }
 
   /**
    * Removes deal. Permitted only if deal is in PENDING state.
+   * Protected route: Requires authenticated participant role.
    */
   @Delete(':id')
+  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Delete a deal in PENDING state',
     description:
@@ -291,14 +318,19 @@ export class DealsController {
     status: 404,
     description: 'Không tìm thấy deal với ID cung cấp.',
   })
-  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+  async remove(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser('userId') _userId: string,
+  ) {
     return this.dealsService.remove(id);
   }
 
   /**
    * Unlocks digital vault asset, tracking access attempts and checking quota.
+   * Protected route: Requires authenticated participant role.
    */
   @Post(':id/vault/unlock')
+  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Unlock and retrieve encrypted Digital Vault asset payload',
     description:
@@ -316,15 +348,44 @@ export class DealsController {
   })
   @ApiResponse({
     status: 400,
-    description:
-      'Deal not deposited or maximum access limit reached.',
+    description: 'Deal not deposited or maximum access limit reached.',
   })
   @ApiResponse({
     status: 404,
     description: 'Deal or digital asset not found.',
   })
-  async unlockVault(@Param('id', new ParseUUIDPipe()) id: string) {
+  async unlockVault(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser('id') _userId: string,
+  ) {
     return this.dealsService.unlockVault(id);
   }
-}
 
+  /**
+   * Settles deal escrow, releasing funds to seller.
+   * Protected route: Requires authenticated participant role.
+   */
+  @Post(':id/settle')
+  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
+  @ApiOperation({
+    summary: 'Settle deal escrow and release payment to seller',
+    description:
+      'Buyer confirms asset receipt and triggers on-chain release of escrow funds.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'UUID của deal cần xác nhận nghiệm thu và giải ngân',
+    example: 'd0000000-0000-4000-a000-000000000001',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Escrow settled successfully and funds released.',
+  })
+  async settle(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser('id') _userId: string,
+  ) {
+    return this.dealsService.triggerSettle(id);
+  }
+}
