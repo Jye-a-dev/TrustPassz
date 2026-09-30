@@ -11,7 +11,10 @@ describe('PaymentsService', () => {
 
   const checksumKey = 'mock_checksum_key_1234567890';
 
-  const generateSignature = (data: Record<string, any>, key: string): string => {
+  const generateSignature = (
+    data: Record<string, any>,
+    key: string,
+  ): string => {
     const sortedKeys = Object.keys(data).sort();
     const queryParts: string[] = [];
     for (const k of sortedKeys) {
@@ -148,7 +151,7 @@ describe('PaymentsService', () => {
         webhookIdempotencyKey: validWebhookData.reference,
       });
 
-      const response = await service.handleWebhook(payload as any);
+      const response = await service.handleWebhook(payload);
 
       expect(response.success).toBe(true);
       expect(response.message).toContain('idempotent');
@@ -238,7 +241,7 @@ describe('PaymentsService', () => {
         status: OrderStatus.PAID_ESCROW,
       });
 
-      const response = await service.handleWebhook(payload as any);
+      const response = await service.handleWebhook(payload);
 
       expect(response.success).toBe(true);
       expect((response as any).deal.state).toBe(DealState.DEPOSITED);

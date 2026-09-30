@@ -47,7 +47,7 @@ export default function DigitalVaultPage() {
       const data = (res && "data" in res && res.data ? res.data : res) as DealDetail;
       setDeal(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Không thể tải thông tin két số từ máy chủ.");
+      setError(err instanceof Error ? err.message : "Không thể tải thông tin kho lưu trữ từ máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function DigitalVaultPage() {
       }
 
       if (!assetPayload || !assetPayload.encryptedContent) {
-        throw new Error("Không tìm thấy thông tin tài sản mã hóa trong két.");
+        throw new Error("Không tìm thấy thông tin bàn giao được khóa trong kho lưu trữ.");
       }
 
       let decrypted: string;
@@ -122,7 +122,7 @@ export default function DigitalVaultPage() {
         try {
           decrypted = atob(assetPayload.encryptedContent);
         } catch {
-          throw new Error("Mật khẩu giải mã hoặc Auth Tag không khớp.");
+          throw new Error("Mật khẩu mở khóa nhận hàng không đúng hoặc thông tin đã bị thay đổi.");
         }
       }
 
@@ -130,12 +130,12 @@ export default function DigitalVaultPage() {
       setDecryptedPlaintext(decrypted);
       setIsPlaintextVisible(true);
 
-      toast.success("Giải mã thành công bằng Web Crypto AES-256-GCM!", {
-        description: "Plaintext chỉ tồn tại trong bộ nhớ RAM trình duyệt của bạn.",
+      toast.success("Mở khóa nhận hàng thành công!", {
+        description: "Thông tin bàn giao hiển thị an toàn trên thiết bị của bạn.",
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Giải mã thất bại";
-      toast.error(`Lỗi mở két số: ${msg}`);
+      const msg = err instanceof Error ? err.message : "Mở khóa thất bại";
+      toast.error(`Lỗi mở kho lưu trữ: ${msg}`);
     } finally {
       setIsUnlocking(false);
     }
@@ -171,7 +171,7 @@ export default function DigitalVaultPage() {
   // Decision 1: Confirm Receipt and Settle Escrow
   const handleSettleDeal = async () => {
     const confirmed = window.confirm(
-      "Xác nhận nghiệm thu sản phẩm? Tiền ký quỹ sẽ được giải phóng ngay lập tức cho người bán trên Smart Contract."
+      "Xác nhận bạn đã nhận đúng sản phẩm? Tiền được giữ an toàn sẽ chuyển ngay cho người bán."
     );
     if (!confirmed) return;
 
@@ -181,10 +181,10 @@ export default function DigitalVaultPage() {
         method: "POST",
       });
 
-      toast.success("Đã giải ngân thành công cho người bán! Kèo đã hoàn tất (SETTLED).");
+      toast.success("Đã chuyển tiền thành công cho người bán! Giao dịch hoàn tất.");
       setDeal((prev) => (prev ? { ...prev, state: "SETTLED" } : null));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Lỗi giải ngân";
+      const msg = err instanceof Error ? err.message : "Lỗi chuyển tiền";
       toast.error(`Thao tác thất bại: ${msg}`);
     } finally {
       setIsSettling(false);
@@ -198,9 +198,9 @@ export default function DigitalVaultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center gap-3 text-slate-400">
+      <div className="min-h-100 flex flex-col items-center justify-center gap-3 text-slate-400">
         <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-        <p className="text-xs font-mono">Đang kết nối Digital Vault an toàn...</p>
+        <p className="text-xs font-mono">Đang kết nối kho lưu trữ bảo mật...</p>
       </div>
     );
   }
@@ -209,12 +209,12 @@ export default function DigitalVaultPage() {
     return (
       <div className="max-w-md mx-auto my-12 rounded-2xl border border-rose-500/30 bg-slate-900/80 p-6 text-center space-y-4">
         <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
-        <h2 className="text-lg font-bold text-white">Lỗi Truy Cập Két Số</h2>
+        <h2 className="text-lg font-bold text-white">Lỗi Truy Cập Kho Lưu Trữ</h2>
         <p className="text-xs text-slate-400">
-          {error || `Kèo ${dealId} không tồn tại hoặc chưa khởi tạo két số.`}
+          {error || `Giao dịch ${dealId} không tồn tại hoặc chưa khởi tạo kho lưu trữ.`}
         </p>
         <Button asChild variant="outline" className="border-slate-700 text-xs">
-          <Link href="/user/deals">Quay lại danh sách kèo</Link>
+          <Link href="/user/deals">Quay lại danh sách giao dịch</Link>
         </Button>
       </div>
     );

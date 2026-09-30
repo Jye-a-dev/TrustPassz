@@ -28,12 +28,12 @@ const MOBILE_TABS: MobileTab[] = [
     icon: LayoutDashboard,
   },
   {
-    label: "Kèo",
+    label: "Giao Dịch",
     href: "/user/deals",
     icon: Handshake,
   },
   {
-    label: "Tạo Kèo",
+    label: "Tạo Mới",
     href: "/user/deals/create",
     icon: PlusCircle,
     isAction: true,

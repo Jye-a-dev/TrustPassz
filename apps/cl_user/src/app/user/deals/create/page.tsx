@@ -16,7 +16,7 @@ export default function UserCreateDealPage() {
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
         >
           <ArrowLeft className="size-4" />
-          <span>Quay lại Kèo của tôi</span>
+          <span>Quay lại Giao dịch của tôi</span>
         </Link>
 
         <Badge
@@ -24,7 +24,7 @@ export default function UserCreateDealPage() {
           className="border-cyan-500/40 text-cyan-300 bg-cyan-950/20 text-xs px-2.5 py-1 flex items-center gap-1.5"
         >
           <Lock className="size-3 text-cyan-400" />
-          AES-256-GCM Vault
+          Kho Lưu Trữ Bảo Mật
         </Badge>
       </div>
 
@@ -36,10 +36,10 @@ export default function UserCreateDealPage() {
           </span>
           <div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-              Tạo Kèo Ký Quỹ Mới
+              Tạo Giao Dịch Mới
             </h1>
             <p className="text-xs text-slate-400">
-              Đóng gói tài sản số vào két bảo mật, định giá kèm thời gian kiểm thử (Inspection Window).
+              Lưu trữ thông tin bàn giao an toàn, định giá và thiết lập thời gian cho người mua kiểm tra hàng.
             </p>
           </div>
         </div>

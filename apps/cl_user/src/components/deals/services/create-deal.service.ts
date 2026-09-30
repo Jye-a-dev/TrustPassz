@@ -76,22 +76,22 @@ export class CreateDealService {
         suggestedHours = 48;
         recommendedRules = [
           "Bên mua và bên bán cam kết đồng kiểm ngoại quan cùng nhân viên bưu tá khi nhận kiện hàng.",
-          "Số IMEI/Serial và tình trạng ngoại quan được đối chiếu trực tiếp với bản cam kết đã niêm phong trong Smart Vault.",
-          "Tiền cọc được bảo lưu an toàn 100% trong Két Escrow và chỉ giải ngân khi hết thời hạn kiểm thử không tranh chấp.",
+          "Số IMEI/Serial và tình trạng ngoại quan được đối chiếu trực tiếp với thông tin đã niêm phong trong Kho lưu trữ.",
+          "Tiền được giữ an toàn 100% trong Két bảo vệ và chỉ chuyển cho người bán khi hết thời gian kiểm tra không có khiếu nại.",
         ];
       } else if (params.assetType === "DOCUMENT") {
         suggestedHours = 12;
         recommendedRules = [
           "Bên bán cam kết tài liệu/giáo trình chính chủ tự biên soạn hoặc tài nguyên bản quyền mở (Creative Commons).",
-          "Bên mua nhận link tải một lần qua Digital Vault với mã hóa đầu cuối AES-256-GCM.",
-          "Thời gian kiểm thử bàn giao đảm bảo đủ để bên mua xác nhận tính toàn vẹn và chất lượng của tài liệu.",
+          "Bên mua nhận link tải tài liệu qua Kho lưu trữ bảo mật.",
+          "Thời gian kiểm tra hàng đảm bảo đủ để bên mua xác nhận chất lượng của tài liệu.",
         ];
       } else {
         suggestedHours = 24;
         recommendedRules = [
-          "Bên mua có toàn quyền kiểm thử tính toàn vẹn của sản phẩm số trong thời gian kiểm định.",
+          "Bên mua có toàn quyền kiểm tra sản phẩm số trong thời gian kiểm tra hàng.",
           "Bên bán cam kết tài sản số không chứa mã độc, backdoor hoặc vi phạm bản quyền bên thứ ba.",
-          "Toàn bộ tài sản được mã hóa AES-256-GCM và tự động giải phóng ký quỹ khi hết hạn không tranh chấp.",
+          "Toàn bộ thông tin bàn giao được khóa bảo mật và tự động hoàn tất giao dịch khi hết thời gian kiểm tra.",
         ];
       }
 
@@ -108,7 +108,7 @@ export class CreateDealService {
         suggested_inspection_hours: suggestedHours,
         risk_level: params.assetType === "PHYSICAL_ITEM" ? "MEDIUM" : "LOW",
         recommended_rules: recommendedRules,
-        reasoning: "Gợi ý mặc định theo tiêu chuẩn ký quỹ an toàn TrustPassz.",
+        reasoning: "Gợi ý mặc định theo tiêu chuẩn giao dịch an toàn của TrustPassz.",
       };
     }
   }

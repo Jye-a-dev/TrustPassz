@@ -62,6 +62,7 @@ _AI_MODEL_PATH = os.getenv("AI_MODEL_PATH", "Qwen/Qwen2-VL-2B-Instruct")
 _DEFAULT_ORIGINS = [
     "http://localhost:3000",  # apps/cl_user
     "http://localhost:3001",  # apps/server (NestJS)
+    "http://localhost:5100",  # apps/cl_admin
 ]
 _extra = os.getenv("ALLOWED_ORIGINS", "")
 _ALLOWED_ORIGINS: list[str] = _DEFAULT_ORIGINS + [
@@ -83,19 +84,40 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# ── Swagger OpenAPI Tags Metadata ──────────────────────────────────────────────
+tags_metadata = [
+    {
+        "name": "AI Suggestions",
+        "description": "Gợi ý điều khoản và giá kèo: định giá, thời gian kiểm thử (TASK-06).",
+    },
+    {
+        "name": "Arbitration",
+        "description": "Trọng tài AI thẩm định bằng chứng unbox/lỗi và phân xử tranh chấp (TASK-07).",
+    },
+    {
+        "name": "Infrastructure",
+        "description": "Healthcheck và trạng thái sẵn sàng của AI Pipeline Engine.",
+    },
+]
+
 # ── FastAPI App ────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="TrustPassz AI Pipeline",
-    description=(
-        "Local sVLM-powered deal pricing, inspection suggestion, and "
-        "AI Arbitrator & Dispute Engine via Outlines Logit Masking. "
-        "Zero Cloud API dependency."
-    ),
-    version="3.0.0",
-    docs_url="/docs" if _ENVIRONMENT == "development" else None,
-    redoc_url="/redoc" if _ENVIRONMENT == "development" else None,
+    title="TrustPassz AI Arbitration & Suggestion Pipeline",
+    description="Interactive OpenAPI Swagger Playground phục vụ kiểm thử TASK-06 & TASK-07",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/docs-json",
+    openapi_tags=tags_metadata,
     lifespan=lifespan,
 )
+
+
+@app.get("/openapi.json", include_in_schema=False)
+def openapi_json_alias():
+    """Alias route trả về spec OpenAPI JSON cho các client/công cụ OpenAPI."""
+    return app.openapi()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -159,7 +181,7 @@ async def _decode_upload(file: UploadFile) -> Image.Image:
 @app.get(
     "/health",
     response_model=HealthResponse,
-    summary="Engine readiness probe",
+    summary="Healthcheck & Engine readiness probe",
     tags=["Infrastructure"],
 )
 def health_check(engine: IConstrainedVisionEngine = Depends(get_engine)) -> HealthResponse:
@@ -180,7 +202,12 @@ def health_check(engine: IConstrainedVisionEngine = Depends(get_engine)) -> Heal
     "/api/v1/suggest-deal",
     response_model=DealRuleSuggestion,
     status_code=status.HTTP_200_OK,
-    summary="Suggest pricing and inspection time for a digital asset deal",
+    summary="Gợi ý điều khoản và giá kèo (TASK-06)",
+    description=(
+        "Dual-mode endpoint (application/json hoặc multipart/form-data) gợi ý điều khoản, "
+        "định giá và thời gian kiểm thử cho hợp đồng số. "
+        "Inference chạy cục bộ qua Outlines Logit Masking — không phụ thuộc Cloud API."
+    ),
     tags=["AI Suggestions"],
 )
 async def suggest_deal(

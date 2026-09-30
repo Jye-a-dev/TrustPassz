@@ -52,12 +52,12 @@ export const BASE_NAV_ITEMS: Omit<NavItem, "badge" | "badgeColor">[] = [
     icon: LayoutDashboard,
   },
   {
-    label: "Kèo Ký Quỹ Của Tôi",
+    label: "Giao Dịch Của Tôi",
     href: "/user/deals",
     icon: Handshake,
   },
   {
-    label: "Tạo Kèo Ký Quỹ",
+    label: "Tạo Giao Dịch Mới",
     href: "/user/deals/create",
     icon: PlusCircle,
     isAction: true,
@@ -68,7 +68,7 @@ export const BASE_NAV_ITEMS: Omit<NavItem, "badge" | "badgeColor">[] = [
     icon: Receipt,
   },
   {
-    label: "Khiếu Nại & Trọng Tài AI",
+    label: "Báo Lỗi & Khiếu Nại",
     href: "/user/disputes",
     icon: Scale,
   },
@@ -173,14 +173,14 @@ export function UserSidebarContent({
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
               </span>
-              NODE L2 CONNECTED
+              HỆ THỐNG BẢO VỆ TỰ ĐỘNG
             </span>
-            <span className="text-slate-400 font-mono text-[11px]">24ms</span>
+            <span className="text-slate-400 font-mono text-[11px]">24/7</span>
           </div>
           <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px]">
-            <span className="text-slate-400 font-medium">Network:</span>
+            <span className="text-slate-400 font-medium">Bảo vệ:</span>
             <span className="font-mono text-cyan-400 font-semibold bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/20 text-[10px]">
-              Base Sepolia (84532)
+              Tự Động &amp; An Toàn
             </span>
           </div>
         </div>
@@ -189,7 +189,7 @@ export function UserSidebarContent({
         <div className="space-y-1">
           <div className="px-3 flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-              {"// WORKSPACE MODULES"}
+              {"// DANH MỤC QUẢN LÝ"}
             </span>
             <span className="text-[10px] font-mono text-cyan-400/80">v2.5</span>
           </div>
@@ -238,7 +238,7 @@ export function UserSidebarContent({
                           : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 group-hover:border-emerald-400/40"
                       )}
                     >
-                      AES-256
+                      BẢO MẬT
                     </span>
 
                     <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full duration-700 transition-transform pointer-events-none" />
@@ -308,10 +308,10 @@ export function UserSidebarContent({
               </div>
               <div>
                 <span className="text-xs font-bold text-white block tracking-tight">
-                  Két Ký Quỹ Escrow
+                  Két Giữ Tiền An Toàn
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">
-                  Smart Contract Vault
+                  Kho bảo vệ tự động
                 </span>
               </div>
             </div>
@@ -330,7 +330,7 @@ export function UserSidebarContent({
 
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block font-mono">
-              Tổng số dư bảo chứng
+              Tiền đang giữ an toàn
             </span>
             <div className="font-mono text-xl font-black text-cyan-300 tracking-tight flex items-baseline gap-1">
               <span>{displayLockedBalance.toLocaleString("vi-VN")}</span>
@@ -341,9 +341,9 @@ export function UserSidebarContent({
           {/* Mini Progress Status */}
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-              <span>Bảo vệ on-chain</span>
+              <span>Bảo vệ tự động</span>
               <span className={displayLockedBalance > 0 ? "text-emerald-400 font-bold" : "text-slate-400 font-medium"}>
-                {displayLockedBalance > 0 ? "100% Lock" : "Sẵn sàng ký quỹ"}
+                {displayLockedBalance > 0 ? "Đang giữ an toàn" : "Sẵn sàng giao dịch"}
               </span>
             </div>
             <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
@@ -363,7 +363,7 @@ export function UserSidebarContent({
             onClick={onNavigate}
             className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 py-2.5 text-[11px] font-bold text-cyan-300 hover:bg-cyan-500/20 hover:text-white transition-all shadow-sm hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]"
           >
-            <span>Quản Lý Két Ký Quỹ</span>
+            <span>Quản Lý Giao Dịch</span>
             <ExternalLink className="size-3" />
           </Link>
         </div>
@@ -373,10 +373,10 @@ export function UserSidebarContent({
       <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3 space-y-1 text-center backdrop-blur-xs mb-6">
         <div className="flex items-center justify-center gap-1.5 text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
           <Cpu className="size-3 text-emerald-400" />
-          <span>WebCrypto AES-256-GCM</span>
+          <span>Kho lưu trữ bảo mật</span>
         </div>
         <p className="text-[10px] text-slate-400 leading-tight">
-          Khóa riêng tư và dữ liệu két chỉ giải mã trực tiếp trong RAM trình duyệt.
+          Tài liệu và mật khẩu được khóa kín, chỉ gửi đúng cho người mua khi hoàn tất.
         </p>
       </div>
     </div>
@@ -408,11 +408,11 @@ export function UserSidebar({
                   TrustPassz
                 </span>
                 <span className="rounded bg-cyan-950/80 border border-cyan-500/40 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider text-cyan-300">
-                  L2
+                  SAFE
                 </span>
               </div>
               <span className="text-[10px] font-medium text-slate-400 leading-none">
-                Cyber-Escrow Platform
+                Nền tảng giao dịch an toàn
               </span>
             </div>
           </Link>
@@ -443,7 +443,7 @@ export function UserSidebar({
                   TrustPassz
                 </span>
                 <span className="block text-[10px] font-semibold text-cyan-400 uppercase tracking-wider">
-                  Cyber-Escrow OS
+                  Bảo Vệ Giao Dịch An Toàn
                 </span>
               </div>
             </SheetTitle>

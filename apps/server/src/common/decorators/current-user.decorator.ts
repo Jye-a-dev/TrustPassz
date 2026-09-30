@@ -35,7 +35,7 @@ export const CurrentUser = createParamDecorator(
     }
 
     if (property) {
-      return user[property as keyof RequestUser];
+      return user[property];
     }
 
     return user;

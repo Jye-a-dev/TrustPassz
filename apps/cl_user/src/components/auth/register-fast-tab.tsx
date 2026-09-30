@@ -32,8 +32,8 @@ export function RegisterFastTab({
           <span>Đăng ký tức thì qua Ví Solana</span>
         </div>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Tự động cấp danh tính Web3 Escrow, không cần mật khẩu rườm rà. Xác
-          thực quyền sở hữu ví an toàn qua chữ ký Ed25519.
+          Tự động tạo tài khoản an toàn, không cần nhớ mật khẩu rườm rà. Xác
+          thực đăng nhập nhanh chóng chỉ với 1 thao tác chạm.
         </p>
 
         <Button
@@ -52,8 +52,8 @@ export function RegisterFastTab({
               <Wallet className="size-4 text-cyan-200" />
               <span>
                 {connected
-                  ? "Ký xác thực đăng ký ví Solana"
-                  : "Kết nối ví Solana để Đăng ký"}
+                  ? "Xác nhận đăng ký bằng ví"
+                  : "Kết nối ví để Đăng ký"}
               </span>
               <ArrowRight className="size-3.5 ml-auto text-cyan-200" />
             </>
@@ -68,8 +68,8 @@ export function RegisterFastTab({
           <span>Đăng ký 1 chạm bằng Google</span>
         </div>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Liên kết hồ sơ Google, đồng bộ email nhận thông báo giao dịch và mã mở
-          két Digital Vault.
+          Liên kết tài khoản Google, nhận thông báo giao dịch và mã mở kho
+          lưu trữ trực tiếp qua email.
         </p>
 
         <div className="w-full flex justify-center py-1">
@@ -102,7 +102,7 @@ export function RegisterFastTab({
         >
           Tôi đồng ý với{" "}
           <span className="text-cyan-400 underline underline-offset-2">
-            Quy chế Ký quỹ & Bảo mật Digital Vault của TrustPassz
+            Quy chế Giữ Tiền An Toàn &amp; Bảo Mật Giao Dịch của TrustPassz
           </span>
           .
         </label>

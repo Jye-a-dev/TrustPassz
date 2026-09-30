@@ -1,8 +1,7 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const cookieParser = require('cookie-parser') as () => ReturnType<typeof import('cookie-parser')>;
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import './common/utils/bigint-serializer.util';
 
@@ -20,6 +19,7 @@ async function bootstrap() {
     'http://localhost:4000',
     'http://localhost:5000', // cl_user dev server
     'http://localhost:5001',
+    'http://localhost:5100', // cl_admin dev server
     'http://localhost:6000',
     'https://trustpassz.vercel.app',
     'https://www.trustpassz.io',
@@ -27,10 +27,19 @@ async function bootstrap() {
   ];
 
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ): void => {
       // Allow requests with no origin (curl, Postman, server-to-server)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
       callback(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
@@ -65,14 +74,38 @@ async function bootstrap() {
       'JWT-auth',
     )
     .addTag('System & Health', 'Health check, system status ping')
-    .addTag('Authentication (Passwordless & Web3)', 'Privy Passkey & Google OAuth token verification and JWT issue')
-    .addTag('Users & Social Storefronts', 'User profile management and seller social-commerce storefronts')
-    .addTag('Marketplace Products & Inventory', 'Product listings, pricing, specs, and bargain rule configurations')
-    .addTag('Deals & Digital Vault', 'Escrow lifecycle state machine, encrypted digital asset vault, and access control')
-    .addTag('Orders & Escrow Fulfillment', 'Purchase orders, physical/digital shipping tracking, and deal linkage')
-    .addTag('Bargain & Dynamic Negotiation', 'Realtime buyer price bidding, seller accept/reject counter-offers')
-    .addTag('Disputes & AI Arbitration', 'Dispute submission, evidence audit, AI confidence scoring, and admin resolution')
-    .addTag('Payments & Payment Gateway Webhooks', 'PayOS checkout links and idempotent payment webhook reconciliation')
+    .addTag(
+      'Authentication (Passwordless & Web3)',
+      'Privy Passkey & Google OAuth token verification and JWT issue',
+    )
+    .addTag(
+      'Users & Social Storefronts',
+      'User profile management and seller social-commerce storefronts',
+    )
+    .addTag(
+      'Marketplace Products & Inventory',
+      'Product listings, pricing, specs, and bargain rule configurations',
+    )
+    .addTag(
+      'Deals & Digital Vault',
+      'Escrow lifecycle state machine, encrypted digital asset vault, and access control',
+    )
+    .addTag(
+      'Orders & Escrow Fulfillment',
+      'Purchase orders, physical/digital shipping tracking, and deal linkage',
+    )
+    .addTag(
+      'Bargain & Dynamic Negotiation',
+      'Realtime buyer price bidding, seller accept/reject counter-offers',
+    )
+    .addTag(
+      'Disputes & AI Arbitration',
+      'Dispute submission, evidence audit, AI confidence scoring, and admin resolution',
+    )
+    .addTag(
+      'Payments & Payment Gateway Webhooks',
+      'PayOS checkout links and idempotent payment webhook reconciliation',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

@@ -124,7 +124,7 @@ export function CountdownTimer({
     text: "text-emerald-400",
     glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)]",
     progressBg: "bg-emerald-500",
-    label: "Inspection Window An Toàn",
+    label: "Thời Gian Kiểm Tra Hàng An Toàn",
     icon: Clock,
   };
 
@@ -135,7 +135,7 @@ export function CountdownTimer({
       text: "text-slate-400",
       glow: "shadow-none",
       progressBg: "bg-slate-600",
-      label: "Hết Hạn Kiểm Thử (Auto-Settle)",
+      label: "Hết Hạn Kiểm Tra (Tự Động Chuyển Tiền)",
       icon: CheckCircle,
     };
   } else if (time.isCritical) {
@@ -202,8 +202,8 @@ export function CountdownTimer({
             </span>
             <span className="text-[11px] text-slate-400">
               {time.isExpired
-                ? "Thời hạn kiểm thử đã qua. Tiền sẽ được thanh toán tự động cho người bán."
-                : "Hết thời gian kiểm thử, hệ thống sẽ tự động giải ngân cho Seller."}
+                ? "Thời gian kiểm tra đã qua. Tiền sẽ được thanh toán tự động cho người bán."
+                : "Hết thời gian kiểm tra, hệ thống sẽ tự động chuyển tiền cho người bán."}
             </span>
           </div>
         </div>
@@ -249,7 +249,7 @@ export function CountdownTimer({
           </div>
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Đồng Hồ Kiểm Thử (Inspection Window)
+              Đồng Hồ Kiểm Tra Hàng
             </h4>
             <span className={cn("text-xs font-semibold", statusTheme.text)}>
               {statusTheme.label}
@@ -258,7 +258,7 @@ export function CountdownTimer({
         </div>
 
         <span className="font-mono text-xs text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-          {Math.round(totalDurationSeconds / 3600)} Giờ Cam Kết
+          {Math.round(totalDurationSeconds / 3600)} Giờ Kiểm Tra
         </span>
       </div>
 
@@ -310,7 +310,7 @@ export function CountdownTimer({
       {/* Time Elapsed Progress Bar */}
       <div className="space-y-1.5 pt-1">
         <div className="flex items-center justify-between text-[11px] text-slate-400">
-          <span>Tiến độ đồng kiểm</span>
+          <span>Tiến độ kiểm tra hàng</span>
           <span className="font-mono">{Math.round(percentage)}% thời gian còn lại</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/80">

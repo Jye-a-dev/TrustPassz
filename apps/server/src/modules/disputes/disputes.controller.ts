@@ -31,10 +31,17 @@ export class DisputesController {
   @Post()
   @ApiOperation({
     summary: 'Open dispute on deal and initiate AI Arbitration',
-    description: 'Locks escrow deal in DISPUTED state, stores evidence URLs, and triggers initial AI analysis.',
+    description:
+      'Locks escrow deal in DISPUTED state, stores evidence URLs, and triggers initial AI analysis.',
   })
-  @ApiResponse({ status: 201, description: 'Dispute opened and AI evaluation recorded.' })
-  @ApiResponse({ status: 400, description: 'Cannot dispute settled or refunded deal.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Dispute opened and AI evaluation recorded.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Cannot dispute settled or refunded deal.',
+  })
   async openDispute(@Body() dto: OpenDisputeDto) {
     return this.disputesService.openDispute(dto);
   }
@@ -42,7 +49,8 @@ export class DisputesController {
   @Get()
   @ApiOperation({
     summary: 'List disputes with status filter and pagination',
-    description: 'Retrieves disputes with filters for deal ID and dispute status.',
+    description:
+      'Retrieves disputes with filters for deal ID and dispute status.',
   })
   @ApiResponse({ status: 200, description: 'Paginated list of disputes.' })
   async findAll(@Query() query: QueryDisputeDto) {
@@ -52,7 +60,8 @@ export class DisputesController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get dispute details, AI reasoning, and evidence by UUID',
-    description: 'Returns full audit log with AI confidence score and arbitrator decisions.',
+    description:
+      'Returns full audit log with AI confidence score and arbitrator decisions.',
   })
   @ApiParam({ name: 'id', description: 'Dispute UUID v4' })
   @ApiResponse({ status: 200, description: 'Dispute details.' })
@@ -75,10 +84,14 @@ export class DisputesController {
   @Patch(':id/resolve')
   @ApiOperation({
     summary: 'Submit binding arbitration resolution',
-    description: 'Arbitrator issues verdict (APPROVE_PAYOUT or TRIGGER_REFUND), closing the dispute and transitioning deal state.',
+    description:
+      'Arbitrator issues verdict (APPROVE_PAYOUT or TRIGGER_REFUND), closing the dispute and transitioning deal state.',
   })
   @ApiParam({ name: 'id', description: 'Dispute UUID v4' })
-  @ApiResponse({ status: 200, description: 'Dispute closed and deal state transitioned.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dispute closed and deal state transitioned.',
+  })
   @ApiResponse({ status: 400, description: 'Dispute already closed.' })
   async resolve(
     @Param('id', new ParseUUIDPipe()) id: string,

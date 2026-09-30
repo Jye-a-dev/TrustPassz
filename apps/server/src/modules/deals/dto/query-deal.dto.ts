@@ -61,7 +61,8 @@ export class QueryDealDto {
   buyerId?: string;
 
   @ApiPropertyOptional({
-    description: 'Case-insensitive full-text search string on title or description',
+    description:
+      'Case-insensitive full-text search string on title or description',
     example: 'source code',
   })
   @IsOptional()

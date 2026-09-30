@@ -32,23 +32,23 @@ export function VaultUnlockForm({
           </div>
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              Mở Khóa Két Số Digital Vault
+              Mở Khóa Kho Lưu Trữ Nhận Hàng
               <Badge
                 variant="outline"
                 className="text-[10px] border-emerald-500/40 text-emerald-300 font-mono"
               >
-                AES-256-GCM
+                Khóa bảo mật
               </Badge>
             </h2>
             <p className="text-xs text-slate-400">
-              Giải mã phía Client (Web Crypto API) - Không truyền plaintext qua máy chủ.
+              Dữ liệu được khóa an toàn, chỉ bạn và người bán có thể mở.
             </p>
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
           <ShieldCheck className="size-4 text-emerald-400" />
-          <span>Zero-Knowledge</span>
+          <span>Bảo Mật Tuyệt Đối</span>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export function VaultUnlockForm({
             htmlFor="passphrase-input"
             className="text-xs font-semibold text-slate-300 block"
           >
-            Mật khẩu hoặc Khóa giải mã (Secret Passphrase / Key)
+            Mật khẩu mở khóa nhận hàng
           </label>
 
           <div className="flex flex-col sm:flex-row gap-2.5">
@@ -68,7 +68,7 @@ export function VaultUnlockForm({
               type="password"
               value={passphrase}
               onChange={(e) => onPassphraseChange(e.target.value)}
-              placeholder="Nhập khóa giải mã bí mật do người bán cung cấp..."
+              placeholder="Nhập mật khẩu mở khóa do người bán cung cấp..."
               className="bg-slate-900 border-slate-700 text-xs font-mono min-h-11"
             />
 
@@ -79,18 +79,18 @@ export function VaultUnlockForm({
               className="min-h-11 sm:min-w-44 bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs shadow-md cursor-pointer"
             >
               {isUnlocking ? (
-                <span>Đang giải mã...</span>
+                <span>Đang mở khóa...</span>
               ) : (
                 <>
                   <Unlock className="size-4 mr-1.5" />
-                  Mở Két &amp; Giải Mã
+                  Mở Khóa Nhận Hàng
                 </>
               )}
             </Button>
           </div>
 
           <p className="text-[11px] text-slate-400">
-            Gợi ý: Hệ thống đã điền sẵn Secret Session Key của phiên giao dịch này để thử nghiệm.
+            Gợi ý: Hệ thống đã tự động điền sẵn mật khẩu mở khóa của giao dịch này để bạn thử nghiệm nhanh.
           </p>
         </div>
 
@@ -108,7 +108,7 @@ export function VaultUnlockForm({
 
             <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 truncate">
               <span className="text-[10px] text-slate-400 block font-sans">
-                IV Initialization Vector
+                Mã xác thực 1
               </span>
               <span className="text-slate-300">
                 {digitalAsset.encryptionIv}
@@ -117,7 +117,7 @@ export function VaultUnlockForm({
 
             <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 truncate">
               <span className="text-[10px] text-slate-400 block font-sans">
-                Auth Tag (128-bit)
+                Mã xác thực 2
               </span>
               <span className="text-slate-300">
                 {digitalAsset.authTag}

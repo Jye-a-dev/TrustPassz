@@ -38,29 +38,29 @@ const STATE_MAPPINGS: Record<
   { label: string; color: string; vault: string }
 > = {
   PENDING: {
-    label: "Chờ Ký Quỹ",
+    label: "Chờ thanh toán",
     color: "border-amber-500/40 bg-amber-950/40 text-amber-300",
-    vault: "AES-256 Khóa Két",
+    vault: "Đang khóa bảo mật",
   },
   DEPOSITED: {
-    label: "Đã Ký Quỹ",
+    label: "Tiền đã giữ an toàn",
     color: "border-cyan-500/40 bg-cyan-950/40 text-cyan-300",
-    vault: "AES-256 Sẵn Sàng",
+    vault: "Sẵn sàng bàn giao",
   },
   IN_INSPECTION: {
-    label: "Đang Kiểm Thử",
+    label: "Đang kiểm tra hàng",
     color: "border-blue-500/40 bg-blue-950/40 text-blue-300",
-    vault: "Đang Mở Két",
+    vault: "Đang mở kiểm tra",
   },
   SETTLED: {
-    label: "Đã Hoàn Tất",
+    label: "Giao dịch hoàn tất",
     color: "border-emerald-500/40 bg-emerald-950/40 text-emerald-300",
-    vault: "Đã Giải Mã",
+    vault: "Đã bàn giao",
   },
   DISPUTED: {
-    label: "Tranh Chấp",
+    label: "Đang khiếu nại",
     color: "border-rose-500/40 bg-rose-950/40 text-rose-300",
-    vault: "Khóa Bảo Mật",
+    vault: "Đang tạm khóa",
   },
 };
 
@@ -122,23 +122,23 @@ export default function ExplorePage() {
               variant="outline"
               className="border-emerald-500/40 text-emerald-300 bg-emerald-950/20 text-xs px-2.5 py-1"
             >
-              Thị Trường Ký Quỹ Phi Tập Trung
+              Nền Tảng Giao Dịch An Toàn
             </Badge>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Khám Phá Giao Dịch Ký Quỹ Mới Nhất
+              Khám Phá Giao Dịch Mới Nhất
             </h1>
             <p className="text-xs sm:text-sm text-slate-400">
-              Giao dịch an toàn với Digital Vault AES-256-GCM và thanh toán VietQR khóa tiền tự động.
+              Giao dịch an toàn với thanh toán VietQR tự động và kho lưu trữ bảo mật.
             </p>
           </div>
 
           <Button
             asChild
-            className="self-start md:self-auto min-h-11 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg"
+            className="self-start md:self-auto min-h-11 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg cursor-pointer"
           >
             <Link href="/user/deals/create" className="flex items-center gap-2">
               <PlusCircle className="size-4" />
-              <span>Tạo Giao Dịch Của Bạn</span>
+              <span>+ Tạo Giao Dịch</span>
             </Link>
           </Button>
         </div>
@@ -151,7 +151,7 @@ export default function ExplorePage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm giao dịch theo tên sản phẩm, mã nguồn, tài khoản..."
+              placeholder="Tìm kiếm giao dịch theo tên sản phẩm, tài liệu, tài khoản..."
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50"
             />
           </div>
@@ -180,9 +180,9 @@ export default function ExplorePage() {
           </div>
         ) : filteredDeals.length === 0 ? (
           <EmptyState
-            title="Không tìm thấy kèo phù hợp"
+            title="Không tìm thấy giao dịch phù hợp"
             description="Hiện chưa có giao dịch nào khớp với tiêu chí tìm kiếm của bạn."
-            actionLabel="Tạo Kèo Ký Quỹ Mới"
+            actionLabel="Tạo Giao Dịch Mới"
             actionHref="/user/deals/create"
           />
         ) : (
@@ -195,7 +195,7 @@ export default function ExplorePage() {
                 (deal.inspectionDuration || 43200) / 3600
               );
               const category =
-                deal.digitalAsset?.assetType || "Tài Sản Kỹ Thuật Số";
+                deal.digitalAsset?.assetType || "Sản Phẩm";
 
               return (
                 <Card
@@ -228,12 +228,12 @@ export default function ExplorePage() {
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         <Clock className="size-3 text-slate-500" />
-                        Kiểm thử: {inspectionHours}h
+                        Kiểm tra: {inspectionHours}h
                       </span>
                       {deal.seller?.displayName && (
                         <>
                           <span>•</span>
-                          <span>Bán bởi: {deal.seller.displayName}</span>
+                          <span>Người bán: {deal.seller.displayName}</span>
                         </>
                       )}
                     </div>
@@ -241,7 +241,7 @@ export default function ExplorePage() {
 
                   <CardContent className="pt-2 border-t border-slate-800/60 mt-auto flex items-center justify-between">
                     <div>
-                      <div className="text-[11px] text-slate-400">Giá ký quỹ</div>
+                      <div className="text-[11px] text-slate-400">Giá giao dịch</div>
                       <div className="text-lg font-extrabold text-transparent bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text font-mono">
                         {amountNum.toLocaleString("vi-VN")} ₫
                       </div>
@@ -251,7 +251,7 @@ export default function ExplorePage() {
                       asChild
                       size="sm"
                       variant="outline"
-                      className="rounded-xl border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 min-h-9.5 px-3.5 gap-1.5"
+                      className="rounded-xl border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 min-h-9.5 px-3.5 gap-1.5 cursor-pointer"
                     >
                       <Link href={`/deals/${deal.id}`}>
                         <span>Vào Giao Dịch</span>

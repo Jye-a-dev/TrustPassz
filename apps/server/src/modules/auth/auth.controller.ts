@@ -80,7 +80,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid token format, missing identity claims, or unsupported provider.',
+    description:
+      'Invalid token format, missing identity claims, or unsupported provider.',
   })
   @ApiResponse({
     status: 401,

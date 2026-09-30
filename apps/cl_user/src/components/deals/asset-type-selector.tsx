@@ -26,7 +26,7 @@ export function AssetTypeSelector({
           Loại sản phẩm bàn giao <span className="text-cyan-400">*</span>
         </label>
         <span className="text-xs font-mono text-slate-400">
-          Cyber-Escrow Standard
+          Tiêu Chuẩn Giao Dịch An Toàn
         </span>
       </div>
 
@@ -123,7 +123,7 @@ export function AssetTypeSelector({
 
               {/* Bottom: Delivery Method Pill */}
               <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-[10px] font-mono">
-                <span className="text-slate-400">Cách giao:</span>
+                <span className="text-slate-400">Phương thức giao:</span>
                 <span
                   className={cn(
                     "font-semibold truncate max-w-42.5",

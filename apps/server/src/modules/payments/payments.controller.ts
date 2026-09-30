@@ -17,10 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/auth.guard';
-import {
-  CreatePaymentLinkDto,
-  PayOSWebhookDto,
-} from './dto/payment.dto';
+import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
 import { PaymentsService } from './payments.service';
 
 @ApiTags('Payments & Payment Gateway Webhooks')
@@ -103,7 +100,10 @@ export class PaymentsController {
       'Hỗ trợ tạo link thanh toán khi truyền dealId qua JSON body thay vì URL param.',
   })
   @ApiResponse({ status: 201, description: 'Tạo payment link thành công.' })
-  @ApiResponse({ status: 400, description: 'Thiếu dealId hoặc trạng thái không hợp lệ.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Thiếu dealId hoặc trạng thái không hợp lệ.',
+  })
   async checkout(@Body() dto: CreatePaymentLinkDto) {
     if (!dto.dealId) {
       throw new Error('dealId is required in checkout body');
@@ -156,11 +156,13 @@ export class PaymentsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Xử lý webhook thành công hoặc giao dịch đã ghi nhận (Idempotent).',
+    description:
+      'Xử lý webhook thành công hoặc giao dịch đã ghi nhận (Idempotent).',
     schema: {
       example: {
         success: true,
-        message: 'Payment verified and deal successfully transitioned to DEPOSITED',
+        message:
+          'Payment verified and deal successfully transitioned to DEPOSITED',
         deal: {
           id: 'd0000000-0000-4000-a000-000000000001',
           state: 'DEPOSITED',

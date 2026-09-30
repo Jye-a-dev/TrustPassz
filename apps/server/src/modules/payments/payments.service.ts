@@ -8,10 +8,7 @@ import { CreatePaymentLinkResponse, PayOS, Webhook } from '@payos/node';
 import { DealState, Order, OrderStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
-import {
-  CreatePaymentLinkDto,
-  PayOSWebhookDto,
-} from './dto/payment.dto';
+import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -180,9 +177,7 @@ export class PaymentsService {
     });
 
     if (!deal) {
-      this.logger.warn(
-        `No Deal found matching paymentOrderCode ${orderCode}`,
-      );
+      this.logger.warn(`No Deal found matching paymentOrderCode ${orderCode}`);
       throw new NotFoundException(
         `No deal found matching paymentOrderCode ${orderCode}`,
       );
@@ -255,7 +250,8 @@ export class PaymentsService {
 
       return {
         success: true,
-        message: 'Payment verified and deal successfully transitioned to DEPOSITED',
+        message:
+          'Payment verified and deal successfully transitioned to DEPOSITED',
         deal: updatedDeal,
         order: updatedOrder,
       };

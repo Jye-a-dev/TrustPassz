@@ -53,9 +53,9 @@ export class EncryptedAssetDto {
   authTag: string;
 
   @ApiPropertyOptional({
-    description: 'SHA-256 hash of original plaintext asset for client-side integrity audit',
-    example:
-      'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
+    description:
+      'SHA-256 hash of original plaintext asset for client-side integrity audit',
+    example: 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
   })
   @IsOptional()
   @IsString({ message: 'Content hash must be a string' })
@@ -82,7 +82,8 @@ export class EncryptedAssetDto {
   fileSizeBytes?: number;
 
   @ApiPropertyOptional({
-    description: 'Maximum access/decryption attempts before vault locks permanently',
+    description:
+      'Maximum access/decryption attempts before vault locks permanently',
     example: 3,
     default: 1,
   })
@@ -95,7 +96,8 @@ export class EncryptedAssetDto {
 
 export class CreateDealDto {
   @ApiProperty({
-    description: 'UUID of the seller who creates the deal and owns the digital vault item',
+    description:
+      'UUID of the seller who creates the deal and owns the digital vault item',
     example: '11111111-1111-4111-a111-111111111111',
   })
   @IsNotEmpty({ message: 'Seller ID is required' })
@@ -120,7 +122,8 @@ export class CreateDealDto {
   title: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed scope, terms, and delivery specifications for the deal',
+    description:
+      'Detailed scope, terms, and delivery specifications for the deal',
     example: 'Production-ready escrow system built on Base Sepolia and NestJS',
   })
   @IsOptional()
@@ -151,7 +154,8 @@ export class CreateDealDto {
   currency?: string = 'VND';
 
   @ApiPropertyOptional({
-    description: 'Inspection duration granted to buyer in seconds upon escrow funding (e.g. 43200s = 12h)',
+    description:
+      'Inspection duration granted to buyer in seconds upon escrow funding (e.g. 43200s = 12h)',
     example: 43200,
     default: 86400,
   })
@@ -162,7 +166,8 @@ export class CreateDealDto {
   inspectionDuration?: number = 86400;
 
   @ApiPropertyOptional({
-    description: 'On-chain DigitalEscrow smart contract deal identifier or address',
+    description:
+      'On-chain DigitalEscrow smart contract deal identifier or address',
     example: '0x1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d',
   })
   @IsOptional()
@@ -171,7 +176,8 @@ export class CreateDealDto {
   onchainDealId?: string;
 
   @ApiPropertyOptional({
-    description: 'Client-side AES-256-GCM encrypted payload package for Digital Vault',
+    description:
+      'Client-side AES-256-GCM encrypted payload package for Digital Vault',
     type: () => EncryptedAssetDto,
   })
   @IsOptional()

@@ -111,7 +111,7 @@ export default function DealCheckoutPage() {
     }
     playSuccessChime();
     toast.success(
-      "Thanh toán VietQR thành công! Đã ký quỹ an toàn vào Escrow Smart Contract.",
+      "Thanh toán VietQR thành công! Tiền đã được giữ an toàn trong Két bảo chứng.",
       { duration: 4000 }
     );
 
@@ -164,7 +164,7 @@ export default function DealCheckoutPage() {
     } catch {
       setDeal({
         id: dealId,
-        title: "Fullstack Escrow Marketplace Source Code (Next.js 15 + Smart Contract)",
+        title: "Bộ mã nguồn ứng dụng thương mại điện tử an toàn (Next.js 15 + Bảo vệ tự động)",
         amount: 500000,
         currency: "VND",
         state: "PENDING",
@@ -266,7 +266,7 @@ export default function DealCheckoutPage() {
   };
 
   const handleSimulateWebhook = () => {
-    toast.info("Đang mô phỏng Webhook PayOS xác nhận tiền vào...");
+    toast.info("Đang mô phỏng xác nhận tiền vào két an toàn...");
     handlePaymentSuccess();
   };
 
@@ -279,14 +279,14 @@ export default function DealCheckoutPage() {
             <CheckCircle2 className="size-14 text-emerald-400" />
           </div>
           <h2 className="mt-6 text-3xl font-black text-white tracking-tight">
-            KÝ QUỸ THÀNH CÔNG!
+            GIỮ TIỀN AN TOÀN THÀNH CÔNG!
           </h2>
           <p className="mt-2 text-sm text-emerald-300 font-semibold max-w-md">
-            Hệ thống đã xác nhận tiền vào Escrow Smart Contract. Đang chuyển hướng vào Két Digital Vault...
+            Hệ thống đã xác nhận tiền vào Két giữ an toàn. Đang chuyển hướng vào Kho lưu trữ nhận hàng...
           </p>
           <div className="mt-6 flex items-center gap-2 text-xs text-slate-400 font-mono">
             <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>Mở két số tự động...</span>
+            <span>Mở kho nhận hàng tự động...</span>
           </div>
         </div>
       )}
@@ -298,7 +298,7 @@ export default function DealCheckoutPage() {
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
         >
           <ArrowLeft className="size-4" />
-          <span>Quay lại chi tiết kèo</span>
+          <span>Quay lại chi tiết giao dịch</span>
         </Link>
 
         <Badge
@@ -306,7 +306,7 @@ export default function DealCheckoutPage() {
           className="bg-amber-950/40 border-amber-500/40 text-amber-300 text-xs px-2.5 py-1"
         >
           <Clock className="size-3 mr-1 animate-pulse" />
-          Chờ Thanh Toán Ký Quỹ
+          Chờ Thanh Toán Giữ Tiền An Toàn
         </Badge>
       </div>
 
@@ -322,16 +322,15 @@ export default function DealCheckoutPage() {
         <div className="text-center space-y-2 max-w-lg mx-auto">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-300">
             <QrCode className="size-3.5" />
-            <span>Dynamic VietQR Chuyển Khoản Tức Thì</span>
+            <span>Quét Mã VietQR Chuyển Khoản Nhanh</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Quét Mã VietQR Ký Quỹ Escrow
+            Quét Mã VietQR Để Giữ Tiền An Toàn
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-400">
-            Tiền chuyển sẽ được khóa tạm trong Smart Contract Base Sepolia. Chỉ
-            giải ngân sau khi bạn kiểm thử và xác nhận nghiệm thu.
+            Tiền chuyển sẽ được giữ an toàn trong két bảo vệ. Tiền chỉ chuyển cho người bán sau khi bạn kiểm tra đúng hàng và xác nhận.
           </p>
         </div>
 

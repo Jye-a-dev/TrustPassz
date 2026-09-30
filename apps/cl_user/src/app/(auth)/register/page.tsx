@@ -65,7 +65,7 @@ function RegisterContent() {
   // 1-Click Onboarding via Solana Wallet
   const handleSolanaRegister = async () => {
     if (!agreeFastTerms) {
-      toast.warning("Vui lòng xác nhận đồng ý với Quy chế Ký quỹ!");
+      toast.warning("Vui lòng xác nhận đồng ý với Quy chế Giữ Tiền An Toàn!");
       return;
     }
 
@@ -123,7 +123,7 @@ function RegisterContent() {
   // 1-Click Onboarding via Google
   const handleGoogleRegister = async (credentialResponse: { credential?: string }) => {
     if (!agreeFastTerms) {
-      toast.warning("Vui lòng xác nhận đồng ý với Quy chế Ký quỹ!");
+      toast.warning("Vui lòng xác nhận đồng ý với Quy chế Giữ Tiền An Toàn!");
       return;
     }
 
@@ -197,7 +197,7 @@ function RegisterContent() {
             className="flex items-center gap-1.5 border-cyan-500/40 bg-slate-900/95 px-3 py-1 text-[11px] font-semibold text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)]"
           >
             <ShieldCheck className="size-3.5 text-cyan-400" />
-            <span>Mở Tài Khoản Ký Quỹ Mới</span>
+            <span>Đăng Ký Tài Khoản Giao Dịch An Toàn</span>
           </Badge>
         </div>
 
@@ -206,7 +206,7 @@ function RegisterContent() {
             Tham Gia TrustPassz
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto">
-            Hạ tầng ký quỹ thông minh cho mọi giao dịch số và thỏa thuận trực tuyến
+            Nền tảng bảo vệ an toàn cho mọi giao dịch mua bán trực tuyến
           </CardDescription>
         </CardHeader>
 

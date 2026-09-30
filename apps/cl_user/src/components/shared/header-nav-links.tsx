@@ -6,17 +6,17 @@ import { PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const GUEST_NAV_ITEMS = [
-  { label: "Khám phá Kèo", href: "/explore" },
-  { label: "Quy trình Ký quỹ", href: "/#how-it-works" },
-  { label: "Bàn Đàm Phán Demo", href: "/deals/demo" },
-  { label: "Bảo mật Két Vault", href: "/#pillars" },
+  { label: "Khám phá Giao dịch", href: "/explore" },
+  { label: "Quy trình Giữ tiền an toàn", href: "/#how-it-works" },
+  { label: "Phòng Thương Lượng Mẫu", href: "/deals/demo" },
+  { label: "Bảo mật Kho lưu trữ", href: "/#pillars" },
 ];
 
 export const AUTH_NAV_ITEMS = [
   { label: "Khám phá", href: "/explore" },
-  { label: "Kèo của tôi", href: "/user/deals" },
+  { label: "Giao dịch của tôi", href: "/user/deals" },
   { label: "Đơn hàng", href: "/user/orders" },
-  { label: "Dashboard", href: "/user" },
+  { label: "Bàn điều hành", href: "/user" },
 ];
 
 interface HeaderNavLinksProps {
@@ -52,7 +52,7 @@ export function HeaderNavLinks({ isAuth, pathname }: HeaderNavLinksProps) {
             )}
           >
             <PlusCircle className="size-3.5 text-emerald-400" />
-            <span>+ Tạo Kèo Mới</span>
+            <span>+ Tạo Giao Dịch</span>
           </Link>
         </>
       ) : (

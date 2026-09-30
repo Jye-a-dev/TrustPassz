@@ -28,7 +28,7 @@ export default function UserSettingsPage() {
     setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
-      toast.success("Đã cập nhật STK VietQR nhận tiền giải ngân thành công!");
+      toast.success("Đã cập nhật STK VietQR nhận tiền bán thành công!");
     }, 600);
   };
 
@@ -40,7 +40,7 @@ export default function UserSettingsPage() {
           Cấu Hình Tài Khoản &amp; STK VietQR Nhận Tiền
         </h1>
         <p className="text-xs text-slate-400">
-          Thiết lập số tài khoản ngân hàng nhận tiền giải ngân tự động và khóa Passkey bảo mật.
+          Thiết lập số tài khoản ngân hàng nhận tiền bán tự động và phương thức bảo mật sinh trắc học.
         </p>
       </div>
 
@@ -53,10 +53,10 @@ export default function UserSettingsPage() {
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">
-                STK VietQR Nhận Giải Ngân
+                STK VietQR Nhận Tiền Bán
               </h2>
               <p className="text-[11px] text-slate-400">
-                Tiền escrow sẽ chuyển vào đây sau khi người mua nghiệm thu.
+                Tiền bán hàng sẽ tự động chuyển vào đây sau khi người mua kiểm tra xong.
               </p>
             </div>
           </div>
@@ -115,10 +115,10 @@ export default function UserSettingsPage() {
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white">
-                  Bảo Mật Passkey &amp; Smart Wallet
+                  Bảo Mật Sinh Trắc Học &amp; Tài Khoản An Toàn
                 </h2>
                 <p className="text-[11px] text-slate-400">
-                  Xác thực sinh trắc học TouchID/FaceID không mật khẩu.
+                  Xác thực sinh trắc học TouchID / FaceID bảo mật, không lo quên mật khẩu.
                 </p>
               </div>
             </div>
@@ -127,21 +127,21 @@ export default function UserSettingsPage() {
               <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-slate-400 block">
-                    Khóa Passkey hiện tại
+                    Khóa sinh trắc học hiện tại
                   </span>
                   <span className="font-bold text-slate-200">
                     TouchID / Windows Hello
                   </span>
                 </div>
                 <Badge className="bg-emerald-950 border-emerald-500/40 text-emerald-300 text-[10px]">
-                  Active
+                  Đang hoạt động
                 </Badge>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-slate-400 block">
-                    Địa chỉ ví Smart Account (Base Sepolia)
+                    Mã tài khoản giao dịch bảo vệ tự động
                   </span>
                   <span className="font-mono text-cyan-400">
                     0x8B4f...3a29
@@ -155,10 +155,10 @@ export default function UserSettingsPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => toast.success("Khóa Passkey backup đã sẵn sàng!")}
+            onClick={() => toast.success("Khóa bảo mật dự phòng đã sẵn sàng!")}
             className="w-full min-h-11 border-slate-700 bg-slate-800 text-slate-200 text-xs font-semibold"
           >
-            Đăng Ký Thêm Thiết Bị Passkey Mới
+            Thêm Thiết Bị Xác Thực Sinh Trắc Học Mới
           </Button>
         </div>
       </div>

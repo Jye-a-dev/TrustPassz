@@ -29,10 +29,10 @@ export default function RootLoading() {
       {/* Loading Status Indicator */}
       <div className="relative z-10 mt-8 space-y-2 max-w-sm">
         <p className="font-mono text-sm font-semibold tracking-wider text-slate-200">
-          ĐANG TẢI DỮ LIỆU KÝ QUỸ...
+          ĐANG TẢI DỮ LIỆU GIAO DỊCH...
         </p>
         <p className="text-xs text-slate-400">
-          Đồng bộ hóa trạng thái Smart Contract &amp; Digital Vault
+          Bảo vệ giao dịch an toàn tự động
         </p>
 
         {/* Subtle Shimmer Progress Line */}
@@ -43,7 +43,7 @@ export default function RootLoading() {
 
       {/* Protocol Telemetry */}
       <div className="relative z-10 mt-10 font-mono text-[11px] text-slate-600 tracking-widest">
-        TRUSTPASSZ ESCROW PROTOCOL // ZERO-KNOWLEDGE
+        HỆ THỐNG BẢO VỆ GIAO DỊCH TRUSTPASSZ
       </div>
     </div>
   );

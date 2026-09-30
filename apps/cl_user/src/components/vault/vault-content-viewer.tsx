@@ -36,10 +36,10 @@ export function VaultContentViewer({
         <AlertTriangle className="size-4 shrink-0 mt-0.5" />
         <div>
           <strong className="block font-bold">
-            Bảo Mật Single-View Phiên Đồng Kiểm:
+            Lưu Ý Bảo Mật Khi Kiểm Tra Hàng:
           </strong>
           <span>
-            Tài sản số chỉ được mở khóa trong phiên đồng kiểm này. Hãy lưu trữ an toàn hoặc sử dụng tính năng tự hủy clipboard.
+            Thông tin bàn giao chỉ mở khóa trong phiên kiểm tra này. Hãy lưu lại cẩn thận hoặc sao chép an toàn.
           </span>
         </div>
       </div>
@@ -49,11 +49,11 @@ export function VaultContentViewer({
         <div className="flex items-center justify-between pb-2 border-b border-slate-800">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              Nội dung tài sản đã giải mã
+              Thông tin bàn giao đã mở khóa
             </span>
             {integrityVerified && (
               <Badge className="bg-emerald-950 border-emerald-500/40 text-emerald-300 text-[10px]">
-                SHA-256 Verified
+                Dữ liệu nguyên vẹn
               </Badge>
             )}
           </div>
@@ -95,7 +95,7 @@ export function VaultContentViewer({
               ) : (
                 <>
                   <Copy className="size-3.5" />
-                  <span>Sao chép (Tự hủy 30s)</span>
+                  <span>Sao chép (Tự xóa 30s)</span>
                 </>
               )}
             </Button>
@@ -120,7 +120,7 @@ export function VaultContentViewer({
           <div className="space-y-1 pt-1">
             <div className="flex items-center justify-between text-[10px] text-amber-400 font-mono">
               <span className="flex items-center gap-1">
-                <Trash2 className="size-3" /> Bộ nhớ tạm sẽ tự động xóa sạch
+                <Trash2 className="size-3" /> Bộ nhớ tạm sẽ tự động xóa sạch sau
               </span>
               <span>{clipboardCountdown} giây</span>
             </div>

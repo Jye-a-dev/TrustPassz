@@ -147,10 +147,14 @@ export class ProductsService {
           basePrice: new Prisma.Decimal(dto.basePrice),
         }),
         ...(dto.floorPrice !== undefined && {
-          floorPrice: dto.floorPrice ? new Prisma.Decimal(dto.floorPrice) : null,
+          floorPrice: dto.floorPrice
+            ? new Prisma.Decimal(dto.floorPrice)
+            : null,
         }),
         ...(dto.status && { status: dto.status }),
-        ...(dto.specAttributes && { specAttributes: dto.specAttributes as any }),
+        ...(dto.specAttributes && {
+          specAttributes: dto.specAttributes as any,
+        }),
         ...(dto.ruleConfig && { ruleConfig: dto.ruleConfig as any }),
       },
     });

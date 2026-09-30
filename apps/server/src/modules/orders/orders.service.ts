@@ -25,7 +25,9 @@ export class OrdersService {
     }
 
     if (product.status !== 'ACTIVE') {
-      throw new BadRequestException('Product is not currently available for purchase');
+      throw new BadRequestException(
+        'Product is not currently available for purchase',
+      );
     }
 
     const buyer = await this.prisma.user.findUnique({
@@ -142,10 +144,20 @@ export class OrdersService {
           },
         },
         buyer: {
-          select: { id: true, displayName: true, email: true, walletAddress: true },
+          select: {
+            id: true,
+            displayName: true,
+            email: true,
+            walletAddress: true,
+          },
         },
         seller: {
-          select: { id: true, displayName: true, email: true, walletAddress: true },
+          select: {
+            id: true,
+            displayName: true,
+            email: true,
+            walletAddress: true,
+          },
         },
       },
     });

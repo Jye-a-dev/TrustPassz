@@ -14,17 +14,26 @@ import {
 import { OrderStatus } from '@prisma/client';
 
 export class CreateOrderDto {
-  @ApiProperty({ example: '22222222-2222-4222-a222-222222222222', description: 'Buyer User UUID' })
+  @ApiProperty({
+    example: '22222222-2222-4222-a222-222222222222',
+    description: 'Buyer User UUID',
+  })
   @IsUUID()
   @IsNotEmpty()
   buyerId: string;
 
-  @ApiProperty({ example: '44444444-4444-4444-a444-444444444444', description: 'Product UUID' })
+  @ApiProperty({
+    example: '44444444-4444-4444-a444-444444444444',
+    description: 'Product UUID',
+  })
   @IsUUID()
   @IsNotEmpty()
   productId: string;
 
-  @ApiPropertyOptional({ example: 'd0000000-0000-4000-a000-000000000001', description: 'Existing Deal UUID if pre-negotiated' })
+  @ApiPropertyOptional({
+    example: 'd0000000-0000-4000-a000-000000000001',
+    description: 'Existing Deal UUID if pre-negotiated',
+  })
   @IsOptional()
   @IsUUID()
   dealId?: string;
@@ -51,7 +60,10 @@ export class UpdateOrderStatusDto {
   status: OrderStatus;
 
   @ApiPropertyOptional({
-    example: { carrier_tracking_code: 'VNPOST123456789', carrier_name: 'VNPost' },
+    example: {
+      carrier_tracking_code: 'VNPOST123456789',
+      carrier_name: 'VNPost',
+    },
   })
   @IsOptional()
   @IsObject()

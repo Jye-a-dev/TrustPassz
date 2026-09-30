@@ -58,7 +58,9 @@ export class UsersService {
           ...(dto.walletAddress !== undefined && {
             walletAddress: dto.walletAddress.toLowerCase(),
           }),
-          ...(dto.displayName !== undefined && { displayName: dto.displayName }),
+          ...(dto.displayName !== undefined && {
+            displayName: dto.displayName,
+          }),
           ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
           ...(dto.role !== undefined && { role: dto.role }),
         },
@@ -83,7 +85,9 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(`Seller user with ID ${dto.sellerId} not found`);
+      throw new NotFoundException(
+        `Seller user with ID ${dto.sellerId} not found`,
+      );
     }
 
     if (user.storefront) {
@@ -95,7 +99,9 @@ export class UsersService {
     });
 
     if (existingSlug) {
-      throw new ConflictException(`Storefront slug '${dto.slug}' is already taken`);
+      throw new ConflictException(
+        `Storefront slug '${dto.slug}' is already taken`,
+      );
     }
 
     return this.prisma.storefront.create({

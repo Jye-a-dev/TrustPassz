@@ -25,7 +25,7 @@ export const registerSchema = z
     confirmPassword: z.string().min(6, "Mật khẩu xác nhận phải có ít nhất 6 ký tự"),
     bindSolanaWallet: z.boolean(),
     agreeTerms: z.boolean().refine((val) => val === true, {
-      message: "Bạn cần đồng ý với Quy chế Ký quỹ & Bảo mật Digital Vault",
+      message: "Bạn cần đồng ý với Quy chế Giữ Tiền An Toàn & Bảo Mật Giao Dịch",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -77,7 +77,7 @@ export function RegisterForm({
           htmlFor="name"
           className="text-xs font-semibold text-slate-300"
         >
-          Họ và tên / Biệt danh Trader
+          Họ và tên / Tên hiển thị
         </label>
         <div className="relative">
           <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
@@ -109,7 +109,7 @@ export function RegisterForm({
           <Input
             id="email"
             type="email"
-            placeholder="trader@trustpassz.io"
+            placeholder="email@vidu.com"
             className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
             {...register("email")}
           />
@@ -210,7 +210,7 @@ export function RegisterForm({
             htmlFor="bindSolanaWallet"
             className="text-[11px] text-slate-400 select-none cursor-pointer"
           >
-            Tự động gán ví Solana này vào tài khoản để nhận tiền ký quỹ
+            Tự động gán ví này vào tài khoản để nhận tiền thanh toán
           </label>
         </div>
       </div>
@@ -230,7 +230,7 @@ export function RegisterForm({
           >
             Tôi đồng ý với{" "}
             <span className="text-cyan-400 underline underline-offset-2">
-              Quy chế Ký quỹ & Bảo mật Digital Vault của TrustPassz
+              Quy chế Giữ Tiền An Toàn &amp; Bảo Mật Giao Dịch của TrustPassz
             </span>
             .
           </label>

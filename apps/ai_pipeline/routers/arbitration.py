@@ -88,7 +88,7 @@ async def _decode_upload(file: UploadFile) -> Image.Image:
     "/inspect",
     response_model=ArbitrationVerdict,
     status_code=status.HTTP_200_OK,
-    summary="AI Arbitrator: phân xử tranh chấp giao dịch tài sản số",
+    summary="Trọng tài AI thẩm định bằng chứng unbox/lỗi (TASK-07)",
     description=(
         "Nhận thông tin deal, lý do khiếu nại, log lỗi và ảnh bằng chứng. "
         "Trả về phán quyết ArbitrationVerdict với action "

@@ -30,14 +30,14 @@ export function HeaderUserMenu({
 }: HeaderUserMenuProps) {
   return (
     <div className="flex items-center gap-2 sm:gap-3">
-      {/* Widget Số dư Két Escrow Tạm Khóa */}
+      {/* Widget Số dư Két Giữ Tiền Tạm Khóa */}
       <div className="hidden xl:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-2.5 py-1 shadow-[0_0_12px_rgba(6,182,212,0.12)]">
         <div className="p-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 text-cyan-400">
           <Lock className="size-3" />
         </div>
         <div className="flex flex-col text-left">
           <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-400 leading-none">
-            Két Ký Quỹ
+            Két Giữ Tiền
           </span>
           <span className="font-mono text-[11px] font-bold text-cyan-300 leading-tight">
             1.250.000 ₫
@@ -45,11 +45,11 @@ export function HeaderUserMenu({
         </div>
       </div>
 
-      {/* Thông báo chuông biến động Escrow */}
+      {/* Thông báo chuông biến động giao dịch */}
       <button
         type="button"
         className="relative flex size-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
-        title="Thông báo biến động Escrow"
+        title="Thông báo biến động giao dịch"
         aria-label="Thông báo"
       >
         <Bell className="size-4" />

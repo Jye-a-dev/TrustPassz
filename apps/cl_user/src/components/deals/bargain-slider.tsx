@@ -162,10 +162,10 @@ export function BargainSlider({
           <TrendingDown className="w-5 h-5 text-cyan-400" />
           <div>
             <h4 className="text-sm font-bold text-slate-100">
-              {isBuyer ? "Bargain Slider (Thương Lượng Giá)" : "Đề Xuất Thương Lượng Buyer"}
+              {isBuyer ? "Thanh Thương Lượng Giá" : "Đề Xuất Giá Từ Người Mua"}
             </h4>
             <span className="text-[11px] text-slate-400">
-              Kéo trượt để đồng bộ mức giá trả tức thời với đối tác
+              Kéo thanh này để đề xuất mức giá bạn mong muốn
             </span>
           </div>
         </div>
@@ -219,7 +219,7 @@ export function BargainSlider({
           <div className="flex items-center gap-2 text-cyan-300">
             <UserCheck className="w-4 h-4 text-cyan-400 shrink-0" />
             <span>
-              Đối phương đề xuất:{" "}
+              Đối tác đề xuất:{" "}
               <strong className="text-white font-mono">
                 {peerOffer.toLocaleString("vi-VN")} ₫
               </strong>
@@ -232,7 +232,7 @@ export function BargainSlider({
             onClick={adoptPeerOffer}
             className="h-7 px-2 text-[11px] text-cyan-400 hover:text-cyan-200 hover:bg-cyan-900/50"
           >
-            Đồng bộ mức này
+            Chấp nhận giá này
           </Button>
         </div>
       )}
@@ -248,7 +248,7 @@ export function BargainSlider({
             value={localPrice}
             onChange={handleSliderChange}
             disabled={disabled}
-            aria-label="Thanh trượt trả giá"
+            aria-label="Thanh thương lượng giá"
             className="w-full h-3 bg-slate-950 rounded-lg appearance-none cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed accent-cyan-400 [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-cyan-500/50 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900"
             style={{
               touchAction: "none",
@@ -260,11 +260,11 @@ export function BargainSlider({
         {/* Boundary Marks */}
         <div className="flex justify-between items-center text-[11px] font-mono text-slate-400 px-0.5">
           <span>
-            Sàn (-30%):{" "}
+            Giá thấp nhất (-30%):{" "}
             <strong className="text-slate-300">{minPrice.toLocaleString("vi-VN")} ₫</strong>
           </span>
           <span>
-            Gốc:{" "}
+            Giá ban đầu:{" "}
             <strong className="text-slate-300">{maxPrice.toLocaleString("vi-VN")} ₫</strong>
           </span>
         </div>
@@ -279,7 +279,7 @@ export function BargainSlider({
           className="w-full min-h-11 text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md shadow-cyan-950 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <CheckCircle className="w-4 h-4" />
-          Chốt đề xuất {localPrice.toLocaleString("vi-VN")} ₫
+          Xác nhận đề xuất {localPrice.toLocaleString("vi-VN")} ₫
         </Button>
       )}
     </div>

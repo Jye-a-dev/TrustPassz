@@ -70,7 +70,7 @@ export function HeaderMobileDrawer({
                     TrustPassz
                   </div>
                   <div className="text-[10px] text-emerald-400 uppercase tracking-wider font-semibold">
-                    Két Kèo Escrow
+                    Bảo Vệ Giao Dịch An Toàn
                   </div>
                 </div>
               </SheetTitle>
@@ -79,10 +79,10 @@ export function HeaderMobileDrawer({
             <div className="flex flex-col gap-2 mt-6">
               {/* Network Status Badge */}
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs text-slate-300 mb-1">
-                <span className="text-slate-400">Trạng thái mạng:</span>
+                <span className="text-slate-400">Trạng thái bảo vệ:</span>
                 <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
                   <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Base Sepolia
+                  Hệ thống bảo vệ tự động
                 </span>
               </div>
 
@@ -120,14 +120,14 @@ export function HeaderMobileDrawer({
                     </Link>
                   ))}
 
-                  {/* Nút Tạo Kèo Mới trong Drawer */}
+                  {/* Nút Tạo Giao Dịch trong Drawer */}
                   <Link
                     href="/user/deals/create"
                     onClick={() => onOpenChange(false)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold min-h-11 px-4 text-sm shadow-[0_0_15px_rgba(16,185,129,0.3)] mt-2"
                   >
                     <PlusCircle className="size-4" />
-                    <span>+ Tạo Kèo Mới</span>
+                    <span>+ Tạo Giao Dịch</span>
                   </Link>
 
                   {/* Cài đặt tài khoản & STK VietQR */}

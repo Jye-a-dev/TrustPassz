@@ -21,7 +21,7 @@ export function VaultActions({
     <div className="rounded-2xl border border-slate-800 bg-[#0F172A] p-6 space-y-4 shadow-xl">
       <div className="text-center sm:text-left space-y-1">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-          Quyết Định Nghiệm Thu &amp; Phân Xử Ký Quỹ
+          Xác Nhận Nhận Hàng Hoặc Báo Lỗi
         </h3>
         <p className="text-xs text-slate-400">
           Bạn có quyền toàn quyền kiểm tra sản phẩm trước khi chuyển tiền cho người bán.
@@ -39,8 +39,8 @@ export function VaultActions({
           <CheckCircle2 className="size-5" />
           <span>
             {isSettled
-              ? "Đã Giải Ngân Cho Seller"
-              : "Đã Kiểm Tra & Giải Ngân Cho Seller"}
+              ? "Đã Chuyển Tiền Cho Người Bán"
+              : "Hàng Đúng Mô Tả - Chuyển Tiền Cho Người Bán"}
           </span>
         </Button>
 
@@ -53,7 +53,7 @@ export function VaultActions({
           className="min-h-13 text-sm font-extrabold border-rose-500/50 bg-rose-950/30 hover:bg-rose-900/50 text-rose-300 hover:text-white shadow-lg flex items-center justify-center gap-2 cursor-pointer"
         >
           <Scale className="size-5 text-rose-400" />
-          <span>Báo Cáo Lỗi / Khiếu Nại (AI Phân Xử)</span>
+          <span>Báo Lỗi &amp; Khiếu Nại (Trợ Lý Phân Xử)</span>
         </Button>
       </div>
     </div>

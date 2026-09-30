@@ -31,10 +31,14 @@ export class BargainsController {
   @Post()
   @ApiOperation({
     summary: 'Submit price bargain offer for product',
-    description: 'Proposes an offer price with expiration deadline and negotiation message.',
+    description:
+      'Proposes an offer price with expiration deadline and negotiation message.',
   })
   @ApiResponse({ status: 201, description: 'Bargain offer submitted.' })
-  @ApiResponse({ status: 400, description: 'Product not active or bargaining disabled.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Product not active or bargaining disabled.',
+  })
   async create(@Body() dto: CreateBargainDto) {
     return this.bargainsService.create(dto);
   }
@@ -52,7 +56,8 @@ export class BargainsController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get bargain offer details by UUID',
-    description: 'Retrieves current offer status, expiration timestamp, and negotiation log.',
+    description:
+      'Retrieves current offer status, expiration timestamp, and negotiation log.',
   })
   @ApiParam({ name: 'id', description: 'Bargain offer UUID v4' })
   @ApiResponse({ status: 200, description: 'Bargain details.' })
@@ -64,11 +69,18 @@ export class BargainsController {
   @Patch(':id/respond')
   @ApiOperation({
     summary: 'Respond to bargain offer (Accept or Reject)',
-    description: 'Seller accepts or rejects offer. If ACCEPTED, an Escrow Deal is automatically initialized.',
+    description:
+      'Seller accepts or rejects offer. If ACCEPTED, an Escrow Deal is automatically initialized.',
   })
   @ApiParam({ name: 'id', description: 'Bargain offer UUID v4' })
-  @ApiResponse({ status: 200, description: 'Response recorded. If accepted, includes initialized deal.' })
-  @ApiResponse({ status: 400, description: 'Offer expired or already resolved.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Response recorded. If accepted, includes initialized deal.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Offer expired or already resolved.',
+  })
   async respond(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: RespondBargainDto,

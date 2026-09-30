@@ -167,16 +167,15 @@ class OutlinesVisionEngine(IConstrainedVisionEngine):
         if self._is_ready:
             return
 
-        import outlines  # type: ignore[import]
-
-        device = _resolve_device()
-        logger.info(
-            "OutlinesVisionEngine: loading %s on %s ...",
-            self.model_id_or_path,
-            device,
-        )
-
         try:
+            import outlines  # type: ignore[import]
+
+            device = _resolve_device()
+            logger.info(
+                "OutlinesVisionEngine: loading %s on %s ...",
+                self.model_id_or_path,
+                device,
+            )
             # transformers_vision() wraps AutoModelForCausalLM + AutoProcessor
             # and patches the logits pipeline for Outlines FSM constraints.
             self._model = outlines.models.transformers_vision(

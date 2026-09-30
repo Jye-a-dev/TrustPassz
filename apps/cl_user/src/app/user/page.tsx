@@ -87,7 +87,7 @@ export default function UserDashboardPage() {
             : [];
           setDeals(items);
         } else {
-          setError("Không thể đồng bộ danh sách hợp đồng ký quỹ từ máy chủ.");
+          setError("Không thể đồng bộ danh sách giao dịch từ máy chủ.");
         }
 
         if (countsRes.status === "fulfilled") {
@@ -131,15 +131,14 @@ export default function UserDashboardPage() {
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-300">
             <Sparkles className="size-3.5" />
-            <span>Không Gian Escrow Thông Minh</span>
+            <span>Quản Lý Giao Dịch An Toàn</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Xin chào, {user?.displayName || "Nhà Giao Dịch"}
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-            Chào mừng bạn đến với trung tâm điều hành ký quỹ TrustPassz. Bảo
-            chứng an toàn qua Web Crypto AES-256-GCM và Smart Contract Base
-            Sepolia.
+            Chào mừng bạn đến với trung tâm quản lý giao dịch TrustPassz. Mọi đơn
+            hàng được bảo vệ tự động, tiền giữ an toàn qua VietQR và bàn giao chính xác.
           </p>
         </div>
 
@@ -150,7 +149,7 @@ export default function UserDashboardPage() {
           >
             <Link href="/user/deals/create">
               <PlusCircle className="size-4 mr-1.5" />
-              Tạo Kèo Ký Quỹ Mới
+              Tạo Giao Dịch Mới
             </Link>
           </Button>
 
@@ -159,7 +158,7 @@ export default function UserDashboardPage() {
             variant="outline"
             className="min-h-11 border-slate-700 bg-slate-900/80 text-slate-200 hover:bg-slate-800 text-xs font-semibold"
           >
-            <Link href="/explore">Khám Phá Kèo Khác</Link>
+            <Link href="/explore">Khám Phá Giao Dịch</Link>
           </Button>
         </div>
       </div>
@@ -170,7 +169,7 @@ export default function UserDashboardPage() {
         <Card className="border-slate-800 bg-slate-900/60 shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Két Khóa Tạm Thời (Locked)
+              Tiền Đang Giữ An Toàn
             </CardTitle>
             <div className="p-2 rounded-lg bg-cyan-950/80 border border-cyan-500/30 text-cyan-400">
               <Lock className="size-4" />
@@ -185,7 +184,7 @@ export default function UserDashboardPage() {
               )}
             </div>
             <p className="text-[11px] text-slate-400">
-              Đang bảo chứng trong Smart Contract
+              Đang giữ an toàn trong két bảo chứng
             </p>
           </CardContent>
         </Card>
@@ -194,7 +193,7 @@ export default function UserDashboardPage() {
         <Card className="border-slate-800 bg-slate-900/60 shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Chờ Quét VietQR Cọc
+              Chờ Thanh Toán VietQR
             </CardTitle>
             <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-500/30 text-amber-400">
               <QrCode className="size-4" />
@@ -205,11 +204,11 @@ export default function UserDashboardPage() {
               {isLoading ? (
                 <div className="h-8 w-16 bg-slate-800/80 animate-pulse rounded" />
               ) : (
-                `${pendingCount} Kèo`
+                `${pendingCount} Giao dịch`
               )}
             </div>
             <p className="text-[11px] text-slate-400">
-              Cần hoàn tất chuyển khoản đặt cọc
+              Đang chờ người mua quét mã thanh toán
             </p>
           </CardContent>
         </Card>
@@ -218,7 +217,7 @@ export default function UserDashboardPage() {
         <Card className="border-slate-800 bg-slate-900/60 shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Đang Trong Kiểm Thử
+              Đang Trong Thời Gian Kiểm Tra
             </CardTitle>
             <div className="p-2 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
               <Clock className="size-4" />
@@ -229,11 +228,11 @@ export default function UserDashboardPage() {
               {isLoading ? (
                 <div className="h-8 w-16 bg-slate-800/80 animate-pulse rounded" />
               ) : (
-                `${inspectionCount} Kèo`
+                `${inspectionCount} Giao dịch`
               )}
             </div>
             <p className="text-[11px] text-slate-400">
-              Đang đếm ngược thời gian nghiệm thu
+              Đang trong thời gian người mua kiểm tra hàng
             </p>
           </CardContent>
         </Card>
@@ -253,11 +252,11 @@ export default function UserDashboardPage() {
               {isLoading ? (
                 <div className="h-8 w-16 bg-slate-800/80 animate-pulse rounded" />
               ) : (
-                `${settledCount} Kèo`
+                `${settledCount} Giao dịch`
               )}
             </div>
             <p className="text-[11px] text-slate-400">
-              Đã giải ngân cho người bán an toàn
+              Đã hoàn tất và chuyển tiền thành công
             </p>
           </CardContent>
         </Card>
@@ -269,10 +268,10 @@ export default function UserDashboardPage() {
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <Handshake className="size-5 text-cyan-400" />
-              Kèo Ký Quỹ Đang Hoạt Động (Dữ Liệu Thực)
+              Giao Dịch Đang Hoạt Động
             </h2>
             <p className="text-xs text-slate-400">
-              Đồng bộ trực tiếp từ Neon Database & Smart Contract Base Sepolia
+              Cập nhật trực tiếp từ hệ thống bảo vệ tự động
             </p>
           </div>
 
@@ -312,9 +311,9 @@ export default function UserDashboardPage() {
           </div>
         ) : deals.length === 0 ? (
           <EmptyState
-            title="Chưa có giao dịch ký quỹ nào"
-            description="Bạn chưa khởi tạo hoặc tham gia kèo ký quỹ nào. Bắt đầu ngay với kèo bảo đảm tài sản số đầu tiên."
-            actionLabel="Tạo Kèo Ký Quỹ Mới"
+            title="Chưa có giao dịch nào"
+            description="Bạn chưa tạo hoặc tham gia giao dịch nào. Hãy bắt đầu ngay với giao dịch an toàn đầu tiên."
+            actionLabel="Tạo Giao Dịch Mới"
             actionHref="/user/deals/create"
           />
         ) : (
@@ -328,7 +327,7 @@ export default function UserDashboardPage() {
               const amountNum = Number(deal.amount || 0);
 
               const counterParty =
-                deal.buyer?.displayName || deal.seller?.displayName || "Đối tác bảo chứng";
+                deal.buyer?.displayName || deal.seller?.displayName || "Đối tác giao dịch";
 
               const targetTime = deal.inspectionDeadline
                 ? new Date(deal.inspectionDeadline).getTime()
@@ -349,31 +348,31 @@ export default function UserDashboardPage() {
 
                       {isInspection && (
                         <Badge className="bg-emerald-950/80 border-emerald-500/40 text-emerald-300 text-[10px] font-bold">
-                          Đang Kiểm Thử (In Inspection)
+                          Đang Kiểm Tra
                         </Badge>
                       )}
 
                       {isDeposited && (
                         <Badge className="bg-cyan-950/80 border-cyan-500/40 text-cyan-300 text-[10px] font-bold">
-                          Đã Ký Quỹ (Deposited)
+                          Tiền Đã Giữ An Toàn
                         </Badge>
                       )}
 
                       {isPending && (
                         <Badge className="bg-amber-950/80 border-amber-500/40 text-amber-300 text-[10px] font-bold">
-                          Chờ Quét VietQR Cọc
+                          Chờ Thanh Toán
                         </Badge>
                       )}
 
                       {isSettled && (
                         <Badge className="bg-blue-950/80 border-blue-500/40 text-blue-300 text-[10px] font-bold">
-                          Hoàn Tất (Settled)
+                          Giao Dịch Hoàn Tất
                         </Badge>
                       )}
 
                       {isDisputed && (
                         <Badge className="bg-rose-950/80 border-rose-500/40 text-rose-300 text-[10px] font-bold">
-                          Tranh Chấp (Disputed)
+                          Đang Khiếu Nại
                         </Badge>
                       )}
 
@@ -402,7 +401,7 @@ export default function UserDashboardPage() {
                   <div className="flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800/80">
                     <div className="text-left lg:text-right">
                       <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                        Số tiền ký quỹ
+                        Giá trị giao dịch
                       </span>
                       <span className="text-lg sm:text-xl font-black font-mono text-cyan-400">
                         {amountNum.toLocaleString("vi-VN")} ₫
@@ -431,7 +430,7 @@ export default function UserDashboardPage() {
                         >
                           <Link href={`/user/deals/${deal.id}/vault`}>
                             <KeyRound className="size-3.5 mr-1.5" />
-                            Mở Két Số Vault
+                            Mở Kho Nhận Hàng
                           </Link>
                         </Button>
                       )}

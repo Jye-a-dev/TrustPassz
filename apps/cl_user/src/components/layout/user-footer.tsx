@@ -13,7 +13,7 @@ export function UserFooter() {
           <div className="flex size-4 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
             <CheckCircle2 className="size-3" />
           </div>
-          <span className="text-slate-400">ESCROW CONTRACT:</span>
+          <span className="text-slate-400">HỆ THỐNG BẢO VỆ:</span>
           <Link
             href="https://sepolia.basescan.org/address/0x165B47291B87569b91696DCE6f1207eE15C9f783"
             target="_blank"
@@ -23,13 +23,13 @@ export function UserFooter() {
             <span>0x165B...f783</span>
             <ExternalLink className="size-2.5 text-cyan-500" />
           </Link>
-          <span className="text-slate-500">• Base Sepolia</span>
+          <span className="text-slate-500">• Tự Động 24/7</span>
         </div>
 
         {/* Center: Enclave Status */}
         <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
           <Terminal className="size-3 text-cyan-400" />
-          <span>CRYPTOGRAPHIC STATE // VERIFIED ZERO-KNOWLEDGE PROOF</span>
+          <span>HỆ THỐNG BẢO MẬT &amp; MÃ HÓA TỰ ĐỘNG</span>
         </div>
 
         {/* Right: Emergency support & Policy */}
@@ -39,7 +39,7 @@ export function UserFooter() {
             className="inline-flex items-center gap-1.5 text-slate-400 hover:text-amber-400 transition-colors"
           >
             <LifeBuoy className="size-3.5 text-amber-400" />
-            <span>Trọng Tài AI 24/7</span>
+            <span>Trợ Lý Phân Xử 24/7</span>
           </Link>
 
           <span className="text-slate-800">•</span>
@@ -49,7 +49,7 @@ export function UserFooter() {
             className="inline-flex items-center gap-1 text-slate-400 hover:text-cyan-400 transition-colors"
           >
             <FileText className="size-3.5 text-cyan-400" />
-            <span>Quy Chế Ký Quỹ</span>
+            <span>Quy Chế Giữ Tiền An Toàn</span>
           </Link>
         </div>
       </div>

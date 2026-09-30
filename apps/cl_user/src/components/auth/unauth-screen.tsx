@@ -16,7 +16,7 @@ export interface UnauthScreenProps {
 export function UnauthScreen({
   callbackUrl,
   title = "Yêu cầu xác thực tài khoản",
-  description = "Bạn cần đăng nhập để truy cập Bàn làm việc, Tạo Kèo hoặc Quản lý Vault.",
+  description = "Bạn cần đăng nhập để quản lý giao dịch, tạo đơn hàng mới hoặc mở kho lưu trữ.",
   customAction,
 }: UnauthScreenProps) {
   const pathname = usePathname();
@@ -69,7 +69,7 @@ export function UnauthScreen({
           className="border-amber-500/40 bg-amber-950/40 text-amber-300 px-3.5 py-1 text-xs font-semibold gap-1.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.15)]"
         >
           <Lock className="size-3.5 text-amber-400" />
-          <span>PHÂN VÙNG BẢO MẬT // RESTRICTED ACCESS</span>
+          <span>YÊU CẦU ĐĂNG NHẬP AN TOÀN</span>
         </Badge>
       </div>
 
@@ -128,7 +128,7 @@ export function UnauthScreen({
 
       {/* Protocol Telemetry Footer */}
       <div className="relative z-10 mt-10 font-mono text-[11px] text-slate-500 tracking-wider">
-        STATUS // 401_ESCROW_UNAUTHORIZED · IDENTITY_PROVIDER_REQUIRED
+        HỆ THỐNG BẢO VỆ TỰ ĐỘNG · BẢO MẬT TÀI KHOẢN
       </div>
     </div>
   );

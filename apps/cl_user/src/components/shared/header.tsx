@@ -87,7 +87,7 @@ export function Header() {
                 TrustPassz
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/90 leading-none">
-                Két Kèo Escrow
+                Bảo Vệ Giao Dịch An Toàn
               </span>
             </div>
           </Link>
@@ -97,7 +97,7 @@ export function Header() {
 
         {/* Right Action Cluster */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Network Badge: Base Sepolia */}
+          {/* Network Badge: Automated Protection */}
           <Badge
             variant="outline"
             className="hidden lg:inline-flex items-center gap-1.5 rounded-full border-slate-700 bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-slate-300"
@@ -106,7 +106,7 @@ export function Header() {
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            <span>Base Sepolia</span>
+            <span>Hệ thống bảo vệ tự động</span>
           </Badge>
 
           {isAuth ? (

@@ -42,37 +42,37 @@ export default function DemoDealRoomPage() {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      toast.success("Đã sao chép liên kết Deal Room Demo!");
+      toast.success("Đã sao chép liên kết Phòng thương lượng mẫu!");
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleSimulateDeposit = () => {
     setDealState("DEPOSITED");
-    toast.success("Xác nhận tiền ký quỹ!", {
-      description: "Hệ thống ghi nhận VietQR 1,500,000 VND đã vào két an toàn.",
+    toast.success("Tiền đã vào két an toàn!", {
+      description: "Hệ thống ghi nhận VietQR 1,500,000 VND đã được giữ bảo chứng an toàn.",
     });
   };
 
   const handleStartInspection = () => {
     setDealState("IN_INSPECTION");
     setIsVaultDecrypted(true);
-    toast.success("Digital Vault đã mở khóa!", {
-      description: "Bộ đếm thời gian kiểm thử 24h bắt đầu chạy.",
+    toast.success("Kho lưu trữ đã mở khóa!", {
+      description: "Thời gian kiểm tra hàng 24h bắt đầu tính.",
     });
   };
 
   const handleSettleDeal = () => {
     setDealState("SETTLED");
     toast.success("Giao dịch hoàn tất thành công!", {
-      description: "Tiền đã được giải phóng cho Seller. Hợp đồng ký quỹ thanh lý.",
+      description: "Tiền đã chuyển cho người bán. Giao dịch hoàn tất thành công.",
     });
   };
 
   const handleTriggerDispute = () => {
     setDealState("DISPUTED");
-    toast.error("Đã kích hoạt tranh chấp!", {
-      description: "Hệ thống AI Arbitrator đang phân tích log kiểm thử và bằng chứng.",
+    toast.error("Đã gửi yêu cầu khiếu nại!", {
+      description: "Trợ lý phân xử tự động đang phân tích bằng chứng giao dịch.",
     });
   };
 
@@ -97,7 +97,7 @@ export default function DemoDealRoomPage() {
             className="border-cyan-500/40 bg-cyan-950/30 text-cyan-400 text-xs px-2.5 py-0.5"
           >
             <Sparkles className="size-3 mr-1" />
-            Bàn Đàm Phán Ký Quỹ Demo
+            Phòng Thương Lượng Giao Dịch Mẫu
           </Badge>
         </div>
 
@@ -113,7 +113,7 @@ export default function DemoDealRoomPage() {
             ) : (
               <Copy className="size-3.5 mr-1" />
             )}
-            <span>Chia sẻ Kèo</span>
+            <span>Chia sẻ Giao Dịch</span>
           </Button>
 
           <Button
@@ -156,18 +156,18 @@ export default function DemoDealRoomPage() {
                   Trạng thái: {dealState}
                 </Badge>
                 <span className="text-xs text-slate-500 font-mono">
-                  Mã kèo: DEAL-DEMO-888999
+                  Mã giao dịch: DEAL-DEMO-888999
                 </span>
               </div>
 
               <CardTitle className="text-xl sm:text-2xl font-bold text-white">
-                Mã Nguồn TrustPassz Escrow Gateway + Base Sepolia Contract
+                Bộ Mã Nguồn Nền Tảng Giao Dịch An Toàn TrustPassz
               </CardTitle>
 
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Kèo chuyển nhượng bộ module ký quỹ đa kênh: tích hợp VietQR PayOS
-                tự động, Smart Contract Escrow Solady, và Digital Vault mã hóa
-                AES-256-GCM bảo vệ an toàn 100% người mua & người bán.
+                Giao dịch chuyển nhượng trọn bộ giải pháp: thanh toán VietQR
+                tự động, hệ thống giữ tiền an toàn, và kho lưu trữ bảo mật bảo vệ
+                100% người mua &amp; người bán.
               </p>
             </CardHeader>
 
@@ -176,7 +176,7 @@ export default function DemoDealRoomPage() {
               <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-300">
-                    Quy Trình Ký Quỹ & Bảo Vệ Tài Sản
+                    Quy Trình Giữ Tiền &amp; Bàn Giao An Toàn
                   </span>
                   <span className="text-cyan-400 font-medium">4 Bước Khép Kín</span>
                 </div>
@@ -189,7 +189,7 @@ export default function DemoDealRoomPage() {
                         : "border-amber-500/50 bg-amber-950/30 text-amber-300"
                     }`}
                   >
-                    1. Khóa Tiền
+                    1. Giữ Tiền An Toàn
                   </div>
                   <div
                     className={`p-2 rounded-lg border ${
@@ -200,7 +200,7 @@ export default function DemoDealRoomPage() {
                         : "border-slate-800 bg-slate-900 text-slate-500"
                     }`}
                   >
-                    2. Mở Két Vault
+                    2. Mở Kho Lưu Trữ
                   </div>
                   <div
                     className={`p-2 rounded-lg border ${
@@ -211,7 +211,7 @@ export default function DemoDealRoomPage() {
                         : "border-slate-800 bg-slate-900 text-slate-500"
                     }`}
                   >
-                    3. Kiểm Thử 24h
+                    3. Kiểm Tra 24h
                   </div>
                   <div
                     className={`p-2 rounded-lg border ${
@@ -220,7 +220,7 @@ export default function DemoDealRoomPage() {
                         : "border-slate-800 bg-slate-900 text-slate-500"
                     }`}
                   >
-                    4. Tất Toán
+                    4. Chuyển Tiền Cho Người Bán
                   </div>
                 </div>
               </div>
@@ -238,12 +238,12 @@ export default function DemoDealRoomPage() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-white">
-                        Digital Vault (Két Mã Hóa AES-256-GCM)
+                        Kho Lưu Trữ Bảo Mật
                       </div>
                       <div className="text-[11px] text-slate-400">
                         {isVaultDecrypted
-                          ? "Tài sản số đã giải mã thành công cho phiên kiểm thử"
-                          : "Tài sản số đang khóa an toàn. Cần nạp ký quỹ để mở két."}
+                          ? "Thông tin bàn giao đã mở khóa để bạn kiểm tra"
+                          : "Thông tin đang khóa an toàn. Cần thanh toán vào két để nhận hàng."}
                       </div>
                     </div>
                   </div>
@@ -251,7 +251,7 @@ export default function DemoDealRoomPage() {
                     variant="outline"
                     className="border-slate-700 bg-slate-800 text-slate-300 text-[10px]"
                   >
-                    Mã nguồn Git & License
+                    Mã nguồn Git &amp; License
                   </Badge>
                 </div>
 
@@ -277,11 +277,10 @@ VAULT_PAYLOAD = {
                   <div className="rounded-lg bg-slate-950/80 border border-slate-800 p-6 text-center space-y-2">
                     <Lock className="size-8 text-slate-600 mx-auto" />
                     <div className="text-xs font-semibold text-slate-400">
-                      Nội dung được bảo vệ trong két số TrustPassz
+                      Thông tin bàn giao được khóa kín an toàn
                     </div>
                     <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
-                      Chỉ người mua đã nạp đủ số tiền ký quỹ mới có thể mở két và
-                      bắt đầu giai đoạn kiểm thử.
+                      Chỉ người mua đã thanh toán tiền vào két an toàn mới có thể xem thông tin và kiểm tra hàng.
                     </p>
                   </div>
                 )}
@@ -295,7 +294,7 @@ VAULT_PAYLOAD = {
                     className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs h-10 px-4"
                   >
                     <QrCode className="size-4 mr-1.5" />
-                    Mô phỏng Nạp Tiền VietQR (Ký Quỹ)
+                    Mô phỏng Quét Mã VietQR (Giữ Tiền An Toàn)
                   </Button>
                 )}
 
@@ -305,7 +304,7 @@ VAULT_PAYLOAD = {
                     className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs h-10 px-4"
                   >
                     <Unlock className="size-4 mr-1.5" />
-                    Mở Khóa Digital Vault (Bắt Đầu Kiểm Thử)
+                    Mở Khóa Nhận Hàng (Bắt Đầu Kiểm Tra)
                   </Button>
                 )}
 
@@ -316,7 +315,7 @@ VAULT_PAYLOAD = {
                       className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs h-10 px-4"
                     >
                       <Check className="size-4 mr-1.5" />
-                      Nghiệm Thu Đạt & Giải Phóng Quỹ Cho Seller
+                      Hàng Đúng Mô Tả - Chuyển Tiền Cho Người Bán
                     </Button>
                     <Button
                       variant="outline"
@@ -324,7 +323,7 @@ VAULT_PAYLOAD = {
                       className="border-rose-500/50 bg-rose-950/20 text-rose-300 hover:bg-rose-950/40 text-xs h-10 px-4"
                     >
                       <Scale className="size-4 mr-1.5" />
-                      Yêu Cầu Phân Xử Tranh Chấp (AI)
+                      Báo Lỗi &amp; Khiếu Nại (Trợ Lý Phân Xử)
                     </Button>
                   </>
                 )}
@@ -344,7 +343,7 @@ VAULT_PAYLOAD = {
             onOfferSubmit={(price) => {
               setCurrentPrice(price);
               toast.success("Đã gửi đề xuất giá mới!", {
-                description: `Giá đàm phán: ${price.toLocaleString("vi-VN")} VND`,
+                description: `Giá đề xuất: ${price.toLocaleString("vi-VN")} VND`,
               });
             }}
           />

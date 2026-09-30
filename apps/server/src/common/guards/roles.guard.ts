@@ -33,7 +33,9 @@ export class RolesGuard implements CanActivate {
       );
     }
 
-    const normalizedRequiredRoles = requiredRoles.map((r) => String(r).toUpperCase());
+    const normalizedRequiredRoles = requiredRoles.map((r) =>
+      String(r).toUpperCase(),
+    );
     const userRole = String(user.role).toUpperCase();
 
     // Match assigned role against permitted roles list

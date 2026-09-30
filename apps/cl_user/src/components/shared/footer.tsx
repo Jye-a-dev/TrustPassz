@@ -21,11 +21,11 @@ export function Footer() {
           </div>
           <div>
             <p className="text-slate-300 font-medium">
-              © 2026 TrustPassz. Bảo chứng Escrow qua Smart Contract Base Sepolia (
+              © 2026 TrustPassz. Bảo vệ giao dịch bằng Hệ thống bảo vệ tự động (
               <span className="font-mono text-cyan-400">0x165B...f783</span>).
             </p>
             <p className="text-[11px] text-slate-400">
-              Két Giao Dịch Ký Quỹ Tự Hành Cho Sản Phẩm Số &amp; Social Commerce.
+              Nền Tảng Giao Dịch An Toàn Cho Sản Phẩm Số &amp; Đồ Mua Bán Online.
             </p>
           </div>
         </div>
@@ -36,14 +36,14 @@ export function Footer() {
             href="/deals/demo"
             className="hover:text-cyan-300 transition-colors"
           >
-            Điều khoản Ký quỹ
+            Điều khoản Giữ tiền an toàn
           </Link>
           <span className="text-slate-700">•</span>
           <Link
             href="/user/deals/create"
             className="hover:text-emerald-300 transition-colors"
           >
-            Bảo mật Digital Vault
+            Bảo mật Kho lưu trữ
           </Link>
           <span className="text-slate-700">•</span>
           <Link

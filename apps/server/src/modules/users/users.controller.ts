@@ -46,10 +46,14 @@ export class UsersController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get user profile by UUID',
-    description: 'Retrieves user profile, storefront reference, and activity counts.',
+    description:
+      'Retrieves user profile, storefront reference, and activity counts.',
   })
   @ApiParam({ name: 'id', description: 'User UUID v4' })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile retrieved successfully.',
+  })
   @ApiResponse({ status: 404, description: 'User not found.' })
   async findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.findById(id);
@@ -58,11 +62,18 @@ export class UsersController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Update user profile attributes',
-    description: 'Updates display name, avatar, contact email/phone, or wallet address.',
+    description:
+      'Updates display name, avatar, contact email/phone, or wallet address.',
   })
   @ApiParam({ name: 'id', description: 'User UUID v4' })
-  @ApiResponse({ status: 200, description: 'User profile updated successfully.' })
-  @ApiResponse({ status: 409, description: 'Conflict: Identifier already in use.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict: Identifier already in use.',
+  })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
@@ -73,10 +84,14 @@ export class UsersController {
   @Post('storefront')
   @ApiOperation({
     summary: 'Create custom storefront for seller',
-    description: 'Initializes social-commerce storefront slug and layout configurations.',
+    description:
+      'Initializes social-commerce storefront slug and layout configurations.',
   })
   @ApiResponse({ status: 201, description: 'Storefront created successfully.' })
-  @ApiResponse({ status: 409, description: 'Storefront slug taken or seller already has store.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Storefront slug taken or seller already has store.',
+  })
   async createStorefront(@Body() dto: CreateStorefrontDto) {
     return this.usersService.createStorefront(dto);
   }
@@ -84,7 +99,8 @@ export class UsersController {
   @Get('storefront/:slug')
   @ApiOperation({
     summary: 'Get public storefront by slug',
-    description: 'Fetches storefront metadata, theme configuration, and active products.',
+    description:
+      'Fetches storefront metadata, theme configuration, and active products.',
   })
   @ApiParam({ name: 'slug', description: 'Storefront alphanumeric slug' })
   @ApiResponse({ status: 200, description: 'Storefront details retrieved.' })

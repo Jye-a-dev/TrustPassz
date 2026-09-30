@@ -42,7 +42,7 @@ export function EscrowTermsSection({
             htmlFor="deal-amount"
             className="text-sm font-semibold text-slate-200"
           >
-            Giá trị ký quỹ niêm yết (VNĐ) <span className="text-cyan-400">*</span>
+            Giá giao dịch (VNĐ) <span className="text-cyan-400">*</span>
           </label>
           <div className="relative">
             <Input
@@ -50,7 +50,7 @@ export function EscrowTermsSection({
               type="number"
               min={1000}
               step={10000}
-              placeholder="500000"
+              placeholder="Nhập số tiền người mua cần trả"
               disabled={disabled}
               value={amount}
               onChange={(e) =>
@@ -74,11 +74,11 @@ export function EscrowTermsSection({
           <div className="flex items-center justify-between">
             <label className="text-sm font-semibold text-slate-200 flex items-center gap-1.5">
               <Clock className="size-4 text-cyan-400" />
-              <span>Thời hạn kiểm thử bàn giao</span>
+              <span>Thời gian kiểm tra hàng</span>
             </label>
             {isPhysical && (
               <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-mono text-amber-300">
-                Khuyên dùng 24h - 48h
+                Khuyên dùng: 24h - 48h
               </span>
             )}
           </div>
@@ -108,7 +108,7 @@ export function EscrowTermsSection({
             })}
           </div>
           <span className="text-[11px] text-slate-400 block leading-tight">
-            Thời gian bảo vệ buyer kiểm thử trước khi quỹ ký quỹ tự động giải phóng.
+            Cho người mua kiểm tra trong bao lâu? Hết thời gian này, tiền sẽ tự động chuyển cho bạn.
           </span>
         </div>
       </div>
@@ -116,12 +116,12 @@ export function EscrowTermsSection({
       {/* Designated Buyer ID (Optional) */}
       <div className="space-y-1.5">
         <label htmlFor="buyer-id" className="text-xs font-medium text-slate-300">
-          Chỉ định Buyer UUID (Tùy chọn - nếu để trống kèo sẽ hiển thị công khai trên Explore)
+          Chỉ định Người mua (Tùy chọn - để trống nếu muốn đăng công khai cho mọi người)
         </label>
         <Input
           id="buyer-id"
           disabled={disabled}
-          placeholder="Ví dụ: 2d5ca332-d489-43ba-b8ed-74f0f54e670c (để trống nếu bán công khai)"
+          placeholder="Nhập mã định danh người mua nếu giao dịch riêng, hoặc để trống để đăng công khai"
           value={buyerId}
           onChange={(e) => onBuyerIdChange(e.target.value)}
           className="bg-slate-950/80 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 min-h-11 text-xs font-mono"

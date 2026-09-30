@@ -112,7 +112,12 @@ export class BargainsService {
           },
         },
         buyer: {
-          select: { id: true, displayName: true, email: true, walletAddress: true },
+          select: {
+            id: true,
+            displayName: true,
+            email: true,
+            walletAddress: true,
+          },
         },
       },
     });

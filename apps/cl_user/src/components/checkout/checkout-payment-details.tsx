@@ -23,7 +23,7 @@ export function CheckoutPaymentDetails({
       <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 flex items-center justify-between">
         <div>
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-            Số tiền cần ký quỹ
+            Số tiền cần thanh toán
           </span>
           <span className="font-mono text-2xl sm:text-3xl font-black text-cyan-400">
             {bankConfig.amount.toLocaleString("vi-VN")} ₫

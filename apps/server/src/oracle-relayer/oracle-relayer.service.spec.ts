@@ -60,7 +60,9 @@ const MOCK_TX_HASH =
   '0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1' as const;
 
 /** Build a minimal TransactionReceipt stub */
-function makeReceipt(status: 'success' | 'reverted' = 'success'): TransactionReceipt {
+function makeReceipt(
+  status: 'success' | 'reverted' = 'success',
+): TransactionReceipt {
   return {
     status,
     transactionHash: MOCK_TX_HASH,

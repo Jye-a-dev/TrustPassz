@@ -22,37 +22,36 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "TrustPassz - Két Giao Dịch Ký Quỹ Thông Minh Cho Sản Phẩm Số",
+    default: "TrustPassz - Nền Tảng Giao Dịch An Toàn Cho Sản Phẩm Số & Đồ Mua Bán Online",
     template: "%s | TrustPassz",
   },
   description:
-    "Giao thức ký quỹ tự hành cho sản phẩm số & social commerce trên Base Sepolia. Khóa tiền qua VietQR, mở két Digital Vault AES-256-GCM, bảo đảm giao dịch 100%.",
+    "Tiền được giữ an toàn qua VietQR. Khách có thời gian kiểm tra hàng từ 6h - 24h trước khi chuyển tiền cho người bán. Không lo bị quỵt tiền hay gửi hàng sai.",
   keywords: [
     "TrustPassz",
-    "Escrow",
-    "Ký Quỹ",
+    "Giao Dịch An Toàn",
+    "Giữ Tiền An Toàn",
     "Sản Phẩm Số",
     "VietQR",
-    "Digital Vault",
-    "Base Sepolia",
-    "Smart Contract",
-    "Web Crypto",
+    "Kho Bảo Mật",
+    "Bảo Vệ Người Mua",
+    "Bảo Vệ Người Bán",
   ],
   authors: [{ name: "TrustPassz Architecture Team" }],
   openGraph: {
     type: "website",
     locale: "vi_VN",
     url: "https://trustpassz.vercel.app",
-    title: "TrustPassz - Két Giao Dịch Ký Quỹ Thông Minh Cho Sản Phẩm Số",
+    title: "TrustPassz - Nền Tảng Giao Dịch An Toàn Cho Sản Phẩm Số & Đồ Mua Bán Online",
     description:
-      "Khóa tiền an toàn qua VietQR tự động. Mở két Digital Vault kiểm thử 6h - 24h. Trọng tài AI phân xử tranh chấp công tâm.",
+      "Tiền được giữ an toàn qua VietQR. Khách có thời gian kiểm tra hàng từ 6h - 24h trước khi chuyển tiền cho người bán. Không lo bị quỵt tiền hay gửi hàng sai.",
     siteName: "TrustPassz",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrustPassz - Két Giao Dịch Ký Quỹ Thông Minh Cho Sản Phẩm Số",
+    title: "TrustPassz - Nền Tảng Giao Dịch An Toàn Cho Sản Phẩm Số & Đồ Mua Bán Online",
     description:
-      "Khóa tiền an toàn qua VietQR tự động. Mở két Digital Vault kiểm thử 6h - 24h. Trọng tài AI phân xử tranh chấp công tâm.",
+      "Tiền được giữ an toàn qua VietQR. Khách có thời gian kiểm tra hàng từ 6h - 24h trước khi chuyển tiền cho người bán. Không lo bị quỵt tiền hay gửi hàng sai.",
   },
   robots: {
     index: true,

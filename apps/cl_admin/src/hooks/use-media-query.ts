@@ -1,21 +1,23 @@
 import * as React from "react";
 
 /**
- * Tracks matches for a CSS media query string.
+ * Tracks matches for a CSS media query string using useSyncExternalStore.
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = React.useState(false);
+  const subscribe = React.useCallback(
+    (callback: () => void) => {
+      const media = window.matchMedia(query);
+      media.addEventListener("change", callback);
+      return () => media.removeEventListener("change", callback);
+    },
+    [query]
+  );
 
-  React.useEffect(() => {
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => setMatches(media.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, [matches, query]);
+  const getSnapshot = React.useCallback(() => {
+    return window.matchMedia(query).matches;
+  }, [query]);
 
-  return matches;
+  const getServerSnapshot = () => false;
+
+  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
-

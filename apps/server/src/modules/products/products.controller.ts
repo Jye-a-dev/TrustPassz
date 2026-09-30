@@ -32,7 +32,8 @@ export class ProductsController {
   @Post()
   @ApiOperation({
     summary: 'Create marketplace product listing',
-    description: 'Lists digital or physical product with escrow inspection and bargain settings.',
+    description:
+      'Lists digital or physical product with escrow inspection and bargain settings.',
   })
   @ApiResponse({ status: 201, description: 'Product created successfully.' })
   @ApiResponse({ status: 404, description: 'Seller or Storefront not found.' })
@@ -43,7 +44,8 @@ export class ProductsController {
   @Get()
   @ApiOperation({
     summary: 'List products with filters, search, and pagination',
-    description: 'Filter by category, status, seller ID, and title/category search terms.',
+    description:
+      'Filter by category, status, seller ID, and title/category search terms.',
   })
   @ApiResponse({ status: 200, description: 'Paginated product list.' })
   async findAll(@Query() query: QueryProductDto) {
@@ -53,7 +55,8 @@ export class ProductsController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get product details by UUID',
-    description: 'Fetches detailed specification, storefront linkage, and seller credentials.',
+    description:
+      'Fetches detailed specification, storefront linkage, and seller credentials.',
   })
   @ApiParam({ name: 'id', description: 'Product UUID v4' })
   @ApiResponse({ status: 200, description: 'Product details.' })
@@ -65,7 +68,8 @@ export class ProductsController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Update product properties or pricing',
-    description: 'Updates base price, floor price, rules, or specification attributes.',
+    description:
+      'Updates base price, floor price, rules, or specification attributes.',
   })
   @ApiParam({ name: 'id', description: 'Product UUID v4' })
   @ApiResponse({ status: 200, description: 'Product updated successfully.' })

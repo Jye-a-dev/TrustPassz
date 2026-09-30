@@ -25,7 +25,7 @@ export function AiSuggestionPanel({
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-cyan-400" />
           <span className="text-xs font-semibold text-cyan-300">
-            Phân tích thông minh từ AI (Gemini 2.5)
+            Trợ lý AI gợi ý điều khoản an toàn
           </span>
         </div>
         <Badge
@@ -38,7 +38,7 @@ export function AiSuggestionPanel({
               : "border-rose-500/50 text-rose-400 bg-rose-950/20"
           }`}
         >
-          Rủi ro: {suggestion.risk_level}
+          Mức độ an toàn: {suggestion.risk_level === "LOW" ? "Cao" : suggestion.risk_level === "MEDIUM" ? "Trung bình" : "Cần lưu ý"}
         </Badge>
       </div>
 
@@ -58,7 +58,7 @@ export function AiSuggestionPanel({
         <div className="flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-cyan-400" />
           <span>
-            Kiểm thử chuẩn:{" "}
+            Thời gian kiểm tra hàng:{" "}
             <strong className="text-slate-200">
               {suggestion.suggested_inspection_hours} giờ
             </strong>
@@ -98,7 +98,7 @@ export function AiSuggestionPanel({
           onClick={onApplyRules}
           className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 h-7 px-2 cursor-pointer"
         >
-          + Chèn điều khoản đã chọn vào mô tả
+          + Thêm điều khoản vào mô tả giao dịch
         </Button>
       </div>
     </div>

@@ -60,12 +60,15 @@ function consumeNonce(nonce: string): boolean {
 }
 
 // FIX C1: Cleanup entries đã expired định kỳ (mỗi 10 phút)
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of nonceStore) {
-    if (now > entry.expiresAt) nonceStore.delete(key);
-  }
-}, 10 * 60 * 1000).unref();
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, entry] of nonceStore) {
+      if (now > entry.expiresAt) nonceStore.delete(key);
+    }
+  },
+  10 * 60 * 1000,
+).unref();
 
 @Injectable()
 export class AuthService {
@@ -219,7 +222,10 @@ export class AuthService {
         );
       }
 
-      const passwordMatch = await bcrypt.compare(dto.password, existingUser.password);
+      const passwordMatch = await bcrypt.compare(
+        dto.password,
+        existingUser.password,
+      );
       if (!passwordMatch) {
         throw new UnauthorizedException('Mật khẩu không chính xác');
       }

@@ -54,14 +54,14 @@ export function CreateDealForm() {
     // Auto-suggest appropriate inspection window for physical shipping & unboxing
     if (newType === "PHYSICAL_ITEM" && inspectionDuration < 86400) {
       setInspectionDuration(86400); // 24h
-      toast.info("Đã điều chỉnh thời gian kiểm thử sang 24 Giờ phù hợp với vận chuyển hàng thực tế.");
+      toast.info("Đã điều chỉnh thời gian kiểm tra hàng sang 24 Giờ phù hợp với vận chuyển hàng thực tế.");
     }
   };
 
   // Trigger AI Suggestion via Magic Fill
   const handleMagicFill = async () => {
     if (!title.trim() || title.trim().length < 3) {
-      toast.error("Vui lòng nhập tiêu đề ít nhất 3 ký tự để AI gợi ý.");
+      toast.error("Vui lòng nhập tên sản phẩm/giao dịch ít nhất 3 ký tự để AI gợi ý.");
       return;
     }
 
@@ -116,7 +116,7 @@ export function CreateDealForm() {
     if (selectedRules.length === 0) return;
     const ruleBlock = CreateDealService.formatRuleBlock(selectedRules);
     setDescription((prev) => prev.trim() + ruleBlock);
-    toast.success("Đã bổ sung điều khoản vào mô tả hợp đồng!");
+    toast.success("Đã bổ sung điều khoản vào mô tả giao dịch!");
   };
 
   // Form submission handler
@@ -133,9 +133,9 @@ export function CreateDealForm() {
     }
     if (!rawSecret.trim()) {
       if (assetType === "PHYSICAL_ITEM") {
-        toast.error("Vui lòng nhập mô tả ngoại quan hoặc số Serial/IMEI vào Vault niêm phong.");
+        toast.error("Vui lòng nhập mô tả ngoại quan hoặc số Serial/IMEI vào Kho lưu trữ bảo mật.");
       } else {
-        toast.error("Vui lòng nhập nội dung nhạy cảm của tài sản số vào Vault.");
+        toast.error("Vui lòng nhập thông tin bàn giao bí mật vào Kho lưu trữ bảo mật.");
       }
       return;
     }
@@ -160,8 +160,8 @@ export function CreateDealForm() {
       const result = await CreateDealService.submitDeal(dealDto);
       toast.success(
         assetType === "PHYSICAL_ITEM"
-          ? "Khởi tạo kèo ký quỹ thành công! Cam kết ngoại quan đã được niêm phong vào Vault."
-          : "Tạo giao dịch ký quỹ số thành công! Tài sản đã được mã hóa an toàn.",
+          ? "Tạo giao dịch thành công! Tình trạng hàng đã được lưu trữ bảo mật."
+          : "Tạo giao dịch thành công! Thông tin bàn giao đã được khóa an toàn.",
       );
       router.push(`/deals/${result.id || "new-deal"}`);
     } catch (err) {
@@ -203,7 +203,7 @@ export function CreateDealForm() {
             ) : (
               <Sparkles className="size-3.5 text-cyan-400" />
             )}
-            AI Gợi ý điều khoản
+            AI Gợi Ý Giá &amp; Thời Gian Tự Động
           </Button>
         </div>
 
@@ -211,10 +211,10 @@ export function CreateDealForm() {
           id="deal-title"
           placeholder={
             assetType === "PHYSICAL_ITEM"
-              ? "Ví dụ: Pass bàn phím cơ Keychron K2 V2 nhôm RGB (Fullbox như mới)"
+              ? "Ví dụ: Áo khoác dọn tủ, Bàn phím cơ Keychron, Tai nghe không dây..."
               : assetType === "DOCUMENT"
-              ? "Ví dụ: Bộ Ebook & Template Notion quản lý tài chính doanh nghiệp SME"
-              : "Ví dụ: Bàn giao Fullstack Escrow Marketplace + Smart Contract"
+              ? "Ví dụ: Tài liệu học tập PDF, Ebook tài chính, File mẫu thiết kế..."
+              : "Ví dụ: Mã nguồn ứng dụng, Bản quyền phần mềm, Tài khoản..."
           }
           value={title}
           disabled={isSubmitting}
@@ -285,14 +285,14 @@ export function CreateDealForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="size-5 animate-spin mr-2" />
-            Đang mã hóa Vault & Tạo Giao Dịch...
+            Đang khóa an toàn &amp; Tạo Giao Dịch...
           </>
         ) : (
           <>
             <ShieldCheck className="size-5 mr-2" />
             {assetType === "PHYSICAL_ITEM"
-              ? "Niêm Phong Biên Lai & Tạo Kèo Ký Quỹ"
-              : "Khởi Tạo Giao Dịch Ký Quỹ Số"}
+              ? "Xác Nhận & Tạo Giao Dịch Mới"
+              : "Xác Nhận & Tạo Giao Dịch Mới"}
           </>
         )}
       </Button>

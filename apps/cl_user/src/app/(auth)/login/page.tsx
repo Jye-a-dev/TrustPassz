@@ -272,16 +272,16 @@ function LoginContent() {
             className="flex items-center gap-1.5 border-emerald-500/40 bg-slate-900/95 px-3 py-1 text-[11px] font-semibold text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
           >
             <ShieldCheck className="size-3.5 text-emerald-400" />
-            <span>Digital Vault Protocol v2.5</span>
+            <span>Hệ Thống Bảo Vệ Tự Động v2.5</span>
           </Badge>
         </div>
 
         <CardHeader className="space-y-2 text-center pt-8">
           <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">
-            <span>Đăng Nhập Két Giao Dịch</span>
+            <span>Đăng Nhập Tài Khoản An Toàn</span>
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto">
-            Truy cập cổng ký quỹ bảo mật cao với Web3 Identity, Google OAuth hoặc Passkey sinh trắc học
+            Truy cập an toàn với Google, Sinh trắc học hoặc Ví tiện lợi
           </CardDescription>
         </CardHeader>
 
@@ -305,10 +305,10 @@ function LoginContent() {
               <Zap className="size-4 text-cyan-400 shrink-0 animate-pulse" />
               <div className="text-left">
                 <span className="text-xs font-bold text-cyan-200 block">
-                  Truy Cập Nhanh Demo Trader
+                  Trải Nghiệm Nhanh Bản Thử Nghiệm
                 </span>
                 <span className="text-[10px] text-slate-400">
-                  Vào thẳng Bàn điều hành &amp; Đơn hàng (1-Click)
+                  Vào thẳng trang quản lý giao dịch (1 Chạm)
                 </span>
               </div>
             </div>
@@ -318,7 +318,7 @@ function LoginContent() {
               onClick={handleDemoSignIn}
               className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs h-8 px-3 rounded-lg shadow-[0_0_12px_rgba(6,182,212,0.3)] cursor-pointer shrink-0"
             >
-              1-Click Demo
+              Dùng Thử Ngay
             </Button>
           </div>
 
@@ -334,7 +334,7 @@ function LoginContent() {
               }`}
             >
               <Sparkles className="size-3.5 text-cyan-400" />
-              <span>Web3 &amp; OAuth 1-Click</span>
+              <span>Google &amp; Ví An Toàn</span>
             </button>
             <button
               type="button"
@@ -373,8 +373,7 @@ function LoginContent() {
           <div className="rounded-lg bg-slate-900/60 border border-slate-800/80 p-3 text-[11px] text-slate-400 flex items-start gap-2">
             <KeyRound className="size-4 text-cyan-400 shrink-0 mt-0.5" />
             <p>
-              Toàn bộ phiên đăng nhập được mã hóa theo tiêu chuẩn Ed25519 và
-              AES-256-GCM. Khóa riêng tư ví Solana không bao giờ rời khỏi thiết bị của bạn.
+              Toàn bộ phiên đăng nhập được bảo vệ an toàn. Dữ liệu tài khoản của bạn luôn được bảo mật tuyệt đối trên thiết bị.
             </p>
           </div>
         </CardContent>

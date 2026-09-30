@@ -99,19 +99,19 @@ export function UserNavbar({
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            <span className="text-slate-200 font-semibold">Base Sepolia L2</span>
+            <span className="text-slate-200 font-semibold">Hệ thống bảo vệ tự động</span>
           </div>
 
           <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-slate-900/60 px-2.5 py-1 rounded-md border border-slate-800/60">
             <Flame className="size-3 text-amber-400" />
-            <span>1.2 Gwei · Low</span>
+            <span>Phí giao dịch tối ưu</span>
           </div>
         </div>
       </div>
 
       {/* Right Action Widgets */}
       <div className="flex items-center gap-2 sm:gap-3.5">
-        {/* Quick Launch "Tạo Kèo" CTA */}
+        {/* Quick Launch "Tạo Giao Dịch" CTA */}
         <Button
           asChild
           size="sm"
@@ -119,7 +119,7 @@ export function UserNavbar({
         >
           <Link href="/user/deals/create">
             <Plus className="size-3.5 stroke-3" />
-            <span>Tạo Kèo Mới</span>
+            <span>+ Tạo Giao Dịch</span>
           </Link>
         </Button>
 
@@ -130,7 +130,7 @@ export function UserNavbar({
           </div>
           <div className="flex flex-col text-left">
             <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-400 leading-none font-mono">
-              Két Khóa Tạm Thời
+              Két Giữ Tiền An Toàn
             </span>
             <span className="font-mono text-xs font-bold text-cyan-300 leading-tight">
               {lockedBalanceVND.toLocaleString("vi-VN")} ₫
@@ -142,7 +142,7 @@ export function UserNavbar({
         <button
           type="button"
           className="relative flex size-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
-          title="Thông báo biến động Escrow"
+          title="Thông báo biến động giao dịch"
           aria-label="Thông báo"
         >
           <Bell className="size-4" />
@@ -220,7 +220,7 @@ export function UserNavbar({
               <DropdownMenuItem asChild>
                 <Link href="/deals/demo" className="flex items-center gap-2 cursor-pointer py-2">
                   <Sparkles className="size-3.5 text-emerald-400" />
-                  <span>Mô phỏng Đàm phán Demo</span>
+                  <span>Thương lượng giao dịch mẫu</span>
                 </Link>
               </DropdownMenuItem>
 

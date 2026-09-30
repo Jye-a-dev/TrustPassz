@@ -79,10 +79,10 @@ export default function UserDisputesPage() {
       <div>
         <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
           <Scale className="size-6 text-amber-400" />
-          Khiếu Nại &amp; Trọng Tài Phân Xử AI
+          Báo Lỗi &amp; Trợ Lý Phân Xử Tự Động
         </h1>
         <p className="text-xs text-slate-400">
-          Hệ thống AI Arbitrator tự động phân tích log unbox, bằng chứng số và đề xuất phán quyết công tâm.
+          Trợ lý phân xử tự động kiểm tra hình ảnh, video bằng chứng và đề xuất phương án xử lý công minh.
         </p>
       </div>
 
@@ -109,8 +109,8 @@ export default function UserDisputesPage() {
       ) : disputes.length === 0 ? (
         <EmptyState
           title="Không có khiếu nại nào đang mở"
-          description="Tất cả các giao dịch ký quỹ của bạn đều đang diễn ra an toàn và không có tranh chấp phát sinh."
-          actionLabel="Xem Danh Sách Kèo"
+          description="Tất cả các giao dịch của bạn đều diễn ra thuận lợi và không có khiếu nại phát sinh."
+          actionLabel="Xem Danh Sách Giao Dịch"
           actionHref="/user/deals"
         />
       ) : (
@@ -142,7 +142,7 @@ export default function UserDisputesPage() {
                         Mã khiếu nại: #{dispute.id.slice(0, 8)}...
                       </span>
                       <h3 className="font-bold text-white text-sm sm:text-base">
-                        {dispute.deal?.title || `Kèo ký quỹ ${dispute.dealId}`}
+                        {dispute.deal?.title || `Giao dịch ${dispute.dealId}`}
                       </h3>
                     </div>
                   </div>
@@ -150,7 +150,7 @@ export default function UserDisputesPage() {
                   <div className="flex items-center gap-2">
                     <Badge className="bg-amber-950/80 border-amber-500/50 text-amber-300 text-xs">
                       <Sparkles className="size-3 mr-1" />
-                      AI Đang Phân Tích ({confidencePercent}% Confidence)
+                      Đang Phân Tích Tự Động ({confidencePercent}% Độ tin cậy)
                     </Badge>
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default function UserDisputesPage() {
                   {dispute.aiExplanation && (
                     <div className="p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-cyan-200 leading-relaxed">
                       <strong className="text-cyan-400 block mb-1">
-                        Phân tích sơ bộ từ AI Arbitrator:
+                        Phân tích sơ bộ từ Trợ lý phân xử tự động:
                       </strong>
                       {dispute.aiExplanation}
                     </div>
@@ -192,7 +192,7 @@ export default function UserDisputesPage() {
 
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-slate-400">
                     <span>
-                      Số tiền tranh chấp:{" "}
+                      Số tiền khiếu nại:{" "}
                       <strong className="text-cyan-400 font-mono text-sm">
                         {amountNum.toLocaleString("vi-VN")} ₫
                       </strong>
@@ -209,7 +209,7 @@ export default function UserDisputesPage() {
                     className="min-h-10 border-slate-700 bg-slate-800 text-slate-200 text-xs hover:bg-slate-700"
                   >
                     <Link href={`/user/deals/${dispute.dealId}/vault`}>
-                      Xem Chi Tiết Két Số
+                      Xem Kho Bàn Giao
                     </Link>
                   </Button>
                 </div>

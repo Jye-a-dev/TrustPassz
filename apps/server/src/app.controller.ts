@@ -10,7 +10,8 @@ export class AppController {
   @Get()
   @ApiOperation({
     summary: 'Health check and service status ping',
-    description: 'Returns server operational message confirming system availability.',
+    description:
+      'Returns server operational message confirming system availability.',
   })
   @ApiResponse({
     status: 200,
@@ -24,4 +25,3 @@ export class AppController {
     return this.appService.getHello();
   }
 }
-

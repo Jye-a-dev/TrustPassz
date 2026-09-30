@@ -166,9 +166,7 @@ describe('Payments & Webhooks (e2e)', () => {
       expect(response.body.deal.depositedAt).toBeDefined();
       expect(response.body.deal.inspectionDeadline).toBeDefined();
       expect(dealsStore[0].state).toBe(DealState.DEPOSITED);
-      expect(dealsStore[0].webhookIdempotencyKey).toBe(
-        webhookData.reference,
-      );
+      expect(dealsStore[0].webhookIdempotencyKey).toBe(webhookData.reference);
       expect(ordersStore[0].status).toBe(OrderStatus.PAID_ESCROW);
     });
 

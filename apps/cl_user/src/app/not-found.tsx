@@ -15,7 +15,7 @@ export default function NotFound() {
           variant="outline"
           className="px-3.5 py-1.5 text-xs font-mono tracking-widest uppercase border-cyan-500/30 bg-cyan-950/40 text-cyan-300 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.15)]"
         >
-          ESCROW PROTOCOL 404 // RESOURCE_NOT_FOUND
+          LỖI 404 // KHÔNG TÌM THẤY TRANG
         </Badge>
       </div>
 
@@ -35,10 +35,10 @@ export default function NotFound() {
       {/* Content */}
       <div className="relative z-10 max-w-lg space-y-3 mt-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          Không Tìm Thấy Trang Hoặc Kèo Ký Quỹ
+          Không Tìm Thấy Trang Hoặc Giao Dịch
         </h1>
         <p className="text-sm sm:text-base text-slate-300 leading-relaxed text-balance">
-          Đường dẫn bạn yêu cầu không tồn tại, hợp đồng số đã hết hạn hoặc mã định danh giao dịch trên Base Sepolia không chính xác.
+          Đường dẫn bạn yêu cầu không tồn tại, giao dịch đã hết hạn hoặc mã định danh không chính xác.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default function NotFound() {
         >
           <Link href="/explore" className="flex items-center justify-center gap-2">
             <Compass className="size-5 text-cyan-400" />
-            <span>Khám Phá Kèo Giao Dịch</span>
+            <span>Khám Phá Giao Dịch</span>
             <ArrowRight className="size-4" />
           </Link>
         </Button>

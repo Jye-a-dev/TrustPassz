@@ -31,10 +31,14 @@ export class OrdersController {
   @Post()
   @ApiOperation({
     summary: 'Create purchase order and initialize escrow deal',
-    description: 'Atomically creates an order record linked to product and underlying escrow deal.',
+    description:
+      'Atomically creates an order record linked to product and underlying escrow deal.',
   })
   @ApiResponse({ status: 201, description: 'Order created successfully.' })
-  @ApiResponse({ status: 400, description: 'Product not active or seller self-purchase.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Product not active or seller self-purchase.',
+  })
   @ApiResponse({ status: 404, description: 'Product or buyer not found.' })
   async create(@Body() dto: CreateOrderDto) {
     return this.ordersService.create(dto);
@@ -53,7 +57,8 @@ export class OrdersController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get order details by UUID',
-    description: 'Includes associated product, deal state, and fulfillment information.',
+    description:
+      'Includes associated product, deal state, and fulfillment information.',
   })
   @ApiParam({ name: 'id', description: 'Order UUID v4' })
   @ApiResponse({ status: 200, description: 'Order details.' })
@@ -65,7 +70,8 @@ export class OrdersController {
   @Patch(':id/status')
   @ApiOperation({
     summary: 'Update order lifecycle status or shipping information',
-    description: 'Transitions status (e.g. PROCESSING, SHIPPING, COMPLETED) and updates tracking.',
+    description:
+      'Transitions status (e.g. PROCESSING, SHIPPING, COMPLETED) and updates tracking.',
   })
   @ApiParam({ name: 'id', description: 'Order UUID v4' })
   @ApiResponse({ status: 200, description: 'Order status updated.' })

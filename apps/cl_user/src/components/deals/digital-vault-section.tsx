@@ -33,92 +33,92 @@ export function DigitalVaultSection({
     switch (assetType) {
       case "PHYSICAL_ITEM":
         return {
-          title: "Biên Lai Ngoại Quan & Niêm Phong Vault (AES-256-GCM)",
+          title: "Kho Lưu Trữ Tình Trạng Hàng (Bảo Mật Cao)",
           subtitle:
-            "Cam kết tình trạng thực tế & Serial/IMEI được mã hóa thành biên lai bất biến trên Smart Contract để đối chiếu khi bưu tá đồng kiểm.",
-          label: "Mô tả cam kết ngoại quan / Mã định danh kiện hàng",
+            "Cam kết tình trạng thực tế & Serial/IMEI được khóa bảo mật trong hệ thống để đối chiếu khi nhận hàng.",
+          label: "Thông tin bàn giao & Cam kết ngoại quan",
           placeholder:
-            "Nhập số IMEI/Serial, mô tả chi tiết khuyết tật ban đầu hoặc link video quay rõ tình trạng món đồ...",
-          badgeText: "Smart Receipt",
+            "Dán link ảnh/video quay rõ ngoại quan sản phẩm, số IMEI/Serial, hoặc các lưu ý khi giao nhận...",
+          badgeText: "Biên Lai Lưu Trữ",
           badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/40",
           noticeText:
-            "Không mua bán hàng cấm, hàng nhái kém chất lượng. Tiền cọc được khóa an toàn tới khi bưu tá giao thành công.",
+            "Không mua bán hàng cấm, hàng nhái. Tiền được giữ an toàn trong két tới khi khách kiểm tra xong.",
           noticeIcon: AlertTriangle,
           noticeColor: "text-amber-400",
         };
       case "DOCUMENT":
         return {
-          title: "Digital Vault (Mã hóa đầu cuối AES-256-GCM)",
+          title: "Kho Lưu Trữ Bảo Mật (Khóa Tự Động)",
           subtitle:
-            "Link tài liệu được mã hóa đầu cuối Zero-Knowledge, chỉ mở khóa duy nhất cho người mua sau khi hoàn tất ký quỹ.",
-          label: "Nội dung bí mật bàn giao (Link tài liệu)",
+            "Link tài liệu được khóa kín, hệ thống chỉ gửi đúng người mua sau khi tiền đã nạp an toàn vào két.",
+          label: "Thông tin bàn giao bí mật (Link file / Tài liệu)",
           placeholder:
-            "Nhập link Google Drive tải tài liệu (chế độ tải 1 lần) hoặc link file PDF/ZIP...",
-          badgeText: "Bản Quyền Số",
+            "Dán link Google Drive (chế độ tải), mã bản quyền hoặc mật khẩu bàn giao tại đây (Hệ thống khóa kín, chỉ gửi khi khách đã thanh toán)",
+          badgeText: "Khóa Bảo Mật",
           badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
           noticeText:
-            "Cam kết tài liệu chính chủ tự biên soạn hoặc tài nguyên bản quyền mở (Creative Commons).",
+            "Tài liệu được bảo mật tối đa, chỉ người mua hợp lệ mới nhận được link.",
           noticeIcon: FileCheck,
           noticeColor: "text-emerald-400",
         };
       case "LICENSE_KEY":
         return {
-          title: "Digital Vault (Mã hóa đầu cuối AES-256-GCM)",
+          title: "Kho Lưu Trữ Bảo Mật (Khóa Tự Động)",
           subtitle:
-            "Khóa kích hoạt phần mềm được niêm phong an toàn và giải phóng tự động khi bên mua nghiệm thu.",
-          label: "Nội dung bí mật bàn giao (Khóa bản quyền / Token)",
+            "Khóa bản quyền hoặc tài khoản được khóa kín và chỉ tự động gửi khi người mua thanh toán tiền vào két.",
+          label: "Thông tin bàn giao bí mật (Khóa bản quyền / Mật khẩu)",
           placeholder:
-            "Dán License Key, Mã kích hoạt phần mềm, SaaS Token hoặc tài khoản bản quyền...",
-          badgeText: "Zero-Knowledge",
+            "Dán License Key, mã kích hoạt bản quyền, tài khoản hoặc mật khẩu bàn giao tại đây...",
+          badgeText: "Khóa Bảo Mật",
           badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
           noticeText:
-            "Plaintext không bao giờ được lưu trữ hoặc đọc bởi máy chủ backend TrustPassz.",
+            "Dữ liệu được khóa an toàn, người ngoài hoặc máy chủ không thể đọc trộm.",
           noticeIcon: ShieldCheck,
           noticeColor: "text-emerald-400",
         };
       case "DESIGN_ASSET":
         return {
-          title: "Digital Vault (Mã hóa đầu cuối AES-256-GCM)",
+          title: "Kho Lưu Trữ Bảo Mật (Khóa Tự Động)",
           subtitle:
-            "Kho lưu trữ đồ họa nén hoặc link Figma được bảo mật quyền truy cập qua thuật toán AES-256.",
-          label: "Nội dung bí mật bàn giao (Kho tài nguyên thiết kế)",
+            "File thiết kế hoặc link Figma được bảo mật chặt chẽ, chỉ chuyển giao khi khách đã nạp tiền an toàn.",
+          label: "Thông tin bàn giao bí mật (Link Figma / File thiết kế)",
           placeholder:
-            "Dán link Figma file, kho lưu trữ vector/3D hoặc link Google Drive asset...",
-          badgeText: "Zero-Knowledge",
+            "Dán link Figma file, link Google Drive tài nguyên thiết kế, file nén...",
+          badgeText: "Khóa Bảo Mật",
           badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
           noticeText:
-            "Tài nguyên đồ họa được bảo vệ tính toàn vẹn và quyền sử dụng theo thỏa thuận.",
+            "File thiết kế được bảo vệ tuyệt đối và bàn giao đúng người nhận.",
           noticeIcon: ShieldCheck,
           noticeColor: "text-emerald-400",
         };
       case "OTHER":
         return {
-          title: "Digital Vault (Mã hóa đầu cuối AES-256-GCM)",
+          title: "Kho Lưu Trữ Bảo Mật (Khóa Tự Động)",
           subtitle:
-            "Dữ liệu số được mã hóa đầu cuối Zero-Knowledge trước khi lưu vào Smart Vault.",
-          label: "Nội dung bí mật bàn giao",
+            "Dữ liệu giao dịch được khóa kín, chỉ gửi khi người mua hoàn tất thanh toán vào két giữ tiền.",
+          label: "Thông tin bàn giao bí mật",
           placeholder:
-            "Dán dữ liệu mật, hướng dẫn bí mật hoặc thông tin bàn giao thỏa thuận riêng...",
-          badgeText: "Zero-Knowledge",
+            "Dán link Google Drive (chế độ tải), mã bản quyền hoặc mật khẩu bàn giao tại đây (Hệ thống khóa kín, chỉ gửi khi khách đã thanh toán)",
+          badgeText: "Khóa Bảo Mật",
           badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
           noticeText:
-            "Plaintext không bao giờ được lưu trữ hoặc đọc bởi máy chủ backend TrustPassz.",
+            "Dữ liệu được khóa an toàn, người ngoài hoặc máy chủ không thể đọc trộm.",
           noticeIcon: ShieldCheck,
           noticeColor: "text-emerald-400",
         };
       case "SOURCE_CODE":
       default:
         return {
-          title: "Digital Vault (Mã hóa đầu cuối AES-256-GCM)",
+          title: "Kho Lưu Trữ Bảo Mật (Khóa Tự Động)",
           subtitle:
-            "Nội dung nhạy cảm được mã hóa trực tiếp trên trình duyệt của bạn trước khi gửi.",
-          label: "Nội dung bí mật bàn giao (Mã nguồn / Repo)",
+            "Link mã nguồn được khóa kín ngay trên trình duyệt, chỉ bàn giao sau khi khách đã nạp tiền vào két.",
+          label: "Thông tin bàn giao bí mật (Link mã nguồn / Token)",
           placeholder:
-            "Dán Repo link (kèm token đọc), commit hash hoặc link kho lưu trữ mã nguồn nén...",
-          badgeText: "Zero-Knowledge",
+            "Dán Repo link (kèm token truy cập), link tải mã nguồn hoặc thông tin bàn giao...",
+          badgeText: "Khóa Bảo Mật",
           badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
           noticeText:
-            "Bên bán cam kết mã nguồn sạch, không backdoor và có quyền sở hữu hợp pháp.",
+            "Mã nguồn được khóa an toàn, bàn giao tự động và chính xác.",
           noticeIcon: ShieldCheck,
           noticeColor: "text-emerald-400",
         };
@@ -200,13 +200,13 @@ export function DigitalVaultSection({
           htmlFor="vault-passphrase"
           className="text-xs font-medium text-slate-300"
         >
-          Mật khẩu giải mã Vault (Tùy chọn - nếu để trống sẽ tự sinh ngẫu nhiên 256-bit)
+          Mật khẩu mở khóa (Tùy chọn - nếu để trống hệ thống sẽ tự tạo mật khẩu bảo mật)
         </label>
         <Input
           id="vault-passphrase"
           type="password"
           disabled={disabled}
-          placeholder="Nhập khóa bí mật hoặc để trống để sinh tự động"
+          placeholder="Nhập mật khẩu mở khóa hoặc để trống để tạo tự động"
           value={passphrase}
           onChange={(e) => onPassphraseChange(e.target.value)}
           className="bg-slate-950/80 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 min-h-11 text-xs font-mono"
@@ -218,7 +218,7 @@ export function DigitalVaultSection({
         <div className="rounded-md border border-emerald-500/40 bg-slate-950/90 p-3 space-y-1.5 text-xs text-slate-300 font-mono animate-in fade-in duration-200">
           <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
             <CheckCircle2 className="w-4 h-4" />
-            <span>Đã mã hóa cục bộ an toàn:</span>
+            <span>Đã khóa an toàn vào Kho bảo mật:</span>
           </div>
           <div className="truncate">
             <span className="text-slate-400">SHA-256 Hash: </span>

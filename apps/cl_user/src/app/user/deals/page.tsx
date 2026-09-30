@@ -66,7 +66,7 @@ export default function UserDealsPage() {
         setDeals(items);
       } catch (err: unknown) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Không thể tải danh sách kèo ký quỹ.");
+          setError(err instanceof Error ? err.message : "Không thể tải danh sách giao dịch.");
         }
       } finally {
         if (isMounted) {
@@ -99,12 +99,12 @@ export default function UserDealsPage() {
       { key: "ALL", label: "Tất cả", count: deals.length },
       {
         key: "PENDING",
-        label: "Chờ cọc",
+        label: "Chờ thanh toán",
         count: deals.filter((d) => d.state === "PENDING").length,
       },
       {
         key: "IN_INSPECTION",
-        label: "Đang kiểm thử",
+        label: "Đang kiểm tra",
         count: deals.filter(
           (d) => d.state === "IN_INSPECTION" || d.state === "DEPOSITED"
         ).length,
@@ -116,7 +116,7 @@ export default function UserDealsPage() {
       },
       {
         key: "DISPUTED",
-        label: "Tranh chấp",
+        label: "Khiếu nại",
         count: deals.filter((d) => d.state === "DISPUTED").length,
       },
     ],
@@ -130,10 +130,10 @@ export default function UserDealsPage() {
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <Handshake className="size-6 text-cyan-400" />
-            Kèo Của Tôi
+            Giao Dịch Của Tôi
           </h1>
           <p className="text-xs text-slate-400">
-            Quản lý các giao dịch ký quỹ, theo dõi tiến độ cọc VietQR và mở két số Vault.
+            Quản lý các giao dịch mua bán, theo dõi giữ tiền an toàn qua VietQR và nhận hàng trong kho bảo mật.
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export default function UserDealsPage() {
         >
           <Link href="/user/deals/create">
             <PlusCircle className="size-4 mr-1.5" />
-            Tạo Kèo Mới
+            Tạo Giao Dịch Mới
           </Link>
         </Button>
       </div>
@@ -177,7 +177,7 @@ export default function UserDealsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo tên kèo..."
+            placeholder="Tìm theo tên giao dịch..."
             className="pl-9 bg-slate-900/80 border-slate-800 text-xs min-h-10 text-white"
           />
         </div>
@@ -209,13 +209,13 @@ export default function UserDealsPage() {
           </div>
         ) : filteredDeals.length === 0 ? (
           <EmptyState
-            title="Không tìm thấy kèo nào"
+            title="Không tìm thấy giao dịch nào"
             description={
               search
                 ? `Không có giao dịch nào khớp với từ khóa "${search}".`
-                : "Chưa có hợp đồng nào trong danh mục lọc này."
+                : "Chưa có giao dịch nào trong danh mục lọc này."
             }
-            actionLabel="Tạo Kèo Ký Quỹ Mới"
+            actionLabel="Tạo Giao Dịch Mới"
             actionHref="/user/deals/create"
           />
         ) : (
@@ -228,7 +228,7 @@ export default function UserDealsPage() {
             const amountNum = Number(deal.amount || 0);
 
             const counterParty =
-              deal.buyer?.displayName || deal.seller?.displayName || "Đối tác ký quỹ";
+              deal.buyer?.displayName || deal.seller?.displayName || "Đối tác giao dịch";
 
             const targetTime = deal.inspectionDeadline
               ? Date.parse(deal.inspectionDeadline)
@@ -250,19 +250,19 @@ export default function UserDealsPage() {
 
                     {isInspection && (
                       <Badge className="bg-emerald-950/80 border-emerald-500/40 text-emerald-300 text-[10px] font-bold">
-                        Đang Kiểm Thử
+                        Đang Kiểm Tra
                       </Badge>
                     )}
 
                     {isDeposited && (
                       <Badge className="bg-cyan-950/80 border-cyan-500/40 text-cyan-300 text-[10px] font-bold">
-                        Đã Ký Quỹ
+                        Đã Giữ Tiền
                       </Badge>
                     )}
 
                     {isPending && (
                       <Badge className="bg-amber-950/80 border-amber-500/40 text-amber-300 text-[10px] font-bold">
-                        Chờ Quét Cọc
+                        Chờ Thanh Toán
                       </Badge>
                     )}
 
@@ -274,7 +274,7 @@ export default function UserDealsPage() {
 
                     {isDisputed && (
                       <Badge className="bg-rose-950/80 border-rose-500/40 text-rose-300 text-[10px] font-bold">
-                        Tranh Chấp
+                        Đang Khiếu Nại
                       </Badge>
                     )}
 
@@ -301,7 +301,7 @@ export default function UserDealsPage() {
                 <div className="flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800/80">
                   <div className="text-left lg:text-right">
                     <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                      Số tiền ký quỹ
+                      Giá trị giao dịch
                     </span>
                     <span className="text-lg sm:text-xl font-black font-mono text-cyan-400">
                       {amountNum.toLocaleString("vi-VN")} ₫
@@ -330,7 +330,7 @@ export default function UserDealsPage() {
                       >
                         <Link href={`/user/deals/${deal.id}/vault`}>
                           <KeyRound className="size-3.5 mr-1.5" />
-                          Mở Két Số Vault
+                          Mở Kho Nhận Hàng
                         </Link>
                       </Button>
                     )}

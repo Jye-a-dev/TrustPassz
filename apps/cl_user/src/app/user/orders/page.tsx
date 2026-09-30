@@ -82,10 +82,10 @@ export default function UserOrdersPage() {
       <div>
         <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
           <Receipt className="size-6 text-cyan-400" />
-          Lịch Sử Đơn Hàng &amp; Biên Lai PayOS
+          Lịch Sử Đơn Hàng &amp; Biên Lai Thanh Toán
         </h1>
         <p className="text-xs text-slate-400">
-          Tra cứu mã giao dịch, biên lai chuyển khoản ngân hàng và hash smart contract Base Sepolia thực.
+          Tra cứu mã giao dịch, biên lai chuyển khoản VietQR và thông tin bảo vệ tự động.
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default function UserOrdersPage() {
         <EmptyState
           title="Chưa có đơn hàng nào"
           description="Lịch sử đơn hàng và biên lai chuyển khoản VietQR PayOS sẽ hiển thị tại đây khi bạn thực hiện giao dịch."
-          actionLabel="Khám Phá Kèo Ký Quỹ"
+          actionLabel="Khám Phá Giao Dịch"
           actionHref="/explore"
         />
       ) : (
@@ -124,7 +124,7 @@ export default function UserOrdersPage() {
             const amountNum = Number(order.totalAmount || 0);
             const title =
               order.product?.title ||
-              `Đơn hàng ký quỹ #${order.orderNumber}`;
+              `Đơn hàng #${order.orderNumber}`;
             const orderCode =
               order.paymentMetadata?.orderCode ||
               order.orderNumber.replace(/[^0-9]/g, "").slice(-8) ||
@@ -166,7 +166,7 @@ export default function UserOrdersPage() {
                     {isInspection && (
                       <Badge className="bg-blue-950/80 border-blue-500/40 text-blue-300 text-[10px]">
                         <Clock className="size-3 mr-1" />
-                        Đang Kiểm Thử
+                        Đang Kiểm Tra Hàng
                       </Badge>
                     )}
 
@@ -216,7 +216,7 @@ export default function UserOrdersPage() {
                     >
                       <Link href={`/user/deals/${order.dealId}/vault`}>
                         <KeyRound className="size-3.5 mr-1" />
-                        Xem Két Số
+                        Xem Kho Nhận Hàng
                       </Link>
                     </Button>
                   )}

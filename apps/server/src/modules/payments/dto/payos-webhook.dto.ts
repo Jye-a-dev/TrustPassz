@@ -175,10 +175,8 @@ export class PayOSWebhookDto {
   data: PayOSWebhookDataDto;
 
   @ApiProperty({
-    example:
-      'c131d9430f59fced8551be1b4c818738a90b310a875f08d232787a4b7e1c7cf6',
-    description:
-      'Chữ ký HMAC-SHA256 bảo mật xác thực payload không bị sửa đổi',
+    example: 'c131d9430f59fced8551be1b4c818738a90b310a875f08d232787a4b7e1c7cf6',
+    description: 'Chữ ký HMAC-SHA256 bảo mật xác thực payload không bị sửa đổi',
   })
   @IsString()
   @IsNotEmpty()

@@ -28,7 +28,10 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role, Roles } from '../../common/decorators/roles.decorator';
-import { CurrentUser, RequestUser } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  RequestUser,
+} from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Deals & Digital Vault')
 @ApiBearerAuth('JWT-auth')

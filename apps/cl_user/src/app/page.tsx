@@ -20,41 +20,41 @@ import { useMounted } from "@/hooks/use-mounted";
 const CORE_PILLARS = [
   {
     icon: QrCode,
-    badge: "Thanh Toán Tự Động",
+    badge: "Thanh Toán Tiện Lợi",
     badgeColor: "text-cyan-400 border-cyan-500/30 bg-cyan-950/40",
-    title: "VietQR-to-Escrow",
+    title: "Thanh toán VietQR tiện lợi",
     description:
-      "Quét mã VietQR ngân hàng bất kỳ, Webhook tự động khóa tiền vào Smart Contract Base Sepolia, không cần ví Web3 phức tạp.",
+      "Quét mã ngân hàng quen thuộc, tiền được khóa an toàn ở trung gian.",
     details: [
-      "Sinh mã dynamic VietQR tích hợp mã giao dịch tức thì",
-      "Khóa tiền ký quỹ on-chain trong 30 giây",
-      "Phí giao dịch tối ưu mạng L2 Base Sepolia",
+      "Quét mã QR bằng ứng dụng ngân hàng bất kỳ",
+      "Tiền được giữ an toàn ngay lập tức",
+      "Không lo bị quỵt tiền hay lừa đảo chuyển khoản",
     ],
   },
   {
     icon: Lock,
-    badge: "Bảo Mật Zero-Knowledge",
+    badge: "Bảo Vệ Người Mua",
     badgeColor: "text-emerald-400 border-emerald-500/30 bg-emerald-950/40",
-    title: "Digital Vault & Time-lock Inspection",
+    title: "Thời gian thử & kiểm tra",
     description:
-      "Dữ liệu link/key được mã hóa client-side AES-256-GCM, cấp quyền tải 1 lần kèm đồng hồ đếm ngược đồng kiểm.",
+      "Người mua có từ 6 đến 24 tiếng kiểm tra sản phẩm trước khi tiền về tay người bán.",
     details: [
-      "Khóa giải mã 256-bit không lưu plaintext trên server",
-      "Thời gian kiểm thử 6h - 24h tự động khóa quyền truy cập",
-      "Xác thực toàn vẹn bằng mã băm SHA-256",
+      "Tài liệu/mật khẩu được khóa kín, chỉ gửi đúng người mua",
+      "Có từ 6h đến 24h dùng thử và kiểm tra kỹ lưỡng",
+      "Hài lòng mới xác nhận chuyển tiền cho người bán",
     ],
   },
   {
     icon: Bot,
-    badge: "Phân Xử Công Tâm",
+    badge: "Hỗ Trợ Công Minh",
     badgeColor: "text-amber-400 border-amber-500/30 bg-amber-950/40",
-    title: "AI Arbitrator & Dispute Engine",
+    title: "Hỗ trợ giải quyết tranh chấp",
     description:
-      "Trọng tài số tự động thẩm định log lỗi và ảnh chụp màn hình unbox bằng sVLM khi phát sinh khiếu nại.",
+      "AI tự động kiểm tra bằng chứng nếu sản phẩm bị lỗi để hoàn tiền công minh.",
     details: [
-      "Phân tích bằng chứng ảnh unbox & logs kiểm thử",
-      "Gợi ý hoàn tiền hoặc thanh lý hợp đồng minh bạch",
-      "Loại bỏ 100% gian lận boom hàng và chiếm đoạt tài sản số",
+      "Trợ lý phân xử tự động kiểm tra hình ảnh/bằng chứng khi có lỗi",
+      "Gợi ý hoàn tiền hoặc xử lý tranh chấp minh bạch",
+      "Không lo bị gửi hàng sai hay hàng kém chất lượng",
     ],
   },
 ];
@@ -62,36 +62,36 @@ const CORE_PILLARS = [
 const STAT_BADGES = [
   {
     value: "0%",
-    label: "Rủi ro boom hàng",
-    subtext: "Bảo chứng két ký quỹ tự động",
+    label: "Rủi ro bùng hàng",
+    subtext: "Tiền được giữ an toàn ở két trung gian",
   },
   {
-    value: "48h",
-    label: "Bảo đảm hoàn tiền",
-    subtext: "Tự động phân xử tranh chấp",
+    value: "6h - 24h",
+    label: "Thời gian kiểm tra hàng",
+    subtext: "Kiểm tra kỹ trước khi chuyển tiền",
   },
   {
     value: "100%",
-    label: "On-chain Verified",
-    subtext: "Base Sepolia Smart Contract",
+    label: "Bảo vệ tự động",
+    subtext: "Không lo quỵt tiền hay gửi hàng sai",
   },
 ];
 
 const WORKFLOW_STEPS = [
   {
     step: "01",
-    title: "Tạo Giao Dịch & Khóa Vault",
-    desc: "Người bán tải tài sản số (source code, tài khoản, license key, drive link). Web Crypto mã hóa AES-256-GCM ngay tại trình duyệt.",
+    title: "Tạo Giao Dịch & Khóa Thông Tin",
+    desc: "Người bán đăng thông tin bàn giao (link file, mã kích hoạt hoặc tài khoản). Hệ thống khóa kín bảo mật, chỉ gửi đúng người mua.",
   },
   {
     step: "02",
     title: "Người Mua Quét VietQR",
-    desc: "Người mua nạp tiền ký quỹ qua VietQR liên ngân hàng. Webhook kích hoạt khóa tiền vào Smart Contract Base Sepolia.",
+    desc: "Người mua quét mã ngân hàng quen thuộc. Tiền được giữ an toàn ở két trung gian, người bán chưa rút được ngay.",
   },
   {
     step: "03",
-    title: "Mở Két & Đồng Kiểm 6h - 24h",
-    desc: "Người mua nhận link/key kiểm thử. Đồng hồ đếm ngược bắt đầu. Hết giờ nếu không tranh chấp, smart contract giải phóng tiền cho người bán.",
+    title: "Kiểm Tra Hàng & Bàn Giao Tiền",
+    desc: "Người mua nhận thông tin bàn giao và có từ 6h - 24h kiểm tra. Hài lòng thì xác nhận nhận hàng để chuyển tiền cho người bán.",
   },
 ];
 
@@ -120,20 +120,20 @@ export default function HomePage() {
               variant="outline"
               className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold gap-2 rounded-full border-cyan-500/40 bg-cyan-950/40 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.15)]"
             >
-              <span>🛡️ Giao Thức Ký Quỹ Tự Hành Cho Sản Phẩm Số (Base Sepolia)</span>
+              <span>🛡️ Hệ Thống Bảo Vệ Giao Dịch Trực Tuyến Tự Động</span>
             </Badge>
 
             {/* Main Headline H1 */}
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white text-balance leading-tight sm:leading-none">
-              Két Giao Dịch Ký Quỹ Thông Minh Cho{" "}
+              Nền Tảng Giao Dịch An Toàn Cho{" "}
               <span className="bg-linear-to-r from-emerald-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
-                Giao Dịch Số &amp; Social Commerce
+                Sản Phẩm Số &amp; Đồ Mua Bán Online
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-sm sm:text-lg text-slate-300 leading-relaxed max-w-2xl text-balance">
-              Khóa tiền an toàn qua VietQR tự động. Mở két Digital Vault kiểm thử 6h - 24h. Trọng tài AI phân xử tranh chấp công tâm.
+              Tiền được giữ an toàn qua VietQR. Khách có thời gian kiểm tra hàng từ 6h - 24h trước khi chuyển tiền cho người bán. Không lo bị quỵt tiền hay gửi hàng sai.
             </p>
 
             {/* Auth-Aware Primary & Public Secondary CTAs (min-height >= 48px) */}
@@ -142,11 +142,11 @@ export default function HomePage() {
               <Button
                 asChild
                 size="lg"
-                className="w-full sm:w-auto min-h-12 px-7 rounded-xl bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all duration-200 border-0"
+                className="w-full sm:w-auto min-h-12 px-7 rounded-xl bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all duration-200 border-0 cursor-pointer"
               >
                 <Link href={createDealHref} className="flex items-center justify-center gap-2">
                   <ShieldCheck className="size-5" />
-                  <span>Tạo Giao Dịch Bán Sản Phẩm Số</span>
+                  <span>Tạo Giao Dịch Ngay</span>
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -156,10 +156,10 @@ export default function HomePage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto min-h-12 px-6 rounded-xl border-zinc-700 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-600 text-slate-200 hover:text-white transition-all duration-200 font-semibold"
+                className="w-full sm:w-auto min-h-12 px-6 rounded-xl border-zinc-700 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-600 text-slate-200 hover:text-white transition-all duration-200 font-semibold cursor-pointer"
               >
                 <Link href="/deals/demo" className="flex items-center justify-center gap-2">
-                  <span>Vào Bàn Đàm Phán Thử Nghiệm</span>
+                  <span>Xem Giao Dịch Mẫu</span>
                   <Sparkles className="size-4 text-cyan-400" />
                 </Link>
               </Button>
@@ -199,10 +199,10 @@ export default function HomePage() {
               Cơ Chế Bảo Vệ 3 Lớp
             </Badge>
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-              Giao Thức Ký Quỹ Công Nghệ Cao Cho Tài Sản Số
+              An Tâm Tuyệt Đối Cho Mọi Giao Dịch Trực Tuyến
             </h2>
             <p className="text-slate-400 text-sm sm:base">
-              Loại bỏ hoàn toàn rủi ro chuyển tiền không nhận hàng hoặc gửi hàng không nhận tiền trong giao dịch số.
+              Loại bỏ hoàn toàn rủi ro chuyển tiền không nhận được hàng hoặc gửi hàng không nhận được tiền.
             </p>
           </div>
 
@@ -255,10 +255,10 @@ export default function HomePage() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Quy Trình Ký Quỹ &amp; Mở Két Trong 3 Bước
+              Quy Trình Giữ Tiền &amp; Bàn Giao Trong 3 Bước
             </h2>
             <p className="text-slate-400 text-sm">
-              Đơn giản như mua sắm thương mại điện tử, an toàn như hợp đồng thông minh Web3.
+              Đơn giản như mua sắm online, tiền và hàng được bảo vệ an toàn 100%.
             </p>
           </div>
 
@@ -289,10 +289,10 @@ export default function HomePage() {
                 <span>Bắt Đầu Giao Dịch Không Lo Rủi Ro</span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                Bảo Vệ Thu Nhập Freelancer &amp; Giao Dịch Số Ngay Hôm Nay
+                Bảo Vệ Thu Nhập &amp; An Toàn Mua Bán Ngay Hôm Nay
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Tạo giao dịch mua bán tài khoản, bản quyền, mã nguồn hoặc hợp đồng freelance. Cài đặt thời gian đồng kiểm và để TrustPassz tự động hóa toàn bộ quá trình ký quỹ.
+                Tạo giao dịch mua bán tài liệu số, đồ dùng online hoặc sản phẩm cá nhân. Cài đặt thời gian kiểm tra và để TrustPassz tự động bảo vệ tiền và hàng cho bạn.
               </p>
             </div>
 
@@ -300,10 +300,10 @@ export default function HomePage() {
               <Button
                 size="lg"
                 asChild
-                className="w-full sm:w-auto min-h-12 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg"
+                className="w-full sm:w-auto min-h-12 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg cursor-pointer"
               >
                 <Link href={createDealHref} className="flex items-center justify-center gap-2">
-                  <span>Khởi Tạo Giao Dịch Mới</span>
+                  <span>Tạo Giao Dịch Ngay</span>
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -312,10 +312,10 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="w-full sm:w-auto min-h-12 rounded-xl border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white"
+                className="w-full sm:w-auto min-h-12 rounded-xl border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white cursor-pointer"
               >
                 <Link href="/deals/demo">
-                  Trải Nghiệm Demo
+                  Xem Giao Dịch Mẫu
                 </Link>
               </Button>
             </div>
