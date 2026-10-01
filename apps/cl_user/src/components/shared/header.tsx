@@ -77,16 +77,16 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-8">
         {/* Brand Logo & Desktop Nav Links */}
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500/20 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)] group-hover:border-cyan-400/60 transition-all">
+        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500/20 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)] group-hover:border-cyan-400/60 transition-all shrink-0">
               <ShieldCheck className="size-5 text-emerald-400 group-hover:text-cyan-300 transition-colors" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-cyan-300 transition-colors">
+            <div className="flex flex-col shrink-0">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-cyan-300 transition-colors whitespace-nowrap">
                 TrustPassz
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/90 leading-none">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/90 leading-none whitespace-nowrap">
                 Bảo Vệ Giao Dịch An Toàn
               </span>
             </div>
@@ -96,17 +96,17 @@ export function Header() {
         </div>
 
         {/* Right Action Cluster */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Network Badge: Automated Protection */}
           <Badge
             variant="outline"
-            className="hidden lg:inline-flex items-center gap-1.5 rounded-full border-slate-700 bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-slate-300"
+            className="hidden xl:inline-flex items-center gap-1.5 rounded-full border-slate-700 bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-slate-300 whitespace-nowrap shrink-0"
           >
-            <span className="relative flex size-2">
+            <span className="relative flex size-2 shrink-0">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            <span>Hệ thống bảo vệ tự động</span>
+            <span className="whitespace-nowrap">Hệ thống bảo vệ tự động</span>
           </Badge>
 
           {isAuth ? (
