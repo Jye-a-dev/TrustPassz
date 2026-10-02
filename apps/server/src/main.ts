@@ -12,7 +12,7 @@ async function bootstrap() {
   // FIX C2: Parse cookies so AuthGuard can read httpOnly access_token cookie
   app.use(cookieParser());
 
-  // CORS — allow all local dev ports + production origins
+  // CORS — allow all local dev ports + production origins + mobile clients (LAN IP & expo)
   const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
@@ -21,6 +21,9 @@ async function bootstrap() {
     'http://localhost:5001',
     'http://localhost:5100', // cl_admin dev server
     'http://localhost:6000',
+    'http://localhost:8081', // Metro bundler
+    'http://localhost:19000',
+    'http://localhost:19006',
     'https://trustpassz.vercel.app',
     'https://www.trustpassz.io',
     'https://trustpassz.io',
@@ -31,12 +34,18 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ): void => {
-      // Allow requests with no origin (curl, Postman, server-to-server)
+      // Allow requests with no origin (curl, Postman, server-to-server, mobile native apps)
       if (!origin) {
         callback(null, true);
         return;
       }
-      if (allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        /^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(
+          origin,
+        ) ||
+        origin.startsWith('exp://')
+      ) {
         callback(null, true);
         return;
       }
@@ -116,11 +125,11 @@ async function bootstrap() {
     },
   });
 
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port);
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+  await app.listen(port, '0.0.0.0');
 
-  logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`Swagger UI available at: http://localhost:${port}/docs`);
+  logger.log(`Application is running on: http://0.0.0.0:${port}`);
+  logger.log(`Swagger UI available at: http://0.0.0.0:${port}/docs`);
 }
 
 void bootstrap();

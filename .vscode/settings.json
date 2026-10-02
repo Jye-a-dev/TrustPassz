@@ -1,4 +1,6 @@
 {
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.gradle.enabled": false,
   "java.import.exclusions": [
     "**/node_modules/**",
     "**/.metadata/**",

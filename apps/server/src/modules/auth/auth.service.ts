@@ -131,9 +131,17 @@ export class AuthService {
    */
   private async verifyGoogleIdToken(token: string) {
     try {
+      const allowedAudiences = [
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_WEB_CLIENT_ID,
+        process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        process.env.GOOGLE_ANDROID_CLIENT_ID,
+        process.env.GOOGLE_IOS_CLIENT_ID,
+      ].filter((aud): aud is string => Boolean(aud && aud.trim().length > 0));
+
       const ticket = await this.googleClient.verifyIdToken({
         idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID,
+        audience: allowedAudiences.length > 0 ? allowedAudiences : undefined,
       });
       const payload = ticket.getPayload();
       if (!payload || !payload.email) {
@@ -142,7 +150,7 @@ export class AuthService {
       return {
         sub: payload.sub,
         email: payload.email,
-        displayName: payload.name || payload.given_name,
+        displayName: payload.name || payload.given_name || payload.email.split('@')[0],
         avatarUrl: payload.picture,
       };
     } catch (verifyErr) {
@@ -254,7 +262,8 @@ export class AuthService {
       };
     }
 
-    const { token, provider, solanaPublicKey, solanaSignature, solanaMessage } =
+    const rawToken = dto.idToken || dto.token;
+    const { provider, solanaPublicKey, solanaSignature, solanaMessage } =
       dto;
     const normalizedProvider = provider?.toLowerCase() || '';
 
@@ -266,7 +275,7 @@ export class AuthService {
       Boolean(solanaPublicKey && solanaSignature)
     ) {
       const pubkey = solanaPublicKey || dto.walletAddress;
-      const signature = solanaSignature || token;
+      const signature = solanaSignature || rawToken;
       const message = solanaMessage;
 
       if (!pubkey || !signature || !message) {
@@ -305,10 +314,10 @@ export class AuthService {
     }
     // 2. Google OAuth Authentication — FIX H1: verify-only, no fallback
     else if (normalizedProvider === 'google') {
-      if (!token) {
+      if (!rawToken) {
         throw new BadRequestException('Google ID token is required');
       }
-      const googleClaims = await this.verifyGoogleIdToken(token);
+      const googleClaims = await this.verifyGoogleIdToken(rawToken);
       decodedClaims = {
         sub: googleClaims.sub,
         email: googleClaims.email || dto.email,
@@ -319,7 +328,7 @@ export class AuthService {
     }
     // 3. Privy JWT Token (verified via Privy JWKS — decode with complete=true for header inspection only)
     else {
-      if (!token) {
+      if (!rawToken) {
         throw new BadRequestException('Authentication token is required');
       }
 
@@ -328,7 +337,7 @@ export class AuthService {
         // We decode here only to extract payload claims for user upsert.
         // For production hardening, replace with full JWKS verify against Privy's JWKS endpoint.
         const { decode } = await import('jsonwebtoken');
-        const unverified = decode(token, { complete: true }) as {
+        const unverified = decode(rawToken, { complete: true }) as {
           header: { alg: string; kid?: string };
           payload: {
             sub?: string;

@@ -12,6 +12,15 @@ export class VerifyAuthDto {
   token?: string;
 
   @ApiPropertyOptional({
+    description: 'Google OAuth ID Token alias',
+    example:
+      'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhdWQiOiJ5b3VyLWNsaWVudC1pZCIsImVtYWlsIjoic2VsbGVyQHRydXN0cGFzc3ouaW8iLCJzdWIiOiIxMTExMTExMTExMTExMTExMTExMTEifQ.signature',
+  })
+  @IsOptional()
+  @IsString({ message: 'idToken must be a string' })
+  idToken?: string;
+
+  @ApiPropertyOptional({
     description: 'Authentication provider name',
     enum: ['google', 'privy', 'solana'],
     example: 'google',
