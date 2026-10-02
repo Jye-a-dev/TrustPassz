@@ -1,14 +1,32 @@
 {
-  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.project.importOnFirstTimeStartup": "disabled",
   "java.import.gradle.enabled": false,
+  "java.import.gradle.wrapper.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.autobuild.enabled": false,
   "java.import.exclusions": [
     "**/node_modules/**",
     "**/.metadata/**",
     "**/archetype-resources/**",
     "**/META-INF/maven/**",
-    "**/apps/mb_user/android/**"
+    "**/apps/mb_user/android/**",
+    "**/android/**"
+  ],
+  "java.project.resourceFilters": [
+    "node_modules",
+    ".git",
+    "apps/mb_user/android/.gradle",
+    "apps/mb_user/android/app/build",
+    "apps/mb_user/android"
   ],
   "files.exclude": {
-    "**/apps/mb_user/android/.gradle": true
+    "**/apps/mb_user/android/.gradle": true,
+    "**/apps/mb_user/android/app/build": true
+  },
+  "files.watcherExclude": {
+    "**/apps/mb_user/android/.gradle/**": true,
+    "**/apps/mb_user/android/app/build/**": true,
+    "**/.gradle/**": true
   }
 }

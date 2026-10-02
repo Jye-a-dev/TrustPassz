@@ -357,7 +357,17 @@ export class DealsService {
     }
 
     this.logger.log(`[triggerSettle] Initiating settle for deal=${dealId}`);
-    return this.oracleRelayer.settle(dealId);
+    const txResult = await this.oracleRelayer.settle(dealId);
+    if (!txResult) {
+      await this.prisma.deal.update({
+        where: { id: dealId },
+        data: { state: DealState.SETTLED },
+      });
+      this.logger.log(
+        `[triggerSettle] DB updated → SETTLED for deal=${dealId} (fiat / off-chain settlement)`,
+      );
+    }
+    return txResult || { success: true, state: DealState.SETTLED };
   }
 
   /**

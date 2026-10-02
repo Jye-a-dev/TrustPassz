@@ -43,8 +43,10 @@
 │   │   ├── 📄 Dockerfile
 │   │   ├── 📄 engine.py
 │   │   ├── 📄 main.py
+│   │   ├── 📄 package.json
 │   │   ├── 📄 pytest.ini
 │   │   ├── 📄 requirements.txt
+│   │   ├── 📄 run.js
 │   │   └── 📄 test_suggestion.py
 │   ├── 📁 cl_admin
 │   │   ├── 📁 public
@@ -55,12 +57,28 @@
 │   │   │   │   ├── 📁 (auth)
 │   │   │   │   │   ├── 📁 login
 │   │   │   │   │   │   └── 📄 page.tsx
-│   │   │   │   │   └── 📁 register
-│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 register
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   └── 📄 layout.tsx
 │   │   │   │   ├── 📁 (dashboard)
-│   │   │   │   │   └── 📁 dashboard
-│   │   │   │   │       ├── 📄 loading.tsx
-│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 ai-lab
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 api-explorer
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 dashboard
+│   │   │   │   │   │   ├── 📄 loading.tsx
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 deals
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 disputes
+│   │   │   │   │   │   ├── 📁 [id]
+│   │   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 system-status
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   ├── 📁 users
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   └── 📄 layout.tsx
 │   │   │   │   ├── 📁 api
 │   │   │   │   │   └── 📁 health
 │   │   │   │   │       └── 📄 route.ts
@@ -70,57 +88,80 @@
 │   │   │   │   ├── 📄 not-found.tsx
 │   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 components
+│   │   │   │   ├── 📁 ai-lab
+│   │   │   │   │   ├── 📄 ai-benchmark-tester.tsx
+│   │   │   │   │   ├── 📄 contrast-slider-panel.tsx
+│   │   │   │   │   └── 📄 prompt-scenario-editor.tsx
+│   │   │   │   ├── 📁 auth
+│   │   │   │   │   ├── 📄 admin-auth-guard.tsx
+│   │   │   │   │   ├── 📄 auth-error-banner.tsx
+│   │   │   │   │   ├── 📄 sandbox-quick-login-tab.tsx
+│   │   │   │   │   ├── 📄 standard-login-tab.tsx
+│   │   │   │   │   └── 📄 web3-passkey-tab.tsx
+│   │   │   │   ├── 📁 dashboard
+│   │   │   │   │   ├── 📄 kpi-metrics-grid.tsx
+│   │   │   │   │   └── 📄 system-health-banner.tsx
+│   │   │   │   ├── 📁 deals
+│   │   │   │   │   ├── 📄 deal-details-drawer.tsx
+│   │   │   │   │   └── 📄 deal-override-dialog.tsx
+│   │   │   │   ├── 📁 disputes
+│   │   │   │   │   ├── 📄 ai-verdict-card.tsx
+│   │   │   │   │   ├── 📄 dispute-evidence-viewer.tsx
+│   │   │   │   │   └── 📄 override-action-dialog.tsx
+│   │   │   │   ├── 📁 layout
+│   │   │   │   │   ├── 📄 admin-footer.tsx
+│   │   │   │   │   ├── 📄 admin-navbar.tsx
+│   │   │   │   │   └── 📄 admin-sidebar.tsx
 │   │   │   │   ├── 📁 shared
 │   │   │   │   │   ├── 📄 empty-state.tsx
 │   │   │   │   │   ├── 📄 footer.tsx
 │   │   │   │   │   ├── 📄 header.tsx
 │   │   │   │   │   ├── 📄 providers.tsx
 │   │   │   │   │   └── 📄 theme-toggle.tsx
+│   │   │   │   ├── 📁 status
+│   │   │   │   │   └── 📄 service-health-card.tsx
 │   │   │   │   └── 📁 ui
 │   │   │   │       ├── 📄 badge.tsx
 │   │   │   │       ├── 📄 button.tsx
 │   │   │   │       ├── 📄 card.tsx
 │   │   │   │       ├── 📄 dialog.tsx
+│   │   │   │       ├── 📄 dropdown-menu.tsx
 │   │   │   │       ├── 📄 input.tsx
 │   │   │   │       ├── 📄 popover.tsx
 │   │   │   │       ├── 📄 sheet.tsx
-│   │   │   │       └── 📄 skeleton.tsx
-│   │   │   ├── 📁 features
-│   │   │   │   └── 📁 items
-│   │   │   │       ├── 📁 actions
-│   │   │   │       │   └── 📄 item-actions.ts
-│   │   │   │       ├── 📁 components
-│   │   │   │       │   ├── 📄 item-card.tsx
-│   │   │   │       │   ├── 📄 item-form-dialog.tsx
-│   │   │   │       │   ├── 📄 item-list.tsx
-│   │   │   │       │   └── 📄 item-search-filter.tsx
-│   │   │   │       ├── 📁 hooks
-│   │   │   │       │   └── 📄 use-items.ts
-│   │   │   │       ├── 📁 types
-│   │   │   │       │   └── 📄 item.ts
-│   │   │   │       └── 📁 utils
-│   │   │   │           └── 📄 item-helpers.ts
+│   │   │   │       ├── 📄 skeleton.tsx
+│   │   │   │       ├── 📄 slider.tsx
+│   │   │   │       └── 📄 table.tsx
 │   │   │   ├── 📁 hooks
 │   │   │   │   ├── 📄 use-debounce.ts
 │   │   │   │   ├── 📄 use-media-query.ts
 │   │   │   │   └── 📄 use-mounted.ts
 │   │   │   ├── 📁 lib
+│   │   │   │   ├── 📄 admin-auth-store.ts
 │   │   │   │   ├── 📄 api-client.ts
+│   │   │   │   ├── 📄 audit-logger.ts
+│   │   │   │   ├── 📄 auth-redirect.ts
 │   │   │   │   ├── 📄 env.ts
 │   │   │   │   ├── 📄 query-client.ts
 │   │   │   │   ├── 📄 store.ts
+│   │   │   │   ├── 📄 system-monitor.ts
 │   │   │   │   └── 📄 utils.ts
-│   │   │   └── 📁 styles
-│   │   │       └── 📄 globals.css
+│   │   │   ├── 📁 styles
+│   │   │   │   └── 📄 globals.css
+│   │   │   ├── 📁 types
+│   │   │   │   └── 📄 index.ts
+│   │   │   └── 📄 middleware.ts
+│   │   ├── 📄 .env.local
 │   │   ├── 📄 .gitignore
 │   │   ├── 📄 eslint.config.mjs
-│   │   ├── 📄 next.config.mjs
+│   │   ├── 📄 next-env.d.ts
 │   │   ├── 📄 next.config.ts
 │   │   ├── 📄 package-lock.json
 │   │   ├── 📄 package.json
 │   │   ├── 📄 postcss.config.mjs
 │   │   ├── 📄 README.md
-│   │   └── 📄 tsconfig.json
+│   │   ├── 📄 tsconfig.json
+│   │   └── 📄 tsconfig.tsbuildinfo
 │   ├── 📁 cl_user
 │   │   ├── 📁 public
 │   │   │   └── 📁 img
@@ -129,7 +170,8 @@
 │   │   │   ├── 📁 __tests__
 │   │   │   │   ├── 📄 bargain-slider.test.tsx
 │   │   │   │   ├── 📄 countdown-timer.test.ts
-│   │   │   │   └── 📄 crypto.test.ts
+│   │   │   │   ├── 📄 crypto.test.ts
+│   │   │   │   └── 📄 session-lifecycle.test.ts
 │   │   │   ├── 📁 abi
 │   │   │   │   ├── 📄 DigitalEscrow.json
 │   │   │   │   ├── 📄 DigitalEscrowABI.ts
@@ -273,17 +315,36 @@
 │   │   ├── 📄 package.json
 │   │   ├── 📄 postcss.config.mjs
 │   │   ├── 📄 README.md
+│   │   ├── 📄 STRUCTURE_TEMP.md
 │   │   ├── 📄 tsconfig.json
 │   │   └── 📄 tsconfig.tsbuildinfo
 │   ├── 📁 mb_user
-│   │   ├── 📁 .expo
-│   │   │   ├── 📄 devices.json
-│   │   │   └── 📄 README.md
 │   │   ├── 📁 android
 │   │   │   ├── 📁 .gradle
+│   │   │   │   ├── 📁 8.2.1
+│   │   │   │   │   ├── 📁 checksums
+│   │   │   │   │   │   ├── 📄 checksums.lock
+│   │   │   │   │   │   ├── 📄 md5-checksums.bin
+│   │   │   │   │   │   └── 📄 sha1-checksums.bin
+│   │   │   │   │   ├── 📁 dependencies-accessors
+│   │   │   │   │   │   ├── 📄 dependencies-accessors.lock
+│   │   │   │   │   │   └── 📄 gc.properties
+│   │   │   │   │   ├── 📁 executionHistory
+│   │   │   │   │   │   ├── 📄 executionHistory.bin
+│   │   │   │   │   │   └── 📄 executionHistory.lock
+│   │   │   │   │   ├── 📁 fileChanges
+│   │   │   │   │   │   └── 📄 last-build.bin
+│   │   │   │   │   ├── 📁 fileHashes
+│   │   │   │   │   │   ├── 📄 fileHashes.bin
+│   │   │   │   │   │   ├── 📄 fileHashes.lock
+│   │   │   │   │   │   └── 📄 resourceHashesCache.bin
+│   │   │   │   │   ├── 📁 vcsMetadata
+│   │   │   │   │   └── 📄 gc.properties
 │   │   │   │   ├── 📁 8.9
 │   │   │   │   │   ├── 📁 checksums
-│   │   │   │   │   │   └── 📄 checksums.lock
+│   │   │   │   │   │   ├── 📄 checksums.lock
+│   │   │   │   │   │   ├── 📄 md5-checksums.bin
+│   │   │   │   │   │   └── 📄 sha1-checksums.bin
 │   │   │   │   │   ├── 📁 dependencies-accessors
 │   │   │   │   │   │   └── 📄 gc.properties
 │   │   │   │   │   ├── 📁 executionHistory
@@ -295,65 +356,187 @@
 │   │   │   │   │   │   └── 📄 fileHashes.lock
 │   │   │   │   │   ├── 📁 vcsMetadata
 │   │   │   │   │   └── 📄 gc.properties
-│   │   │   │   ├── 📁 9.2.0
-│   │   │   │   │   ├── 📁 checksums
-│   │   │   │   │   │   └── 📄 checksums.lock
-│   │   │   │   │   ├── 📁 expanded
-│   │   │   │   │   ├── 📁 fileChanges
-│   │   │   │   │   │   └── 📄 last-build.bin
-│   │   │   │   │   ├── 📁 fileHashes
-│   │   │   │   │   │   ├── 📄 fileHashes.bin
-│   │   │   │   │   │   └── 📄 fileHashes.lock
-│   │   │   │   │   ├── 📁 vcsMetadata
-│   │   │   │   │   └── 📄 gc.properties
 │   │   │   │   ├── 📁 buildOutputCleanup
 │   │   │   │   │   ├── 📄 buildOutputCleanup.lock
-│   │   │   │   │   └── 📄 cache.properties
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   └── 📁 errors
-│   │   │   │   └── 📁 vcs-1
-│   │   │   │       └── 📄 gc.properties
+│   │   │   │   │   ├── 📄 cache.properties
+│   │   │   │   │   └── 📄 outputFiles.bin
+│   │   │   │   ├── 📁 vcs-1
+│   │   │   │   │   └── 📄 gc.properties
+│   │   │   │   └── 📄 file-system.probe
 │   │   │   ├── 📁 app
+│   │   │   │   ├── 📁 src
+│   │   │   │   │   ├── 📁 androidTest
+│   │   │   │   │   │   └── 📁 java
+│   │   │   │   │   │       └── 📁 com
+│   │   │   │   │   │           └── 📁 getcapacitor
+│   │   │   │   │   │               └── 📁 myapp
+│   │   │   │   │   │                   └── 📄 ExampleInstrumentedTest.java
+│   │   │   │   │   ├── 📁 main
+│   │   │   │   │   │   ├── 📁 assets
+│   │   │   │   │   │   │   ├── 📁 public
+│   │   │   │   │   │   │   │   ├── 📁 assets
+│   │   │   │   │   │   │   │   │   ├── 📄 index-Bt-oDxCG.js
+│   │   │   │   │   │   │   │   │   ├── 📄 index-D8vs_vIX.css
+│   │   │   │   │   │   │   │   │   ├── 📄 web-BsVwlM3y.js
+│   │   │   │   │   │   │   │   │   └── 📄 web-CthuAYli.js
+│   │   │   │   │   │   │   │   ├── 📄 cordova_plugins.js
+│   │   │   │   │   │   │   │   ├── 📄 cordova.js
+│   │   │   │   │   │   │   │   ├── 📄 favicon.ico
+│   │   │   │   │   │   │   │   └── 📄 index.html
+│   │   │   │   │   │   │   ├── 📄 capacitor.config.json
+│   │   │   │   │   │   │   └── 📄 capacitor.plugins.json
+│   │   │   │   │   │   ├── 📁 java
+│   │   │   │   │   │   │   └── 📁 io
+│   │   │   │   │   │   │       └── 📁 trustpassz
+│   │   │   │   │   │   │           └── 📁 mobile
+│   │   │   │   │   │   │               └── 📄 MainActivity.java
+│   │   │   │   │   │   ├── 📁 res
+│   │   │   │   │   │   │   ├── 📁 drawable
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_background.xml
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-land-hdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-land-mdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-land-xhdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-land-xxhdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-land-xxxhdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-port-hdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-port-mdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-port-xhdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-port-xxhdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-port-xxxhdpi
+│   │   │   │   │   │   │   │   └── 📄 splash.png
+│   │   │   │   │   │   │   ├── 📁 drawable-v24
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher_foreground.xml
+│   │   │   │   │   │   │   ├── 📁 layout
+│   │   │   │   │   │   │   │   └── 📄 activity_main.xml
+│   │   │   │   │   │   │   ├── 📁 mipmap-anydpi-v26
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.xml
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher.xml
+│   │   │   │   │   │   │   ├── 📁 mipmap-hdpi
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
+│   │   │   │   │   │   │   ├── 📁 mipmap-mdpi
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
+│   │   │   │   │   │   │   ├── 📁 mipmap-xhdpi
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
+│   │   │   │   │   │   │   ├── 📁 mipmap-xxhdpi
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
+│   │   │   │   │   │   │   ├── 📁 mipmap-xxxhdpi
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
+│   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
+│   │   │   │   │   │   │   ├── 📁 values
+│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_background.xml
+│   │   │   │   │   │   │   │   ├── 📄 strings.xml
+│   │   │   │   │   │   │   │   └── 📄 styles.xml
+│   │   │   │   │   │   │   └── 📁 xml
+│   │   │   │   │   │   │       ├── 📄 config.xml
+│   │   │   │   │   │   │       └── 📄 file_paths.xml
+│   │   │   │   │   │   └── 📄 AndroidManifest.xml
+│   │   │   │   │   └── 📁 test
+│   │   │   │   │       └── 📁 java
+│   │   │   │   │           └── 📁 com
+│   │   │   │   │               └── 📁 getcapacitor
+│   │   │   │   │                   └── 📁 myapp
+│   │   │   │   │                       └── 📄 ExampleUnitTest.java
+│   │   │   │   ├── 📄 .gitignore
+│   │   │   │   ├── 📄 build.gradle
+│   │   │   │   ├── 📄 capacitor.build.gradle
+│   │   │   │   └── 📄 proguard-rules.pro
+│   │   │   ├── 📁 capacitor-cordova-android-plugins
 │   │   │   │   ├── 📁 src
 │   │   │   │   │   └── 📁 main
 │   │   │   │   │       ├── 📁 java
-│   │   │   │   │       │   └── 📁 com
-│   │   │   │   │       │       └── 📁 trustpassz
-│   │   │   │   │       │           └── 📁 mobile
+│   │   │   │   │       │   └── 📄 .gitkeep
 │   │   │   │   │       ├── 📁 res
-│   │   │   │   │       │   └── 📁 values
-│   │   │   │   │       │       └── 📄 strings.xml
+│   │   │   │   │       │   └── 📄 .gitkeep
 │   │   │   │   │       └── 📄 AndroidManifest.xml
-│   │   │   │   └── 📄 build.gradle
+│   │   │   │   ├── 📄 build.gradle
+│   │   │   │   └── 📄 cordova.variables.gradle
+│   │   │   ├── 📁 gradle
+│   │   │   │   └── 📁 wrapper
+│   │   │   │       ├── 📄 gradle-wrapper.jar
+│   │   │   │       └── 📄 gradle-wrapper.properties
+│   │   │   ├── 📄 .gitignore
 │   │   │   ├── 📄 build.gradle
+│   │   │   ├── 📄 capacitor.settings.gradle
 │   │   │   ├── 📄 gradle.properties
-│   │   │   └── 📄 settings.gradle
+│   │   │   ├── 📄 gradlew
+│   │   │   ├── 📄 gradlew.bat
+│   │   │   ├── 📄 settings.gradle
+│   │   │   └── 📄 variables.gradle
+│   │   ├── 📁 public
+│   │   │   └── 📄 favicon.ico
 │   │   ├── 📁 src
-│   │   │   ├── 📁 abi
-│   │   │   │   ├── 📄 DigitalEscrow.json
-│   │   │   │   ├── 📄 DigitalEscrowABI.ts
-│   │   │   │   └── 📄 index.ts
 │   │   │   ├── 📁 components
-│   │   │   ├── 📁 core
-│   │   │   │   └── 📄 interfaces.ts
+│   │   │   │   ├── 📁 common
+│   │   │   │   │   ├── 📄 AppHeader.tsx
+│   │   │   │   │   ├── 📄 CountdownTimer.tsx
+│   │   │   │   │   └── 📄 ServerStatusBar.tsx
+│   │   │   │   ├── 📁 deal
+│   │   │   │   │   ├── 📄 BargainSlider.tsx
+│   │   │   │   │   ├── 📄 DealCard.tsx
+│   │   │   │   │   └── 📄 VaultModal.tsx
+│   │   │   │   └── 📁 payment
+│   │   │   │       ├── 📄 DeepLinkButton.tsx
+│   │   │   │       └── 📄 VietQRCard.tsx
 │   │   │   ├── 📁 screens
-│   │   │   └── 📁 services
-│   │   │       └── 📄 EscrowService.ts
+│   │   │   │   ├── 📁 auth
+│   │   │   │   │   ├── 📄 GreetingScreen.tsx
+│   │   │   │   │   └── 📄 LoginScreen.tsx
+│   │   │   │   └── 📁 main
+│   │   │   │       ├── 📄 DealRoomScreen.tsx
+│   │   │   │       ├── 📄 DisputeScreen.tsx
+│   │   │   │       └── 📄 HomeScreen.tsx
+│   │   │   ├── 📁 services
+│   │   │   │   ├── 📄 apiClient.ts
+│   │   │   │   ├── 📄 auth.service.ts
+│   │   │   │   ├── 📄 deal.service.ts
+│   │   │   │   ├── 📄 health.service.ts
+│   │   │   │   └── 📄 keyframe-extractor.ts
+│   │   │   ├── 📁 stores
+│   │   │   │   ├── 📄 useAuthStore.ts
+│   │   │   │   └── 📄 useDealStore.ts
+│   │   │   ├── 📁 types
+│   │   │   │   └── 📄 index.ts
+│   │   │   ├── 📄 App.tsx
+│   │   │   ├── 📄 index.css
+│   │   │   ├── 📄 main.tsx
+│   │   │   └── 📄 vite-env.d.ts
 │   │   ├── 📄 .env
 │   │   ├── 📄 .env.example
-│   │   ├── 📄 app.json
 │   │   ├── 📄 App.tsx
-│   │   ├── 📄 babel.config.js
-│   │   ├── 📄 index.js
-│   │   ├── 📄 metro.config.js
+│   │   ├── 📄 capacitor.config.ts
+│   │   ├── 📄 index.html
 │   │   ├── 📄 package-lock.json
 │   │   ├── 📄 package.json
-│   │   └── 📄 tsconfig.json
+│   │   ├── 📄 postcss.config.js
+│   │   ├── 📄 tailwind.config.js
+│   │   ├── 📄 tsconfig.json
+│   │   └── 📄 vite.config.ts
 │   └── 📁 server
 │       ├── 📁 prisma
 │       │   ├── 📁 migrations
 │       │   │   └── 📄 init_schema.sql
-│       │   └── 📄 schema.prisma
+│       │   ├── 📄 clean-deals.ts
+│       │   ├── 📄 schema.prisma
+│       │   └── 📄 seed.ts
 │       ├── 📁 src
 │       │   ├── 📁 @types
 │       │   │   ├── 📄 @types.md
@@ -1462,5 +1645,6 @@
 ├── 📄 .gitignore
 ├── 📄 .gitmodules
 ├── 📄 package-lock.json
-└── 📄 package.json
+├── 📄 package.json
+└── 📄 STRUCTURE.md
 ```

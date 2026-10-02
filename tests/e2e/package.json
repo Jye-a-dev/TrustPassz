@@ -1,0 +1,22 @@
+{
+  "name": "@trustpassz/testing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cross-system End-to-End integration test suite for TrustPassz",
+  "scripts": {
+    "test": "jest --config jest.config.ts --runInBand --verbose",
+    "test:happy": "jest --config jest.config.ts specs/01-happy-path.spec.ts",
+    "test:dispute": "jest --config jest.config.ts specs/02-dispute-flow.spec.ts",
+    "test:concurrency": "jest --config jest.config.ts specs/03-realtime-concurrency.spec.ts",
+    "test:health": "jest --config jest.config.ts specs/04-system-health.spec.ts"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^7.0.0",
+    "jest": "^30.0.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.3"
+  }
+}

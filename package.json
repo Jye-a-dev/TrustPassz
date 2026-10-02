@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "tests/e2e"
   ],
   "scripts": {
     "mb": "npm --prefix apps/mb_user run dev",
@@ -12,7 +13,8 @@
     "admin": "npm --prefix apps/cl_admin run dev",
     "server": "npm --prefix apps/server run dev",
     "pipe": "npm --prefix apps/ai_pipeline run dev",
-    "structure": "node scripts/draw-structure.js"
+    "structure": "node scripts/draw-structure.js",
+    "test:e2e": "npm --prefix tests/e2e test"
   },
   "devDependencies": {
     "concurrently": "^9.2.4"
