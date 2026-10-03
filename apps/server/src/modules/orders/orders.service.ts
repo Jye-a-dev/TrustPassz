@@ -170,7 +170,7 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto) {
-    const order = await this.findOne(id);
+    await this.findOne(id);
 
     return this.prisma.order.update({
       where: { id },

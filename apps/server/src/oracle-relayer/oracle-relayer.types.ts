@@ -6,7 +6,9 @@
 import type { Hash, TransactionReceipt } from 'viem';
 
 export type DisputeAction =
-  'APPROVE_PAYOUT' | 'TRIGGER_REFUND' | 'ESCALATE_TO_ADMIN';
+  | 'APPROVE_PAYOUT'
+  | 'TRIGGER_REFUND'
+  | 'ESCALATE_TO_ADMIN';
 
 export interface TxResult {
   txHash: Hash;

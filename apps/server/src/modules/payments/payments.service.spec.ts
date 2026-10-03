@@ -7,7 +7,7 @@ import { PaymentsService } from './payments.service';
 
 describe('PaymentsService', () => {
   let service: PaymentsService;
-  let prisma: PrismaService;
+  let _prisma: PrismaService;
 
   const checksumKey = 'mock_checksum_key_1234567890';
 
@@ -55,7 +55,7 @@ describe('PaymentsService', () => {
     }).compile();
 
     service = module.get<PaymentsService>(PaymentsService);
-    prisma = module.get<PrismaService>(PrismaService);
+    _prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
   });
 

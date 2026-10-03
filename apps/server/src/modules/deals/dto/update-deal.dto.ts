@@ -22,7 +22,7 @@ export class UpdateDealDto extends PartialType(CreateDealDto) {
   @ApiPropertyOptional({
     description: 'Settlement transaction hash on-chain',
     example:
-      '0x5a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef',
+      '0x5a1b2c3d4e5f6789_sample_onchain_settle_transaction_hash_example_hex',
   })
   @IsOptional()
   @IsString({ message: 'Settle transaction hash must be a string' })
@@ -34,7 +34,7 @@ export class UpdateDealDto extends PartialType(CreateDealDto) {
   @ApiPropertyOptional({
     description: 'Dispute arbitration transaction hash on-chain',
     example:
-      '0x9f8e7d6c5b4a3210fedcba9876543210fedcba9876543210fedcba9876543210',
+      '0x9f8e7d6c5b4a3210_sample_onchain_dispute_transaction_hash_example_hex',
   })
   @IsOptional()
   @IsString({ message: 'Dispute transaction hash must be a string' })

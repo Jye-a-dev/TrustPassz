@@ -1,8 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { AppService } from './app.service';
 
 @ApiTags('System & Health')
+@SkipThrottle()
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -28,7 +30,8 @@ export class AppController {
   @Get('api/v1/health')
   @ApiOperation({
     summary: 'API v1 Health Check',
-    description: 'Returns JSON status for mobile and infrastructure health pings.',
+    description:
+      'Returns JSON status for mobile and infrastructure health pings.',
   })
   @ApiResponse({
     status: 200,

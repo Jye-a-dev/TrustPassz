@@ -6,7 +6,7 @@ import { PaymentsService } from './payments.service';
 
 describe('PaymentsController', () => {
   let controller: PaymentsController;
-  let service: PaymentsService;
+  let _service: PaymentsService;
 
   const mockPaymentsService = {
     createPaymentLink: jest.fn(),
@@ -36,7 +36,7 @@ describe('PaymentsController', () => {
       .compile();
 
     controller = module.get<PaymentsController>(PaymentsController);
-    service = module.get<PaymentsService>(PaymentsService);
+    _service = module.get<PaymentsService>(PaymentsService);
     jest.clearAllMocks();
   });
 

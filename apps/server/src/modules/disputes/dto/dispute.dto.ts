@@ -8,7 +8,6 @@ import {
   IsOptional,
   IsString,
   IsUUID,
-  Max,
   Min,
 } from 'class-validator';
 import { ArbitrationVerdict, DisputeStatus } from '@prisma/client';

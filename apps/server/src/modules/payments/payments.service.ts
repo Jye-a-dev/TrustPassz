@@ -279,7 +279,13 @@ export class PaymentsService {
         for (const k of sortedKeys) {
           const val = dataObj[k];
           if (val !== undefined && val !== null) {
-            queryParts.push(`${k}=${val}`);
+            const strVal =
+              typeof val === 'string'
+                ? val
+                : typeof val === 'number' || typeof val === 'boolean'
+                  ? `${val}`
+                  : JSON.stringify(val);
+            queryParts.push(`${k}=${strVal}`);
           }
         }
 

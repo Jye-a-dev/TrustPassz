@@ -5,10 +5,16 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 const logger = new Logger('OracleRelayerConfig');
-const DEV_FALLBACK_PRIVATE_KEY: `0x${string}` =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+// Known default Anvil / Hardhat test wallet addresses (strictly banned in production)
+const DEFAULT_TEST_ADDRESS_DENYLIST = new Set([
+  '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+  '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+  '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc',
+]);
 
 export interface OracleRelayerConfig {
   /** 0x-prefixed hex private key of the Oracle Relayer wallet */
@@ -52,15 +58,15 @@ function validateAddress(value: string, label: string): `0x${string}` {
  * Call once at module bootstrap — throws on misconfiguration.
  */
 export function loadOracleRelayerConfig(): OracleRelayerConfig {
-  const isDev = process.env.NODE_ENV !== 'production';
+  const isProd = process.env.NODE_ENV === 'production';
   let rawPrivateKey = process.env.ORACLE_RELAYER_PRIVATE_KEY;
 
   if (!rawPrivateKey || rawPrivateKey.trim() === '') {
-    if (isDev) {
+    if (!isProd) {
       logger.warn(
-        '[OracleRelayer] ORACLE_RELAYER_PRIVATE_KEY is not defined. Using local development fallback wallet key.',
+        '[OracleRelayer] ORACLE_RELAYER_PRIVATE_KEY is missing. Generated ephemeral in-memory wallet key for development.',
       );
-      rawPrivateKey = DEV_FALLBACK_PRIVATE_KEY;
+      rawPrivateKey = generatePrivateKey();
     } else {
       rawPrivateKey = requireEnv('ORACLE_RELAYER_PRIVATE_KEY');
     }
@@ -76,6 +82,23 @@ export function loadOracleRelayerConfig(): OracleRelayerConfig {
     throw new Error(
       `[OracleRelayer] ORACLE_RELAYER_PRIVATE_KEY must be 32 bytes (66 chars including 0x prefix)`,
     );
+  }
+
+  // Reject insecure test accounts in production environments
+  if (isProd) {
+    try {
+      const derivedAccount = privateKeyToAccount(privateKey);
+      if (
+        DEFAULT_TEST_ADDRESS_DENYLIST.has(derivedAccount.address.toLowerCase())
+      ) {
+        throw new Error(
+          `[OracleRelayer] CRITICAL SECURITY ERROR: Well-known Anvil/Hardhat test private key (${derivedAccount.address}) is strictly rejected in production!`,
+        );
+      }
+    } catch (err: any) {
+      if (err.message.includes('CRITICAL SECURITY ERROR')) throw err;
+      throw new Error(`[OracleRelayer] Invalid private key: ${err.message}`);
+    }
   }
 
   const contractAddress = validateAddress(

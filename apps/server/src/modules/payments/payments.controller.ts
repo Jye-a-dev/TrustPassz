@@ -16,7 +16,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { THROTTLE_CONFIG } from '../../config/throttle.config';
 import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
 import { PaymentsService } from './payments.service';
 
@@ -117,6 +119,12 @@ export class PaymentsController {
    */
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
+  @Throttle({
+    webhook: {
+      limit: THROTTLE_CONFIG.webhookLimit,
+      ttl: THROTTLE_CONFIG.ttlMs,
+    },
+  })
   @ApiOperation({
     summary: 'Tiếp nhận Webhook thanh toán PayOS (HMAC-SHA256 & Idempotent)',
     description:

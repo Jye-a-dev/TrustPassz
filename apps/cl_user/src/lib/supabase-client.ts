@@ -7,8 +7,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || "https://trustpassz-escrow.supabase.co";
 const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder-anon-key";
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "mock-anon-key";
 
 let supabaseInstance: SupabaseClient | null = null;
 

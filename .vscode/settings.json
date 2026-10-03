@@ -28,5 +28,10 @@
     "**/apps/mb_user/android/.gradle/**": true,
     "**/apps/mb_user/android/app/build/**": true,
     "**/.gradle/**": true
+  },
+  "files.associations": {
+    "deploy-contracts.yml": "yaml",
+    "**/.github/workflows/*.yml": "yaml",
+    "**/.github/workflows/*.yaml": "yaml"
   }
 }

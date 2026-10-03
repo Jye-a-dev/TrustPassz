@@ -1,0 +1,49 @@
+{
+  "secretLeaks": [],
+  "trackedEnvFiles": [],
+  "oversizedFiles": [],
+  "envExampleStatus": [
+    {
+      "package": "contracts",
+      "path": "packages/contracts/.env.example",
+      "exists": true,
+      "varsCount": 5
+    },
+    {
+      "package": "server",
+      "path": "apps/server/.env.example",
+      "exists": true,
+      "varsCount": 29
+    },
+    {
+      "package": "ai_pipeline",
+      "path": "apps/ai_pipeline/.env.example",
+      "exists": true,
+      "varsCount": 8
+    },
+    {
+      "package": "cl_user",
+      "path": "apps/cl_user/.env.example",
+      "exists": true,
+      "varsCount": 10
+    },
+    {
+      "package": "cl_admin",
+      "path": "apps/cl_admin/.env.example",
+      "exists": true,
+      "varsCount": 5
+    },
+    {
+      "package": "mb_user",
+      "path": "apps/mb_user/.env.example",
+      "exists": true,
+      "varsCount": 8
+    }
+  ],
+  "summary": {
+    "passed": true,
+    "qualityScorePercent": 100,
+    "totalFilesAudited": 493,
+    "auditTimestamp": "2026-10-03T18:36:44.209Z"
+  }
+}

@@ -2,11 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import bs58 from "bs58";
 import { ShieldCheck, KeyRound, Mail, Sparkles, AlertTriangle, Zap } from "lucide-react";
 import {
   Card,
@@ -18,42 +15,29 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { verifyAuthApi, type AuthResponse } from "@/lib/auth-api";
-import { useAuthStore, generateClientSessionJwt } from "@/lib/auth-store";
 import { LoginWeb3Tab } from "@/components/auth/login-web3-tab";
-import {
-  LoginEmailForm,
-  type LoginFormValues,
-} from "@/components/auth/login-email-form";
+import { LoginEmailForm } from "@/components/auth/login-email-form";
+import { useAuthHandlers } from "@/components/auth/use-auth-handlers";
 
 function LoginContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const setAuth = useAuthStore((s) => s.setAuth);
-
-  const { publicKey, signMessage, connected, disconnect } = useWallet();
-  const { setVisible: setWalletModalVisible } = useWalletModal();
-
-  const [isLoadingEmail, setIsLoadingEmail] = React.useState(false);
-  const [isSolanaLoading, setIsSolanaLoading] = React.useState(false);
-  const [isPasskeyLoading, setIsPasskeyLoading] = React.useState(false);
-  const [solanaStep, setSolanaStep] = React.useState<
-    "idle" | "requesting_sign" | "verifying"
-  >("idle");
-  const [activeMethod, setActiveMethod] = React.useState<"web3" | "email">(
-    "web3"
-  );
-
+  const [activeMethod, setActiveMethod] = React.useState<"web3" | "email">("web3");
   const isSessionExpired = searchParams?.get("expired") === "1";
 
-  // Validate callbackUrl safety: starts with '/' and does not target auth loops
-  const getRedirectTarget = React.useCallback((): string => {
-    const cb = searchParams?.get("callbackUrl");
-    if (cb && cb.startsWith("/") && !cb.startsWith("/login") && !cb.startsWith("/register")) {
-      return cb;
-    }
-    return "/user";
-  }, [searchParams]);
+  const {
+    connected,
+    publicKey,
+    disconnect,
+    isSolanaLoading,
+    solanaStep,
+    isPasskeyLoading,
+    isLoadingEmail,
+    handleSolanaSignIn,
+    handleGoogleSuccess,
+    handlePasskeySignIn,
+    onEmailSubmit,
+    handleDemoSignIn,
+  } = useAuthHandlers();
 
   React.useEffect(() => {
     if (isSessionExpired) {
@@ -63,200 +47,6 @@ function LoginContent() {
       });
     }
   }, [isSessionExpired]);
-
-  const handleAuthSuccess = React.useCallback(
-    (result: AuthResponse, methodDesc: string) => {
-      // Ensure token is guaranteed present (either from server payload or generated from verified claims)
-      const token = result.accessToken || generateClientSessionJwt(result.user);
-      if (typeof document !== "undefined") {
-        document.cookie = `access_token=${token}; path=/; Max-Age=${result.expiresIn || 604800}; SameSite=Lax;`;
-      }
-      setAuth(result.user, token);
-
-      toast.success(`${methodDesc} thành công!`, {
-        description: `Chào mừng ${result.user.displayName || result.user.email || "bạn"} trở lại.`,
-      });
-
-      const target = getRedirectTarget();
-      router.replace(target);
-
-      setTimeout(() => {
-        if (typeof window !== "undefined" && window.location.pathname.startsWith("/login")) {
-          window.location.replace(target);
-        }
-      }, 250);
-    },
-    [getRedirectTarget, router, setAuth]
-  );
-
-  // Handle Solana SIWS (Sign-in With Solana)
-  const handleSolanaSignIn = async () => {
-    try {
-      if (!connected || !publicKey) {
-        setWalletModalVisible(true);
-        return;
-      }
-
-      if (!signMessage) {
-        toast.error("Ví của bạn không hỗ trợ ký tin nhắn bảo mật SIWS");
-        return;
-      }
-
-      setIsSolanaLoading(true);
-      setSolanaStep("requesting_sign");
-
-      const nonce =
-        Math.random().toString(36).substring(2, 15) +
-        Date.now().toString(36) +
-        crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
-
-      const messageText = `TrustPassz Authentication: Sign this message to verify ownership of your wallet. Nonce: ${nonce}`;
-      const messageBytes = new TextEncoder().encode(messageText);
-
-      toast.info("Yêu cầu chữ ký", {
-        description: "Vui lòng phê duyệt chữ ký xác thực trong cửa sổ ví Solana của bạn.",
-      });
-
-      const signatureBytes = await signMessage(messageBytes);
-      const solanaSignature = bs58.encode(signatureBytes);
-      const solanaPublicKey = publicKey.toBase58();
-
-      setSolanaStep("verifying");
-
-      const result = await verifyAuthApi({
-        provider: "solana",
-        solanaPublicKey,
-        solanaSignature,
-        solanaMessage: messageText,
-      });
-
-      handleAuthSuccess(result, "Xác thực ví Solana");
-    } catch (error: unknown) {
-      const errMessage =
-        error instanceof Error ? error.message : "Xác thực Solana không thành công";
-      toast.error("Đăng nhập Solana thất bại", {
-        description: errMessage.includes("User rejected")
-          ? "Bạn đã từ chối ký thông điệp xác thực."
-          : errMessage,
-      });
-    } finally {
-      setIsSolanaLoading(false);
-      setSolanaStep("idle");
-    }
-  };
-
-  // Trigger auto-sign if wallet connects after clicking Connect
-  React.useEffect(() => {
-    if (connected && isSolanaLoading && solanaStep === "idle") {
-      handleSolanaSignIn();
-    }
-  }, [connected]);
-
-  // Handle Google OAuth Success
-  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
-    if (!credentialResponse.credential) {
-      toast.error("Không nhận được token từ Google");
-      return;
-    }
-
-    try {
-      toast.loading("Đang xác thực tài khoản Google...", { id: "google-auth" });
-
-      const result = await verifyAuthApi({
-        provider: "google",
-        token: credentialResponse.credential,
-      });
-
-      toast.dismiss("google-auth");
-      handleAuthSuccess(result, "Đăng nhập Google");
-    } catch (error: unknown) {
-      toast.dismiss("google-auth");
-      const errMessage =
-        error instanceof Error ? error.message : "Xác thực Google thất bại";
-      toast.error("Đăng nhập Google không thành công", {
-        description: errMessage,
-      });
-    }
-  };
-
-  // Handle Passkey / WebAuthn Biometrics
-  const handlePasskeySignIn = async () => {
-    setIsPasskeyLoading(true);
-    try {
-      if (
-        typeof window === "undefined" ||
-        !window.PublicKeyCredential ||
-        typeof navigator.credentials?.get !== "function"
-      ) {
-        throw new Error(
-          "Trình duyệt hoặc thiết bị này không hỗ trợ xác thực Passkey WebAuthn"
-        );
-      }
-
-      toast.info("Khởi động Passkey / Biometrics", {
-        description: "Quét vân tay hoặc FaceID trên thiết bị của bạn...",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      const mockEmail = "passkey-user@trustpassz.io";
-      const result = await verifyAuthApi({
-        provider: "privy",
-        email: mockEmail,
-        displayName: "Passkey Verified Trader",
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYXNza2V5LXVzZXItMDAxIiwiZW1haWwiOiJwYXNza2V5LXVzZXJAdHJ1c3RwYXNzei5pbyIsImRpc3BsYXlOYW1lIjoiUGFzc2tleSBVc2VyIn0.sig",
-      });
-
-      handleAuthSuccess(result, "Đăng nhập Passkey");
-    } catch (error: unknown) {
-      const errMessage =
-        error instanceof Error ? error.message : "Đăng nhập Passkey thất bại";
-      toast.error("Không thể hoàn tất Passkey", { description: errMessage });
-    } finally {
-      setIsPasskeyLoading(false);
-    }
-  };
-
-  // Traditional Email & Password Submit
-  const onEmailSubmit = async (data: LoginFormValues) => {
-    setIsLoadingEmail(true);
-    try {
-      const result = await verifyAuthApi({
-        email: data.email,
-        password: data.password,
-      });
-
-      handleAuthSuccess(result, "Đăng nhập tài khoản");
-    } catch (error: unknown) {
-      const errMessage =
-        error instanceof Error ? error.message : "Không thể xác thực";
-      toast.error("Đăng nhập email thất bại", { description: errMessage });
-    } finally {
-      setIsLoadingEmail(false);
-    }
-  };
-
-  const handleDemoSignIn = () => {
-    const demoUser = {
-      id: "11111111-1111-4111-a111-111111111111",
-      email: "seller@trustpassz.io",
-      walletAddress: "0x1111111111111111111111111111111111111111",
-      displayName: "Trusted Seller",
-      avatarUrl: null,
-      role: "USER",
-    };
-    const demoToken = generateClientSessionJwt(demoUser);
-    handleAuthSuccess(
-      {
-        accessToken: demoToken,
-        tokenType: "Bearer",
-        expiresIn: 604800,
-        user: demoUser,
-      },
-      "Đăng nhập tài khoản Demo"
-    );
-  };
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-[#0B0F17] overflow-hidden">

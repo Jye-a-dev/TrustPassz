@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -12,9 +14,11 @@ import { BargainsModule } from './modules/bargains/bargains.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
+import { throttlerAsyncOptions } from './config/throttle.config';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot(throttlerAsyncOptions),
     DatabaseModule,
     SupabaseModule,
     AuthModule,
@@ -28,6 +32,12 @@ import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
     OracleRelayerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

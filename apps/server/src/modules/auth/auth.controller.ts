@@ -8,15 +8,17 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { AuthService, generateNonce } from './auth.service';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
+import { THROTTLE_CONFIG } from '../../config/throttle.config';
 
-// Cookie config — centralized để logout dùng lại
+// Cookie config — centralized for login and logout consistency
 const ACCESS_TOKEN_COOKIE = 'access_token';
 const COOKIE_OPTIONS = {
-  httpOnly: false,
+  httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
@@ -24,12 +26,15 @@ const COOKIE_OPTIONS = {
 };
 
 @ApiTags('Authentication (Passwordless & Web3)')
+@Throttle({
+  auth: { limit: THROTTLE_CONFIG.authLimit, ttl: THROTTLE_CONFIG.ttlMs },
+})
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
-   * FIX C1: Endpoint sinh Nonce cho SIWS (Sign-In With Solana).
+   * Endpoint sinh Nonce cho SIWS (Sign-In With Solana).
    * Client phải nhúng nonce vào message trước khi ký.
    */
   @Public()
@@ -50,8 +55,7 @@ export class AuthController {
   }
 
   /**
-   * FIX C2: verify() giờ ghi JWT vào httpOnly cookie thay vì trả về body.
-   * Response body vẫn giữ `user` metadata và `tokenType` nhưng KHÔNG còn `accessToken`.
+   * verify() ghi JWT vào httpOnly cookie và trả về thông tin phiên.
    */
   @Public()
   @Post('verify')
@@ -59,7 +63,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Verify Google ID Token or Privy Passkey Token & Issue JWT Cookie',
     description:
-      'Verifies the authenticity of OAuth tokens from Google or Privy Passkey, upserts the user record into Neon PostgreSQL, and sets an httpOnly cookie with the JWT. accessToken is no longer returned in the response body.',
+      'Verifies the authenticity of OAuth tokens from Google or Privy Passkey, upserts the user record into Neon PostgreSQL, and sets an httpOnly cookie with the JWT.',
   })
   @ApiResponse({
     status: 200,
@@ -93,14 +97,14 @@ export class AuthController {
   ) {
     const result = await this.authService.verifyAuth(verifyAuthDto);
 
-    // FIX C2: Ghi JWT vào cookie và đồng thời trả accessToken trong response body
+    // Ghi JWT vào httpOnly cookie và đồng thời trả accessToken trong response body
     res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, COOKIE_OPTIONS);
 
     return result;
   }
 
   /**
-   * FIX C2: Logout endpoint xóa httpOnly cookie.
+   * Logout endpoint xóa httpOnly cookie với cùng path, sameSite và secure attributes.
    */
   @Public()
   @Post('logout')
@@ -108,7 +112,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout — clear auth cookie' })
   @ApiResponse({ status: 200, description: 'Logged out successfully.' })
   logout(@Res({ passthrough: true }) res: Response): { message: string } {
-    res.clearCookie(ACCESS_TOKEN_COOKIE, { path: '/' });
+    res.clearCookie(ACCESS_TOKEN_COOKIE, {
+      httpOnly: COOKIE_OPTIONS.httpOnly,
+      secure: COOKIE_OPTIONS.secure,
+      sameSite: COOKIE_OPTIONS.sameSite,
+      path: COOKIE_OPTIONS.path,
+    });
     return { message: 'Đã đăng xuất thành công' };
   }
 }

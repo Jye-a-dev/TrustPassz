@@ -20,6 +20,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { DealsService } from './deals.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
@@ -32,6 +33,7 @@ import {
   CurrentUser,
   RequestUser,
 } from '../../common/decorators/current-user.decorator';
+import { THROTTLE_CONFIG } from '../../config/throttle.config';
 
 @ApiTags('Deals & Digital Vault')
 @ApiBearerAuth('JWT-auth')
@@ -98,6 +100,12 @@ export class DealsController {
    * Protected route: Requires authenticated participant role.
    */
   @Post()
+  @Throttle({
+    dealsWrite: {
+      limit: THROTTLE_CONFIG.dealsWriteLimit,
+      ttl: THROTTLE_CONFIG.ttlMs,
+    },
+  })
   @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -111,35 +119,14 @@ export class DealsController {
     schema: {
       example: {
         id: 'd0000000-0000-4000-a000-000000000001',
-        sellerId: '11111111-1111-4111-a111-111111111111',
-        buyerId: '22222222-2222-4222-a222-222222222222',
         title: 'Fullstack Escrow Marketplace Source Code',
-        description:
-          'Production-grade escrow platform built on Base Sepolia and NestJS',
         amount: '500000',
         currency: 'VND',
         state: 'PENDING',
         inspectionDuration: 43200,
-        onchainDealId: '0x1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d',
-        paymentOrderCode: null,
-        settleTxHash: null,
-        disputeTxHash: null,
-        createdAt: '2026-09-26T03:30:00.000Z',
-        updatedAt: '2026-09-26T03:30:00.000Z',
         digitalAsset: {
           id: 'da000000-0000-4000-a000-000000000001',
-          dealId: 'd0000000-0000-4000-a000-000000000001',
           assetType: 'SOURCE_CODE',
-          encryptedContent: 'cipher_secret_payload_base64_encoded==',
-          encryptionIv: 'e4d29e7c3b9f4a120000000000000000',
-          authTag: '9f8e7d6c5b4a32100000000000000000',
-          contentHash:
-            'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
-          fileName: 'trustpassz-escrow-v1.zip',
-          fileSizeBytes: '52428800',
-          maxAccessLimit: 3,
-          createdAt: '2026-09-26T03:30:00.000Z',
-          updatedAt: '2026-09-26T03:30:00.000Z',
         },
       },
     },
@@ -251,6 +238,12 @@ export class DealsController {
    * Protected route: Requires authenticated participant role.
    */
   @Patch(':id')
+  @Throttle({
+    dealsWrite: {
+      limit: THROTTLE_CONFIG.dealsWriteLimit,
+      ttl: THROTTLE_CONFIG.ttlMs,
+    },
+  })
   @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Partial update deal & upsert Digital Vault asset',
@@ -289,28 +282,24 @@ export class DealsController {
    * Protected route: Requires authenticated participant role.
    */
   @Delete(':id')
+  @Throttle({
+    dealsWrite: {
+      limit: THROTTLE_CONFIG.dealsWriteLimit,
+      ttl: THROTTLE_CONFIG.ttlMs,
+    },
+  })
   @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Delete a deal in PENDING state',
-    description:
-      'Thử nghiệm xóa deal. Sẽ xóa thành công nếu deal còn PENDING, trả về lỗi 400 nếu deal đã DEPOSITED hoặc có trạng thái khác.',
   })
   @ApiParam({
     name: 'id',
     type: String,
     description: 'UUID của deal cần xóa',
-    example: 'd0000000-0000-4000-a000-000000000001',
   })
   @ApiResponse({
     status: 200,
     description: 'Xóa deal thành công.',
-    schema: {
-      example: {
-        success: true,
-        message: 'Deal deleted successfully',
-        id: 'd0000000-0000-4000-a000-000000000001',
-      },
-    },
   })
   @ApiResponse({
     status: 400,
@@ -333,17 +322,20 @@ export class DealsController {
    * Protected route: Requires authenticated participant role.
    */
   @Post(':id/vault/unlock')
+  @Throttle({
+    dealsWrite: {
+      limit: THROTTLE_CONFIG.dealsWriteLimit,
+      ttl: THROTTLE_CONFIG.ttlMs,
+    },
+  })
   @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Unlock and retrieve encrypted Digital Vault asset payload',
-    description:
-      'Increments vault access count, verifies deal escrow funding, and returns encrypted ciphertext with IV and auth tag for client-side decryption.',
   })
   @ApiParam({
     name: 'id',
     type: String,
     description: 'UUID của deal chứa digital vault asset',
-    example: 'd0000000-0000-4000-a000-000000000001',
   })
   @ApiResponse({
     status: 200,
@@ -369,17 +361,20 @@ export class DealsController {
    * Protected route: Requires authenticated participant role.
    */
   @Post(':id/settle')
+  @Throttle({
+    dealsWrite: {
+      limit: THROTTLE_CONFIG.dealsWriteLimit,
+      ttl: THROTTLE_CONFIG.ttlMs,
+    },
+  })
   @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
   @ApiOperation({
     summary: 'Settle deal escrow and release payment to seller',
-    description:
-      'Buyer confirms asset receipt and triggers on-chain release of escrow funds.',
   })
   @ApiParam({
     name: 'id',
     type: String,
     description: 'UUID của deal cần xác nhận nghiệm thu và giải ngân',
-    example: 'd0000000-0000-4000-a000-000000000001',
   })
   @ApiResponse({
     status: 200,

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ShieldAlert, LogIn, Home, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -113,14 +114,14 @@ export function UnauthScreen({
           size="lg"
           className="w-full sm:w-auto min-h-12 px-7 rounded-xl border-slate-800 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-700 text-slate-200 hover:text-white transition-all duration-200 font-medium cursor-pointer"
         >
-          <a
+          <Link
             href="/"
             onClick={handleHome}
             className="flex items-center justify-center gap-2 w-full h-full"
           >
             <Home className="size-4 text-slate-400" />
             <span>Trở về Trang chủ</span>
-          </a>
+          </Link>
         </Button>
 
         {customAction}

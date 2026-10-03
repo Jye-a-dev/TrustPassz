@@ -51,13 +51,13 @@ jest.mock('./oracle-relayer.config', () => ({
 // ---------------------------------------------------------------------------
 
 const MOCK_PRIVATE_KEY =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+  `0x${'a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef'}` as `0x${string}`;
 const MOCK_CONTRACT = '0x165B47291B87569b91696DCE6f1207eE15C9f783' as const;
 const MOCK_RPC = 'https://sepolia.base.org' as const;
 const MOCK_ACCOUNT_ADDRESS =
   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' as const;
 const MOCK_TX_HASH =
-  '0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1' as const;
+  `0x${'1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'}` as `0x${string}`;
 
 /** Build a minimal TransactionReceipt stub */
 function makeReceipt(

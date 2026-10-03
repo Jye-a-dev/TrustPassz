@@ -299,7 +299,7 @@ export class OracleRelayerService implements OnModuleInit {
         error &&
         typeof error === 'object' &&
         'data' in error &&
-        typeof (error as { data: unknown }).data === 'string'
+        typeof error.data === 'string'
       ) {
         const data = (error as { data: string }).data as `0x${string}`;
         const decoded = decodeErrorResult({ abi: DIGITAL_ESCROW_ABI, data });
@@ -336,8 +336,8 @@ export class OracleRelayerService implements OnModuleInit {
   ): `0x${string}` {
     return encodeFunctionData({
       abi: DIGITAL_ESCROW_ABI,
-      functionName: functionName as never,
-      args: args as never,
+      functionName: functionName as any,
+      args: args as any,
     });
   }
 }

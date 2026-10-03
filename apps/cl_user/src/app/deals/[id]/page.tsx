@@ -5,20 +5,15 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  ShieldCheck,
-  Lock,
-  Clock,
   QrCode,
-  FileCode,
-  Copy,
-  Check,
-  User,
   AlertCircle,
   Loader2,
   KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { BargainSlider } from "@/components/deals/bargain-slider";
+import { DealHeaderOverview } from "@/components/deals/deal-header-overview";
+import { DealVaultStatusCard } from "@/components/deals/deal-vault-status-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { apiClient } from "@/lib/api-client";
@@ -120,7 +115,6 @@ export default function DealRoomPage() {
   const [deal, setDeal] = React.useState<DealDetail | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [copiedHash, setCopiedHash] = React.useState(false);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -154,15 +148,6 @@ export default function DealRoomPage() {
 
   const currentUserId = user?.id || "";
   const isBuyer = currentUserId === deal?.buyer?.id;
-
-  const copyHash = () => {
-    if (deal?.digitalAsset?.contentHash) {
-      navigator.clipboard.writeText(deal.digitalAsset.contentHash);
-      setCopiedHash(true);
-      toast.success("Đã sao chép SHA-256 hash vào clipboard!");
-      setTimeout(() => setCopiedHash(false), 2000);
-    }
-  };
 
   const handleOfferSubmit = (newOffer: number) => {
     toast.success(
@@ -231,72 +216,7 @@ export default function DealRoomPage() {
         </div>
 
         {/* Deal Header Overview */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 space-y-4 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="space-y-1.5 flex-1">
-              <span className="text-[11px] font-mono text-cyan-400 uppercase tracking-wider">
-                Mã giao dịch: {deal.id}
-              </span>
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                {deal.title}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                {deal.description || "Giao dịch được bảo vệ an toàn qua TrustPassz."}
-              </p>
-            </div>
-
-            <div className="sm:text-right shrink-0 bg-slate-950/70 p-3 sm:p-4 rounded-xl border border-slate-800/80">
-              <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">
-                Giá giao dịch niêm yết
-              </span>
-              <span className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono">
-                {amountNum.toLocaleString("vi-VN")}{" "}
-                <span className="text-xs font-normal text-slate-400">{deal.currency}</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Key Metric Pills */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-slate-800/70 text-xs">
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/50 border border-slate-800/50">
-              <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block">Kiểm tra hàng</span>
-                <span className="font-semibold text-slate-200">
-                  {Math.round((deal.inspectionDuration || 43200) / 3600)} Giờ
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/50 border border-slate-800/50">
-              <FileCode className="w-4 h-4 text-cyan-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block">Loại sản phẩm</span>
-                <span className="font-semibold text-slate-200">
-                  {deal.digitalAsset?.assetType || "DIGITAL_ASSET"}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/50 border border-slate-800/50">
-              <User className="w-4 h-4 text-cyan-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block">Người bán</span>
-                <span className="font-semibold text-slate-200 truncate block max-w-25">
-                  {deal.seller?.displayName || "Seller"}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/50 border border-slate-800/50">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block">Bảo vệ</span>
-                <span className="font-semibold text-emerald-400">Khóa an toàn</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DealHeaderOverview deal={deal} />
 
         {/* Realtime Bargain Negotiation Slider */}
         {deal.state === "PENDING" && (
@@ -313,66 +233,10 @@ export default function DealRoomPage() {
         )}
 
         {/* Digital Vault Locked Status Card */}
-        <div className="rounded-2xl border border-slate-800/90 bg-slate-900/40 p-5 space-y-3.5">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-cyan-950/80 border border-cyan-500/30 text-cyan-400">
-                <Lock className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                  Trạng Thái Kho Lưu Trữ Bảo Mật
-                  <Badge variant="outline" className="text-[10px] border-cyan-500/40 text-cyan-300">
-                    Bảo Mật Tự Động
-                  </Badge>
-                </h4>
-                <p className="text-xs text-slate-400">
-                  Thông tin bàn giao đã được khóa kín và lưu trữ an toàn.
-                </p>
-              </div>
-            </div>
-
-            <span className="text-xs font-mono text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-2.5 py-1 rounded-md">
-              {deal.state === "PENDING" ? "Chờ Thanh Toán (Đang Khóa)" : "Đã Mở Khóa Nhận Hàng"}
-            </span>
-          </div>
-
-          {deal.digitalAsset && (
-            <div className="space-y-2 text-xs font-mono">
-              <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-2">
-                <div className="truncate flex-1">
-                  <span className="text-slate-400">Mã kiểm tra bảo mật: </span>
-                  <span className="text-cyan-300">{deal.digitalAsset.contentHash || "Chưa khởi tạo"}</span>
-                </div>
-                {deal.digitalAsset.contentHash && (
-                  <button
-                    type="button"
-                    onClick={copyHash}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                    title="Sao chép Content Hash"
-                  >
-                    {copiedHash ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-400">
-                <div className="p-2 rounded bg-slate-950/60 border border-slate-800/60 truncate">
-                  <span className="text-slate-500">IV (Hex): </span>
-                  <span className="text-slate-300">{deal.digitalAsset.encryptionIv || "N/A"}</span>
-                </div>
-                <div className="p-2 rounded bg-slate-950/60 border border-slate-800/60 truncate">
-                  <span className="text-slate-500">Auth Tag (Hex): </span>
-                  <span className="text-slate-300">{deal.digitalAsset.authTag || "N/A"}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <DealVaultStatusCard
+          dealState={deal.state}
+          digitalAsset={deal.digitalAsset}
+        />
 
         {/* Primary Call to Action */}
         <div className="pt-2">
