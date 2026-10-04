@@ -39,39 +39,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Activate Corepack for pnpm support
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Copy dependency manifests
+COPY package.json package-lock.json* ./
 
-# Copy monorepo manifests for lockfile verification & dependency caching
-COPY package.json package-lock.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
-COPY packages/contracts/package.json* ./packages/contracts/
-COPY apps/server/package.json ./apps/server/
+# Install dependencies (development included for Nest CLI & Prisma code generation)
+RUN npm install --prefer-offline --no-audit
 
-# Install dependencies (supports pnpm workspaces or npm fallback)
-RUN if [ -f pnpm-lock.yaml ]; then \
-      pnpm install --frozen-lockfile --filter server...; \
-    else \
-      npm install --workspace=apps/server --include=dev --prefer-offline --no-audit; \
-    fi
-
-# Copy packages (shared contracts, ABIs) and server application source
-COPY packages ./packages
-COPY apps/server ./apps/server
+# Copy application source & configurations
+COPY prisma ./prisma
+COPY src ./src
+COPY tsconfig*.json nest-cli.json ./
 
 # Generate Prisma Client for PostgreSQL target
-WORKDIR /app/apps/server
 RUN npx prisma generate
 
 # Compile TypeScript production bundle via Nest CLI
 RUN npm run build
-
-# Ensure node_modules directories exist for multi-stage copy safety
-RUN mkdir -p /app/apps/server/node_modules /app/node_modules
-
-# Prune devDependencies to keep final container footprint minimal
-RUN if [ -f /app/pnpm-lock.yaml ]; then \
-      pnpm --filter server deploy --prod /app/pruned; \
-    fi
 
 # ------------------------------------------------------------------------------
 # Stage 2: Production Minimal Runtime
@@ -95,17 +78,10 @@ RUN groupadd -g 1001 nodejs && \
     useradd -u 1001 -g nodejs -s /bin/sh -m nestjs
 
 # Copy compiled application code and Prisma artifacts
-COPY --from=builder --chown=nestjs:nodejs /app/apps/server/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/apps/server/package.json ./package.json
-COPY --from=builder --chown=nestjs:nodejs /app/apps/server/prisma ./prisma
-
-# Copy node_modules (check if pruned deploy folder exists, else copy direct)
-COPY --from=builder --chown=nestjs:nodejs /app/apps/server/node_modules ./node_modules
-# Also copy root node_modules if present in monorepo hoist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules_root
-
-# Setup NODE_PATH so resolution falls back to root hoisted modules if needed
-ENV NODE_PATH=/app/node_modules:/app/node_modules_root
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 
 USER nestjs
 
