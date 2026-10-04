@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 5000",
     "build": "next build",
+    "pages:build": "npx @cloudflare/next-on-pages",
     "start": "next start -p 5000",
     "lint": "eslint",
     "test": "npx tsx --test src/__tests__/crypto.test.ts src/__tests__/bargain-slider.test.tsx src/__tests__/countdown-timer.test.ts src/__tests__/session-lifecycle.test.ts"
@@ -41,6 +42,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const runtime = 'edge';
+
 /**
  * 307 Temporary Redirect from legacy /dashboard to canonical /user portal.
  */
