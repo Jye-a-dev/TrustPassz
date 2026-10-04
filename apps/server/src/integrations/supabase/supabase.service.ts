@@ -1,5 +1,12 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
+
+// Ensure global WebSocket is available for Supabase Realtime across all Node versions
+if (typeof globalThis.WebSocket === 'undefined') {
+  // @ts-expect-error Node WebSocket polyfill
+  globalThis.WebSocket = WebSocket;
+}
 
 @Injectable()
 export class SupabaseService implements OnModuleInit {
