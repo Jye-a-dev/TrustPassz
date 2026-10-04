@@ -3,8 +3,8 @@
   publish = "apps/cl_user/.next"
 
 [build.environment]
-  NODE_ENV = "development"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NPM_FLAGS = "--legacy-peer-deps --include=dev"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
