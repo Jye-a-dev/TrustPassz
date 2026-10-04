@@ -2,7 +2,7 @@
 export const DIGITAL_ESCROW_CONTRACT_NAME = "DigitalEscrow" as const;
 export const DIGITAL_ESCROW_CHAIN_ID = 84532 as const;
 export const DIGITAL_ESCROW_NETWORK = "base-sepolia" as const;
-export const DIGITAL_ESCROW_ADDRESS = "0x165B47291B87569b91696DCE6f1207eE15C9f783" as const;
+export const DIGITAL_ESCROW_ADDRESS = "0xef976eb14fdba8cb722789b451e2b9f903005c26" as const;
 
 export const DIGITAL_ESCROW_ABI = [
   {
@@ -558,6 +558,11 @@ export const DIGITAL_ESCROW_ABI = [
   {
     "type": "error",
     "name": "DealAlreadyExists",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DealNotFound",
     "inputs": []
   },
   {

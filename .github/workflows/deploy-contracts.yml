@@ -97,7 +97,7 @@ jobs:
 
             forge script script/DeployEscrow.s.sol:DeployEscrow -vvv
 
-            MOCK_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            MOCK_ADDRESS="0xef976eb14fdba8cb722789b451e2b9f903005c26"
             echo "DEPLOYED_ESCROW_ADDRESS=$MOCK_ADDRESS" >> $GITHUB_ENV
             echo "contract_address=$MOCK_ADDRESS" >> $GITHUB_OUTPUT
             echo "is_simulated=true" >> $GITHUB_OUTPUT
@@ -116,7 +116,7 @@ jobs:
           BROADCAST_FILE="broadcast/DeployEscrow.s.sol/84532/run-latest.json"
           if [ ! -f "$BROADCAST_FILE" ]; then
             echo "Broadcast log not found. Falling back to default mock address."
-            FALLBACK_ADDR="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            FALLBACK_ADDR="0xef976eb14fdba8cb722789b451e2b9f903005c26"
             echo "DEPLOYED_ESCROW_ADDRESS=$FALLBACK_ADDR" >> $GITHUB_ENV
             echo "contract_address=$FALLBACK_ADDR" >> $GITHUB_OUTPUT
             exit 0
@@ -140,7 +140,7 @@ jobs:
 
       - name: Execute Export Artifacts & Sync Pipeline
         env:
-          DEPLOYED_ESCROW_ADDRESS: ${{ steps.extract-address.outputs.contract_address || env.DEPLOYED_ESCROW_ADDRESS || '0x165B47291B87569b91696DCE6f1207eE15C9f783' }}
+          DEPLOYED_ESCROW_ADDRESS: ${{ steps.extract-address.outputs.contract_address || env.DEPLOYED_ESCROW_ADDRESS || '0xef976eb14fdba8cb722789b451e2b9f903005c26' }}
         run: node scripts/export-artifacts.js
 
       - name: Commit and Push Updated ABI & Configurations

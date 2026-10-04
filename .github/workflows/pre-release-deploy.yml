@@ -39,7 +39,7 @@ jobs:
         env:
           NODE_ENV: test
           BASE_SEPOLIA_RPC_URL: https://sepolia.base.org
-          ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          ESCROW_CONTRACT_ADDRESS: "0xef976eb14fdba8cb722789b451e2b9f903005c26"
           ORACLE_RELAYER_PRIVATE_KEY: "0x0000000000000000000000000000000000000000000000000000000000000001"
 
       - name: Build Server Distribution Bundle
@@ -68,7 +68,7 @@ jobs:
         run: npm run build --prefix apps/cl_user
         env:
           NEXT_PUBLIC_API_URL: https://trustpassz-server.onrender.com
-          NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0xef976eb14fdba8cb722789b451e2b9f903005c26"
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
 
@@ -76,7 +76,7 @@ jobs:
         run: npm run build --prefix apps/cl_admin
         env:
           NEXT_PUBLIC_API_URL: https://trustpassz-server.onrender.com
-          NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0xef976eb14fdba8cb722789b451e2b9f903005c26"
 
   # ----------------------------------------------------------------------------
   # Job 3: Docker Build & Security Scan

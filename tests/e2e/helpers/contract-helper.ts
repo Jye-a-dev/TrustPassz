@@ -52,7 +52,7 @@ export const DIGITAL_ESCROW_ABI = parseAbi([
 ]);
 
 export const DEFAULT_CONTRACT_ADDRESS: Address = (process.env.ESCROW_CONTRACT_ADDRESS ||
-  '0x165B47291B87569b91696DCE6f1207eE15C9f783') as Address;
+  '0xef976eb14fdba8cb722789b451e2b9f903005c26') as Address;
 
 export const DEFAULT_RPC_URL =
   process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';

@@ -61,7 +61,7 @@ function resolveContractAddress() {
   }
 
   // Fallback to active Base Sepolia deployed contract
-  return "0x165B47291B87569b91696DCE6f1207eE15C9f783";
+  return "0xef976eb14fdba8cb722789b451e2b9f903005c26";
 }
 
 function resolveAbi() {
