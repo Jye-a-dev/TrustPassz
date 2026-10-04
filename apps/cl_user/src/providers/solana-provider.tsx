@@ -13,8 +13,6 @@ import {
 } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 
-// Import default styles for Solana wallet adapter modal
-import "@solana/wallet-adapter-react-ui/styles.css";
 
 interface SolanaProviderProps {
   children: React.ReactNode;

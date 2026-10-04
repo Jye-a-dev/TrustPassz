@@ -4,6 +4,7 @@ import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
 import { Providers } from "@/components/shared/providers";
 import "@/styles/globals.css";
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
