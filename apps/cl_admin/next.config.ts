@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const securityHeaders = [
   {
@@ -30,7 +31,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   turbopack: {
-    root: "d:/Code/TrustPassz",
+    root: path.resolve(__dirname, "../../"),
   },
   async headers() {
     return [

@@ -26,6 +26,9 @@ export interface ViemPublicClient {
     confirmations?: number;
     timeout?: number;
   }): Promise<TransactionReceipt>;
+  getBlock(args?: {
+    blockTag?: 'latest' | 'pending' | 'earliest' | 'finalized' | 'safe';
+  }): Promise<{ number?: bigint | number | null; timestamp?: bigint | number | null; [key: string]: any }>;
 }
 
 export interface ViemWalletClient {
