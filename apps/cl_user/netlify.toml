@@ -1,6 +1,6 @@
 [build]
-  command = "npm run build"
-  publish = ".next"
+  command = "npm run build --workspace=cl_user"
+  publish = "apps/cl_user/.next"
 
 [build.environment]
   NODE_ENV = "development"
