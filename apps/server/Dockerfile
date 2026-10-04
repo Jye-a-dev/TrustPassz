@@ -19,8 +19,8 @@ ARG BASE_SEPOLIA_RPC_URL="https://sepolia.base.org"
 ARG ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
 ARG ORACLE_RELAYER_PRIVATE_KEY="0x0000000000000000000000000000000000000000000000000000000000000001"
 
-# Environment variables for builder stage
-ENV NODE_ENV=${NODE_ENV} \
+# Environment variables for builder stage (force development so devDependencies like @nestjs/cli are installed)
+ENV NODE_ENV=development \
     DATABASE_URL=${DATABASE_URL} \
     DIRECT_URL=${DIRECT_URL} \
     JWT_SECRET=${JWT_SECRET} \
@@ -42,8 +42,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy dependency manifests
 COPY package.json package-lock.json* ./
 
-# Install dependencies (development included for Nest CLI & Prisma code generation)
-RUN npm install --prefer-offline --no-audit
+# Install all dependencies including devDependencies (@nestjs/cli, typescript) for compilation
+RUN npm install --include=dev --prefer-offline --no-audit
 
 # Copy application source & configurations
 COPY prisma ./prisma
