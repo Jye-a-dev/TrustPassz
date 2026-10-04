@@ -7,6 +7,9 @@
     "tests/e2e"
   ],
   "scripts": {
+    "build": "npm run build --workspace=cl_user",
+    "build:user": "npm run build --workspace=cl_user",
+    "build:admin": "npm run build --workspace=cl_admin",
     "mb": "npm --prefix apps/mb_user run dev",
     "mb:clean": "npm --prefix apps/mb_user run clean",
     "user": "npm --prefix apps/cl_user run dev",
@@ -17,9 +20,8 @@
     "test:e2e": "npm --prefix tests/e2e test"
   },
   "devDependencies": {
-    "concurrently": "^9.2.4"
-  },
-  "overrides": {
-    "@types/react": "18.3.12"
+    "@tailwindcss/postcss": "^4",
+    "concurrently": "^9.2.4",
+    "tailwindcss": "^4"
   }
 }

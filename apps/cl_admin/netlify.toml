@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build --workspace=cl_admin"
+  publish = "apps/cl_admin/.next"
+
+[build.environment]
+  NPM_FLAGS = "--legacy-peer-deps --include=dev"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
