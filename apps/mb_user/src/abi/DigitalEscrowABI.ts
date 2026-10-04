@@ -562,11 +562,6 @@ export const DIGITAL_ESCROW_ABI = [
   },
   {
     "type": "error",
-    "name": "DealNotFound",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "DeliveryTimeoutNotReached",
     "inputs": [
       {
