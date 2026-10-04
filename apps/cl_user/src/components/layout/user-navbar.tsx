@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
   Menu,
@@ -15,9 +14,7 @@ import {
   ChevronDown,
   Sparkles,
   Plus,
-  Flame,
   CheckCircle2,
-  Radio,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,7 +37,6 @@ export function UserNavbar({
   onOpenMobileMenu,
   lockedBalanceVND = 0,
 }: UserNavbarProps) {
-  const router = useRouter();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
 
@@ -84,7 +80,7 @@ export function UserNavbar({
           href="/user"
           className="flex items-center gap-2.5 transition-transform hover:scale-[1.02] md:hidden"
         >
-          <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/25 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/50 text-emerald-400">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500/25 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/50 text-emerald-400">
             <ShieldCheck className="size-5 text-emerald-400" />
           </div>
           <span className="font-extrabold text-base tracking-tight text-white">
@@ -92,8 +88,16 @@ export function UserNavbar({
           </span>
         </Link>
 
-        {/* Desktop Left: Live Status Radar */}
+        {/* Desktop Left: Live Status Radar & Pre-Release Testnet Badge */}
         <div className="hidden md:flex items-center gap-2.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 rounded-full border border-amber-500/50 bg-amber-950/40 px-2.5 py-1 font-mono text-[11px] font-bold text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+            </span>
+            <span>[PRE-RELEASE TESTNET - BASE SEPOLIA]</span>
+          </div>
+
           <div className="flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/80 px-2.5 py-1 font-mono text-[11px]">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -101,13 +105,9 @@ export function UserNavbar({
             </span>
             <span className="text-slate-200 font-semibold">Hệ thống bảo vệ tự động</span>
           </div>
-
-          <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-slate-900/60 px-2.5 py-1 rounded-md border border-slate-800/60">
-            <Flame className="size-3 text-amber-400" />
-            <span>Phí giao dịch tối ưu</span>
-          </div>
         </div>
       </div>
+
 
       {/* Right Action Widgets */}
       <div className="flex items-center gap-2 sm:gap-3.5">
@@ -115,7 +115,7 @@ export function UserNavbar({
         <Button
           asChild
           size="sm"
-          className="hidden sm:inline-flex min-h-9 px-3.5 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
+          className="hidden sm:inline-flex min-h-9 px-3.5 rounded-lg bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
         >
           <Link href="/user/deals/create">
             <Plus className="size-3.5 stroke-3" />
@@ -161,7 +161,7 @@ export function UserNavbar({
                 className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 p-1 sm:px-2.5 sm:py-1 hover:border-cyan-500/40 hover:bg-slate-800 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500/40"
               >
                 <div className="relative">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950 shadow-sm">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950 shadow-sm">
                     {userInitials || "U"}
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 size-2 bg-emerald-400 border border-slate-900 rounded-full" />

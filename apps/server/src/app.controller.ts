@@ -26,23 +26,5 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-
-  @Get('api/v1/health')
-  @ApiOperation({
-    summary: 'API v1 Health Check',
-    description:
-      'Returns JSON status for mobile and infrastructure health pings.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Backend operational',
-    schema: { example: { status: 'ok', service: 'TrustPassz Unified API' } },
-  })
-  getHealth() {
-    return {
-      status: 'ok',
-      service: 'TrustPassz Unified API',
-      timestamp: new Date().toISOString(),
-    };
-  }
 }
+

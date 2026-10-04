@@ -1,0 +1,100 @@
+# ==============================================================================
+# TRUSTPASSZ MONOREPO - RENDER INFRASTRUCTURE BLUEPRINT (TASK-15)
+# Cloud Services Topology: Backend API (NestJS), AI Pipeline (FastAPI)
+# Target Environment: Pre-release Testnet (Base Sepolia + Neon PostgreSQL)
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. NestJS Core Backend Service (API Gateway, Escrow Relayer, Webhooks)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: trustpassz-server
+    runtime: docker
+    dockerfilePath: ./apps/server/Dockerfile
+    dockerContext: .
+    region: singapore
+    plan: starter
+    healthCheckPath: /api/v1/health
+    numInstances: 1
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: TRUST_PROXY
+        value: "true"
+      - key: ENABLE_SWAGGER
+        value: "true"
+
+      # Neon PostgreSQL (pgBouncer Pooled Connection URL)
+      - key: DATABASE_URL
+        sync: false
+        # Example: postgresql://[user]:[password]@[neon-hostname]-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&pgbouncer=true
+
+      # Neon PostgreSQL Direct URL (DDL migrations)
+      - key: DIRECT_URL
+        sync: false
+        # Example: postgresql://[user]:[password]@[neon-hostname].ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+
+      # Blockchain: Base Sepolia RPC & Escrow Contract
+      - key: BASE_SEPOLIA_RPC_URL
+        value: https://sepolia.base.org
+      - key: ESCROW_CONTRACT_ADDRESS
+        value: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+      - key: ORACLE_RELAYER_PRIVATE_KEY
+        sync: false
+
+      # Authentication & Cryptography
+      - key: JWT_SECRET
+        sync: false
+      - key: PRIVY_APP_ID
+        sync: false
+      - key: PRIVY_APP_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+
+      # PayOS VietQR Payment Gateway
+      - key: PAYOS_CLIENT_ID
+        sync: false
+      - key: PAYOS_API_KEY
+        sync: false
+      - key: PAYOS_CHECKSUM_KEY
+        sync: false
+
+      # Supabase Storage & Realtime BaaS
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # Strict CORS Whitelist for Vercel Frontend Subdomains & Mobile Schemas
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://trustpassz.vercel.app,https://trustpassz-cl-user.vercel.app,https://trustpassz-cl-admin.vercel.app,https://trustpassz-user.vercel.app,https://trustpassz-admin.vercel.app"
+
+  # ----------------------------------------------------------------------------
+  # 2. AI Arbitration & Suggestion Pipeline (FastAPI / sVLM / Gemini Fallback)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: trustpassz-ai-pipeline
+    runtime: docker
+    dockerfilePath: ./apps/ai_pipeline/Dockerfile
+    dockerContext: ./apps/ai_pipeline
+    region: singapore
+    plan: starter
+    healthCheckPath: /health
+    numInstances: 1
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+      - key: AI_MODEL_PATH
+        value: Qwen/Qwen2-VL-2B-Instruct
+      - key: ALLOWED_ORIGINS
+        value: "https://trustpassz.vercel.app,https://trustpassz-cl-user.vercel.app,https://trustpassz-cl-admin.vercel.app,https://trustpassz-server.onrender.com"
+      - key: GEMINI_API_KEY
+        sync: false

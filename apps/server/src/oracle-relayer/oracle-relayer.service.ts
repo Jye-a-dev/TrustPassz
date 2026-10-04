@@ -79,8 +79,60 @@ export class OracleRelayerService implements OnModuleInit {
   }
 
   // -------------------------------------------------------------------------
-  // Public entrypoints
+  // Public entrypoints & Health Monitoring
   // -------------------------------------------------------------------------
+
+  /**
+   * Healthcheck probe: queries the latest block on Base Sepolia and returns
+   * RPC latency and block metadata for system monitoring.
+   */
+  async getChainStatus(): Promise<{
+    status: 'up' | 'down';
+    network: string;
+    chainId: number;
+    contractAddress: `0x${string}`;
+    latestBlock?: number;
+    blockTimestamp?: number;
+    latencyMs: number;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    try {
+      if (!this.publicClient) {
+        return {
+          status: 'down',
+          network: 'Base Sepolia',
+          chainId: baseSepolia.id,
+          contractAddress:
+            this.config?.contractAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`),
+          latencyMs: Date.now() - startTime,
+          error: 'PublicClient not initialized',
+        };
+      }
+
+      const block = await this.publicClient.getBlock({ blockTag: 'latest' });
+      return {
+        status: 'up',
+        network: 'Base Sepolia',
+        chainId: baseSepolia.id,
+        contractAddress: this.config.contractAddress,
+        latestBlock: Number(block.number),
+        blockTimestamp: Number(block.timestamp),
+        latencyMs: Date.now() - startTime,
+      };
+    } catch (err: any) {
+      return {
+        status: 'down',
+        network: 'Base Sepolia',
+        chainId: baseSepolia.id,
+        contractAddress:
+          this.config?.contractAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`),
+        latencyMs: Date.now() - startTime,
+        error: err?.message || 'Failed to query RPC provider',
+      };
+    }
+  }
+
 
   /**
    * Calls `startInspection(bytes32 dealId)` on-chain.

@@ -14,6 +14,7 @@ import { BargainsModule } from './modules/bargains/bargains.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
+import { HealthModule } from './health/health.module';
 import { throttlerAsyncOptions } from './config/throttle.config';
 
 @Module({
@@ -21,6 +22,7 @@ import { throttlerAsyncOptions } from './config/throttle.config';
     ThrottlerModule.forRoot(throttlerAsyncOptions),
     DatabaseModule,
     SupabaseModule,
+    HealthModule,
     AuthModule,
     UsersModule,
     ProductsModule,

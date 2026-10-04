@@ -17,6 +17,10 @@ export function createCorsOptions(): CorsOptions {
   // Base production origins + Capacitor mobile schemes
   const productionAllowedOrigins = [
     'https://trustpassz.vercel.app',
+    'https://trustpassz-cl-user.vercel.app',
+    'https://trustpassz-cl-admin.vercel.app',
+    'https://trustpassz-user.vercel.app',
+    'https://trustpassz-admin.vercel.app',
     'https://www.trustpassz.io',
     'https://trustpassz.io',
     'capacitor://localhost',

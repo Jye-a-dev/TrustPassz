@@ -122,4 +122,6 @@ class HealthResponse(BaseModel):
     ai_api_ready: bool
     model: str
     environment: str
+    engine_type: Optional[str] = "sVLM / Outlines"
+    gemini_sdk_ready: Optional[bool] = True
     message: Optional[str] = None

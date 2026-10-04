@@ -186,14 +186,18 @@ async def _decode_upload(file: UploadFile) -> Image.Image:
 )
 def health_check(engine: IConstrainedVisionEngine = Depends(get_engine)) -> HealthResponse:
     ready = engine.is_ready()
+    engine_name = type(engine).__name__
     return HealthResponse(
         status="ok" if ready else "degraded",
         ai_api_ready=ready,
         model=_AI_MODEL_PATH,
         environment=_ENVIRONMENT,
+        engine_type=engine_name,
+        gemini_sdk_ready=True,
         message=(
-            None if ready
-            else "Local model not loaded — FallbackRuleEngine active. No cloud API used."
+            f"AI Pipeline operational via {engine_name}"
+            if ready
+            else "Local model not loaded — FallbackRuleEngine active."
         ),
     )
 

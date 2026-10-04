@@ -58,8 +58,17 @@ export function AdminNavbar() {
           </span>
         </Link>
 
+        {/* Pre-Release Testnet Badge */}
+        <div className="flex items-center gap-1.5 rounded-full border border-amber-500/50 bg-amber-950/40 px-2.5 py-1 font-mono text-[10px] sm:text-xs font-bold text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+          </span>
+          <span>[PRE-RELEASE TESTNET - BASE SEPOLIA]</span>
+        </div>
+
         {/* Contract Network Pill */}
-        <div className="hidden lg:flex items-center space-x-2 rounded-full border border-slate-800 bg-[#0F172A] px-3 py-1 text-xs">
+        <div className="hidden xl:flex items-center space-x-2 rounded-full border border-slate-800 bg-[#0F172A] px-3 py-1 text-xs">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -76,6 +85,7 @@ export function AdminNavbar() {
           </a>
         </div>
       </div>
+
 
       {/* Right: Relayer Gas Status & User Profile */}
       <div className="flex items-center space-x-3">

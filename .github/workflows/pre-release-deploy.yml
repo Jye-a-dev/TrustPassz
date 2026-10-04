@@ -1,0 +1,112 @@
+name: Pre-release Cloud Deployment & CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, "release/*"]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: NestJS Server Verification & Prisma Validation
+  # ----------------------------------------------------------------------------
+  verify-server:
+    name: Verify Server (NestJS & Prisma)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema=apps/server/prisma/schema.prisma
+
+      - name: Run Server Unit & Integration Tests
+        run: npm run test --prefix apps/server
+        env:
+          NODE_ENV: test
+          BASE_SEPOLIA_RPC_URL: https://sepolia.base.org
+          ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          ORACLE_RELAYER_PRIVATE_KEY: "0x0000000000000000000000000000000000000000000000000000000000000001"
+
+      - name: Build Server Distribution Bundle
+        run: npm run build --prefix apps/server
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Frontend Compilation & Typecheck (User & Admin Portals)
+  # ----------------------------------------------------------------------------
+  verify-frontends:
+    name: Verify Frontends (cl_user & cl_admin)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build cl_user (Next.js)
+        run: npm run build --prefix apps/cl_user
+        env:
+          NEXT_PUBLIC_API_URL: https://trustpassz-server.onrender.com
+          NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
+
+      - name: Build cl_admin (Next.js)
+        run: npm run build --prefix apps/cl_admin
+        env:
+          NEXT_PUBLIC_API_URL: https://trustpassz-server.onrender.com
+          NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Docker Build & Security Scan
+  # ----------------------------------------------------------------------------
+  verify-containers:
+    name: Validate Container Images (Multi-Stage Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Server Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/server/Dockerfile
+          push: false
+          tags: trustpassz/server:pre-release
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build AI Pipeline Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/ai_pipeline
+          file: ./apps/ai_pipeline/Dockerfile
+          push: false
+          tags: trustpassz/ai-pipeline:pre-release
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

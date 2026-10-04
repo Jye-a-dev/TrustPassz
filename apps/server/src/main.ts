@@ -25,6 +25,19 @@ async function bootstrap() {
   // Parse cookies so AuthGuard can read httpOnly access_token cookie
   app.use(cookieParser());
 
+  // Enterprise Security Headers (TASK-15)
+  app.use((_req: unknown, res: { setHeader: (name: string, value: string) => void }, next: () => void) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload',
+    );
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+  });
+
   // Strict CORS Configuration (TASK-14)
   app.enableCors(createCorsOptions());
 
