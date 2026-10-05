@@ -43,7 +43,7 @@ export async function logAdminAction(
 
     // Attempt pushing to server audit endpoint if available
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
       fetch(`${baseUrl}/api/v1/admin/audit-logs`, {
         method: 'POST',
         headers: {

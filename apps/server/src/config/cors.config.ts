@@ -30,6 +30,8 @@ export function createCorsOptions(): CorsOptions {
 
   const devAllowedOrigins = [
     ...productionAllowedOrigins,
+    'http://localhost:3000', // server / local web on 3000
+    'http://localhost:3001', // server / local web on 3001
     'http://localhost:5000', // cl_user dev web
     'http://localhost:5100', // cl_admin dev web
     'http://localhost:3100', // ai_pipeline FastAPI
@@ -81,6 +83,22 @@ export function createCorsOptions(): CorsOptions {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Idempotency-Key',
+      'idempotency-key',
+      'X-Idempotency-Key',
+      'x-idempotency-key',
+      'X-Requested-With',
+      'Origin',
+    ],
+    exposedHeaders: [
+      'Idempotency-Key',
+      'idempotency-key',
+      'X-Idempotency-Key',
+      'x-idempotency-key',
+    ],
   };
 }

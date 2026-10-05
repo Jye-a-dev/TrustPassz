@@ -1,13 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
 import { UserNavbar } from "@/components/layout/user-navbar";
 import { UserSidebar } from "@/components/layout/user-sidebar";
 import { UserMobileNav } from "@/components/layout/user-mobile-nav";
 import { UserFooter } from "@/components/layout/user-footer";
 import { AuthGuard } from "@/components/auth/auth-guard";
-import { Terminal, Shield, Cpu, Activity, Radio, Lock } from "lucide-react";
+import { Terminal, Cpu, Radio, Lock } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 
 export default function UserLayout({
@@ -15,7 +14,6 @@ export default function UserLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [lockedBalanceVND, setLockedBalanceVND] = React.useState<number>(0);
   const [activeDealsCount, setActiveDealsCount] = React.useState<number>(0);
@@ -57,10 +55,16 @@ export default function UserLayout({
 
     void fetchStats();
 
+    // Background polling every 45s instead of blocking on every client route transition
+    const interval = setInterval(() => {
+      void fetchStats();
+    }, 45000);
+
     return () => {
       isMounted = false;
+      clearInterval(interval);
     };
-  }, [pathname]);
+  }, []);
 
   return (
     <AuthGuard>
@@ -70,12 +74,12 @@ export default function UserLayout({
         {/* ============================================================ */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
           {/* Cyber Grid with Elliptical Radial Mask */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#0e172635_1px,transparent_1px),linear-gradient(to_bottom,#0e172635_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_0%,#000_75%,transparent_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#0e172635_1px,transparent_1px),linear-gradient(to_bottom,#0e172635_1px,transparent_1px)] bg-size-[3.5rem_3.5rem] mask-[radial-gradient(ellipse_75%_65%_at_50%_0%,#000_75%,transparent_100%)]" />
 
           {/* Holographic Glowing Spotlights */}
-          <div className="absolute -top-40 left-1/4 size-[550px] rounded-full bg-cyan-500/10 blur-[150px] animate-pulse duration-10000" />
-          <div className="absolute top-1/3 right-4 size-[480px] rounded-full bg-emerald-500/8 blur-[160px]" />
-          <div className="absolute bottom-10 left-1/3 size-[420px] rounded-full bg-indigo-500/6 blur-[140px]" />
+          <div className="absolute -top-40 left-1/4 size-137.5 rounded-full bg-cyan-500/10 blur-[150px] animate-pulse duration-10000" />
+          <div className="absolute top-1/3 right-4 size-120 rounded-full bg-emerald-500/8 blur-[160px]" />
+          <div className="absolute bottom-10 left-1/3 size-105 rounded-full bg-indigo-500/6 blur-[140px]" />
 
           {/* Top Cyber Laser Wire */}
           <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-cyan-500/60 to-transparent" />

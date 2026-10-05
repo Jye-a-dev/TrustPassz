@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -143,17 +144,20 @@ export class DealsController {
   async create(
     @Body() createDealDto: CreateDealDto,
     @CurrentUser() user: RequestUser,
+    @Headers('idempotency-key') headerKey?: string,
+    @Headers('x-idempotency-key') altHeaderKey?: string,
   ) {
-    // If sellerId not supplied, fallback to authenticated caller's identity
     const sellerId = createDealDto.sellerId || user.id;
     if (createDealDto.buyerId && createDealDto.buyerId === sellerId) {
       throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
     }
+    const idempotencyKey = headerKey || altHeaderKey || createDealDto.idempotencyKey;
     const payload: CreateDealDto = {
       ...createDealDto,
       sellerId,
+      idempotencyKey,
     };
-    return this.dealsService.create(payload);
+    return this.dealsService.create(payload, idempotencyKey);
   }
 
   /**

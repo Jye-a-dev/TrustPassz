@@ -47,6 +47,16 @@ export function CreateDealForm() {
 
   // Submission & Encryption states
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const isSubmittingRef = React.useRef(false);
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const isRedirectingRef = React.useRef(false);
+  const formIdempotencyKeyRef = React.useRef<string>("");
+  if (!formIdempotencyKeyRef.current) {
+    formIdempotencyKeyRef.current =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `idem_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+  }
   const [vaultAudit, setVaultAudit] = React.useState<VaultAuditData | null>(null);
 
   // Dynamic UX adjustments when asset type switches
@@ -121,9 +131,14 @@ export function CreateDealForm() {
     toast.success("Đã bổ sung điều khoản vào mô tả giao dịch!");
   };
 
-  // Form submission handler
+  // Form submission handler with synchronous re-entrancy guard & idempotency
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 1. Immediate synchronous lock preventing multi-click race conditions and post-success re-entry
+    if (isSubmittingRef.current || isSubmitting || isRedirectingRef.current || isRedirecting) {
+      return;
+    }
 
     if (!title.trim()) {
       toast.error("Vui lòng nhập tiêu đề giao dịch.");
@@ -153,9 +168,13 @@ export function CreateDealForm() {
       }
     }
 
+    // Synchronously lock state before microtask yield during crypto & network operations
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
+      const idempotencyKey = formIdempotencyKeyRef.current;
+
       const { dealDto, vaultAudit: audit } =
         await CreateDealService.encryptAndPreparePayload({
           title,
@@ -167,11 +186,17 @@ export function CreateDealForm() {
           inspectionDuration,
           buyerId,
           sellerId: user?.id,
+          idempotencyKey,
         });
 
       setVaultAudit(audit);
 
-      const result = await CreateDealService.submitDeal(dealDto);
+      const result = await CreateDealService.submitDeal(dealDto, idempotencyKey);
+      
+      // Permanently lock form during navigation redirect to prevent re-activation
+      isRedirectingRef.current = true;
+      setIsRedirecting(true);
+
       toast.success(
         assetType === "PHYSICAL_ITEM"
           ? "Tạo giao dịch thành công! Tình trạng hàng đã được lưu trữ bảo mật."
@@ -184,8 +209,14 @@ export function CreateDealForm() {
       } else {
         toast.error("Đã xảy ra lỗi khi tạo giao dịch hoặc mã hóa dữ liệu.");
       }
-    } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
+    } finally {
+      // Only unlock if navigation redirect is NOT active
+      if (!isRedirectingRef.current) {
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -276,7 +307,7 @@ export function CreateDealForm() {
         buyerId={buyerId}
         onBuyerIdChange={setBuyerId}
         isPhysical={assetType === "PHYSICAL_ITEM"}
-        disabled={isSubmitting}
+        disabled={isSubmitting || isRedirecting}
       />
 
       {/* 4. Digital Vault: Zero-Knowledge AES-256-GCM Section */}
@@ -287,16 +318,26 @@ export function CreateDealForm() {
         passphrase={passphrase}
         onPassphraseChange={setPassphrase}
         vaultAudit={vaultAudit}
-        disabled={isSubmitting}
+        disabled={isSubmitting || isRedirecting}
       />
 
-      {/* 5. Submit Button */}
+      {/* 5. Submit Button with anti-double-click & redirect protection */}
       <Button
         type="submit"
-        disabled={isSubmitting}
-        className="w-full min-h-12 text-base font-bold bg-linear-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 shadow-lg shadow-cyan-950/50 transition-all cursor-pointer"
+        disabled={isSubmitting || isRedirecting}
+        aria-busy={isSubmitting || isRedirecting}
+        className={`w-full min-h-12 text-base font-bold bg-linear-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 shadow-lg shadow-cyan-950/50 transition-all ${
+          isSubmitting || isRedirecting
+            ? "cursor-not-allowed opacity-70 pointer-events-none"
+            : "cursor-pointer"
+        }`}
       >
-        {isSubmitting ? (
+        {isRedirecting ? (
+          <>
+            <Loader2 className="size-5 animate-spin mr-2" />
+            Đang chuyển hướng tới giao dịch...
+          </>
+        ) : isSubmitting ? (
           <>
             <Loader2 className="size-5 animate-spin mr-2" />
             Đang khóa an toàn &amp; Tạo Giao Dịch...
@@ -304,9 +345,7 @@ export function CreateDealForm() {
         ) : (
           <>
             <ShieldCheck className="size-5 mr-2" />
-            {assetType === "PHYSICAL_ITEM"
-              ? "Xác Nhận & Tạo Giao Dịch Mới"
-              : "Xác Nhận & Tạo Giao Dịch Mới"}
+            Xác Nhận &amp; Tạo Giao Dịch Mới
           </>
         )}
       </Button>

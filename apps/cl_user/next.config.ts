@@ -33,6 +33,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname, "../../"),
   },
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@solana/web3.js",
+      "@solana/wallet-adapter-react",
+      "@solana/wallet-adapter-wallets",
+      "motion",
+    ],
+  },
   async headers() {
     return [
       {

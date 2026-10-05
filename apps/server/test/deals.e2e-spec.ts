@@ -110,6 +110,40 @@ describe('DealsController (e2e)', () => {
         payload.digitalAsset.authTag,
       );
     });
+
+    it('should be idempotent and prevent duplicate records when multi-clicked with Idempotency-Key', async () => {
+      const idempotencyKey = 'test-idempotency-key-task-a-3';
+      const payload = {
+        sellerId: sellerUser.id,
+        buyerId: buyerUser.id,
+        title: 'Idempotency Safe Deal',
+        amount: 1500000,
+        currency: 'VND',
+        digitalAsset: {
+          assetType: AssetType.LICENSE_KEY,
+          encryptedContent: 'license_key_encrypted_payload==',
+          encryptionIv: 'e4d29e7c3b9f4a120000000000000000',
+          authTag: '9f8e7d6c5b4a32100000000000000000',
+          contentHash: 'hash1234567890abcdef',
+        },
+      };
+
+      const [res1, res2] = await Promise.all([
+        request(app.getHttpServer())
+          .post('/api/v1/deals')
+          .set('Idempotency-Key', idempotencyKey)
+          .send(payload),
+        request(app.getHttpServer())
+          .post('/api/v1/deals')
+          .set('Idempotency-Key', idempotencyKey)
+          .send(payload),
+      ]);
+
+      expect(res1.status).toBe(HttpStatus.CREATED);
+      expect(res2.status).toBe(HttpStatus.CREATED);
+      expect(res1.body.id).toBe(res2.body.id);
+      expect(dealsStore.length).toBe(1);
+    });
   });
 
   describe('GET /api/v1/deals/count', () => {
