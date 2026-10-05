@@ -39,8 +39,8 @@ export async function apiClient<T>(
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL ||
     (typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:3000`
-      : "http://localhost:3000");
+      ? `${window.location.protocol}//${window.location.hostname}:3001`
+      : "http://localhost:3001");
 
   const fullUrl = endpoint.startsWith("http://") || endpoint.startsWith("https://")
     ? endpoint

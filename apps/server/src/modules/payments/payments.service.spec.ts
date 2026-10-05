@@ -198,7 +198,35 @@ describe('PaymentsService', () => {
         });
 
       await expect(service.handleWebhook(payload as any)).rejects.toThrow(
-        BadRequestException,
+        'Số tiền thanh toán không đủ.',
+      );
+    });
+
+    it('should throw BadRequestException if beneficiary accountNumber does not match Escrow account', async () => {
+      const tamperedData = {
+        ...validWebhookData,
+        accountNumber: '123456789_personal_account',
+      };
+      const signature = generateSignature(tamperedData, checksumKey);
+      const payload = {
+        code: '00',
+        desc: 'Success',
+        success: true,
+        data: tamperedData,
+        signature,
+      };
+
+      mockPrismaService.deal.findFirst
+        .mockResolvedValueOnce(null) // idempotency check
+        .mockResolvedValueOnce({
+          id: 'd0000000-0000-4000-a000-000000000001',
+          state: DealState.PENDING,
+          amount: 500000,
+          currency: 'VND',
+        });
+
+      await expect(service.handleWebhook(payload as any)).rejects.toThrow(
+        'Tài khoản thụ hưởng không khớp với tài khoản Két ký quỹ Escrow của hệ thống.',
       );
     });
 

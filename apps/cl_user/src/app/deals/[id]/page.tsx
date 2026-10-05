@@ -151,10 +151,21 @@ export default function DealRoomPage() {
   const currentUserId = user?.id || "";
   const isBuyer = currentUserId === deal?.buyer?.id;
 
-  const handleOfferSubmit = (newOffer: number) => {
+  const handleOfferSubmit = async (newOffer: number) => {
+    if (!deal) return;
+    toast.info("Đang cập nhật giá thỏa thuận và chuyển tiếp...");
+    try {
+      await apiClient(`/api/v1/deals/${deal.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ amount: newOffer }),
+      });
+    } catch {
+      // Graceful fallback if offline or guest mode
+    }
     toast.success(
       `Đã ghi nhận đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫. Chuyển sang thanh toán VietQR.`
     );
+    router.push(`/user/deals/${deal.id}/checkout?amount=${newOffer}`);
   };
 
   const handleProceedToPayment = () => {

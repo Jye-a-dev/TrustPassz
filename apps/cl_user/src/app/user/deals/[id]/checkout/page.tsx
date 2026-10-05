@@ -19,12 +19,15 @@ interface PaymentLinkResponse {
   qrCode?: string;
   qrDataUrl?: string;
   accountNo?: string;
+  accountNumber?: string;
   accountName?: string;
   amount?: number;
   orderCode?: number | string;
+  description?: string;
   bin?: string;
   bankName?: string;
   deepLink?: string;
+  checkoutUrl?: string;
 }
 
 export default function DealCheckoutPage() {
@@ -40,19 +43,42 @@ export default function DealCheckoutPage() {
 
   // Bank Account Info (Standard PayOS VietQR Merchant Setup)
   const bankConfig = React.useMemo(() => {
-    const orderCode = paymentInfo?.orderCode || dealId.slice(0, 8).toUpperCase();
-    const memo = `TPZ ${orderCode}`;
-    const amount = paymentInfo?.amount || deal?.amount || 500000;
-    const accountNo = paymentInfo?.accountNo || "998877";
+    const queryAmount =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("amount")
+        : null;
+    const parsedQueryAmount =
+      queryAmount && !isNaN(Number(queryAmount)) ? Number(queryAmount) : 0;
+
+    // Dynamic price resolution from Deal API: prioritize deal.price then deal.amount, fallback to URL param
+    const rawDealPrice = deal?.price ?? deal?.amount;
+    const dealPrice =
+      rawDealPrice !== undefined && rawDealPrice !== null && !isNaN(Number(rawDealPrice))
+        ? Number(rawDealPrice)
+        : parsedQueryAmount;
+
+    const amount =
+      paymentInfo?.amount !== undefined && paymentInfo.amount > 0
+        ? paymentInfo.amount
+        : dealPrice > 0
+        ? dealPrice
+        : parsedQueryAmount;
+
+    const orderCode = paymentInfo?.orderCode || deal?.orderCode || dealId.slice(0, 8).toUpperCase();
+    const memo = paymentInfo?.description || `TPZ ${orderCode}`;
+    const accountNo = paymentInfo?.accountNumber || paymentInfo?.accountNo || "998877";
     const accountName = paymentInfo?.accountName || "TRUSTPASSZ ESCROW";
     const bankName = paymentInfo?.bankName || "MBBank (Ngân hàng TMCP Quân Đội)";
     const bin = paymentInfo?.bin || "970422";
+
+    // Ensure vietQrUrl produces a valid image URL for <Image> component
     const vietQrUrl =
       paymentInfo?.qrDataUrl ||
-      paymentInfo?.qrCode ||
-      `https://img.vietqr.io/image/${bin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(
-        memo
-      )}&accountName=${encodeURIComponent(accountName)}`;
+      (paymentInfo?.qrCode?.startsWith("http") || paymentInfo?.qrCode?.startsWith("data:")
+        ? paymentInfo.qrCode
+        : `https://img.vietqr.io/image/${bin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(
+            memo
+          )}&accountName=${encodeURIComponent(accountName)}`);
 
     return {
       bin,
@@ -64,11 +90,13 @@ export default function DealCheckoutPage() {
       vietQrUrl,
       deepLink:
         paymentInfo?.deepLink ||
-        `vietqr://pay?acc=${accountNo}&bin=${bin}&amount=${amount}&memo=${encodeURIComponent(
-          memo
-        )}`,
+        (paymentInfo?.qrCode?.startsWith("vietqr://")
+          ? paymentInfo.qrCode
+          : `vietqr://pay?acc=${accountNo}&bin=${bin}&amount=${amount}&memo=${encodeURIComponent(
+              memo
+            )}`),
     };
-  }, [dealId, deal?.amount, paymentInfo]);
+  }, [dealId, deal?.price, deal?.amount, deal?.orderCode, paymentInfo]);
 
   // Audio effect using Web Audio API for zero-dependency sound chime
   const playSuccessChime = React.useCallback(() => {
@@ -134,7 +162,8 @@ export default function DealCheckoutPage() {
         data?: DealData;
         id?: string;
         title?: string;
-        amount?: number;
+        amount?: number | string;
+        price?: number | string;
         currency?: string;
         state?: DealData["state"];
         inspectionDuration?: number;
@@ -151,31 +180,26 @@ export default function DealCheckoutPage() {
         return;
       }
 
-      // Call payments/create-link
+      // Call payments/create-link with deal description
       try {
         const payRes = await apiClient<PaymentLinkResponse>(
           `/api/v1/payments/create-link/${dealId}`,
-          { method: "POST" }
+          {
+            method: "POST",
+            body: JSON.stringify({
+              dealId,
+              description: `TPZ ${dealData.id ? dealData.id.slice(0, 8).toUpperCase() : dealId.slice(0, 8).toUpperCase()}`.slice(0, 25),
+            }),
+          }
         );
         if (payRes) {
           setPaymentInfo(payRes);
         }
       } catch {
-        // Fallback: Continue with default VietQR computation
+        // Fallback: Continue with client-side VietQR computation using deal.price
       }
     } catch {
-      setDeal({
-        id: dealId,
-        title: "Bộ mã nguồn ứng dụng thương mại điện tử an toàn (Next.js 15 + Bảo vệ tự động)",
-        amount: 500000,
-        currency: "VND",
-        state: "PENDING",
-        inspectionDuration: 43200,
-        seller: {
-          id: "11111111-1111-4111-a111-111111111111",
-          displayName: "Trusted Dev Corp",
-        },
-      });
+      toast.error("Không thể tải thông tin giao dịch hoặc Kèo không tồn tại.");
     } finally {
       setLoading(false);
     }

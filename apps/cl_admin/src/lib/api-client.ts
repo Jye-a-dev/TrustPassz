@@ -17,7 +17,7 @@ interface RequestOptions extends RequestInit {
   timeoutMs?: number;
 }
 
-const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export async function apiClient<T>(
   endpoint: string,
