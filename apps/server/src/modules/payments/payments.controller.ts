@@ -18,6 +18,10 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import {
+  CurrentUser,
+  RequestUser,
+} from '../../common/decorators/current-user.decorator';
 import { THROTTLE_CONFIG } from '../../config/throttle.config';
 import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
 import { PaymentsService } from './payments.service';
@@ -80,14 +84,19 @@ export class PaymentsController {
     description: 'Chưa xác thực hoặc token JWT không hợp lệ.',
   })
   @ApiResponse({
+    status: 403,
+    description: 'Người bán không thể tự mua hoặc thanh toán sản phẩm của chính mình.',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Không tìm thấy Deal tương ứng với dealId.',
   })
   async createPaymentLink(
     @Param('dealId', new ParseUUIDPipe()) dealId: string,
     @Body() dto?: CreatePaymentLinkDto,
+    @CurrentUser() currentUser?: RequestUser,
   ) {
-    return this.paymentsService.createPaymentLink(dealId, dto);
+    return this.paymentsService.createPaymentLink(dealId, dto, currentUser);
   }
 
   /**
@@ -106,11 +115,18 @@ export class PaymentsController {
     status: 400,
     description: 'Thiếu dealId hoặc trạng thái không hợp lệ.',
   })
-  async checkout(@Body() dto: CreatePaymentLinkDto) {
+  @ApiResponse({
+    status: 403,
+    description: 'Người bán không thể tự mua hoặc thanh toán sản phẩm của chính mình.',
+  })
+  async checkout(
+    @Body() dto: CreatePaymentLinkDto,
+    @CurrentUser() currentUser?: RequestUser,
+  ) {
     if (!dto.dealId) {
       throw new Error('dealId is required in checkout body');
     }
-    return this.paymentsService.createPaymentLink(dto.dealId, dto);
+    return this.paymentsService.createPaymentLink(dto.dealId, dto, currentUser);
   }
 
   /**

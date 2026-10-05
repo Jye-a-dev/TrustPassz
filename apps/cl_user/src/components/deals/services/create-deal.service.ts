@@ -17,6 +17,7 @@ export interface EncryptDealInput {
   assetType: AssetCategory;
   inspectionDuration: number;
   buyerId?: string;
+  sellerId?: string;
 }
 
 export interface PreparedDealPayload {
@@ -132,9 +133,16 @@ export class CreateDealService {
       generatedKey: vaultPayload.exportedKeyHex,
     };
 
+    const targetSellerId = input.sellerId?.trim() || this.DEFAULT_SELLER_ID;
+    const targetBuyerId = input.buyerId?.trim() || undefined;
+
+    if (targetBuyerId && targetBuyerId === targetSellerId) {
+      throw new Error("Bạn không thể tự mua sản phẩm của chính mình.");
+    }
+
     const dealDto = {
-      sellerId: this.DEFAULT_SELLER_ID,
-      buyerId: input.buyerId?.trim() || undefined,
+      sellerId: targetSellerId,
+      buyerId: targetBuyerId,
       title: input.title.trim(),
       description: input.description?.trim() || undefined,
       amount: Number(input.amount),

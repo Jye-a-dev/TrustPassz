@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sparkles, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/api-client";
+import { useAuthStore } from "@/lib/auth-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -27,6 +28,7 @@ export { ASSET_TYPE_OPTIONS, INSPECTION_HOURS_MAP };
 
 export function CreateDealForm() {
   const router = useRouter();
+  const { user } = useAuthStore();
 
   // Core Deal form states
   const [title, setTitle] = React.useState("");
@@ -140,6 +142,17 @@ export function CreateDealForm() {
       return;
     }
 
+    if (buyerId.trim()) {
+      const trimmedBuyerId = buyerId.trim();
+      if (
+        (user?.id && trimmedBuyerId === user.id) ||
+        (user?.email && trimmedBuyerId.toLowerCase() === user.email.toLowerCase())
+      ) {
+        toast.error("Bạn không thể tự mua sản phẩm của chính mình. Vui lòng nhập ID người mua khác hoặc để trống.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -153,6 +166,7 @@ export function CreateDealForm() {
           assetType,
           inspectionDuration,
           buyerId,
+          sellerId: user?.id,
         });
 
       setVaultAudit(audit);

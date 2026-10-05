@@ -5,9 +5,11 @@ export const runtime = "edge";
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, QrCode, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, QrCode, CheckCircle2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/lib/auth-store";
 import { supabase } from "@/lib/supabase-client";
 import { apiClient } from "@/lib/api-client";
 import { CheckoutQrCard } from "@/components/checkout/checkout-qr-card";
@@ -33,6 +35,7 @@ interface PaymentLinkResponse {
 export default function DealCheckoutPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuthStore();
   const dealId = params?.id || "d0000000-0000-4000-a000-000000000001";
 
   const [deal, setDeal] = React.useState<DealData | null>(null);
@@ -40,6 +43,8 @@ export default function DealCheckoutPage() {
   const [isSuccessGlow, setIsSuccessGlow] = React.useState(false);
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = React.useState<PaymentLinkResponse | null>(null);
+
+  const isSeller = Boolean(user?.id && deal?.seller?.id && user.id === deal.seller.id);
 
   // Bank Account Info (Standard PayOS VietQR Merchant Setup)
   const bankConfig = React.useMemo(() => {
@@ -172,6 +177,12 @@ export default function DealCheckoutPage() {
       const dealData: DealData = (dealRes.data || dealRes) as DealData;
       setDeal(dealData);
 
+      if (user?.id && dealData.seller?.id && user.id === dealData.seller.id) {
+        toast.error("Bạn không thể tự mua hoặc thanh toán sản phẩm của chính mình.");
+        setLoading(false);
+        return;
+      }
+
       if (
         dealData.state === "DEPOSITED" ||
         dealData.state === "IN_INSPECTION"
@@ -203,7 +214,7 @@ export default function DealCheckoutPage() {
     } finally {
       setLoading(false);
     }
-  }, [dealId, handlePaymentSuccess]);
+  }, [dealId, handlePaymentSuccess, user]);
 
   React.useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -295,6 +306,76 @@ export default function DealCheckoutPage() {
     toast.info("Đang mô phỏng xác nhận tiền vào két an toàn...");
     handlePaymentSuccess();
   };
+
+  if (isSeller) {
+    return (
+      <div className="relative max-w-xl mx-auto py-12 px-4 space-y-6">
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/deals/${dealId}`}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
+          >
+            <ArrowLeft className="size-4" />
+            <span>Quay lại chi tiết giao dịch</span>
+          </Link>
+          <Badge
+            variant="outline"
+            className="bg-rose-950/40 border-rose-500/40 text-rose-300 text-xs px-2.5 py-1"
+          >
+            Quyền Người Bán
+          </Badge>
+        </div>
+
+        <div className="rounded-2xl border border-rose-500/30 bg-slate-900/90 p-8 text-center space-y-6 shadow-2xl">
+          <div className="size-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.3)]">
+            <ShieldAlert className="size-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              Không Thể Tự Mua Sản Phẩm
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+              Bạn đang đăng nhập với tư cách Người bán của Kèo này. Để đảm bảo tính minh bạch và an toàn của hệ thống bảo chứng, bạn không thể tự đặt cọc hoặc thanh toán đơn hàng do chính mình tạo.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-xs space-y-2 text-left">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Tiêu đề Kèo:</span>
+              <span className="font-semibold text-slate-200">{deal?.title || "Kèo Escrow"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Giá niêm yết:</span>
+              <span className="font-mono font-bold text-cyan-400">
+                {Number(deal?.price ?? deal?.amount ?? 0).toLocaleString("vi-VN")} ₫
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Button
+              asChild
+              className="w-full sm:w-auto bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs min-h-10 px-5 cursor-pointer"
+            >
+              <Link href={`/deals/${dealId}`}>
+                Quay Lại Quản Lý Kèo
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full sm:w-auto border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs min-h-10 px-5 cursor-pointer"
+            >
+              <Link href="/user/deals">
+                Danh Sách Giao Dịch
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative max-w-4xl mx-auto space-y-6">

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -144,9 +145,13 @@ export class DealsController {
     @CurrentUser() user: RequestUser,
   ) {
     // If sellerId not supplied, fallback to authenticated caller's identity
+    const sellerId = createDealDto.sellerId || user.id;
+    if (createDealDto.buyerId && createDealDto.buyerId === sellerId) {
+      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+    }
     const payload: CreateDealDto = {
       ...createDealDto,
-      sellerId: createDealDto.sellerId || user.id,
+      sellerId,
     };
     return this.dealsService.create(payload);
   }

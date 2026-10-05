@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useAuthStore } from "@/lib/auth-store";
+import { apiClient } from "@/lib/api-client";
+import { supabase } from "@/lib/supabase-client";
 import { HeaderNavLinks } from "./header-nav-links";
 import { HeaderUserMenu } from "./header-user-menu";
 import { HeaderMobileDrawer } from "./header-mobile-drawer";
@@ -29,6 +31,51 @@ export function Header() {
   // Đọc state từ Zustand persist store
   const { user, isAuthenticated, logout } = useAuthStore();
   const isAuth = mounted && isAuthenticated && !!user;
+
+  // Realtime Escrow Locked Balance ("Két Giữ Tiền")
+  const [lockedBalanceVND, setLockedBalanceVND] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (!isAuth) return;
+    let isMounted = true;
+
+    async function fetchLockedBalance() {
+      try {
+        const dealsRes = await apiClient<
+          | { data?: Array<{ state: string; amount: string | number }> }
+          | Array<{ state: string; amount: string | number }>
+        >("/api/v1/deals?limit=50");
+
+        if (!isMounted) return;
+        const val = dealsRes;
+        const items = Array.isArray(val) ? val : Array.isArray(val?.data) ? val.data : [];
+        const locked = items
+          .filter((d) => d.state === "DEPOSITED" || d.state === "IN_INSPECTION")
+          .reduce((sum, d) => sum + Number(d.amount || 0), 0);
+        setLockedBalanceVND(locked);
+      } catch {
+        // Fallback silently
+      }
+    }
+
+    void fetchLockedBalance();
+
+    const channel = supabase
+      .channel("public:deals-header-main")
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "deals" },
+        () => {
+          void fetchLockedBalance();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [isAuth, pathname, user?.id]);
 
   // Header công khai tự ẩn khi người dùng đã bước vào /user workspace (đã có UserNavbar/UserSidebar riêng)
   if (pathname?.startsWith("/user")) {
@@ -116,6 +163,7 @@ export function Header() {
               userInitials={userInitials}
               formattedWallet={formattedWallet}
               onLogout={handleLogout}
+              lockedBalanceVND={lockedBalanceVND}
             />
           ) : (
             <div className="flex items-center gap-2">
@@ -158,6 +206,7 @@ export function Header() {
             formattedWallet={formattedWallet}
             pathname={pathname}
             onLogout={handleLogout}
+            lockedBalanceVND={lockedBalanceVND}
           />
         </div>
       </div>

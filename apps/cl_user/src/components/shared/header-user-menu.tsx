@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { AuthUser } from "@/lib/auth-store";
+import { apiClient } from "@/lib/api-client";
+import { supabase } from "@/lib/supabase-client";
 
 interface HeaderUserMenuProps {
   user: AuthUser | null;
@@ -19,6 +21,7 @@ interface HeaderUserMenuProps {
   userInitials: string;
   formattedWallet: string;
   onLogout: () => void;
+  lockedBalanceVND?: number;
 }
 
 export function HeaderUserMenu({
@@ -27,11 +30,67 @@ export function HeaderUserMenu({
   userInitials,
   formattedWallet,
   onLogout,
+  lockedBalanceVND: propLockedBalanceVND,
 }: HeaderUserMenuProps) {
+  const [localLockedBalance, setLocalLockedBalance] = React.useState<number>(
+    propLockedBalanceVND ?? 0
+  );
+
+  React.useEffect(() => {
+    if (propLockedBalanceVND !== undefined) {
+      setLocalLockedBalance(propLockedBalanceVND);
+      return;
+    }
+
+    let isMounted = true;
+    async function fetchLocked() {
+      try {
+        const dealsRes = await apiClient<
+          | { data?: Array<{ state: string; amount: string | number }> }
+          | Array<{ state: string; amount: string | number }>
+        >("/api/v1/deals?limit=50");
+
+        if (!isMounted) return;
+        const val = dealsRes;
+        const items = Array.isArray(val) ? val : Array.isArray(val?.data) ? val.data : [];
+        const locked = items
+          .filter((d) => d.state === "DEPOSITED" || d.state === "IN_INSPECTION")
+          .reduce((sum, d) => sum + Number(d.amount || 0), 0);
+        setLocalLockedBalance(locked);
+      } catch {
+        // Fallback silently
+      }
+    }
+
+    void fetchLocked();
+
+    const channel = supabase
+      .channel("public:deals-header-user-menu")
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "deals" },
+        () => {
+          void fetchLocked();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [propLockedBalanceVND, user?.id]);
+
+  const displayBalance = propLockedBalanceVND ?? localLockedBalance;
+
   return (
     <div className="flex items-center gap-2 sm:gap-3">
       {/* Widget Số dư Két Giữ Tiền Tạm Khóa */}
-      <div className="hidden xl:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-2.5 py-1 shadow-[0_0_12px_rgba(6,182,212,0.12)]">
+      <Link
+        href="/user/deals"
+        className="hidden xl:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-2.5 py-1 shadow-[0_0_12px_rgba(6,182,212,0.12)] hover:border-cyan-400/50 hover:bg-cyan-950/30 transition-all cursor-pointer"
+        title="Tiền đang giữ an toàn trong két bảo vệ. Bấm để xem chi tiết."
+      >
         <div className="p-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 text-cyan-400">
           <Lock className="size-3" />
         </div>
@@ -40,10 +99,10 @@ export function HeaderUserMenu({
             Két Giữ Tiền
           </span>
           <span className="font-mono text-[11px] font-bold text-cyan-300 leading-tight">
-            1.250.000 ₫
+            {displayBalance.toLocaleString("vi-VN")} ₫
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Thông báo chuông biến động giao dịch */}
       <button

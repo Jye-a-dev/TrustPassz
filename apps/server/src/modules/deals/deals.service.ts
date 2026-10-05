@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -80,6 +81,11 @@ export class DealsService {
     }
 
     if (dealData.buyerId) {
+      if (dealData.buyerId === dealData.sellerId) {
+        throw new ForbiddenException(
+          'Bạn không thể tự mua sản phẩm của chính mình.',
+        );
+      }
       const buyer = await this.prisma.user.findUnique({
         where: { id: dealData.buyerId },
       });
@@ -198,6 +204,13 @@ export class DealsService {
     }
 
     const { digitalAsset, ...dealUpdates } = updateDealDto;
+
+    const targetSellerId = dealUpdates.sellerId || existingDeal.sellerId;
+    if (dealUpdates.buyerId && dealUpdates.buyerId === targetSellerId) {
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
+    }
 
     try {
       return await this.prisma.$transaction(async (tx) => {

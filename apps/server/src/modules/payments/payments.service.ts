@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -9,6 +10,7 @@ import { DealState, Order, OrderStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
+import { RequestUser } from '../../common/decorators/current-user.decorator';
 
 @Injectable()
 export class PaymentsService {
@@ -32,7 +34,11 @@ export class PaymentsService {
   /**
    * Generates a dynamic VietQR payment link via PayOS SDK and associates orderCode with Deal.
    */
-  async createPaymentLink(dealId: string, dto?: CreatePaymentLinkDto) {
+  async createPaymentLink(
+    dealId: string,
+    dto?: CreatePaymentLinkDto,
+    currentUser?: RequestUser,
+  ) {
     const deal = await this.prisma.deal.findUnique({
       where: { id: dealId },
       include: { order: true, buyer: true, seller: true },
@@ -40,6 +46,10 @@ export class PaymentsService {
 
     if (!deal) {
       throw new NotFoundException(`Deal with ID '${dealId}' not found`);
+    }
+
+    if (currentUser && currentUser.id === deal.sellerId) {
+      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
     }
 
     if (deal.state !== DealState.PENDING) {

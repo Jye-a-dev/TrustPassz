@@ -9,6 +9,7 @@ import {
   Menu,
   LogOut,
   Settings,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,7 @@ interface HeaderMobileDrawerProps {
   formattedWallet: string;
   pathname: string;
   onLogout: () => void;
+  lockedBalanceVND?: number;
 }
 
 export function HeaderMobileDrawer({
@@ -41,6 +43,7 @@ export function HeaderMobileDrawer({
   formattedWallet,
   pathname,
   onLogout,
+  lockedBalanceVND = 0,
 }: HeaderMobileDrawerProps) {
   return (
     <div className="md:hidden">
@@ -102,6 +105,25 @@ export function HeaderMobileDrawer({
                       </span>
                     </div>
                   </div>
+
+                  {/* Két Giữ Tiền Widget trong Mobile Drawer */}
+                  <Link
+                    href="/user/deals"
+                    onClick={() => onOpenChange(false)}
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-cyan-500/30 bg-cyan-950/25 mb-2 hover:bg-cyan-950/40 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="p-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 text-cyan-400">
+                        <Lock className="size-3.5" />
+                      </div>
+                      <span className="text-xs font-semibold text-slate-300">
+                        Két Giữ Tiền An Toàn
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs font-bold text-cyan-300">
+                      {lockedBalanceVND.toLocaleString("vi-VN")} ₫
+                    </span>
+                  </Link>
 
                   {/* Menu điều hướng cá nhân */}
                   {AUTH_NAV_ITEMS.map((item) => (
