@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
@@ -26,7 +28,12 @@ jobs:
           cache: "npm"
 
       - name: Install Dependencies
-        run: npm install --prefer-offline --no-audit
+        run: |
+          if [ -s package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          fi
 
       - name: Generate Prisma Client
         working-directory: apps/server
@@ -50,6 +57,7 @@ jobs:
         working-directory: apps/server
         env:
           NODE_ENV: production
+          NODE_OPTIONS: "--max-old-space-size=4096"
           JWT_SECRET: "mock-jwt-secret-for-ci-build-purposes-min-32-chars"
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
           DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
@@ -77,6 +85,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
@@ -85,7 +95,12 @@ jobs:
           cache: "npm"
 
       - name: Install Monorepo Dependencies
-        run: npm install --prefer-offline --no-audit
+        run: |
+          if [ -s package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          fi
 
       - name: Build cl_user
         working-directory: apps/cl_user
@@ -101,6 +116,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -108,7 +125,7 @@ jobs:
       - name: Build Server Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./apps/server
           file: ./apps/server/Dockerfile
           push: false
           tags: trustpassz/server:pre-release
@@ -119,6 +136,7 @@ jobs:
             BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
             ESCROW_CONTRACT_ADDRESS=0x165B47291B87569b91696DCE6f1207eE15C9f783
             ORACLE_RELAYER_PRIVATE_KEY=0x0000000000000000000000000000000000000000000000000000000000000001
+            NODE_OPTIONS=--max-old-space-size=4096
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

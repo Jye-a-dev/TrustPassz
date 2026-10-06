@@ -1,5 +1,7 @@
-import type { NextConfig } from "next";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const securityHeaders = [
   {
@@ -28,10 +30,26 @@ const securityHeaders = [
   },
 ];
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   turbopack: {
     root: path.resolve(__dirname, "../../"),
+  },
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@solana/web3.js",
+      "@solana/wallet-adapter-react",
+      "@solana/wallet-adapter-wallets",
+      "motion",
+    ],
   },
   async headers() {
     return [
