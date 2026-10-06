@@ -21,8 +21,15 @@ export function createCorsOptions(): CorsOptions {
     'https://trustpassz-cl-admin.vercel.app',
     'https://trustpassz-user.vercel.app',
     'https://trustpassz-admin.vercel.app',
+    'https://trustpassz-cl-admin.pages.dev',
+    'https://trustpassz-cl-user.pages.dev',
+    'https://trustpassz.pages.dev',
+    'https://admin.trustpassz.io',
     'https://www.trustpassz.io',
     'https://trustpassz.io',
+    'https://admin.trustpassz.com',
+    'https://www.trustpassz.com',
+    'https://trustpassz.com',
     'capacitor://localhost',
     'http://localhost',
     'https://localhost',
@@ -66,15 +73,23 @@ export function createCorsOptions(): CorsOptions {
         return;
       }
 
-      // 3. Dynamic match for Vercel preview/production deployments (cl_user, cl_admin)
-      const isTrustPasszVercel = /^https:\/\/(?:[a-z0-9-]+\.)?vercel\.app$/.test(origin) &&
-        (origin.includes('trustpassz') || origin.includes('cl-user') || origin.includes('cl-admin'));
-      if (isTrustPasszVercel) {
+      // 3. Dynamic match for TrustPassz custom domains (*.trustpassz.io, *.trustpassz.com)
+      const isTrustPasszDomain = /^https:\/\/(?:[a-z0-9-_.]+\.)?trustpassz\.(?:io|com|dev)$/i.test(origin);
+      if (isTrustPasszDomain) {
         callback(null, true);
         return;
       }
 
-      // 4. Local LAN IP regex matching (strictly active in development only)
+      // 4. Dynamic match for Vercel & Cloudflare deployments (cl_user, cl_admin)
+      const isTrustPasszDeploy =
+        /^https:\/\/[a-z0-9-_.]*(?:vercel\.app|pages\.dev|workers\.dev)$/i.test(origin) &&
+        (origin.includes('trustpassz') || origin.includes('admin') || origin.includes('cl-user'));
+      if (isTrustPasszDeploy) {
+        callback(null, true);
+        return;
+      }
+
+      // 5. Local LAN IP regex matching (strictly active in development only)
       if (!isProd) {
         const isLanDevOrigin =
           /^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(
@@ -86,7 +101,7 @@ export function createCorsOptions(): CorsOptions {
         }
       }
 
-      // 5. Safely reject disallowed origins without throwing an unhandled 500 error
+      // 6. Safely reject disallowed origins without throwing an unhandled 500 error
       callback(null, false);
     },
     credentials: true,
@@ -95,6 +110,7 @@ export function createCorsOptions(): CorsOptions {
       'Content-Type',
       'Authorization',
       'Accept',
+      'Cookie',
       'Idempotency-Key',
       'idempotency-key',
       'X-Idempotency-Key',

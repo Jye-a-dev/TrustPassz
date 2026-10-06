@@ -54,6 +54,7 @@ export default function LoginPage() {
     const success = setSession(token, user);
     if (success) {
       toast.success(`Đăng nhập thành công với vai trò ${user.role} (${user.displayName})`);
+      router.refresh();
       router.push(safeCallbackUrl);
     } else {
       setErrorMessage('Không thể cấp quyền quản trị trên thiết bị này.');
@@ -66,10 +67,11 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const res = await fetch(`${apiUrl}/api/v1/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(credentials),
       });
 

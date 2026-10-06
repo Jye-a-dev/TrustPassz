@@ -209,4 +209,22 @@ export class PaymentsController {
   async handleWebhook(@Body() payload: PayOSWebhookDto) {
     return this.paymentsService.handleWebhook(payload);
   }
+
+  /**
+   * Sandbox only: Simulates successful VietQR deposit for development/testing.
+   */
+  @Post('simulate-success/:dealId')
+  @ApiOperation({
+    summary: 'Mô phỏng thanh toán VietQR thành công (Sandbox Dev mode)',
+    description: 'Chuyển trạng thái Deal sang DEPOSITED và kích hoạt Realtime broadcast.',
+  })
+  @ApiParam({
+    name: 'dealId',
+    type: String,
+    description: 'UUID của Deal cần mô phỏng đặt cọc',
+  })
+  async simulateSuccess(@Param('dealId', new ParseUUIDPipe()) dealId: string) {
+    return this.paymentsService.simulatePaymentSuccess(dealId);
+  }
 }
+

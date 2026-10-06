@@ -4,11 +4,13 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { CreatePaymentLinkResponse, PayOS, Webhook } from '@payos/node';
 import { DealState, Order, OrderStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
+import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
 import { RequestUser } from '../../common/decorators/current-user.decorator';
 
@@ -18,7 +20,10 @@ export class PaymentsService {
   private readonly payOS: PayOS;
   private readonly checksumKey: string;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly supabaseService?: SupabaseService,
+  ) {
     const clientId = process.env.PAYOS_CLIENT_ID || 'mock-payos-client-id';
     const apiKey = process.env.PAYOS_API_KEY || 'mock-payos-api-key';
     this.checksumKey =
@@ -234,7 +239,9 @@ export class PaymentsService {
       this.logger.error(
         `[Webhook Underpaid Alert] Số tiền thanh toán không đủ cho Deal ${deal.id}: Cần tối thiểu ${dealPrice} ${deal.currency}, nhưng chỉ nhận được ${receivedAmount} ${data.currency}. Từ chối chuyển trạng thái DEPOSITED.`,
       );
-      throw new BadRequestException('Số tiền thanh toán không đủ.');
+      throw new BadRequestException(
+        `Payment amount mismatch: Số tiền thanh toán không đủ. (Yêu cầu ${dealPrice} ${deal.currency}, nhận ${receivedAmount} ${data.currency}).`,
+      );
     }
 
     if (receivedAmount > dealPrice) {
@@ -247,7 +254,7 @@ export class PaymentsService {
     }
 
     // 7. Atomic State Machine Transition via ACID Database Transaction
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const depositedAt = new Date();
       const inspectionDurationSeconds = deal.inspectionDuration || 86400;
       const inspectionDeadline = new Date(
@@ -296,6 +303,80 @@ export class PaymentsService {
         order: updatedOrder,
       };
     });
+
+    if (this.supabaseService) {
+      await this.supabaseService.broadcastPaymentSuccess(
+        deal.id,
+        DealState.DEPOSITED,
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Sandbox only: Simulates successful VietQR deposit for development/testing.
+   */
+  async simulatePaymentSuccess(dealId: string) {
+    const deal = await this.prisma.deal.findUnique({
+      where: { id: dealId },
+      include: { order: true },
+    });
+    if (!deal) {
+      throw new NotFoundException(`Deal with ID '${dealId}' not found`);
+    }
+    if (
+      deal.state === DealState.DEPOSITED ||
+      deal.state === DealState.IN_INSPECTION
+    ) {
+      return { success: true, message: 'Already deposited', deal };
+    }
+
+    const depositedAt = new Date();
+    const inspectionDurationSeconds = deal.inspectionDuration || 86400;
+    const inspectionDeadline = new Date(
+      depositedAt.getTime() + inspectionDurationSeconds * 1000,
+    );
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const updatedDeal = await tx.deal.update({
+        where: { id: deal.id },
+        data: {
+          state: DealState.DEPOSITED,
+          depositedAt,
+          inspectionDeadline,
+          paymentRefId: `SIM_${Date.now()}`,
+          webhookIdempotencyKey: `SIM_${Date.now()}`,
+        },
+      });
+
+      let updatedOrder: Order | null = null;
+      if (deal.order) {
+        updatedOrder = await tx.order.update({
+          where: { id: deal.order.id },
+          data: {
+            status: OrderStatus.PAID_ESCROW,
+          },
+        });
+      }
+
+      return {
+        success: true,
+        message:
+          'Simulated payment verified and deal transitioned to DEPOSITED',
+        deal: updatedDeal,
+        order: updatedOrder,
+      };
+    });
+
+    if (this.supabaseService) {
+      await this.supabaseService.broadcastPaymentSuccess(
+        deal.id,
+        DealState.DEPOSITED,
+      );
+    }
+
+    return result;
   }
 
   /**

@@ -104,4 +104,43 @@ export class SupabaseService implements OnModuleInit {
 
     this.logger.debug(`Realtime bargain update broadcasted to ${channelName}`);
   }
+
+  /**
+   * Broadcasts realtime payment confirmation to connected deal room peers.
+   */
+  async broadcastPaymentSuccess(
+    dealId: string,
+    state: string = 'DEPOSITED',
+  ): Promise<void> {
+    try {
+      const channelName = `deal-room:${dealId}`;
+      const channel = this.client.channel(channelName);
+
+      await channel.send({
+        type: 'broadcast',
+        event: 'PAYMENT_RECEIVED',
+        payload: {
+          dealId,
+          state,
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      await channel.send({
+        type: 'broadcast',
+        event: 'DEPOSIT_CONFIRMED',
+        payload: {
+          dealId,
+          state,
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      this.logger.debug(`Realtime payment broadcast sent to ${channelName}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Failed to broadcast payment success on Supabase: ${msg}`);
+    }
+  }
 }
+
