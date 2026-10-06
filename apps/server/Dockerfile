@@ -46,9 +46,11 @@ COPY package.json package-lock.json* ./
 
 # Install dependencies with resilient lockfile check
 RUN if [ -s package-lock.json ]; then \
-      npm ci --include=dev --prefer-offline --no-audit; \
-    else \
+      npm ci --include=dev --prefer-offline --no-audit || npm install --include=dev --prefer-offline --no-audit --no-fund; \
+    elif [ -f package.json ]; then \
       npm install --include=dev --prefer-offline --no-audit --no-fund; \
+    else \
+      echo "No package.json found, skipping npm install."; \
     fi
 
 # Copy application source & configurations
