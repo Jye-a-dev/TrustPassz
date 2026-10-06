@@ -1,6 +1,6 @@
 # ==============================================================================
-# TRUSTPASSZ MONOREPO - NESTJS BACKEND SERVER DOCKERFILE (TASK-15)
-# Multi-stage production build: Node.js 20 Debian Slim, Non-root user
+# TRUSTPASSZ MONOREPO - NESTJS BACKEND SERVER DOCKERFILE
+# Multi-stage production build: Node.js 22 Debian Slim, Non-root user
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -18,9 +18,11 @@ ARG JWT_SECRET="mock-jwt-secret-for-ci-build-purposes-min-32-chars"
 ARG BASE_SEPOLIA_RPC_URL="https://sepolia.base.org"
 ARG ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
 ARG ORACLE_RELAYER_PRIVATE_KEY="0x0000000000000000000000000000000000000000000000000000000000000001"
+ARG NODE_OPTIONS="--max-old-space-size=4096"
 
-# Environment variables for builder stage (force development so devDependencies like @nestjs/cli are installed)
+# Environment variables for builder stage (prevent OOM, inject mock database & secrets)
 ENV NODE_ENV=development \
+    NODE_OPTIONS="--max-old-space-size=4096" \
     DATABASE_URL=${DATABASE_URL} \
     DIRECT_URL=${DIRECT_URL} \
     JWT_SECRET=${JWT_SECRET} \
@@ -42,8 +44,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy dependency manifests
 COPY package.json package-lock.json* ./
 
-# Install all dependencies including devDependencies (@nestjs/cli, typescript) for compilation
-RUN npm install --include=dev --prefer-offline --no-audit
+# Install dependencies with resilient lockfile check
+RUN if [ -s package-lock.json ]; then \
+      npm ci --include=dev --prefer-offline --no-audit; \
+    else \
+      npm install --include=dev --prefer-offline --no-audit --no-fund; \
+    fi
 
 # Copy application source & configurations
 COPY prisma ./prisma
@@ -64,7 +70,8 @@ FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    PORT=3001
+    PORT=3001 \
+    NODE_OPTIONS="--max-old-space-size=4096"
 
 # Install runtime OpenSSL (Prisma dependency) and curl (Health Check)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -87,6 +94,7 @@ USER nestjs
 
 EXPOSE 3001
 
+# Production health check probe matching NestJS HealthController
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD curl -f http://localhost:${PORT}/api/v1/health || exit 1
 

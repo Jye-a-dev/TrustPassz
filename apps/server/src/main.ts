@@ -1,3 +1,4 @@
+import net from 'net';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -6,6 +7,36 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { createCorsOptions } from './config/cors.config';
 import './common/utils/bigint-serializer.util';
+
+/**
+ * Resolves server listen port: strictly defaults to 3000 or accepts any available 30xx port (3000-3099).
+ */
+async function resolvePort(preferredPort = 3000, fallbackMax = 3099): Promise<number> {
+  const isPortFree = (targetPort: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const tester = net.createServer();
+      tester.once('error', () => resolve(false));
+      tester.once('listening', () => {
+        tester.close(() => resolve(true));
+      });
+      tester.listen(targetPort, '0.0.0.0');
+    });
+  };
+
+  // 1. Try preferred port first
+  if (await isPortFree(preferredPort)) {
+    return preferredPort;
+  }
+
+  // 2. Scan through 30xx range (3000..3099)
+  for (let candidate = 3000; candidate <= fallbackMax; candidate++) {
+    if (candidate !== preferredPort && (await isPortFree(candidate))) {
+      return candidate;
+    }
+  }
+
+  return preferredPort;
+}
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -116,7 +147,8 @@ async function bootstrap() {
     });
   }
 
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+  const configuredPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const port = await resolvePort(configuredPort, 3099);
   await app.listen(port, '0.0.0.0');
 
   logger.log(`Application is running on: http://0.0.0.0:${port}`);

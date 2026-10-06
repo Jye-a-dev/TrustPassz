@@ -1,5 +1,5 @@
 # ==============================================================================
-# TRUSTPASSZ AI PIPELINE - FASTAPI / UVICORN DOCKERFILE (TASK-15)
+# TRUSTPASSZ AI PIPELINE - FASTAPI / UVICORN DOCKERFILE
 # Multi-stage production build: Python 3.11 Slim, Wheel Caching, Non-root user
 # ==============================================================================
 
@@ -10,8 +10,14 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
+# Build arguments for AI Pipeline
+ARG ENVIRONMENT=production
+ARG AI_MODEL_PATH="Qwen/Qwen2-VL-2B-Instruct"
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    ENVIRONMENT=${ENVIRONMENT} \
+    AI_MODEL_PATH=${AI_MODEL_PATH}
 
 # Install toolchain for building C/C++ dependencies (torch, tokenizers, outlines)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,10 +39,15 @@ FROM python:3.11-slim AS runner
 
 WORKDIR /app
 
+ARG ENVIRONMENT=production
+ARG PORT=8000
+ARG AI_MODEL_PATH="Qwen/Qwen2-VL-2B-Instruct"
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=8000 \
-    ENVIRONMENT=production
+    PORT=${PORT} \
+    ENVIRONMENT=${ENVIRONMENT} \
+    AI_MODEL_PATH=${AI_MODEL_PATH}
 
 # Install minimal runtime shared libraries (libgomp for PyTorch openmp) and curl
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -61,6 +72,7 @@ USER appuser
 
 EXPOSE 8000
 
+# Health check probe against FastAPI /health endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \
   CMD curl -f http://localhost:${PORT}/health || exit 1
 

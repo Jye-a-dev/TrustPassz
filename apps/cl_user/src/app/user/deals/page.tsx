@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { CountdownTimer } from "@/components/deals/countdown-timer";
 import { EmptyState } from "@/components/shared/empty-state";
 import { apiClient } from "@/lib/api-client";
+import { useAuthStore } from "@/lib/auth-store";
 
 type FilterTab = "ALL" | "PENDING" | "IN_INSPECTION" | "SETTLED" | "DISPUTED";
 
@@ -43,6 +44,7 @@ interface DealItem {
 }
 
 export default function UserDealsPage() {
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = React.useState<FilterTab>("ALL");
   const [search, setSearch] = React.useState("");
   const [deals, setDeals] = React.useState<DealItem[]>([]);
@@ -225,6 +227,7 @@ export default function UserDealsPage() {
             const isDeposited = deal.state === "DEPOSITED";
             const isSettled = deal.state === "SETTLED";
             const isDisputed = deal.state === "DISPUTED";
+            const isSellerDeal = Boolean(user?.id && deal.seller?.id && user.id === deal.seller.id);
             const amountNum = Number(deal.amount || 0);
 
             const counterParty =
@@ -310,16 +313,28 @@ export default function UserDealsPage() {
 
                   <div className="flex items-center gap-2">
                     {isPending && (
-                      <Button
-                        asChild
-                        size="sm"
-                        className="min-h-10 bg-linear-to-r from-amber-500 to-cyan-500 text-slate-950 font-bold text-xs shadow-md"
-                      >
-                        <Link href={`/user/deals/${deal.id}/checkout`}>
-                          <QrCode className="size-3.5 mr-1.5" />
-                          Quét VietQR
-                        </Link>
-                      </Button>
+                      isSellerDeal ? (
+                        <Button
+                          asChild
+                          size="sm"
+                          className="min-h-10 border border-slate-700 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs shadow-md cursor-pointer"
+                        >
+                          <Link href={`/deals/${deal.id}`}>
+                            Quản Lý Kèo
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          asChild
+                          size="sm"
+                          className="min-h-10 bg-linear-to-r from-amber-500 to-cyan-500 text-slate-950 font-bold text-xs shadow-md cursor-pointer"
+                        >
+                          <Link href={`/user/deals/${deal.id}/checkout`}>
+                            <QrCode className="size-3.5 mr-1.5" />
+                            Quét VietQR
+                          </Link>
+                        </Button>
+                      )
                     )}
 
                     {(isInspection || isDeposited) && (

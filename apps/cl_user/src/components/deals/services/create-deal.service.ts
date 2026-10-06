@@ -17,6 +17,8 @@ export interface EncryptDealInput {
   assetType: AssetCategory;
   inspectionDuration: number;
   buyerId?: string;
+  sellerId?: string;
+  idempotencyKey?: string;
 }
 
 export interface PreparedDealPayload {
@@ -28,6 +30,7 @@ export interface PreparedDealPayload {
     amount: number;
     currency: string;
     inspectionDuration: number;
+    idempotencyKey?: string;
     digitalAsset: {
       assetType: BackendAssetType;
       encryptedContent: string;
@@ -132,14 +135,22 @@ export class CreateDealService {
       generatedKey: vaultPayload.exportedKeyHex,
     };
 
+    const targetSellerId = input.sellerId?.trim() || this.DEFAULT_SELLER_ID;
+    const targetBuyerId = input.buyerId?.trim() || undefined;
+
+    if (targetBuyerId && targetBuyerId === targetSellerId) {
+      throw new Error("Bạn không thể tự mua sản phẩm của chính mình.");
+    }
+
     const dealDto = {
-      sellerId: this.DEFAULT_SELLER_ID,
-      buyerId: input.buyerId?.trim() || undefined,
+      sellerId: targetSellerId,
+      buyerId: targetBuyerId,
       title: input.title.trim(),
       description: input.description?.trim() || undefined,
       amount: Number(input.amount),
       currency: "VND",
       inspectionDuration: Number(input.inspectionDuration),
+      idempotencyKey: input.idempotencyKey?.trim() || undefined,
       digitalAsset: {
         assetType: mapAssetCategoryToBackend(input.assetType),
         encryptedContent: vaultPayload.encryptedContent,
@@ -155,13 +166,22 @@ export class CreateDealService {
   }
 
   /**
-   * Posts prepared deal DTO to the backend API.
+   * Posts prepared deal DTO to the backend API with idempotency protection.
    */
   public static async submitDeal(
     dealDto: PreparedDealPayload["dealDto"],
+    idempotencyKey?: string,
   ): Promise<{ id: string; state: string }> {
+    const key = idempotencyKey || dealDto.idempotencyKey;
+    const customHeaders: Record<string, string> = {};
+    if (key) {
+      customHeaders["Idempotency-Key"] = key;
+      customHeaders["X-Idempotency-Key"] = key;
+    }
+
     return apiClient<{ id: string; state: string }>("/api/v1/deals", {
       method: "POST",
+      headers: customHeaders,
       body: JSON.stringify(dealDto),
     });
   }

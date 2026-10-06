@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -21,6 +22,11 @@ import {
   QueryOrderDto,
   UpdateOrderStatusDto,
 } from './dto/order.dto';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import {
+  CurrentUser,
+  RequestUser,
+} from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Orders & Escrow Fulfillment')
 @ApiBearerAuth('JWT-auth')
@@ -29,6 +35,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Create purchase order and initialize escrow deal',
     description:
@@ -37,11 +44,18 @@ export class OrdersController {
   @ApiResponse({ status: 201, description: 'Order created successfully.' })
   @ApiResponse({
     status: 400,
-    description: 'Product not active or seller self-purchase.',
+    description: 'Product not active or not available.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Seller self-purchase forbidden.',
   })
   @ApiResponse({ status: 404, description: 'Product or buyer not found.' })
-  async create(@Body() dto: CreateOrderDto) {
-    return this.ordersService.create(dto);
+  async create(
+    @Body() dto: CreateOrderDto,
+    @CurrentUser() currentUser?: RequestUser,
+  ) {
+    return this.ordersService.create(dto, currentUser);
   }
 
   @Get()

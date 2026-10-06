@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -9,6 +10,7 @@ import { DealState, Order, OrderStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
+import { RequestUser } from '../../common/decorators/current-user.decorator';
 
 @Injectable()
 export class PaymentsService {
@@ -32,7 +34,11 @@ export class PaymentsService {
   /**
    * Generates a dynamic VietQR payment link via PayOS SDK and associates orderCode with Deal.
    */
-  async createPaymentLink(dealId: string, dto?: CreatePaymentLinkDto) {
+  async createPaymentLink(
+    dealId: string,
+    dto?: CreatePaymentLinkDto,
+    currentUser?: RequestUser,
+  ) {
     const deal = await this.prisma.deal.findUnique({
       where: { id: dealId },
       include: { order: true, buyer: true, seller: true },
@@ -40,6 +46,10 @@ export class PaymentsService {
 
     if (!deal) {
       throw new NotFoundException(`Deal with ID '${dealId}' not found`);
+    }
+
+    if (currentUser && currentUser.id === deal.sellerId) {
+      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
     }
 
     if (deal.state !== DealState.PENDING) {
@@ -65,7 +75,9 @@ export class PaymentsService {
     // PayOS requires description length <= 25 characters
     const rawDesc = dto?.description || `Deal ${deal.id.slice(0, 8)}`;
     const description = rawDesc.slice(0, 25);
-    const amountNumber = Math.round(Number(deal.amount));
+    const amountNumber = Math.round(
+      Number((deal as any).price ?? deal.amount),
+    );
 
     let gatewayResponse: Partial<CreatePaymentLinkResponse> | null = null;
 
@@ -100,8 +112,12 @@ export class PaymentsService {
       },
     });
 
-    const bin = gatewayResponse?.bin || '970422';
-    const accountNumber = gatewayResponse?.accountNumber || '998877';
+    const bin = gatewayResponse?.bin || process.env.ESCROW_BANK_BIN || '970422';
+    const accountNumber =
+      gatewayResponse?.accountNumber ||
+      process.env.ESCROW_BANK_ACCOUNT_NO ||
+      process.env.PAYOS_ACCOUNT_NUMBER ||
+      '998877';
     const accountName = gatewayResponse?.accountName || 'TRUSTPASSZ ESCROW';
     const checkoutUrl =
       gatewayResponse?.checkoutUrl || `https://pay.payos.vn/web/${orderCode}`;
@@ -117,6 +133,7 @@ export class PaymentsService {
       description,
       bin,
       accountNumber,
+      accountNo: accountNumber,
       accountName,
       checkoutUrl,
       qrCode,
@@ -193,20 +210,43 @@ export class PaymentsService {
       );
     }
 
-    // 5. Amount & Discrepancy Verification
-    const expectedAmount = Math.round(Number(deal.amount));
-    const receivedAmount = Math.round(Number(data.amount));
+    // 5. Escrow Beneficiary Account Verification (STK & Mã ngân hàng thụ hưởng)
+    const expectedAccountNumber =
+      process.env.ESCROW_BANK_ACCOUNT_NO ||
+      process.env.PAYOS_ACCOUNT_NUMBER ||
+      '998877';
 
-    if (receivedAmount !== expectedAmount) {
+    // Verify recipient account matches system escrow configuration to prevent redirection attacks
+    if (data.accountNumber && data.accountNumber.trim() !== expectedAccountNumber.trim()) {
       this.logger.error(
-        `Payment amount mismatch for Deal ${deal.id}: Expected ${expectedAmount}, received ${receivedAmount}`,
+        `[Security Alert] Tiền chuyển vào tài khoản không hợp lệ! Nhận: ${data.accountNumber}, Két ký quỹ Escrow: ${expectedAccountNumber}`,
       );
       throw new BadRequestException(
-        `Payment amount mismatch: Expected ${expectedAmount} ${deal.currency}, received ${receivedAmount} ${data.currency}. Funds held in escrow.`,
+        'Tài khoản thụ hưởng không khớp với tài khoản Két ký quỹ Escrow của hệ thống.',
       );
     }
 
-    // 6. Atomic State Machine Transition via ACID Database Transaction
+    // 6. Amount & Discrepancy Verification (Check chặt chẽ giá trị Kèo)
+    const dealPrice = Math.round(Number((deal as any).price ?? deal.amount));
+    const receivedAmount = Math.round(Number(data.amount));
+
+    if (receivedAmount < dealPrice) {
+      this.logger.error(
+        `[Webhook Underpaid Alert] Số tiền thanh toán không đủ cho Deal ${deal.id}: Cần tối thiểu ${dealPrice} ${deal.currency}, nhưng chỉ nhận được ${receivedAmount} ${data.currency}. Từ chối chuyển trạng thái DEPOSITED.`,
+      );
+      throw new BadRequestException('Số tiền thanh toán không đủ.');
+    }
+
+    if (receivedAmount > dealPrice) {
+      this.logger.error(
+        `[Webhook Discrepancy Alert] Số tiền thanh toán không khớp cho Deal ${deal.id}: Yêu cầu ${dealPrice} ${deal.currency}, nhưng nhận được ${receivedAmount} ${data.currency}.`,
+      );
+      throw new BadRequestException(
+        `Payment amount mismatch: Expected ${dealPrice} ${deal.currency}, received ${receivedAmount} ${data.currency}. Funds held in escrow.`,
+      );
+    }
+
+    // 7. Atomic State Machine Transition via ACID Database Transaction
     return this.prisma.$transaction(async (tx) => {
       const depositedAt = new Date();
       const inspectionDurationSeconds = deal.inspectionDuration || 86400;

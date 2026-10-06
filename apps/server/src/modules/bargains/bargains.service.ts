@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -29,7 +30,7 @@ export class BargainsService {
     }
 
     if (product.sellerId === dto.buyerId) {
-      throw new BadRequestException('Seller cannot bargain on own product');
+      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
     }
 
     const ruleConfig = (product.ruleConfig as any) ?? {};

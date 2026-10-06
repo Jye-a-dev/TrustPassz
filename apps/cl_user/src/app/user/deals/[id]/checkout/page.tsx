@@ -1,13 +1,13 @@
 "use client";
 
-export const runtime = "edge";
-
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, QrCode, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, QrCode, CheckCircle2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/lib/auth-store";
 import { supabase } from "@/lib/supabase-client";
 import { apiClient } from "@/lib/api-client";
 import { CheckoutQrCard } from "@/components/checkout/checkout-qr-card";
@@ -19,17 +19,21 @@ interface PaymentLinkResponse {
   qrCode?: string;
   qrDataUrl?: string;
   accountNo?: string;
+  accountNumber?: string;
   accountName?: string;
   amount?: number;
   orderCode?: number | string;
+  description?: string;
   bin?: string;
   bankName?: string;
   deepLink?: string;
+  checkoutUrl?: string;
 }
 
 export default function DealCheckoutPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuthStore();
   const dealId = params?.id || "d0000000-0000-4000-a000-000000000001";
 
   const [deal, setDeal] = React.useState<DealData | null>(null);
@@ -38,21 +42,46 @@ export default function DealCheckoutPage() {
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = React.useState<PaymentLinkResponse | null>(null);
 
+  const isSeller = Boolean(user?.id && deal?.seller?.id && user.id === deal.seller.id);
+
   // Bank Account Info (Standard PayOS VietQR Merchant Setup)
   const bankConfig = React.useMemo(() => {
-    const orderCode = paymentInfo?.orderCode || dealId.slice(0, 8).toUpperCase();
-    const memo = `TPZ ${orderCode}`;
-    const amount = paymentInfo?.amount || deal?.amount || 500000;
-    const accountNo = paymentInfo?.accountNo || "998877";
+    const queryAmount =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("amount")
+        : null;
+    const parsedQueryAmount =
+      queryAmount && !isNaN(Number(queryAmount)) ? Number(queryAmount) : 0;
+
+    // Dynamic price resolution from Deal API: prioritize deal.price then deal.amount, fallback to URL param
+    const rawDealPrice = deal?.price ?? deal?.amount;
+    const dealPrice =
+      rawDealPrice !== undefined && rawDealPrice !== null && !isNaN(Number(rawDealPrice))
+        ? Number(rawDealPrice)
+        : parsedQueryAmount;
+
+    const amount =
+      paymentInfo?.amount !== undefined && paymentInfo.amount > 0
+        ? paymentInfo.amount
+        : dealPrice > 0
+        ? dealPrice
+        : parsedQueryAmount;
+
+    const orderCode = paymentInfo?.orderCode || deal?.orderCode || dealId.slice(0, 8).toUpperCase();
+    const memo = paymentInfo?.description || `TPZ ${orderCode}`;
+    const accountNo = paymentInfo?.accountNumber || paymentInfo?.accountNo || "998877";
     const accountName = paymentInfo?.accountName || "TRUSTPASSZ ESCROW";
     const bankName = paymentInfo?.bankName || "MBBank (Ngân hàng TMCP Quân Đội)";
     const bin = paymentInfo?.bin || "970422";
+
+    // Ensure vietQrUrl produces a valid image URL for <Image> component
     const vietQrUrl =
       paymentInfo?.qrDataUrl ||
-      paymentInfo?.qrCode ||
-      `https://img.vietqr.io/image/${bin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(
-        memo
-      )}&accountName=${encodeURIComponent(accountName)}`;
+      (paymentInfo?.qrCode?.startsWith("http") || paymentInfo?.qrCode?.startsWith("data:")
+        ? paymentInfo.qrCode
+        : `https://img.vietqr.io/image/${bin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(
+            memo
+          )}&accountName=${encodeURIComponent(accountName)}`);
 
     return {
       bin,
@@ -64,11 +93,13 @@ export default function DealCheckoutPage() {
       vietQrUrl,
       deepLink:
         paymentInfo?.deepLink ||
-        `vietqr://pay?acc=${accountNo}&bin=${bin}&amount=${amount}&memo=${encodeURIComponent(
-          memo
-        )}`,
+        (paymentInfo?.qrCode?.startsWith("vietqr://")
+          ? paymentInfo.qrCode
+          : `vietqr://pay?acc=${accountNo}&bin=${bin}&amount=${amount}&memo=${encodeURIComponent(
+              memo
+            )}`),
     };
-  }, [dealId, deal?.amount, paymentInfo]);
+  }, [dealId, deal?.price, deal?.amount, deal?.orderCode, paymentInfo]);
 
   // Audio effect using Web Audio API for zero-dependency sound chime
   const playSuccessChime = React.useCallback(() => {
@@ -134,7 +165,8 @@ export default function DealCheckoutPage() {
         data?: DealData;
         id?: string;
         title?: string;
-        amount?: number;
+        amount?: number | string;
+        price?: number | string;
         currency?: string;
         state?: DealData["state"];
         inspectionDuration?: number;
@@ -142,6 +174,12 @@ export default function DealCheckoutPage() {
 
       const dealData: DealData = (dealRes.data || dealRes) as DealData;
       setDeal(dealData);
+
+      if (user?.id && dealData.seller?.id && user.id === dealData.seller.id) {
+        toast.error("Bạn không thể tự mua hoặc thanh toán sản phẩm của chính mình.");
+        setLoading(false);
+        return;
+      }
 
       if (
         dealData.state === "DEPOSITED" ||
@@ -151,35 +189,30 @@ export default function DealCheckoutPage() {
         return;
       }
 
-      // Call payments/create-link
+      // Call payments/create-link with deal description
       try {
         const payRes = await apiClient<PaymentLinkResponse>(
           `/api/v1/payments/create-link/${dealId}`,
-          { method: "POST" }
+          {
+            method: "POST",
+            body: JSON.stringify({
+              dealId,
+              description: `TPZ ${dealData.id ? dealData.id.slice(0, 8).toUpperCase() : dealId.slice(0, 8).toUpperCase()}`.slice(0, 25),
+            }),
+          }
         );
         if (payRes) {
           setPaymentInfo(payRes);
         }
       } catch {
-        // Fallback: Continue with default VietQR computation
+        // Fallback: Continue with client-side VietQR computation using deal.price
       }
     } catch {
-      setDeal({
-        id: dealId,
-        title: "Bộ mã nguồn ứng dụng thương mại điện tử an toàn (Next.js 15 + Bảo vệ tự động)",
-        amount: 500000,
-        currency: "VND",
-        state: "PENDING",
-        inspectionDuration: 43200,
-        seller: {
-          id: "11111111-1111-4111-a111-111111111111",
-          displayName: "Trusted Dev Corp",
-        },
-      });
+      toast.error("Không thể tải thông tin giao dịch hoặc Kèo không tồn tại.");
     } finally {
       setLoading(false);
     }
-  }, [dealId, handlePaymentSuccess]);
+  }, [dealId, handlePaymentSuccess, user]);
 
   React.useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -271,6 +304,76 @@ export default function DealCheckoutPage() {
     toast.info("Đang mô phỏng xác nhận tiền vào két an toàn...");
     handlePaymentSuccess();
   };
+
+  if (isSeller) {
+    return (
+      <div className="relative max-w-xl mx-auto py-12 px-4 space-y-6">
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/deals/${dealId}`}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
+          >
+            <ArrowLeft className="size-4" />
+            <span>Quay lại chi tiết giao dịch</span>
+          </Link>
+          <Badge
+            variant="outline"
+            className="bg-rose-950/40 border-rose-500/40 text-rose-300 text-xs px-2.5 py-1"
+          >
+            Quyền Người Bán
+          </Badge>
+        </div>
+
+        <div className="rounded-2xl border border-rose-500/30 bg-slate-900/90 p-8 text-center space-y-6 shadow-2xl">
+          <div className="size-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.3)]">
+            <ShieldAlert className="size-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              Không Thể Tự Mua Sản Phẩm
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+              Bạn đang đăng nhập với tư cách Người bán của Kèo này. Để đảm bảo tính minh bạch và an toàn của hệ thống bảo chứng, bạn không thể tự đặt cọc hoặc thanh toán đơn hàng do chính mình tạo.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-xs space-y-2 text-left">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Tiêu đề Kèo:</span>
+              <span className="font-semibold text-slate-200">{deal?.title || "Kèo Escrow"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Giá niêm yết:</span>
+              <span className="font-mono font-bold text-cyan-400">
+                {Number(deal?.price ?? deal?.amount ?? 0).toLocaleString("vi-VN")} ₫
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Button
+              asChild
+              className="w-full sm:w-auto bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs min-h-10 px-5 cursor-pointer"
+            >
+              <Link href={`/deals/${dealId}`}>
+                Quay Lại Quản Lý Kèo
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full sm:w-auto border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs min-h-10 px-5 cursor-pointer"
+            >
+              <Link href="/user/deals">
+                Danh Sách Giao Dịch
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative max-w-4xl mx-auto space-y-6">

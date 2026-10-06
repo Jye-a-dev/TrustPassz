@@ -1,9 +1,10 @@
 export interface DealData {
   id: string;
   title: string;
-  amount: number;
+  amount?: number | string;
+  price?: number | string;
   currency: string;
-  state: "PENDING" | "DEPOSITED" | "IN_INSPECTION" | "SETTLED" | "REFUNDED";
+  state: "PENDING" | "DEPOSITED" | "IN_INSPECTION" | "SETTLED" | "REFUNDED" | "DISPUTED";
   inspectionDuration: number;
   seller?: {
     id: string;

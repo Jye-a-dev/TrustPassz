@@ -1,4 +1,4 @@
-import { AssetType, DealState, DigitalAsset, Prisma } from '@prisma/client';
+import { AssetType, Deal, DealState, DigitalAsset, Prisma } from '@prisma/client';
 import { CreateDealDto, EncryptedAssetDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
@@ -207,3 +207,154 @@ export function formatVaultUnlockResponse(
     unlockedAt: updatedAsset.unlockedAt,
   };
 }
+
+interface CachedDealResponse<T = unknown> {
+  result: T;
+  expiresAt: number;
+}
+
+export class DealIdempotencyManager {
+  private static inFlight = new Map<string, Promise<unknown>>();
+  private static cache = new Map<string, CachedDealResponse>();
+  private static readonly TTL_MS = 60000;
+
+  public static getInFlight<T = unknown>(key: string): Promise<T> | undefined {
+    return this.inFlight.get(key) as Promise<T> | undefined;
+  }
+
+  public static setInFlight<T = unknown>(key: string, promise: Promise<T>): void {
+    this.inFlight.set(key, promise as Promise<unknown>);
+  }
+
+  public static deleteInFlight(key: string): void {
+    this.inFlight.delete(key);
+  }
+
+  public static getCached<T = unknown>(key: string): T | undefined {
+    const entry = this.cache.get(key);
+    if (!entry) return undefined;
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return undefined;
+    }
+    return entry.result as T;
+  }
+
+  public static setCache<T = unknown>(
+    key: string,
+    result: T,
+    ttlMs: number = this.TTL_MS,
+  ): void {
+    if (this.cache.size > 1000) {
+      const now = Date.now();
+      for (const [k, v] of this.cache.entries()) {
+        if (now > v.expiresAt) this.cache.delete(k);
+      }
+    }
+    this.cache.set(key, { result, expiresAt: Date.now() + ttlMs });
+  }
+
+  public static deriveKey(
+    sellerId: string,
+    idempotencyKey?: string,
+    contentHash?: string,
+    title?: string,
+    amount?: number,
+  ): string {
+    if (idempotencyKey && idempotencyKey.trim()) {
+      return `idem:${sellerId}:${idempotencyKey.trim()}`;
+    }
+    return this.deriveSemanticKey(sellerId, title, amount, contentHash);
+  }
+
+  public static deriveSemanticKey(
+    sellerId: string,
+    title?: string,
+    amount?: number,
+    contentHash?: string,
+  ): string {
+    const cleanTitle = (title || 'deal').trim().toLowerCase();
+    const cleanAmount = Number(amount || 0);
+    const hash = contentHash ? `:${contentHash}` : '';
+    return `semantic:${sellerId}:${cleanTitle}:${cleanAmount}${hash}`;
+  }
+}
+
+export async function findRecentDuplicateDeal(
+  prisma: { deal: { findFirst: (args: any) => Promise<any> } },
+  sellerId: string,
+  title: string,
+  amount: number,
+  contentHash?: string,
+  windowMs = 60000,
+): Promise<(Deal & { digitalAsset: DigitalAsset | null }) | null> {
+  return prisma.deal.findFirst({
+    where: {
+      sellerId,
+      title,
+      amount: new Prisma.Decimal(amount),
+      state: DealState.PENDING,
+      createdAt: { gte: new Date(Date.now() - windowMs) },
+      ...(contentHash ? { digitalAsset: { contentHash } } : {}),
+    },
+    include: { digitalAsset: true },
+  });
+}
+
+export async function executeDealCreateTransaction(
+  prisma: { $transaction: (fn: (tx: any) => Promise<any>) => Promise<any> },
+  dealData: Omit<CreateDealDto, 'digitalAsset'>,
+  digitalAsset?: EncryptedAssetDto,
+): Promise<Deal & { digitalAsset: DigitalAsset | null }> {
+  return prisma.$transaction(async (tx) => {
+    const deal = await tx.deal.create({
+      data: buildDealCreateData(dealData),
+    });
+
+    let createdAsset: DigitalAsset | null = null;
+    if (digitalAsset) {
+      createdAsset = await tx.digitalAsset.create({
+        data: buildDigitalAssetCreateData(deal.id, digitalAsset),
+      });
+    }
+
+    return {
+      ...deal,
+      digitalAsset: createdAsset,
+    };
+  });
+}
+
+export async function executeDealUpdateTransaction(
+  prisma: { $transaction: (fn: (tx: any) => Promise<any>) => Promise<any> },
+  id: string,
+  dealUpdates: Omit<UpdateDealDto, 'digitalAsset'>,
+  digitalAsset?: EncryptedAssetDto,
+): Promise<any> {
+  return prisma.$transaction(async (tx) => {
+    const updatedDeal = await tx.deal.update({
+      where: { id },
+      data: buildDealUpdateData(dealUpdates),
+      include: DEAL_LIST_INCLUDE,
+    });
+
+    if (digitalAsset) {
+      const upsertPayload = buildDigitalAssetUpsertInput(id, digitalAsset);
+      const upsertedAsset = await tx.digitalAsset.upsert({
+        where: upsertPayload.where,
+        create: upsertPayload.create,
+        update: upsertPayload.update,
+      });
+
+      return {
+        ...updatedDeal,
+        digitalAsset: upsertedAsset,
+      };
+    }
+
+    return updatedDeal;
+  });
+}
+
+
+

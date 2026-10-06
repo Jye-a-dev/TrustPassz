@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -10,14 +11,14 @@ import '../../common/utils/bigint-serializer.util';
 import { PrismaService } from '../../database/prisma.service';
 import {
   buildCountBreakdown,
-  buildDealCreateData,
-  buildDealUpdateData,
   buildDealWhereInput,
-  buildDigitalAssetCreateData,
   formatVaultUnlockResponse,
   DEAL_DETAIL_INCLUDE,
   DEAL_LIST_INCLUDE,
-  buildDigitalAssetUpsertInput,
+  DealIdempotencyManager,
+  findRecentDuplicateDeal,
+  executeDealCreateTransaction,
+  executeDealUpdateTransaction,
 } from './deals.helper';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
@@ -45,17 +46,9 @@ export class DealsService {
     try {
       const [total, grouped] = await Promise.all([
         this.prisma.deal.count({ where }),
-        this.prisma.deal.groupBy({
-          by: ['state'],
-          where,
-          _count: { id: true },
-        }),
+        this.prisma.deal.groupBy({ by: ['state'], where, _count: { id: true } }),
       ]);
-
-      return {
-        total,
-        breakdown: buildCountBreakdown(grouped),
-      };
+      return { total, breakdown: buildCountBreakdown(grouped) };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       const stack = error instanceof Error ? error.stack : undefined;
@@ -66,55 +59,105 @@ export class DealsService {
 
   /**
    * Creates a new deal and associates an encrypted digital vault asset in an ACID transaction.
+   * Multi-layer idempotency guard: In-flight coalescing + cache + DB deduplication.
    */
-  async create(createDealDto: CreateDealDto) {
+  async create(createDealDto: CreateDealDto, explicitKey?: string) {
     const { digitalAsset, ...dealData } = createDealDto;
+    const effectiveKey = explicitKey || createDealDto.idempotencyKey;
+    const dedupKey = DealIdempotencyManager.deriveKey(
+      dealData.sellerId,
+      effectiveKey,
+      digitalAsset?.contentHash,
+      dealData.title,
+      dealData.amount,
+    );
+    const semanticKey = DealIdempotencyManager.deriveSemanticKey(
+      dealData.sellerId,
+      dealData.title,
+      dealData.amount,
+      digitalAsset?.contentHash,
+    );
 
-    const seller = await this.prisma.user.findUnique({
-      where: { id: dealData.sellerId },
-    });
-    if (!seller) {
-      throw new NotFoundException(
-        `Seller user with ID ${dealData.sellerId} not found`,
-      );
+    // 1. In-memory response cache check (idempotency key or semantic match)
+    const cached =
+      DealIdempotencyManager.getCached(dedupKey) ||
+      DealIdempotencyManager.getCached(semanticKey);
+    if (cached) {
+      this.logger.log(`[create] Idempotent cache hit: ${dedupKey}`);
+      return cached;
     }
 
-    if (dealData.buyerId) {
-      const buyer = await this.prisma.user.findUnique({
-        where: { id: dealData.buyerId },
-      });
-      if (!buyer) {
-        throw new NotFoundException(
-          `Buyer user with ID ${dealData.buyerId} not found`,
-        );
+    // 2. Coalesce concurrent requests (single-flight execution)
+    const inFlight =
+      DealIdempotencyManager.getInFlight(dedupKey) ||
+      DealIdempotencyManager.getInFlight(semanticKey);
+    if (inFlight) {
+      this.logger.log(`[create] Coalescing concurrent request: ${dedupKey}`);
+      return inFlight;
+    }
+
+    const executionPromise = (async () => {
+      // 3. Database-level deduplication: check recent pending deal created in last 60 seconds
+      const recentDuplicate = await findRecentDuplicateDeal(
+        this.prisma,
+        dealData.sellerId,
+        dealData.title,
+        dealData.amount,
+        digitalAsset?.contentHash,
+        60000,
+      );
+
+      if (recentDuplicate) {
+        this.logger.warn(`[create] Duplicate prevented: ${recentDuplicate.id}`);
+        DealIdempotencyManager.setCache(dedupKey, recentDuplicate);
+        DealIdempotencyManager.setCache(semanticKey, recentDuplicate);
+        return recentDuplicate;
       }
-    }
 
-    try {
-      return await this.prisma.$transaction(async (tx) => {
-        const deal = await tx.deal.create({
-          data: buildDealCreateData(dealData),
-        });
-
-        let createdAsset: DigitalAsset | null = null;
-        if (digitalAsset) {
-          createdAsset = await tx.digitalAsset.create({
-            data: buildDigitalAssetCreateData(deal.id, digitalAsset),
-          });
-        }
-
-        return {
-          ...deal,
-          digitalAsset: createdAsset,
-        };
+      const seller = await this.prisma.user.findUnique({
+        where: { id: dealData.sellerId },
       });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`Failed to create deal: ${message}`, stack);
-      throw new InternalServerErrorException(
-        'Failed to create deal and digital asset',
-      );
+      if (!seller) {
+        throw new NotFoundException(`Seller user with ID ${dealData.sellerId} not found`);
+      }
+
+      if (dealData.buyerId) {
+        if (dealData.buyerId === dealData.sellerId) {
+          throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+        }
+        const buyer = await this.prisma.user.findUnique({
+          where: { id: dealData.buyerId },
+        });
+        if (!buyer) {
+          throw new NotFoundException(`Buyer user with ID ${dealData.buyerId} not found`);
+        }
+      }
+
+      try {
+        const created = await executeDealCreateTransaction(
+          this.prisma,
+          dealData,
+          digitalAsset,
+        );
+
+        DealIdempotencyManager.setCache(dedupKey, created);
+        DealIdempotencyManager.setCache(semanticKey, created);
+        return created;
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        this.logger.error(`Failed to create deal: ${message}`, stack);
+        throw new InternalServerErrorException('Failed to create deal and digital asset');
+      }
+    })();
+
+    DealIdempotencyManager.setInFlight(dedupKey, executionPromise);
+    DealIdempotencyManager.setInFlight(semanticKey, executionPromise);
+    try {
+      return await executionPromise;
+    } finally {
+      DealIdempotencyManager.deleteInFlight(dedupKey);
+      DealIdempotencyManager.deleteInFlight(semanticKey);
     }
   }
 
@@ -139,16 +182,9 @@ export class DealsService {
         this.prisma.deal.count({ where }),
       ]);
 
-      const totalPages = Math.ceil(total / limit) || 1;
-
       return {
         data: deals,
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages,
-        },
+        meta: { total, page, limit, totalPages: Math.ceil(total / limit) || 1 },
       };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
@@ -199,30 +235,20 @@ export class DealsService {
 
     const { digitalAsset, ...dealUpdates } = updateDealDto;
 
+    const targetSellerId = dealUpdates.sellerId || existingDeal.sellerId;
+    if (dealUpdates.buyerId && dealUpdates.buyerId === targetSellerId) {
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
+    }
+
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        const updatedDeal = await tx.deal.update({
-          where: { id },
-          data: buildDealUpdateData(dealUpdates),
-          include: DEAL_LIST_INCLUDE,
-        });
-
-        if (digitalAsset) {
-          const upsertPayload = buildDigitalAssetUpsertInput(id, digitalAsset);
-          const upsertedAsset = await tx.digitalAsset.upsert({
-            where: upsertPayload.where,
-            create: upsertPayload.create,
-            update: upsertPayload.update,
-          });
-
-          return {
-            ...updatedDeal,
-            digitalAsset: upsertedAsset,
-          };
-        }
-
-        return updatedDeal;
-      });
+      return await executeDealUpdateTransaction(
+        this.prisma,
+        id,
+        dealUpdates,
+        digitalAsset,
+      );
     } catch (error: unknown) {
       if (
         error instanceof BadRequestException ||
@@ -257,15 +283,8 @@ export class DealsService {
     }
 
     try {
-      await this.prisma.deal.delete({
-        where: { id },
-      });
-
-      return {
-        success: true,
-        message: 'Deal deleted successfully',
-        id,
-      };
+      await this.prisma.deal.delete({ where: { id } });
+      return { success: true, message: 'Deal deleted successfully', id };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       const stack = error instanceof Error ? error.stack : undefined;
@@ -346,11 +365,7 @@ export class DealsService {
     if (!deal) {
       throw new NotFoundException(`Deal ${dealId} not found`);
     }
-
-    if (
-      deal.state !== DealState.IN_INSPECTION &&
-      deal.state !== DealState.DEPOSITED
-    ) {
+    if (deal.state !== DealState.IN_INSPECTION && deal.state !== DealState.DEPOSITED) {
       throw new BadRequestException(
         `Cannot settle deal in state ${deal.state}. Expected IN_INSPECTION or DEPOSITED.`,
       );
@@ -372,15 +387,12 @@ export class DealsService {
 
   /**
    * Triggers the oracle relayer to start inspection on-chain explicitly.
-   * Useful when seller marks delivery complete (separate code path from vault unlock).
    */
   async triggerStartInspection(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
-
     if (!deal) {
       throw new NotFoundException(`Deal ${dealId} not found`);
     }
-
     if (deal.state !== DealState.DEPOSITED) {
       throw new BadRequestException(
         `Cannot start inspection for deal in state ${deal.state}. Expected DEPOSITED.`,

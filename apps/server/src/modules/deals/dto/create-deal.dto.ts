@@ -184,4 +184,14 @@ export class CreateDealDto {
   @ValidateNested()
   @Type(() => EncryptedAssetDto)
   digitalAsset?: EncryptedAssetDto;
+
+  @ApiPropertyOptional({
+    description:
+      'Unique client-side idempotency key to prevent duplicate deal creation upon multi-click',
+    example: 'c4e3f2b1-8a9d-4e5f-b6a7-123456789abc',
+  })
+  @IsOptional()
+  @IsString({ message: 'Idempotency key must be a string' })
+  @MaxLength(128, { message: 'Idempotency key must not exceed 128 characters' })
+  idempotencyKey?: string;
 }

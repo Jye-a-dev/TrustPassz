@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,12 +11,13 @@ import {
   UpdateOrderStatusDto,
 } from './dto/order.dto';
 import { DealState, OrderStatus, Prisma } from '@prisma/client';
+import { RequestUser } from '../../common/decorators/current-user.decorator';
 
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateOrderDto) {
+  async create(dto: CreateOrderDto, currentUser?: RequestUser) {
     const product = await this.prisma.product.findUnique({
       where: { id: dto.productId },
     });
@@ -38,8 +40,26 @@ export class OrdersService {
       throw new NotFoundException(`Buyer ${dto.buyerId} not found`);
     }
 
+    if (currentUser && currentUser.id === product.sellerId) {
+      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+    }
+
     if (product.sellerId === dto.buyerId) {
-      throw new BadRequestException('Seller cannot order their own product');
+      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+    }
+
+    if (dto.dealId) {
+      const existingDeal = await this.prisma.deal.findUnique({
+        where: { id: dto.dealId },
+      });
+      if (existingDeal) {
+        if (
+          (currentUser && currentUser.id === existingDeal.sellerId) ||
+          dto.buyerId === existingDeal.sellerId
+        ) {
+          throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+        }
+      }
     }
 
     return this.prisma.$transaction(async (tx) => {
