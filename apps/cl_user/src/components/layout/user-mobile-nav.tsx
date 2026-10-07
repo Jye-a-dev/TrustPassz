@@ -9,7 +9,6 @@ import {
   PlusCircle,
   Settings,
   Receipt,
-  Scale,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isRouteActive } from "./user-sidebar";
@@ -71,7 +70,7 @@ export function UserMobileNav() {
                 className="flex flex-col items-center justify-center min-w-12 min-h-12 -mt-4 group"
                 aria-label={tab.label}
               >
-                <div className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.45)] transition-transform group-active:scale-95">
+                <div className="flex size-11 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-cyan-500 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.45)] transition-transform group-active:scale-95">
                   <Icon className="size-6 text-slate-950 font-bold" />
                 </div>
                 <span className="text-[10px] font-bold text-emerald-400 mt-0.5">

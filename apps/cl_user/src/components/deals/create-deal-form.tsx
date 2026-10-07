@@ -50,13 +50,13 @@ export function CreateDealForm() {
   const isSubmittingRef = React.useRef(false);
   const [isRedirecting, setIsRedirecting] = React.useState(false);
   const isRedirectingRef = React.useRef(false);
-  const formIdempotencyKeyRef = React.useRef<string>("");
-  if (!formIdempotencyKeyRef.current) {
-    formIdempotencyKeyRef.current =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `idem_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-  }
+  const [formIdempotencyKey] = React.useState<string>(() => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `idem_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+  });
+  const formIdempotencyKeyRef = React.useRef(formIdempotencyKey);
   const [vaultAudit, setVaultAudit] = React.useState<VaultAuditData | null>(null);
 
   // Dynamic UX adjustments when asset type switches

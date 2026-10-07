@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ShieldCheck, LifeBuoy, FileText, CheckCircle2, Lock, Terminal, ExternalLink } from "lucide-react";
+import { LifeBuoy, FileText, CheckCircle2, Terminal, ExternalLink } from "lucide-react";
 
 export function UserFooter() {
   return (

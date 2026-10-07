@@ -85,7 +85,8 @@ export class PaymentsController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Người bán không thể tự mua hoặc thanh toán sản phẩm của chính mình.',
+    description:
+      'Người bán không thể tự mua hoặc thanh toán sản phẩm của chính mình.',
   })
   @ApiResponse({
     status: 404,
@@ -117,7 +118,8 @@ export class PaymentsController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Người bán không thể tự mua hoặc thanh toán sản phẩm của chính mình.',
+    description:
+      'Người bán không thể tự mua hoặc thanh toán sản phẩm của chính mình.',
   })
   async checkout(
     @Body() dto: CreatePaymentLinkDto,
@@ -216,7 +218,8 @@ export class PaymentsController {
   @Post('simulate-success/:dealId')
   @ApiOperation({
     summary: 'Mô phỏng thanh toán VietQR thành công (Sandbox Dev mode)',
-    description: 'Chuyển trạng thái Deal sang DEPOSITED và kích hoạt Realtime broadcast.',
+    description:
+      'Chuyển trạng thái Deal sang DEPOSITED và kích hoạt Realtime broadcast.',
   })
   @ApiParam({
     name: 'dealId',
@@ -227,4 +230,3 @@ export class PaymentsController {
     return this.paymentsService.simulatePaymentSuccess(dealId);
   }
 }
-

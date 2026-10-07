@@ -2,6 +2,7 @@
  * Web Crypto API AES-256-GCM Digital Vault Client Implementation.
  * Zero external crypto dependencies - 100% compliant with W3C Web Cryptography API.
  * Compatible with TrustPassz Digital Vault DTO (Backend TASK-03 & TASK-04).
+ * Memory-hardened with zeroing routines (wipeMemory) to prevent heap leakage of sensitive keys & plaintexts.
  */
 
 export interface EncryptedVaultPayload {
@@ -30,6 +31,22 @@ function getSubtleCrypto(): SubtleCrypto {
     return globalThis.crypto.subtle;
   }
   throw new Error("Web Crypto API (crypto.subtle) is not supported in this runtime environment.");
+}
+
+/**
+ * Zeroes out sensitive buffers and array buffers immediately in-memory to prevent RAM leaks.
+ */
+export function wipeMemory(...buffers: (Uint8Array | ArrayBuffer | ArrayBufferView | null | undefined)[]): void {
+  for (const buffer of buffers) {
+    if (!buffer) continue;
+    if (buffer instanceof Uint8Array) {
+      buffer.fill(0);
+    } else if (buffer instanceof ArrayBuffer) {
+      new Uint8Array(buffer).fill(0);
+    } else if (ArrayBuffer.isView(buffer)) {
+      new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength).fill(0);
+    }
+  }
 }
 
 /**
@@ -105,8 +122,12 @@ export async function hashContent(plainText: string): Promise<string> {
   const subtle = getSubtleCrypto();
   const encoder = new TextEncoder();
   const data = encoder.encode(plainText);
-  const hashBuffer = await subtle.digest("SHA-256", data);
-  return bufferToHex(hashBuffer);
+  try {
+    const hashBuffer = await subtle.digest("SHA-256", data);
+    return bufferToHex(hashBuffer);
+  } finally {
+    wipeMemory(data);
+  }
 }
 
 /**
@@ -124,41 +145,55 @@ async function resolveAesGcmKey(
     // If exactly 64 hex characters, import directly as 256-bit raw key
     if (trimmed.length === 64 && /^[0-9a-fA-F]{64}$/.test(trimmed)) {
       const rawBytes = hexToBuffer(trimmed);
-      const key = await subtle.importKey(
-        "raw",
-        rawBytes as unknown as BufferSource,
-        { name: "AES-GCM" },
-        false,
-        ["encrypt", "decrypt"]
-      );
-      return { key, exportedKeyHex: trimmed };
+      try {
+        const key = await subtle.importKey(
+          "raw",
+          rawBytes as unknown as BufferSource,
+          { name: "AES-GCM" },
+          false,
+          ["encrypt", "decrypt"]
+        );
+        return { key, exportedKeyHex: trimmed };
+      } finally {
+        wipeMemory(rawBytes);
+      }
     }
 
     // Otherwise derive deterministic 256-bit key via SHA-256 of passphrase
     const encoder = new TextEncoder();
-    const keyDigest = await subtle.digest("SHA-256", encoder.encode(trimmed));
-    const key = await subtle.importKey(
-      "raw",
-      keyDigest,
-      { name: "AES-GCM" },
-      false,
-      ["encrypt", "decrypt"]
-    );
-    return { key };
+    const encodedPass = encoder.encode(trimmed);
+    let keyDigest: ArrayBuffer | null = null;
+    try {
+      keyDigest = await subtle.digest("SHA-256", encodedPass);
+      const key = await subtle.importKey(
+        "raw",
+        keyDigest,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"]
+      );
+      return { key };
+    } finally {
+      wipeMemory(encodedPass, keyDigest);
+    }
   }
 
   // Generate random 256-bit key
   const randomKeyBytes = (typeof window !== "undefined" ? window.crypto : globalThis.crypto).getRandomValues(
     new Uint8Array(32)
   );
-  const key = await subtle.importKey(
-    "raw",
-    randomKeyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt", "decrypt"]
-  );
-  return { key, exportedKeyHex: bufferToHex(randomKeyBytes) };
+  try {
+    const key = await subtle.importKey(
+      "raw",
+      randomKeyBytes,
+      { name: "AES-GCM" },
+      false,
+      ["encrypt", "decrypt"]
+    );
+    return { key, exportedKeyHex: bufferToHex(randomKeyBytes) };
+  } finally {
+    wipeMemory(randomKeyBytes);
+  }
 }
 
 /**
@@ -176,45 +211,56 @@ export async function encryptSecret(
   const subtle = getSubtleCrypto();
   const cryptoSource = typeof window !== "undefined" ? window.crypto : globalThis.crypto;
 
-  // 1. Generate 96-bit (12-byte) IV for GCM mode
-  const iv = cryptoSource.getRandomValues(new Uint8Array(12));
+  let iv: Uint8Array | null = null;
+  let plainTextBytes: Uint8Array | null = null;
+  let encryptedBuffer: ArrayBuffer | null = null;
+  let fullEncryptedBytes: Uint8Array | null = null;
 
-  // 2. Resolve AES-256 key
-  const { key, exportedKeyHex } = await resolveAesGcmKey(secretPassphrase);
+  try {
+    // 1. Generate 96-bit (12-byte) IV for GCM mode
+    iv = cryptoSource.getRandomValues(new Uint8Array(12));
 
-  // 3. Compute plaintext integrity hash (SHA-256, 64 hex characters)
-  const contentHash = await hashContent(plainText);
+    // 2. Resolve AES-256 key
+    const { key, exportedKeyHex } = await resolveAesGcmKey(secretPassphrase);
 
-  // 4. Encrypt via AES-GCM (tagLength: 128 bits = 16 bytes)
-  const encoder = new TextEncoder();
-  const plainTextBytes = encoder.encode(plainText);
-  const encryptedBuffer = await subtle.encrypt(
-    {
-      name: "AES-GCM",
-      iv,
-      tagLength: 128,
-    },
-    key,
-    plainTextBytes
-  );
+    // 3. Compute plaintext integrity hash (SHA-256, 64 hex characters)
+    const contentHash = await hashContent(plainText);
 
-  // 5. In Web Crypto API, the output buffer contains [ciphertext bytes] + [16 bytes auth tag]
-  const fullEncryptedBytes = new Uint8Array(encryptedBuffer);
-  const tagLengthBytes = 16;
-  const cipherBytes = fullEncryptedBytes.subarray(0, fullEncryptedBytes.length - tagLengthBytes);
-  const authTagBytes = fullEncryptedBytes.subarray(fullEncryptedBytes.length - tagLengthBytes);
+    // 4. Encrypt via AES-GCM (tagLength: 128 bits = 16 bytes)
+    const encoder = new TextEncoder();
+    plainTextBytes = encoder.encode(plainText);
+    encryptedBuffer = await subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv: iv as unknown as BufferSource,
+        tagLength: 128,
+      },
+      key,
+      plainTextBytes as unknown as BufferSource
+    );
 
-  return {
-    encryptedContent: bufferToBase64(cipherBytes),
-    encryptionIv: bufferToHex(iv),
-    authTag: bufferToHex(authTagBytes),
-    contentHash,
-    exportedKeyHex,
-  };
+    // 5. In Web Crypto API, the output buffer contains [ciphertext bytes] + [16 bytes auth tag]
+    fullEncryptedBytes = new Uint8Array(encryptedBuffer);
+    const tagLengthBytes = 16;
+    const cipherBytes = fullEncryptedBytes.subarray(0, fullEncryptedBytes.length - tagLengthBytes);
+    const authTagBytes = fullEncryptedBytes.subarray(fullEncryptedBytes.length - tagLengthBytes);
+
+    return {
+      encryptedContent: bufferToBase64(cipherBytes),
+      encryptionIv: bufferToHex(iv),
+      authTag: bufferToHex(authTagBytes),
+      contentHash,
+      exportedKeyHex,
+    };
+  } finally {
+    // Zero-out sensitive intermediate buffers in RAM
+    wipeMemory(plainTextBytes, encryptedBuffer, fullEncryptedBytes);
+  }
 }
 
 /**
  * Decrypts an encrypted vault payload and verifies optional integrity hash.
+ * Immediately wipes all intermediate and decrypted buffers from RAM in a finally block.
  *
  * @param payload Encrypted components matching EncryptedAssetDto
  * @param secretPassphrase Passphrase or raw 256-bit key used during encryption
@@ -225,38 +271,49 @@ export async function decryptSecret(
 ): Promise<string> {
   const subtle = getSubtleCrypto();
 
-  const ivBytes = hexToBuffer(payload.encryptionIv);
-  const cipherBytes = base64ToBuffer(payload.encryptedContent);
-  const authTagBytes = hexToBuffer(payload.authTag);
+  let ivBytes: Uint8Array | null = null;
+  let cipherBytes: Uint8Array | null = null;
+  let authTagBytes: Uint8Array | null = null;
+  let combined: Uint8Array | null = null;
+  let decryptedBuffer: ArrayBuffer | null = null;
 
-  // Re-assemble [ciphertext] + [auth tag] required by Web Crypto subtle.decrypt
-  const combined = new Uint8Array(cipherBytes.length + authTagBytes.length);
-  combined.set(cipherBytes, 0);
-  combined.set(authTagBytes, cipherBytes.length);
+  try {
+    ivBytes = hexToBuffer(payload.encryptionIv);
+    cipherBytes = base64ToBuffer(payload.encryptedContent);
+    authTagBytes = hexToBuffer(payload.authTag);
 
-  const { key } = await resolveAesGcmKey(secretPassphrase);
+    // Re-assemble [ciphertext] + [auth tag] required by Web Crypto subtle.decrypt
+    combined = new Uint8Array(cipherBytes.length + authTagBytes.length);
+    combined.set(cipherBytes, 0);
+    combined.set(authTagBytes, cipherBytes.length);
 
-  const decryptedBuffer = await subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: ivBytes as unknown as BufferSource,
-      tagLength: 128,
-    },
-    key,
-    combined as unknown as BufferSource
-  );
+    const { key } = await resolveAesGcmKey(secretPassphrase);
 
-  const decoder = new TextDecoder();
-  const decryptedText = decoder.decode(decryptedBuffer);
+    decryptedBuffer = await subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: ivBytes as unknown as BufferSource,
+        tagLength: 128,
+      },
+      key,
+      combined as unknown as BufferSource
+    );
 
-  if (payload.expectedHash) {
-    const computedHash = await hashContent(decryptedText);
-    if (computedHash.toLowerCase() !== payload.expectedHash.toLowerCase()) {
-      throw new Error(
-        `Integrity check failed: Expected hash ${payload.expectedHash}, got ${computedHash}`
-      );
+    const decoder = new TextDecoder();
+    const decryptedText = decoder.decode(decryptedBuffer);
+
+    if (payload.expectedHash) {
+      const computedHash = await hashContent(decryptedText);
+      if (computedHash.toLowerCase() !== payload.expectedHash.toLowerCase()) {
+        throw new Error(
+          `Integrity check failed: Expected hash ${payload.expectedHash}, got ${computedHash}`
+        );
+      }
     }
-  }
 
-  return decryptedText;
+    return decryptedText;
+  } finally {
+    // Explicit sanitization: Zero-out all cryptographic memory representations
+    wipeMemory(ivBytes, cipherBytes, authTagBytes, combined, decryptedBuffer);
+  }
 }

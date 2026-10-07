@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DealState, DigitalAsset, Prisma } from '@prisma/client';
+import { DealState, Prisma } from '@prisma/client';
 import '../../common/utils/bigint-serializer.util';
 import { PrismaService } from '../../database/prisma.service';
 import {
@@ -46,7 +46,11 @@ export class DealsService {
     try {
       const [total, grouped] = await Promise.all([
         this.prisma.deal.count({ where }),
-        this.prisma.deal.groupBy({ by: ['state'], where, _count: { id: true } }),
+        this.prisma.deal.groupBy({
+          by: ['state'],
+          where,
+          _count: { id: true },
+        }),
       ]);
       return { total, breakdown: buildCountBreakdown(grouped) };
     } catch (error: unknown) {
@@ -118,18 +122,24 @@ export class DealsService {
         where: { id: dealData.sellerId },
       });
       if (!seller) {
-        throw new NotFoundException(`Seller user with ID ${dealData.sellerId} not found`);
+        throw new NotFoundException(
+          `Seller user with ID ${dealData.sellerId} not found`,
+        );
       }
 
       if (dealData.buyerId) {
         if (dealData.buyerId === dealData.sellerId) {
-          throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+          throw new ForbiddenException(
+            'Bạn không thể tự mua sản phẩm của chính mình.',
+          );
         }
         const buyer = await this.prisma.user.findUnique({
           where: { id: dealData.buyerId },
         });
         if (!buyer) {
-          throw new NotFoundException(`Buyer user with ID ${dealData.buyerId} not found`);
+          throw new NotFoundException(
+            `Buyer user with ID ${dealData.buyerId} not found`,
+          );
         }
       }
 
@@ -147,7 +157,9 @@ export class DealsService {
         const message = error instanceof Error ? error.message : String(error);
         const stack = error instanceof Error ? error.stack : undefined;
         this.logger.error(`Failed to create deal: ${message}`, stack);
-        throw new InternalServerErrorException('Failed to create deal and digital asset');
+        throw new InternalServerErrorException(
+          'Failed to create deal and digital asset',
+        );
       }
     })();
 
@@ -365,7 +377,10 @@ export class DealsService {
     if (!deal) {
       throw new NotFoundException(`Deal ${dealId} not found`);
     }
-    if (deal.state !== DealState.IN_INSPECTION && deal.state !== DealState.DEPOSITED) {
+    if (
+      deal.state !== DealState.IN_INSPECTION &&
+      deal.state !== DealState.DEPOSITED
+    ) {
       throw new BadRequestException(
         `Cannot settle deal in state ${deal.state}. Expected IN_INSPECTION or DEPOSITED.`,
       );

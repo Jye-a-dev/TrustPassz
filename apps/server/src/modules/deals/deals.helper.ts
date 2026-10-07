@@ -1,4 +1,10 @@
-import { AssetType, Deal, DealState, DigitalAsset, Prisma } from '@prisma/client';
+import {
+  AssetType,
+  Deal,
+  DealState,
+  DigitalAsset,
+  Prisma,
+} from '@prisma/client';
 import { CreateDealDto, EncryptedAssetDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
@@ -222,8 +228,11 @@ export class DealIdempotencyManager {
     return this.inFlight.get(key) as Promise<T> | undefined;
   }
 
-  public static setInFlight<T = unknown>(key: string, promise: Promise<T>): void {
-    this.inFlight.set(key, promise as Promise<unknown>);
+  public static setInFlight<T = unknown>(
+    key: string,
+    promise: Promise<T>,
+  ): void {
+    this.inFlight.set(key, promise);
   }
 
   public static deleteInFlight(key: string): void {
@@ -314,7 +323,10 @@ export async function executeDealCreateTransaction(
     let createdAsset: DigitalAsset | null = null;
     if (digitalAsset) {
       createdAsset = await tx.digitalAsset.create({
-        data: buildDigitalAssetCreateData(deal.id, digitalAsset),
+        data: buildDigitalAssetCreateData(
+          (deal as { id: string }).id,
+          digitalAsset,
+        ),
       });
     }
 
@@ -355,6 +367,3 @@ export async function executeDealUpdateTransaction(
     return updatedDeal;
   });
 }
-
-
-

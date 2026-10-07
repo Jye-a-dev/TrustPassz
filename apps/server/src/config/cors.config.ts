@@ -74,7 +74,10 @@ export function createCorsOptions(): CorsOptions {
       }
 
       // 3. Dynamic match for TrustPassz custom domains (*.trustpassz.io, *.trustpassz.com)
-      const isTrustPasszDomain = /^https:\/\/(?:[a-z0-9-_.]+\.)?trustpassz\.(?:io|com|dev)$/i.test(origin);
+      const isTrustPasszDomain =
+        /^https:\/\/(?:[a-z0-9-_.]+\.)?trustpassz\.(?:io|com|dev)$/i.test(
+          origin,
+        );
       if (isTrustPasszDomain) {
         callback(null, true);
         return;
@@ -82,8 +85,12 @@ export function createCorsOptions(): CorsOptions {
 
       // 4. Dynamic match for Vercel & Cloudflare deployments (cl_user, cl_admin)
       const isTrustPasszDeploy =
-        /^https:\/\/[a-z0-9-_.]*(?:vercel\.app|pages\.dev|workers\.dev)$/i.test(origin) &&
-        (origin.includes('trustpassz') || origin.includes('admin') || origin.includes('cl-user'));
+        /^https:\/\/[a-z0-9-_.]*(?:vercel\.app|pages\.dev|workers\.dev)$/i.test(
+          origin,
+        ) &&
+        (origin.includes('trustpassz') ||
+          origin.includes('admin') ||
+          origin.includes('cl-user'));
       if (isTrustPasszDeploy) {
         callback(null, true);
         return;

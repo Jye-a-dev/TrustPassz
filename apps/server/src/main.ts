@@ -30,7 +30,10 @@ import './common/utils/bigint-serializer.util';
 /**
  * Resolves server listen port: strictly defaults to 3000 or accepts any available 30xx port (3000-3099).
  */
-async function resolvePort(preferredPort = 3000, fallbackMax = 3099): Promise<number> {
+async function resolvePort(
+  preferredPort = 3000,
+  fallbackMax = 3099,
+): Promise<number> {
   const isPortFree = (targetPort: number): Promise<boolean> => {
     return new Promise((resolve) => {
       const tester = net.createServer();
@@ -76,17 +79,23 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Enterprise Security Headers (TASK-15)
-  app.use((_req: unknown, res: { setHeader: (name: string, value: string) => void }, next: () => void) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader(
-      'Strict-Transport-Security',
-      'max-age=31536000; includeSubDomains; preload',
-    );
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    next();
-  });
+  app.use(
+    (
+      _req: unknown,
+      res: { setHeader: (name: string, value: string) => void },
+      next: () => void,
+    ) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '1; mode=block');
+      res.setHeader(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains; preload',
+      );
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+      next();
+    },
+  );
 
   // Strict CORS Configuration (TASK-14)
   app.enableCors(createCorsOptions());
@@ -166,7 +175,9 @@ async function bootstrap() {
     });
   }
 
-  const configuredPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const configuredPort = process.env.PORT
+    ? parseInt(process.env.PORT, 10)
+    : 3000;
   const port = await resolvePort(configuredPort, 3099);
   await app.listen(port, '0.0.0.0');
 

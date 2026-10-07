@@ -104,7 +104,8 @@ export class OracleRelayerService implements OnModuleInit {
           network: 'Base Sepolia',
           chainId: baseSepolia.id,
           contractAddress:
-            this.config?.contractAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`),
+            this.config?.contractAddress ||
+            '0x0000000000000000000000000000000000000000',
           latencyMs: Date.now() - startTime,
           error: 'PublicClient not initialized',
         };
@@ -126,13 +127,13 @@ export class OracleRelayerService implements OnModuleInit {
         network: 'Base Sepolia',
         chainId: baseSepolia.id,
         contractAddress:
-          this.config?.contractAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`),
+          this.config?.contractAddress ||
+          '0x0000000000000000000000000000000000000000',
         latencyMs: Date.now() - startTime,
         error: err?.message || 'Failed to query RPC provider',
       };
     }
   }
-
 
   /**
    * Calls `startInspection(bytes32 dealId)` on-chain.

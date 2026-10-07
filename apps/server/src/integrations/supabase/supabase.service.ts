@@ -139,8 +139,9 @@ export class SupabaseService implements OnModuleInit {
       this.logger.debug(`Realtime payment broadcast sent to ${channelName}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Failed to broadcast payment success on Supabase: ${msg}`);
+      this.logger.warn(
+        `Failed to broadcast payment success on Supabase: ${msg}`,
+      );
     }
   }
 }
-

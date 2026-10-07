@@ -5,7 +5,6 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useItemFilters } from "../hooks/use-items";
-import { ItemCategory } from "../types/item";
 
 const CATEGORIES: { label: string; value: string }[] = [
   { label: "Tất cả", value: "all" },

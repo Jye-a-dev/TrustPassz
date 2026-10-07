@@ -4,15 +4,10 @@ import * as React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  ShieldCheck,
   Lock,
   Unlock,
-  Coins,
   QrCode,
-  FileCode,
-  AlertCircle,
   Copy,
-  ExternalLink,
   Check,
   Sparkles,
   RefreshCw,

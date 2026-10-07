@@ -149,9 +149,12 @@ export class DealsController {
   ) {
     const sellerId = createDealDto.sellerId || user.id;
     if (createDealDto.buyerId && createDealDto.buyerId === sellerId) {
-      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
     }
-    const idempotencyKey = headerKey || altHeaderKey || createDealDto.idempotencyKey;
+    const idempotencyKey =
+      headerKey || altHeaderKey || createDealDto.idempotencyKey;
     const payload: CreateDealDto = {
       ...createDealDto,
       sellerId,

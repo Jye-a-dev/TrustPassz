@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck, Lock, ExternalLink } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export function Footer() {
   const pathname = usePathname();

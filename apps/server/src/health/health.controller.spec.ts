@@ -83,7 +83,9 @@ describe('HealthController', () => {
       },
     };
 
-    jest.spyOn(healthService, 'checkHealth').mockResolvedValue(unhealthyPayload);
+    jest
+      .spyOn(healthService, 'checkHealth')
+      .mockResolvedValue(unhealthyPayload);
 
     const mockRes = {
       status: jest.fn().mockReturnThis(),
