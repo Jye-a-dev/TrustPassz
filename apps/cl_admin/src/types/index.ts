@@ -29,12 +29,12 @@ export type ArbitrationVerdict =
 
 export interface AdminUser {
   id: string;
-  email: string;
-  displayName: string;
-  walletAddress?: string;
+  email?: string | null;
+  displayName?: string | null;
+  walletAddress?: string | null;
   role: UserRole;
-  avatarUrl?: string;
-  createdAt: string;
+  avatarUrl?: string | null;
+  createdAt?: string;
 }
 
 export interface DigitalAsset {

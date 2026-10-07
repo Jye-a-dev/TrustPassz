@@ -42,7 +42,7 @@ function parseJwtEdge(token: string): JwtPayload | null {
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Read access_token from cookie or Authorization header

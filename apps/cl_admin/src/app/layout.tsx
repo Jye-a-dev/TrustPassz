@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/shared/providers";
 import "@/styles/globals.css";
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 export const viewport: Viewport = {
   themeColor: "#080C14",
