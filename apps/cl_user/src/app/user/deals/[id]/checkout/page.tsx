@@ -3,17 +3,17 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, QrCode, CheckCircle2, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Clock, QrCode, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/auth-store";
 import { supabase } from "@/lib/supabase-client";
 import { apiClient } from "@/lib/api-client";
 import { CheckoutQrCard } from "@/components/checkout/checkout-qr-card";
 import { CheckoutPaymentDetails } from "@/components/checkout/checkout-payment-details";
 import { CheckoutSandboxBar } from "@/components/checkout/checkout-sandbox-bar";
-import type { DealData } from "@/components/checkout/checkout.types";
+import { CheckoutSellerWarning } from "@/components/checkout/checkout-seller-warning";
+import type { DealData, BankConfig } from "@/components/checkout/checkout.types";
 
 interface PaymentLinkResponse {
   qrCode?: string;
@@ -34,7 +34,7 @@ export default function DealCheckoutPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuthStore();
-  const dealId = params?.id || "d0000000-0000-4000-a000-000000000001";
+  const dealId = params?.id;
 
   const [deal, setDeal] = React.useState<DealData | null>(null);
   const [, setLoading] = React.useState(true);
@@ -44,37 +44,26 @@ export default function DealCheckoutPage() {
 
   const isSeller = Boolean(user?.id && deal?.seller?.id && user.id === deal.seller.id);
 
-  // Bank Account Info (Standard PayOS VietQR Merchant Setup)
-  const bankConfig = React.useMemo(() => {
-    const queryAmount =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("amount")
-        : null;
-    const parsedQueryAmount =
-      queryAmount && !isNaN(Number(queryAmount)) ? Number(queryAmount) : 0;
-
-    // Dynamic price resolution from Deal API: prioritize deal.price then deal.amount, fallback to URL param
+  // Bank Account Info derived dynamically from PayOS / API metadata
+  const bankConfig = React.useMemo<BankConfig>(() => {
     const rawDealPrice = deal?.price ?? deal?.amount;
     const dealPrice =
       rawDealPrice !== undefined && rawDealPrice !== null && !isNaN(Number(rawDealPrice))
         ? Number(rawDealPrice)
-        : parsedQueryAmount;
+        : 0;
 
     const amount =
       paymentInfo?.amount !== undefined && paymentInfo.amount > 0
         ? paymentInfo.amount
-        : dealPrice > 0
-        ? dealPrice
-        : parsedQueryAmount;
+        : dealPrice;
 
-    const orderCode = paymentInfo?.orderCode || deal?.orderCode || dealId.slice(0, 8).toUpperCase();
+    const orderCode = paymentInfo?.orderCode || deal?.orderCode || (dealId ? dealId.slice(0, 8).toUpperCase() : "");
     const memo = paymentInfo?.description || `TPZ ${orderCode}`;
-    const accountNo = paymentInfo?.accountNumber || paymentInfo?.accountNo || "998877";
+    const accountNo = paymentInfo?.accountNumber || paymentInfo?.accountNo || "";
     const accountName = paymentInfo?.accountName || "TRUSTPASSZ ESCROW";
-    const bankName = paymentInfo?.bankName || "MBBank (Ngân hàng TMCP Quân Đội)";
+    const bankName = paymentInfo?.bankName || "MBBank";
     const bin = paymentInfo?.bin || "970422";
 
-    // Ensure vietQrUrl produces a valid image URL for <Image> component
     const vietQrUrl =
       paymentInfo?.qrDataUrl ||
       (paymentInfo?.qrCode?.startsWith("http") || paymentInfo?.qrCode?.startsWith("data:")
@@ -82,6 +71,12 @@ export default function DealCheckoutPage() {
         : `https://img.vietqr.io/image/${bin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(
             memo
           )}&accountName=${encodeURIComponent(accountName)}`);
+
+    const deepLink =
+      paymentInfo?.deepLink ||
+      (paymentInfo?.qrCode?.startsWith("vietqr://")
+        ? paymentInfo.qrCode
+        : `vietqr://pay?acc=${accountNo}&bin=${bin}&amount=${amount}&memo=${encodeURIComponent(memo)}`);
 
     return {
       bin,
@@ -91,23 +86,16 @@ export default function DealCheckoutPage() {
       amount,
       memo,
       vietQrUrl,
-      deepLink:
-        paymentInfo?.deepLink ||
-        (paymentInfo?.qrCode?.startsWith("vietqr://")
-          ? paymentInfo.qrCode
-          : `vietqr://pay?acc=${accountNo}&bin=${bin}&amount=${amount}&memo=${encodeURIComponent(
-              memo
-            )}`),
+      deepLink,
     };
   }, [dealId, deal?.price, deal?.amount, deal?.orderCode, paymentInfo]);
 
-  // Audio effect using Web Audio API for zero-dependency sound chime
+  // Audio chime feedback upon successful escrow receipt
   const playSuccessChime = React.useCallback(() => {
     try {
       const AudioCtx =
         window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
 
@@ -117,10 +105,7 @@ export default function DealCheckoutPage() {
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
         gain.gain.setValueAtTime(0.2, ctx.currentTime + start);
-        gain.gain.exponentialRampToValueAtTime(
-          0.001,
-          ctx.currentTime + start + dur
-        );
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(ctx.currentTime + start);
@@ -132,12 +117,12 @@ export default function DealCheckoutPage() {
       playTone(783.99, 0.24, 0.25); // G5
       playTone(1046.5, 0.36, 0.5); // C6
     } catch {
-      // Audio autoplay may be disabled by browser policy
+      // Audio autoplay policy fallback
     }
   }, []);
 
-  // Handle successful deposit transition
   const handlePaymentSuccess = React.useCallback(() => {
+    if (!dealId) return;
     setIsSuccessGlow(true);
     if (typeof document !== "undefined") {
       document.body.style.overflow = "hidden";
@@ -148,7 +133,6 @@ export default function DealCheckoutPage() {
       { duration: 4000 }
     );
 
-    // Auto navigate without page refresh
     setTimeout(() => {
       if (typeof document !== "undefined") {
         document.body.style.overflow = "";
@@ -157,22 +141,17 @@ export default function DealCheckoutPage() {
     }, 1500);
   }, [dealId, playSuccessChime, router]);
 
-  // 1. Call API POST /api/v1/payments/create-link/:dealId & GET deal details
+  // Fetch deal details and generate VietQR payment link
   const initPaymentData = React.useCallback(async () => {
-    try {
-      // Fetch deal details
-      const dealRes = await apiClient<{
-        data?: DealData;
-        id?: string;
-        title?: string;
-        amount?: number | string;
-        price?: number | string;
-        currency?: string;
-        state?: DealData["state"];
-        inspectionDuration?: number;
-      }>(`/api/v1/deals/${dealId}`);
+    if (!dealId) {
+      toast.error("Mã giao dịch không hợp lệ.");
+      router.replace("/user/deals");
+      return;
+    }
 
-      const dealData: DealData = (dealRes.data || dealRes) as DealData;
+    try {
+      const dealRes = await apiClient<{ data?: DealData } | DealData>(`/api/v1/deals/${dealId}`);
+      const dealData: DealData = ("data" in dealRes && dealRes.data ? dealRes.data : dealRes) as DealData;
       setDeal(dealData);
 
       if (user?.id && dealData.seller?.id && user.id === dealData.seller.id) {
@@ -181,15 +160,11 @@ export default function DealCheckoutPage() {
         return;
       }
 
-      if (
-        dealData.state === "DEPOSITED" ||
-        dealData.state === "IN_INSPECTION"
-      ) {
+      if (dealData.state === "DEPOSITED" || dealData.state === "IN_INSPECTION") {
         handlePaymentSuccess();
         return;
       }
 
-      // Call payments/create-link with deal description
       try {
         const payRes = await apiClient<PaymentLinkResponse>(
           `/api/v1/payments/create-link/${dealId}`,
@@ -197,7 +172,7 @@ export default function DealCheckoutPage() {
             method: "POST",
             body: JSON.stringify({
               dealId,
-              description: `TPZ ${dealData.id ? dealData.id.slice(0, 8).toUpperCase() : dealId.slice(0, 8).toUpperCase()}`.slice(0, 25),
+              description: `TPZ ${dealData.id.slice(0, 8).toUpperCase()}`.slice(0, 25),
             }),
           }
         );
@@ -205,14 +180,14 @@ export default function DealCheckoutPage() {
           setPaymentInfo(payRes);
         }
       } catch {
-        // Fallback: Continue with client-side VietQR computation using deal.price
+        // Fallback: Proceed with client-side derived VietQR values
       }
     } catch {
       toast.error("Không thể tải thông tin giao dịch hoặc Kèo không tồn tại.");
     } finally {
       setLoading(false);
     }
-  }, [dealId, handlePaymentSuccess, user]);
+  }, [dealId, handlePaymentSuccess, router, user]);
 
   React.useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -227,7 +202,7 @@ export default function DealCheckoutPage() {
     };
   }, [initPaymentData]);
 
-  // 2. Realtime Supabase Subscription to deal-room:${dealId} & Fallback Polling
+  // Realtime Supabase Subscription & Fallback Polling
   React.useEffect(() => {
     if (!dealId) return;
 
@@ -235,25 +210,14 @@ export default function DealCheckoutPage() {
     const channel = supabase.channel(channelName);
 
     channel
-      .on(
-        "broadcast" as never,
-        { event: "PAYMENT_RECEIVED" } as never,
-        (payload: { payload?: { state: string } }) => {
-          if (
-            payload.payload?.state === "DEPOSITED" ||
-            payload.payload?.state === "IN_INSPECTION"
-          ) {
-            handlePaymentSuccess();
-          }
-        }
-      )
-      .on(
-        "broadcast" as never,
-        { event: "DEPOSIT_CONFIRMED" } as never,
-        () => {
+      .on("broadcast" as never, { event: "PAYMENT_RECEIVED" } as never, (payload: { payload?: { state: string } }) => {
+        if (payload.payload?.state === "DEPOSITED" || payload.payload?.state === "IN_INSPECTION") {
           handlePaymentSuccess();
         }
-      )
+      })
+      .on("broadcast" as never, { event: "DEPOSIT_CONFIRMED" } as never, () => {
+        handlePaymentSuccess();
+      })
       .on(
         "postgres_changes" as never,
         {
@@ -263,10 +227,7 @@ export default function DealCheckoutPage() {
           filter: `id=eq.${dealId}`,
         },
         (payload: { new: { state: string } }) => {
-          if (
-            payload.new?.state === "DEPOSITED" ||
-            payload.new?.state === "IN_INSPECTION"
-          ) {
+          if (payload.new?.state === "DEPOSITED" || payload.new?.state === "IN_INSPECTION") {
             handlePaymentSuccess();
           }
         }
@@ -276,14 +237,11 @@ export default function DealCheckoutPage() {
     const pollInterval = setInterval(async () => {
       try {
         const res = await apiClient<DealData>(`/api/v1/deals/${dealId}`);
-        if (
-          res?.state === "DEPOSITED" ||
-          res?.state === "IN_INSPECTION"
-        ) {
+        if (res?.state === "DEPOSITED" || res?.state === "IN_INSPECTION") {
           handlePaymentSuccess();
         }
       } catch {
-        // Polling silent catch
+        // Polling silent error suppression
       }
     }, 3000);
 
@@ -294,90 +252,35 @@ export default function DealCheckoutPage() {
   }, [dealId, handlePaymentSuccess]);
 
   const copyToClipboard = (text: string, fieldName: string, label: string) => {
+    if (!navigator?.clipboard) return;
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
     toast.success(`Đã sao chép ${label}!`);
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const handleSimulateWebhook = () => {
-    toast.info("Đang mô phỏng xác nhận tiền vào két an toàn...");
+  const handleSimulateWebhook = async () => {
+    if (!dealId) return;
+    toast.info("Đang kích hoạt mô phỏng nạp tiền vào két...");
+    try {
+      await apiClient(`/api/v1/payments/simulate-success/${dealId}`, {
+        method: "POST",
+      });
+      toast.success("Mô phỏng thanh toán thành công trên hệ thống!");
+    } catch {
+      // Standalone sandbox fallback
+    }
     handlePaymentSuccess();
   };
 
+  if (!dealId) return null;
+
   if (isSeller) {
-    return (
-      <div className="relative max-w-xl mx-auto py-12 px-4 space-y-6">
-        <div className="flex items-center justify-between">
-          <Link
-            href={`/deals/${dealId}`}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
-          >
-            <ArrowLeft className="size-4" />
-            <span>Quay lại chi tiết giao dịch</span>
-          </Link>
-          <Badge
-            variant="outline"
-            className="bg-rose-950/40 border-rose-500/40 text-rose-300 text-xs px-2.5 py-1"
-          >
-            Quyền Người Bán
-          </Badge>
-        </div>
-
-        <div className="rounded-2xl border border-rose-500/30 bg-slate-900/90 p-8 text-center space-y-6 shadow-2xl">
-          <div className="size-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.3)]">
-            <ShieldAlert className="size-8" />
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-2xl font-black text-white tracking-tight">
-              Không Thể Tự Mua Sản Phẩm
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-              Bạn đang đăng nhập với tư cách Người bán của Kèo này. Để đảm bảo tính minh bạch và an toàn của hệ thống bảo chứng, bạn không thể tự đặt cọc hoặc thanh toán đơn hàng do chính mình tạo.
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-xs space-y-2 text-left">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Tiêu đề Kèo:</span>
-              <span className="font-semibold text-slate-200">{deal?.title || "Kèo Escrow"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Giá niêm yết:</span>
-              <span className="font-mono font-bold text-cyan-400">
-                {Number(deal?.price ?? deal?.amount ?? 0).toLocaleString("vi-VN")} ₫
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button
-              asChild
-              className="w-full sm:w-auto bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs min-h-10 px-5 cursor-pointer"
-            >
-              <Link href={`/deals/${dealId}`}>
-                Quay Lại Quản Lý Kèo
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full sm:w-auto border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs min-h-10 px-5 cursor-pointer"
-            >
-              <Link href="/user/deals">
-                Danh Sách Giao Dịch
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <CheckoutSellerWarning dealId={dealId} deal={deal} />;
   }
 
   return (
     <div className="relative max-w-4xl mx-auto space-y-6">
-      {/* Emerald Pulse Fullscreen Celebration Layer on Realtime Confirmation */}
       {isSuccessGlow && (
         <div className="fixed inset-0 z-50 bg-[#0B0F17]/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
           <div className="size-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center animate-bounce shadow-[0_0_60px_rgba(16,185,129,0.7)]">
@@ -396,7 +299,6 @@ export default function DealCheckoutPage() {
         </div>
       )}
 
-      {/* Top Back link */}
       <div className="flex items-center justify-between">
         <Link
           href={`/deals/${dealId}`}
@@ -415,7 +317,6 @@ export default function DealCheckoutPage() {
         </Badge>
       </div>
 
-      {/* Main Checkout Card */}
       <div
         className={`rounded-2xl border transition-all duration-700 bg-linear-to-b from-slate-900/90 to-[#0F172A] p-6 sm:p-8 space-y-6 ${
           isSuccessGlow
@@ -423,7 +324,6 @@ export default function DealCheckoutPage() {
             : "border-slate-800 shadow-2xl"
         }`}
       >
-        {/* Header Title */}
         <div className="text-center space-y-2 max-w-lg mx-auto">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-300">
             <QrCode className="size-3.5" />
@@ -439,7 +339,6 @@ export default function DealCheckoutPage() {
           </p>
         </div>
 
-        {/* Content Split: QR Code on Left, Payment Details on Right */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           <CheckoutQrCard
             vietQrUrl={bankConfig.vietQrUrl}
@@ -453,7 +352,6 @@ export default function DealCheckoutPage() {
           />
         </div>
 
-        {/* Security Notice & Dev Sandbox Simulation */}
         <CheckoutSandboxBar
           memo={bankConfig.memo}
           onSimulateWebhook={handleSimulateWebhook}

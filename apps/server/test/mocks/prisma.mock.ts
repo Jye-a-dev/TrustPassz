@@ -149,6 +149,60 @@ export function createMockPrismaService(
           return Promise.resolve(newDeal);
         },
       ),
+      findFirst: jest.fn().mockImplementation(
+        ({
+          where,
+        }: {
+          where?: {
+            sellerId?: string;
+            buyerId?: string;
+            title?: string;
+            amount?: Prisma.Decimal | number;
+            state?: DealState;
+            createdAt?: { gte?: Date };
+            digitalAsset?: { contentHash?: string };
+          };
+          include?: { digitalAsset?: boolean };
+        } = {}) => {
+          const dealsStore = getDealsStore();
+          const digitalAssetsStore = getAssetsStore();
+          const found = dealsStore.find((d) => {
+            if (where?.sellerId && d.sellerId !== where.sellerId) return false;
+            if (where?.buyerId && d.buyerId !== where.buyerId) return false;
+            if (where?.title && d.title !== where.title) return false;
+            if (where?.state && d.state !== where.state) return false;
+            if (where?.amount !== undefined) {
+              const targetAmount =
+                typeof where.amount === 'number'
+                  ? where.amount
+                  : Number(where.amount);
+              if (Number(d.amount) !== targetAmount) return false;
+            }
+            if (where?.createdAt?.gte && d.createdAt < where.createdAt.gte) {
+              return false;
+            }
+            if (where?.digitalAsset?.contentHash) {
+              const asset = digitalAssetsStore.find((a) => a.dealId === d.id);
+              if (
+                !asset ||
+                asset.contentHash !== where.digitalAsset.contentHash
+              ) {
+                return false;
+              }
+            }
+            return true;
+          });
+          if (!found) return Promise.resolve(null);
+          return Promise.resolve({
+            ...found,
+            digitalAsset:
+              digitalAssetsStore.find((a) => a.dealId === found.id) || null,
+            seller: sellerUser,
+            buyer: buyerUser,
+            disputeLogs: [],
+          });
+        },
+      ),
       count: jest.fn().mockImplementation(
         ({
           where,

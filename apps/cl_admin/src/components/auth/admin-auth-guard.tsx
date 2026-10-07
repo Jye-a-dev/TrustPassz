@@ -24,8 +24,10 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   React.useEffect(() => {
     if (!isMounted) return;
 
-    const cookieToken = document.cookie
-      .split('; ')
+    const rawCookie = typeof document !== 'undefined' ? document.cookie : '';
+    const cookieToken = rawCookie
+      .split(';')
+      .map((c) => c.trim())
       .find((row) => row.startsWith('access_token='))
       ?.split('=')[1];
 

@@ -17,13 +17,17 @@ import { THROTTLE_CONFIG } from '../../config/throttle.config';
 
 // Cookie config — centralized for login and logout consistency
 const ACCESS_TOKEN_COOKIE = 'access_token';
-const COOKIE_OPTIONS = {
+const isProd = process.env.NODE_ENV === 'production';
+const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+
+const getCookieOptions = () => ({
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProd,
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
   path: '/',
+  domain: cookieDomain,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-};
+});
 
 @ApiTags('Authentication (Passwordless & Web3)')
 @Throttle({
@@ -98,7 +102,7 @@ export class AuthController {
     const result = await this.authService.verifyAuth(verifyAuthDto);
 
     // Ghi JWT vào httpOnly cookie và đồng thời trả accessToken trong response body
-    res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, COOKIE_OPTIONS);
+    res.cookie(ACCESS_TOKEN_COOKIE, result.accessToken, getCookieOptions());
 
     return result;
   }
@@ -112,11 +116,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout — clear auth cookie' })
   @ApiResponse({ status: 200, description: 'Logged out successfully.' })
   logout(@Res({ passthrough: true }) res: Response): { message: string } {
+    const options = getCookieOptions();
     res.clearCookie(ACCESS_TOKEN_COOKIE, {
-      httpOnly: COOKIE_OPTIONS.httpOnly,
-      secure: COOKIE_OPTIONS.secure,
-      sameSite: COOKIE_OPTIONS.sameSite,
-      path: COOKIE_OPTIONS.path,
+      httpOnly: options.httpOnly,
+      secure: options.secure,
+      sameSite: options.sameSite,
+      path: options.path,
+      domain: options.domain,
     });
     return { message: 'Đã đăng xuất thành công' };
   }

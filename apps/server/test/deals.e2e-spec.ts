@@ -7,6 +7,7 @@ import { App } from 'supertest/types';
 import '../src/common/utils/bigint-serializer.util';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
+import { AuthGuard } from '../src/common/guards/auth.guard';
 import {
   buyerUser,
   createMockPrismaService,
@@ -46,6 +47,18 @@ describe('DealsController (e2e)', () => {
     })
       .overrideProvider(PrismaService)
       .useValue(mockPrismaService)
+      .overrideGuard(AuthGuard)
+      .useValue({
+        canActivate: (context: any) => {
+          const req = context.switchToHttp().getRequest();
+          req.user = {
+            id: req.body?.sellerId || sellerUser.id,
+            email: 'seller@trustpassz.io',
+            role: 'USER',
+          };
+          return true;
+        },
+      })
       .compile();
 
     app = moduleFixture.createNestApplication();

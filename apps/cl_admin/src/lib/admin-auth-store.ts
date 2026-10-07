@@ -22,19 +22,23 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       isAuthenticated: false,
 
       setSession: (token: string, user: AdminUser) => {
+        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        const secureAttr = isSecure ? '; Secure' : '';
+
         if (!ALLOWED_ROLES.includes(user.role)) {
           // Reject non-admin / non-arbitrator roles
           set({ user: null, token: null, isAuthenticated: false });
           if (typeof document !== 'undefined') {
-            document.cookie = 'access_token=; path=/; max-age=0; SameSite=Lax';
+            document.cookie = `access_token=; path=/; max-age=0; SameSite=Lax${secureAttr}`;
           }
           return false;
         }
 
-        set({ user, token, isAuthenticated: true });
+        const cleanToken = token.trim();
+        set({ user, token: cleanToken, isAuthenticated: true });
         if (typeof document !== 'undefined') {
           // Ensure cookie is available for Next.js Edge Middleware
-          document.cookie = `access_token=${token}; path=/; max-age=604800; SameSite=Lax`;
+          document.cookie = `access_token=${cleanToken}; path=/; max-age=604800; SameSite=Lax${secureAttr}`;
         }
         return true;
       },
@@ -47,9 +51,12 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       },
 
       logout: () => {
+        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        const secureAttr = isSecure ? '; Secure' : '';
+
         set({ user: null, token: null, isAuthenticated: false });
         if (typeof document !== 'undefined') {
-          document.cookie = 'access_token=; path=/; max-age=0; SameSite=Lax';
+          document.cookie = `access_token=; path=/; max-age=0; SameSite=Lax${secureAttr}`;
           window.location.href = '/login';
         }
       },

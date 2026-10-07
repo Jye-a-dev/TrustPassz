@@ -35,12 +35,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   reactStrictMode: true,
-  turbopack: {
-    root: path.resolve(__dirname, "../../"),
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
   async headers() {
     return [

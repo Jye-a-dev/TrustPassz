@@ -17,7 +17,7 @@ interface RequestOptions extends RequestInit {
   timeoutMs?: number;
 }
 
-const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const DEFAULT_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 export async function apiClient<T>(
   endpoint: string,
@@ -27,7 +27,7 @@ export async function apiClient<T>(
 
   let url = endpoint.startsWith('http')
     ? endpoint
-    : `${DEFAULT_BASE_URL.replace(/\/$/, '')}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    : `${DEFAULT_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
   if (params) {
     const searchParams = new URLSearchParams();
@@ -53,6 +53,7 @@ export async function apiClient<T>(
 
   try {
     const response = await fetch(url, {
+      credentials: customConfig.credentials ?? 'include',
       ...customConfig,
       headers: {
         'Content-Type': 'application/json',

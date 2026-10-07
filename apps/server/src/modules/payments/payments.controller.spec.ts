@@ -55,6 +55,7 @@ describe('PaymentsController', () => {
       expect(mockPaymentsService.createPaymentLink).toHaveBeenCalledWith(
         dealId,
         {},
+        undefined,
       );
     });
   });
