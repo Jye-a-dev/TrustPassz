@@ -80,7 +80,8 @@ class ApiClient {
     if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
       return Uri.parse(endpoint);
     }
-    final normalizedEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
+    final normalizedEndpoint =
+        endpoint.startsWith('/') ? endpoint : '/$endpoint';
     return Uri.parse('$baseUrl$normalizedEndpoint');
   }
 
@@ -91,10 +92,12 @@ class ApiClient {
     Duration timeout = const Duration(seconds: 15),
   }) async {
     final uri = _resolveUri(endpoint);
-    final reqHeaders = await _buildHeaders(skipAuth: skipAuth, extraHeaders: headers);
+    final reqHeaders =
+        await _buildHeaders(skipAuth: skipAuth, extraHeaders: headers);
 
     try {
-      final response = await http.get(uri, headers: reqHeaders).timeout(timeout);
+      final response =
+          await http.get(uri, headers: reqHeaders).timeout(timeout);
       return _handleResponse(response);
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -110,7 +113,8 @@ class ApiClient {
     Duration timeout = const Duration(seconds: 15),
   }) async {
     final uri = _resolveUri(endpoint);
-    final reqHeaders = await _buildHeaders(skipAuth: skipAuth, extraHeaders: headers);
+    final reqHeaders =
+        await _buildHeaders(skipAuth: skipAuth, extraHeaders: headers);
     final encodedBody = body != null ? jsonEncode(body) : null;
 
     try {
@@ -179,4 +183,3 @@ class ApiClient {
     throw ApiException(response.statusCode, errorMessage);
   }
 }
-

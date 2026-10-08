@@ -85,7 +85,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
 
     if (_selectedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng đính kèm ít nhất 1 ảnh bằng chứng')),
+        const SnackBar(
+            content: Text('Vui lòng đính kèm ít nhất 1 ảnh bằng chứng')),
       );
       return;
     }
@@ -188,7 +189,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF4C0519).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFF43F5E).withValues(alpha: 0.4)),
+                  border: Border.all(
+                      color: const Color(0xFFF43F5E).withValues(alpha: 0.4)),
                 ),
                 child: const Row(
                   children: [
@@ -209,7 +211,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
                           SizedBox(height: 2),
                           Text(
                             'Mô hình Vision AI đối chiếu thông tin sản phẩm và bằng chứng vi phạm của bạn để ra phán quyết tự động.',
-                            style: TextStyle(color: Color(0xFFFECDD3), fontSize: 11),
+                            style: TextStyle(
+                                color: Color(0xFFFECDD3), fontSize: 11),
                           ),
                         ],
                       ),
@@ -232,7 +235,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
               const SizedBox(height: 6),
               TextField(
                 controller: _dealIdController,
-                style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                style: const TextStyle(
+                    color: Colors.white, fontFamily: 'monospace'),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFF0F172A),
@@ -340,7 +344,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            const Icon(Icons.image, size: 16, color: Color(0xFF10B981)),
+                            const Icon(Icons.image,
+                                size: 16, color: Color(0xFF10B981)),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -354,7 +359,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, size: 16, color: Color(0xFFF43F5E)),
+                              icon: const Icon(Icons.close,
+                                  size: 16, color: Color(0xFFF43F5E)),
                               onPressed: () {
                                 setState(() {
                                   _selectedFiles.remove(file);
@@ -373,7 +379,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
                 const SizedBox(height: 12),
                 Text(
                   _statusFeedback!,
-                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11),
+                  style:
+                      const TextStyle(color: Color(0xFF38BDF8), fontSize: 11),
                 ),
               ],
               const SizedBox(height: 24),
