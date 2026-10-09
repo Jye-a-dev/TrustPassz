@@ -59,6 +59,9 @@ env/
 .env
 .env*
 !.env.example
+secrets.temp.txt
+secrets.*.txt
+
 
 # Logs & Debugging
 logs/

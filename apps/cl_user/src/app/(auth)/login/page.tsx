@@ -39,13 +39,19 @@ function LoginContent() {
   } = useAuthHandlers();
 
   React.useEffect(() => {
+    if (searchParams?.get("force") === "1" || isSessionExpired) {
+      if (typeof document !== "undefined") {
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        document.cookie = "access_token=; path=/; Max-Age=0;";
+      }
+    }
     if (isSessionExpired) {
       toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.", {
         id: "session-expired-toast",
         duration: 5000,
       });
     }
-  }, [isSessionExpired]);
+  }, [searchParams, isSessionExpired]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-[#0B0F17] overflow-hidden">

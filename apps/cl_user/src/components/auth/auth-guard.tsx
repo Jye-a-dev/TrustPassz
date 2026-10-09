@@ -38,39 +38,64 @@ export function AuthGuard({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // 1. Recover session from cookie access_token if Zustand hasn't finished hydrating
-    if (typeof document !== "undefined") {
-      const match = document.cookie.match(/(?:^|; )access_token=([^;]*)/);
-      const cookieToken = match ? decodeURIComponent(match[1]) : null;
+    let isCancelled = false;
 
-      if (cookieToken && !isTokenExpired(cookieToken, 15)) {
-        const storeState = useAuthStore.getState();
-        if (!storeState.isAuthenticated || !storeState.user) {
-          const payload = parseJwtPayload(cookieToken);
-          if (payload) {
-            storeState.setAuth(
-              {
-                id: (payload.id as string) || (payload.sub as string) || "usr-1",
-                email: payload.email,
-                walletAddress: (payload.walletAddress as string) || (payload.wallet_address as string),
-                role: (payload.role as string) || "USER",
-                displayName:
-                  (payload.displayName as string) ||
-                  (payload.email ? payload.email.split("@")[0] : "Trader"),
-              },
-              cookieToken
-            );
+    async function recoverSession() {
+      // 1. Recover session from document.cookie (if non-httpOnly)
+      if (typeof document !== "undefined") {
+        const match = document.cookie.match(/(?:^|; )access_token=([^;]*)/);
+        const cookieToken = match ? decodeURIComponent(match[1]) : null;
+
+        if (cookieToken && !isTokenExpired(cookieToken, 15)) {
+          const storeState = useAuthStore.getState();
+          if (!storeState.isAuthenticated || !storeState.user) {
+            const payload = parseJwtPayload(cookieToken);
+            if (payload) {
+              storeState.setAuth(
+                {
+                  id: (payload.id as string) || (payload.sub as string) || "usr-1",
+                  email: payload.email,
+                  walletAddress: (payload.walletAddress as string) || (payload.wallet_address as string),
+                  role: (payload.role as string) || "USER",
+                  displayName:
+                    (payload.displayName as string) ||
+                    (payload.email ? payload.email.split("@")[0] : "Trader"),
+                },
+                cookieToken
+              );
+            }
           }
+        }
+      }
+
+      // 2. Query /api/session to recover httpOnly cookie session from Edge
+      if (!useAuthStore.getState().isAuthenticated || !useAuthStore.getState().user) {
+        try {
+          const res = await fetch("/api/session");
+          if (res.ok && !isCancelled) {
+            const data = await res.json();
+            if (data?.authenticated && data?.user) {
+              useAuthStore.getState().setAuth(data.user, data.token);
+            }
+          }
+        } catch {
+          // Non-fatal session probe fallback
+        }
+      }
+
+      if (!isCancelled) {
+        setMounted(true);
+        if (useAuthStore.getState().isAuthenticated) {
+          useAuthStore.getState().checkSessionExpiry();
         }
       }
     }
 
-    setMounted(true);
+    void recoverSession();
 
-    // Proactive check if already authenticated
-    if (useAuthStore.getState().isAuthenticated) {
-      useAuthStore.getState().checkSessionExpiry();
-    }
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   // Proactive check when user switches back to tab after inactive duration

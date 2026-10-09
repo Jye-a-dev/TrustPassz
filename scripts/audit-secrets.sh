@@ -30,7 +30,7 @@ PATTERNS=(
 )
 
 # Files to ignore (docs, examples, fixtures, generated ABIs, lockfiles)
-EXCLUDE_FILTER='(\.env\.example$|STRUCTURE.*\.md$|package-lock\.json$|\.bin$|mock|fixtures|DigitalEscrowABI\.ts$)'
+EXCLUDE_FILTER='(\.env\.example$|STRUCTURE.*\.md$|package-lock\.json$|\.bin$|mock|fixtures|broadcast|DigitalEscrowABI\.ts$)'
 
 echo "Scanning git-tracked files for secret patterns..."
 

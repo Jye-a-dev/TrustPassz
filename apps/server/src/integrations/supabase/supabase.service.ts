@@ -92,15 +92,22 @@ export class SupabaseService implements OnModuleInit {
     const channelName = `deal-room:${dealId}`;
     const channel = this.client.channel(channelName);
 
-    await channel.send({
-      type: 'broadcast',
-      event: 'bargain:slider_update',
-      payload: {
-        dealId,
-        timestamp: new Date().toISOString(),
-        ...payload,
-      },
-    });
+    const event = 'bargain:slider_update';
+    const messagePayload = {
+      dealId,
+      timestamp: new Date().toISOString(),
+      ...payload,
+    };
+
+    if (typeof (channel as any).httpSend === 'function') {
+      await (channel as any).httpSend(event, messagePayload);
+    } else {
+      await channel.send({
+        type: 'broadcast',
+        event,
+        payload: messagePayload,
+      });
+    }
 
     this.logger.debug(`Realtime bargain update broadcasted to ${channelName}`);
   }
@@ -116,25 +123,43 @@ export class SupabaseService implements OnModuleInit {
       const channelName = `deal-room:${dealId}`;
       const channel = this.client.channel(channelName);
 
-      await channel.send({
-        type: 'broadcast',
-        event: 'PAYMENT_RECEIVED',
-        payload: {
-          dealId,
-          state,
-          timestamp: new Date().toISOString(),
-        },
-      });
+      const timestamp = new Date().toISOString();
 
-      await channel.send({
-        type: 'broadcast',
-        event: 'DEPOSIT_CONFIRMED',
-        payload: {
+      if (typeof (channel as any).httpSend === 'function') {
+        await (channel as any).httpSend('PAYMENT_RECEIVED', {
           dealId,
           state,
-          timestamp: new Date().toISOString(),
-        },
-      });
+          timestamp,
+        });
+      } else {
+        await channel.send({
+          type: 'broadcast',
+          event: 'PAYMENT_RECEIVED',
+          payload: {
+            dealId,
+            state,
+            timestamp,
+          },
+        });
+      }
+
+      if (typeof (channel as any).httpSend === 'function') {
+        await (channel as any).httpSend('DEPOSIT_CONFIRMED', {
+          dealId,
+          state,
+          timestamp,
+        });
+      } else {
+        await channel.send({
+          type: 'broadcast',
+          event: 'DEPOSIT_CONFIRMED',
+          payload: {
+            dealId,
+            state,
+            timestamp,
+          },
+        });
+      }
 
       this.logger.debug(`Realtime payment broadcast sent to ${channelName}`);
     } catch (err: unknown) {

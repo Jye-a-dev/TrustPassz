@@ -17,7 +17,7 @@ ARG DIRECT_URL="postgresql://postgres:postgres@localhost:5432/trustpassz_build?s
 ARG JWT_SECRET="mock-jwt-secret-for-ci-build-purposes-min-32-chars"
 ARG BASE_SEPOLIA_RPC_URL="https://sepolia.base.org"
 ARG ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
-ARG ORACLE_RELAYER_PRIVATE_KEY="0x0000000000000000000000000000000000000000000000000000000000000001"
+ARG ORACLE_RELAYER_PRIVATE_KEY=""
 ARG NODE_OPTIONS="--max-old-space-size=4096"
 
 # Environment variables for builder stage (prevent OOM, inject mock database & secrets)

@@ -46,8 +46,12 @@ export default function UserDashboardPage() {
       setError(null);
       try {
         const [dealsRes, countsRes] = await Promise.allSettled([
-          apiClient<DealEntity[] | { data: DealEntity[] }>("/api/v1/deals?limit=10"),
-          apiClient<DealCountResponse>("/api/v1/deals/count"),
+          apiClient<DealEntity[] | { data: DealEntity[] }>("/api/v1/deals?limit=10", {
+            skipAuthCheck: true,
+          }),
+          apiClient<DealCountResponse>("/api/v1/deals/count", {
+            skipAuthCheck: true,
+          }),
         ]);
 
         if (!isMounted) return;
@@ -56,16 +60,23 @@ export default function UserDashboardPage() {
           const rawDeals = dealsRes.value;
           const items = Array.isArray(rawDeals)
             ? rawDeals
-            : Array.isArray((rawDeals as { data: DealEntity[] }).data)
+            : Array.isArray((rawDeals as { data: DealEntity[] })?.data)
             ? (rawDeals as { data: DealEntity[] }).data
             : [];
           setDeals(items);
         } else {
-          setError("Không thể đồng bộ danh sách giao dịch từ máy chủ.");
+          console.error("Dashboard deals sync error:", dealsRes.reason);
+          const reasonMsg =
+            dealsRes.reason instanceof Error
+              ? dealsRes.reason.message
+              : "Không thể đồng bộ danh sách giao dịch từ máy chủ.";
+          setError(reasonMsg);
         }
 
         if (countsRes.status === "fulfilled") {
           setCounts(countsRes.value);
+        } else {
+          console.error("Dashboard counts sync error:", countsRes.reason);
         }
       } catch (err: unknown) {
         if (isMounted) {
