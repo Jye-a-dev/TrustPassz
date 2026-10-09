@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@unrs/resolver-binding-win32-x64-msvc": "^1.12.2",
     "concurrently": "^9.2.4",
     "tailwindcss": "^4"
   }
