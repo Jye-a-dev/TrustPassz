@@ -15,7 +15,6 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
   createPublicClient,
   createWalletClient,
-  http,
   type Hash,
   type TransactionReceipt,
   encodeFunctionData,
@@ -30,6 +29,7 @@ import {
   loadOracleRelayerConfig,
   type OracleRelayerConfig,
 } from './oracle-relayer.config';
+import { createViemFallbackTransport } from '../lib/viem-client';
 import { AsyncMutex } from './async-mutex';
 import type {
   DisputeAction,
@@ -62,15 +62,23 @@ export class OracleRelayerService implements OnModuleInit {
 
     const account = privateKeyToAccount(this.config.privateKey);
 
+    const fallbackTransport = createViemFallbackTransport({
+      primaryRpcUrl: this.config.rpcUrl,
+      alchemyApiKey: this.config.alchemyApiKey,
+      infuraApiKey: this.config.infuraApiKey,
+      alchemyRpcUrl: this.config.alchemyRpcUrl,
+      infuraRpcUrl: this.config.infuraRpcUrl,
+    });
+
     this.walletClient = createWalletClient({
       account,
       chain: baseSepolia,
-      transport: http(this.config.rpcUrl),
+      transport: fallbackTransport,
     });
 
     this.publicClient = createPublicClient({
       chain: baseSepolia,
-      transport: http(this.config.rpcUrl),
+      transport: fallbackTransport,
     });
 
     this.logger.log(

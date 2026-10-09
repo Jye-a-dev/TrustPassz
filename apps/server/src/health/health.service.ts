@@ -9,7 +9,8 @@ export interface HealthResponsePayload {
   environment: string;
   timestamp: string;
   uptimeSeconds: number;
-  database: {
+  mode?: 'lightweight' | 'deep';
+  database?: {
     status: 'up' | 'down';
     provider: string;
     latencyMs: number;
@@ -22,7 +23,7 @@ export interface HealthResponsePayload {
     heapUsedMB: number;
     heapUsedPercent: number;
   };
-  relayer: {
+  relayer?: {
     status: 'up' | 'down';
     network: string;
     chainId: number;
@@ -43,7 +44,40 @@ export class HealthService {
     private readonly oracleRelayerService: OracleRelayerService,
   ) {}
 
-  async checkHealth(): Promise<HealthResponsePayload> {
+  async checkHealth(deep = false): Promise<HealthResponsePayload> {
+    // Process memory footprint (fast execution < 1ms)
+    const memUsage = process.memoryUsage();
+    const heapUsedMB = Number((memUsage.heapUsed / (1024 * 1024)).toFixed(2));
+    const heapTotalMB = Number((memUsage.heapTotal / (1024 * 1024)).toFixed(2));
+    const rssMB = Number((memUsage.rss / (1024 * 1024)).toFixed(2));
+    const heapUsedPercent = Number(
+      ((memUsage.heapUsed / memUsage.heapTotal) * 100).toFixed(1),
+    );
+
+    const basePayload = {
+      service: 'TrustPassz Unified API',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: Number(process.uptime().toFixed(1)),
+      memory: {
+        status: 'up' as const,
+        rssMB,
+        heapTotalMB,
+        heapUsedMB,
+        heapUsedPercent,
+      },
+    };
+
+    // Fast-path: Render ping / UptimeRobot (no DB/RPC overhead, guarantees < 500ms)
+    if (!deep) {
+      return {
+        ...basePayload,
+        status: 'healthy',
+        mode: 'lightweight',
+      };
+    }
+
     const dbStartTime = Date.now();
     let dbStatus: 'up' | 'down' = 'up';
     let dbLatencyMs = 0;
@@ -59,15 +93,6 @@ export class HealthService {
       dbError = err?.message || 'Database connection error';
       this.logger.error(`Database health check failed: ${dbError}`);
     }
-
-    // Process memory footprint
-    const memUsage = process.memoryUsage();
-    const heapUsedMB = Number((memUsage.heapUsed / (1024 * 1024)).toFixed(2));
-    const heapTotalMB = Number((memUsage.heapTotal / (1024 * 1024)).toFixed(2));
-    const rssMB = Number((memUsage.rss / (1024 * 1024)).toFixed(2));
-    const heapUsedPercent = Number(
-      ((memUsage.heapUsed / memUsage.heapTotal) * 100).toFixed(1),
-    );
 
     // On-chain Relayer & Base Sepolia block timestamp check
     const relayerStatus = await this.oracleRelayerService.getChainStatus();
@@ -87,6 +112,7 @@ export class HealthService {
       environment: process.env.NODE_ENV || 'development',
       timestamp: new Date().toISOString(),
       uptimeSeconds: Number(process.uptime().toFixed(1)),
+      mode: 'deep',
       database: {
         status: dbStatus,
         provider: 'Neon PostgreSQL (pgBouncer Pool)',
