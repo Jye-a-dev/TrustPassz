@@ -72,7 +72,7 @@ export default function RootLayout({
       className={inter.variable}
       data-scroll-behavior="smooth"
     >
-      <body className="min-h-screen bg-[#0B0F17] font-sans text-slate-100 antialiased flex flex-col overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      <body className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0B0F17] dark:text-slate-100 font-sans antialiased flex flex-col overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-900 dark:selection:text-cyan-200 transition-colors duration-150">
         <Providers>
           <Header />
           <main className="flex-1 flex flex-col">{children}</main>

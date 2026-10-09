@@ -103,7 +103,6 @@ export function UserNavbar({
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            <span className="text-slate-200 font-semibold">Hệ thống bảo vệ tự động</span>
           </div>
         </div>
       </div>

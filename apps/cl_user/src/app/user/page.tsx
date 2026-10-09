@@ -156,9 +156,7 @@ export default function UserDashboardPage() {
               <Handshake className="size-5 text-cyan-400" />
               Giao Dịch Đang Hoạt Động
             </h2>
-            <p className="text-xs text-slate-400">
-              Cập nhật trực tiếp từ hệ thống bảo vệ tự động
-            </p>
+           
           </div>
 
           <Button
