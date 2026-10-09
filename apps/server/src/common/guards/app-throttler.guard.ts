@@ -1,13 +1,45 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import type { ThrottlerLimitDetail } from '@nestjs/throttler/dist/throttler.guard.interface';
+import { THROTTLER_LIMIT } from '@nestjs/throttler/dist/throttler.constants';
+import type {
+  ThrottlerLimitDetail,
+  ThrottlerRequest,
+} from '@nestjs/throttler/dist/throttler.guard.interface';
 
 /**
  * Enterprise AppThrottlerGuard ensuring strict compliance with HTTP 429
- * standards by attaching standard `Retry-After` header (seconds) on rate limiting.
+ * standards by:
+ *   1. Isolating named throttlers ('auth', 'deals', 'dealsWrite', 'webhook') so they
+ *      ONLY enforce limits on endpoints specifically annotated with @Throttle({ [name]: ... }),
+ *      preventing false-positive 429 errors on public read APIs (e.g. GET /deals, GET /deals/count).
+ *   2. Attaching the standard `Retry-After` header (seconds) on rate limiting.
  */
 @Injectable()
 export class AppThrottlerGuard extends ThrottlerGuard {
+  protected async handleRequest(
+    requestProps: ThrottlerRequest,
+  ): Promise<boolean> {
+    const { context, throttler } = requestProps;
+    const throttlerName = throttler.name;
+
+    // Route-specific named throttlers only execute if the route/controller explicitly declared them
+    if (throttlerName && throttlerName !== 'default') {
+      const handler = context.getHandler();
+      const classRef = context.getClass();
+      const routeOrClassLimit = this.reflector.getAllAndOverride(
+        `${THROTTLER_LIMIT}${throttlerName}`,
+        [handler, classRef],
+      );
+
+      // If this specific throttler is not annotated on this route/controller, do not throttle or deduct tokens
+      if (routeOrClassLimit === undefined) {
+        return true;
+      }
+    }
+
+    return super.handleRequest(requestProps);
+  }
+
   protected async throwThrottlingException(
     context: ExecutionContext,
     throttlerLimitDetail: ThrottlerLimitDetail,
@@ -27,4 +59,3 @@ export class AppThrottlerGuard extends ThrottlerGuard {
     await super.throwThrottlingException(context, throttlerLimitDetail);
   }
 }
-

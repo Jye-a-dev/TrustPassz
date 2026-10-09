@@ -35,8 +35,11 @@ export const THROTTLE_CONFIG = {
     );
   },
   get defaultLimit(): number {
+    const isDev = process.env.NODE_ENV !== 'production';
     return parseInt(
-      process.env.THROTTLE_LIMIT || process.env.THROTTLE_DEFAULT_LIMIT || '120',
+      process.env.THROTTLE_LIMIT ||
+        process.env.THROTTLE_DEFAULT_LIMIT ||
+        (isDev ? '300' : '120'),
       10,
     );
   },
@@ -82,8 +85,9 @@ export function getThrottlerOptions(
     (get('THROTTLE_TTL_MS') ? parseInt(get('THROTTLE_TTL_MS')!, 10) : undefined) ??
     resolveTtlMs(get('THROTTLE_TTL'), 60);
 
+  const isDev = (get('NODE_ENV') || process.env.NODE_ENV) !== 'production';
   const defaultLimit = parseInt(
-    get('THROTTLE_LIMIT', get('THROTTLE_DEFAULT_LIMIT', '120'))!,
+    get('THROTTLE_LIMIT', get('THROTTLE_DEFAULT_LIMIT', isDev ? '300' : '120'))!,
     10,
   );
   const authLimit = parseInt(get('THROTTLE_AUTH_LIMIT', '10')!, 10);

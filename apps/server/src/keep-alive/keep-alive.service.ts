@@ -122,6 +122,7 @@ export class KeepAliveService implements OnModuleInit, OnModuleDestroy {
     targetName: string,
     maxRetries = 2,
     timeoutMs = 5000,
+    isOptional = false,
   ): Promise<KeepAliveProbeResult> {
     const start = Date.now();
     let lastError = '';
@@ -144,14 +145,31 @@ export class KeepAliveService implements OnModuleInit, OnModuleDestroy {
         }
 
         lastError = `HTTP ${response.status}`;
-        this.logger.warn(
-          `[Health Worker] ${targetName} responded ${lastError} (attempt ${attempt}/${maxRetries})`,
-        );
+        if (isOptional) {
+          this.logger.debug(
+            `[Health Worker] Optional ${targetName} responded ${lastError}`,
+          );
+        } else {
+          this.logger.warn(
+            `[Health Worker] ${targetName} responded ${lastError} (attempt ${attempt}/${maxRetries})`,
+          );
+        }
       } catch (err: unknown) {
         lastError = err instanceof Error ? err.message : String(err);
-        this.logger.warn(
-          `[Health Worker] ${targetName} probe error: ${lastError} (attempt ${attempt}/${maxRetries})`,
-        );
+        const isConnRefused =
+          lastError.includes('ECONNREFUSED') ||
+          lastError.includes('ENOTFOUND') ||
+          (err as { code?: string })?.code === 'ECONNREFUSED';
+
+        if (isOptional && isConnRefused) {
+          this.logger.debug(
+            `[Health Worker] Optional ${targetName} (${url}) is standby / offline (${lastError})`,
+          );
+        } else {
+          this.logger.warn(
+            `[Health Worker] ${targetName} probe error: ${lastError} (attempt ${attempt}/${maxRetries})`,
+          );
+        }
       }
 
       if (attempt < maxRetries) {
@@ -160,9 +178,15 @@ export class KeepAliveService implements OnModuleInit, OnModuleDestroy {
     }
 
     const latencyMs = Date.now() - start;
-    this.logger.warn(
-      `[Health Worker Warning] ${targetName} unreachable after ${maxRetries} tries: ${lastError}`,
-    );
+    if (isOptional) {
+      this.logger.debug(
+        `[Health Worker] Optional ${targetName} standby: ${lastError}`,
+      );
+    } else {
+      this.logger.warn(
+        `[Health Worker Warning] ${targetName} unreachable after ${maxRetries} tries: ${lastError}`,
+      );
+    }
     return {
       success: false,
       status: lastStatus,
@@ -184,7 +208,7 @@ export class KeepAliveService implements OnModuleInit, OnModuleDestroy {
         ? this.pingHttpEndpoint(serverUrl, 'NestJS Server')
         : Promise.resolve({ success: true, latencyMs: 0 }),
       aiUrl
-        ? this.pingHttpEndpoint(aiUrl, 'AI Pipeline')
+        ? this.pingHttpEndpoint(aiUrl, 'AI Pipeline', 1, 1500, true)
         : Promise.resolve({ success: true, latencyMs: 0 }),
     ]);
 
@@ -209,13 +233,16 @@ export class KeepAliveService implements OnModuleInit, OnModuleDestroy {
     return `http://127.0.0.1:${port}/api/v1/health`;
   }
 
-  private resolveAiPipelineHealthUrl(): string {
+  private resolveAiPipelineHealthUrl(): string | null {
+    const isEnabled =
+      this.configService.get<string>('AI_PIPELINE_ENABLED', 'auto');
+    if (isEnabled === 'false') {
+      return null;
+    }
     const configured = this.configService.get<string>('AI_PIPELINE_HEALTH_URL');
     if (configured) return configured;
-    const base = this.configService.get<string>(
-      'AI_PIPELINE_URL',
-      'http://127.0.0.1:3100',
-    );
+    const base = this.configService.get<string>('AI_PIPELINE_URL');
+    if (!base) return null;
     return `${base.replace(/\/+$/, '')}/health`;
   }
 }
