@@ -59,5 +59,21 @@ describe('PaymentsController', () => {
       );
     });
   });
-});
 
+  describe('handleWebhook', () => {
+    it('should delegate to paymentsService.handleWebhook', async () => {
+      const payload: any = {
+        code: '00',
+        desc: 'Success',
+        data: { orderCode: 88990011 },
+        signature: 'valid_signature',
+      };
+      const expected = { success: true, message: 'Processed' };
+      mockPaymentsService.handleWebhook.mockResolvedValue(expected);
+
+      const result = await controller.handleWebhook(payload);
+      expect(result).toBe(expected);
+      expect(mockPaymentsService.handleWebhook).toHaveBeenCalledWith(payload);
+    });
+  });
+});

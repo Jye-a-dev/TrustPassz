@@ -25,57 +25,33 @@
   "gradle.nestedProjects": false,
   "java.import.exclusions": [
     "**/node_modules/**",
-    "**/dist/**",
-    "**/.next/**",
-    "**/.turbo/**",
-    "**/build/**",
-    "**/android/**",
-    "**/ios/**",
-    "**/.gradle/**",
-    "**/.dart_tool/**",
     "**/.metadata/**",
     "**/archetype-resources/**",
     "**/META-INF/maven/**",
     "**/apps/mb_user/android/**",
-    "**/apps/mb_user/ios/**",
-    "**/apps/mb_user/build/**"
+    "**/android/**"
   ],
   "java.project.resourceFilters": [
     "node_modules",
-    "dist",
-    ".next",
-    ".turbo",
-    "build",
-    "android",
-    "ios",
     ".git",
-    ".gradle",
     "apps/mb_user/android/.gradle",
     "apps/mb_user/android/app/build",
-    "apps/mb_user/android",
-    "apps/mb_user/ios",
-    "apps/mb_user/build"
+    "apps/mb_user/android"
   ],
   "files.exclude": {
     "**/apps/mb_user/android/.gradle": true,
     "**/apps/mb_user/android/app/build": true,
     "**/apps/mb_user/build": true,
-    "**/apps/mb_user/.dart_tool": true,
-    "**/.turbo": true
+    "**/apps/mb_user/.dart_tool": true
   },
   "files.watcherExclude": {
-    "**/node_modules/**": true,
-    "**/dist/**": true,
-    "**/.next/**": true,
-    "**/.turbo/**": true,
-    "**/build/**": true,
-    "**/android/**": true,
-    "**/ios/**": true,
-    "**/.gradle/**": true,
     "**/apps/mb_user/android/.gradle/**": true,
     "**/apps/mb_user/android/app/build/**": true,
     "**/apps/mb_user/build/**": true,
-    "**/apps/mb_user/.dart_tool/**": true
+    "**/apps/mb_user/.dart_tool/**": true,
+    "**/.gradle/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true
   },
   "files.associations": {
     "deploy-contracts.yml": "yaml",

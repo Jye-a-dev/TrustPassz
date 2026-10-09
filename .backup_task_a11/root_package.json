@@ -18,7 +18,6 @@
     "server": "npm --prefix apps/server run dev",
     "pipe": "npm --prefix apps/ai_pipeline run dev",
     "structure": "node scripts/draw-structure.js",
-    "typecheck": "tsc -p apps/server/tsconfig.json --noEmit && tsc -p apps/cl_user/tsconfig.json --noEmit && tsc -p apps/cl_admin/tsconfig.json --noEmit && tsc -p tests/e2e/tsconfig.json --noEmit",
     "test:e2e": "npm --prefix tests/e2e test"
   },
   "devDependencies": {

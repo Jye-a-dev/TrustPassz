@@ -1,8 +1,20 @@
 ```text
 📂 TrustPassz
+├── 📁 .backup_task_a11
+│   ├── 📄 apps_cl_admin_tsconfig.json
+│   ├── 📄 apps_cl_user_tsconfig.json
+│   ├── 📄 apps_server_tsconfig.build.json
+│   ├── 📄 apps_server_tsconfig.json
+│   ├── 📄 payments_controller_spec.ts
+│   ├── 📄 root_package.json
+│   ├── 📄 tests_e2e_tsconfig.json
+│   └── 📄 vscode_settings.json
 ├── 📁 .github
 │   └── 📁 workflows
-│       └── 📄 deploy-contracts.yml
+│       ├── 📄 ci.yml
+│       ├── 📄 deploy-contracts.yml
+│       ├── 📄 oracle-balance-alert.yml
+│       └── 📄 pre-release-deploy.yml
 ├── 📁 .vscode
 │   └── 📄 settings.json
 ├── 📁 apps
@@ -37,8 +49,11 @@
 │   │   │   │   ├── 📄 __init__.py
 │   │   │   │   └── 📄 arbitration_fixtures.py
 │   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 benchmark_ai_pipeline.py
 │   │   │   └── 📄 test_arbitration.py
+│   │   ├── 📄 .dockerignore
 │   │   ├── 📄 .env
+│   │   ├── 📄 .env.deploy
 │   │   ├── 📄 .env.example
 │   │   ├── 📄 Dockerfile
 │   │   ├── 📄 engine.py
@@ -97,6 +112,7 @@
 │   │   │   │   │   ├── 📄 auth-error-banner.tsx
 │   │   │   │   │   ├── 📄 sandbox-quick-login-tab.tsx
 │   │   │   │   │   ├── 📄 standard-login-tab.tsx
+│   │   │   │   │   ├── 📄 use-admin-auth-handlers.ts
 │   │   │   │   │   └── 📄 web3-passkey-tab.tsx
 │   │   │   │   ├── 📁 dashboard
 │   │   │   │   │   ├── 📄 kpi-metrics-grid.tsx
@@ -140,37 +156,47 @@
 │   │   │   │   ├── 📄 admin-auth-store.ts
 │   │   │   │   ├── 📄 api-client.ts
 │   │   │   │   ├── 📄 audit-logger.ts
+│   │   │   │   ├── 📄 auth-api.ts
 │   │   │   │   ├── 📄 auth-redirect.ts
 │   │   │   │   ├── 📄 env.ts
 │   │   │   │   ├── 📄 query-client.ts
 │   │   │   │   ├── 📄 store.ts
 │   │   │   │   ├── 📄 system-monitor.ts
 │   │   │   │   └── 📄 utils.ts
+│   │   │   ├── 📁 providers
+│   │   │   │   └── 📄 solana-provider.tsx
 │   │   │   ├── 📁 styles
 │   │   │   │   └── 📄 globals.css
 │   │   │   ├── 📁 types
 │   │   │   │   └── 📄 index.ts
-│   │   │   └── 📄 middleware.ts
+│   │   │   └── 📄 proxy.ts
+│   │   ├── 📄 .env.deploy
+│   │   ├── 📄 .env.example
 │   │   ├── 📄 .env.local
 │   │   ├── 📄 .gitignore
+│   │   ├── 📄 Dockerfile
 │   │   ├── 📄 eslint.config.mjs
+│   │   ├── 📄 netlify.toml
 │   │   ├── 📄 next-env.d.ts
-│   │   ├── 📄 next.config.ts
-│   │   ├── 📄 package-lock.json
+│   │   ├── 📄 next.config.mjs
 │   │   ├── 📄 package.json
 │   │   ├── 📄 postcss.config.mjs
 │   │   ├── 📄 README.md
 │   │   ├── 📄 tsconfig.json
-│   │   └── 📄 tsconfig.tsbuildinfo
+│   │   ├── 📄 tsconfig.tsbuildinfo
+│   │   └── 📄 vercel.json
 │   ├── 📁 cl_user
 │   │   ├── 📁 public
-│   │   │   └── 📁 img
-│   │   │       └── 📄 img.md
+│   │   │   ├── 📁 img
+│   │   │   │   └── 📄 img.md
+│   │   │   ├── 📄 landingpage_1.png
+│   │   │   └── 📄 logo.png
 │   │   ├── 📁 src
 │   │   │   ├── 📁 __tests__
 │   │   │   │   ├── 📄 bargain-slider.test.tsx
 │   │   │   │   ├── 📄 countdown-timer.test.ts
 │   │   │   │   ├── 📄 crypto.test.ts
+│   │   │   │   ├── 📄 secure-clipboard.test.ts
 │   │   │   │   └── 📄 session-lifecycle.test.ts
 │   │   │   ├── 📁 abi
 │   │   │   │   ├── 📄 DigitalEscrow.json
@@ -183,7 +209,9 @@
 │   │   │   │   │   └── 📁 register
 │   │   │   │   │       └── 📄 page.tsx
 │   │   │   │   ├── 📁 api
-│   │   │   │   │   └── 📁 health
+│   │   │   │   │   ├── 📁 health
+│   │   │   │   │   │   └── 📄 route.ts
+│   │   │   │   │   └── 📁 session
 │   │   │   │   │       └── 📄 route.ts
 │   │   │   │   ├── 📁 dashboard
 │   │   │   │   │   └── 📄 route.ts
@@ -217,6 +245,9 @@
 │   │   │   │   ├── 📄 loading.tsx
 │   │   │   │   ├── 📄 not-found.tsx
 │   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 assets
+│   │   │   │   ├── 📄 landingpage_1.png
+│   │   │   │   └── 📄 logo.png
 │   │   │   ├── 📁 components
 │   │   │   │   ├── 📁 auth
 │   │   │   │   │   ├── 📄 auth-guard.tsx
@@ -224,11 +255,13 @@
 │   │   │   │   │   ├── 📄 login-web3-tab.tsx
 │   │   │   │   │   ├── 📄 register-fast-tab.tsx
 │   │   │   │   │   ├── 📄 register-form.tsx
-│   │   │   │   │   └── 📄 unauth-screen.tsx
+│   │   │   │   │   ├── 📄 unauth-screen.tsx
+│   │   │   │   │   └── 📄 use-auth-handlers.ts
 │   │   │   │   ├── 📁 checkout
 │   │   │   │   │   ├── 📄 checkout-payment-details.tsx
 │   │   │   │   │   ├── 📄 checkout-qr-card.tsx
 │   │   │   │   │   ├── 📄 checkout-sandbox-bar.tsx
+│   │   │   │   │   ├── 📄 checkout-seller-warning.tsx
 │   │   │   │   │   └── 📄 checkout.types.ts
 │   │   │   │   ├── 📁 deals
 │   │   │   │   │   ├── 📁 services
@@ -239,9 +272,30 @@
 │   │   │   │   │   ├── 📄 countdown-timer.tsx
 │   │   │   │   │   ├── 📄 create-deal-form.tsx
 │   │   │   │   │   ├── 📄 create-deal.types.ts
+│   │   │   │   │   ├── 📄 deal-edit-dialog.tsx
+│   │   │   │   │   ├── 📄 deal-header-overview.tsx
+│   │   │   │   │   ├── 📄 deal-room-cta.tsx
+│   │   │   │   │   ├── 📄 deal-room.types.ts
+│   │   │   │   │   ├── 📄 deal-seller-panel.tsx
+│   │   │   │   │   ├── 📄 deal-vault-status-card.tsx
 │   │   │   │   │   ├── 📄 digital-vault-section.tsx
 │   │   │   │   │   └── 📄 escrow-terms-section.tsx
+│   │   │   │   ├── 📁 landing
+│   │   │   │   │   ├── 📄 brand-showcase.tsx
+│   │   │   │   │   ├── 📄 comparison-section.tsx
+│   │   │   │   │   ├── 📄 cta-banner.tsx
+│   │   │   │   │   ├── 📄 escrow-simulation-preview.tsx
+│   │   │   │   │   ├── 📄 faq-section.tsx
+│   │   │   │   │   ├── 📄 index.ts
+│   │   │   │   │   ├── 📄 landing-background.tsx
+│   │   │   │   │   ├── 📄 landing-hero.tsx
+│   │   │   │   │   ├── 📄 landing.data.ts
+│   │   │   │   │   ├── 📄 pillars-section.tsx
+│   │   │   │   │   ├── 📄 use-cases-section.tsx
+│   │   │   │   │   └── 📄 workflow-section.tsx
 │   │   │   │   ├── 📁 layout
+│   │   │   │   │   ├── 📄 sidebar-telemetry-badge.tsx
+│   │   │   │   │   ├── 📄 sidebar-vault-card.tsx
 │   │   │   │   │   ├── 📄 user-footer.tsx
 │   │   │   │   │   ├── 📄 user-mobile-nav.tsx
 │   │   │   │   │   ├── 📄 user-navbar.tsx
@@ -265,6 +319,9 @@
 │   │   │   │   │   ├── 📄 popover.tsx
 │   │   │   │   │   ├── 📄 sheet.tsx
 │   │   │   │   │   └── 📄 skeleton.tsx
+│   │   │   │   ├── 📁 user
+│   │   │   │   │   ├── 📄 dashboard-kpis.tsx
+│   │   │   │   │   └── 📄 recent-deal-item.tsx
 │   │   │   │   └── 📁 vault
 │   │   │   │       ├── 📄 vault-actions.tsx
 │   │   │   │       ├── 📄 vault-content-viewer.tsx
@@ -298,6 +355,7 @@
 │   │   │   │   ├── 📄 env.ts
 │   │   │   │   ├── 📄 jwt-edge.ts
 │   │   │   │   ├── 📄 query-client.ts
+│   │   │   │   ├── 📄 secure-clipboard.ts
 │   │   │   │   ├── 📄 store.ts
 │   │   │   │   ├── 📄 supabase-client.ts
 │   │   │   │   └── 📄 utils.ts
@@ -306,32 +364,61 @@
 │   │   │   ├── 📁 styles
 │   │   │   │   └── 📄 globals.css
 │   │   │   └── 📄 proxy.ts
+│   │   ├── 📄 .env.deploy
 │   │   ├── 📄 .env.example
 │   │   ├── 📄 .env.local
 │   │   ├── 📄 .gitignore
+│   │   ├── 📄 Dockerfile
 │   │   ├── 📄 eslint.config.mjs
+│   │   ├── 📄 netlify.toml
 │   │   ├── 📄 next-env.d.ts
-│   │   ├── 📄 next.config.ts
+│   │   ├── 📄 next.config.mjs
 │   │   ├── 📄 package.json
 │   │   ├── 📄 postcss.config.mjs
 │   │   ├── 📄 README.md
 │   │   ├── 📄 STRUCTURE_TEMP.md
 │   │   ├── 📄 tsconfig.json
-│   │   └── 📄 tsconfig.tsbuildinfo
+│   │   ├── 📄 tsconfig.tsbuildinfo
+│   │   └── 📄 vercel.json
 │   ├── 📁 mb_user
+│   │   ├── 📁 .dart_tool
+│   │   │   ├── 📁 dartpad
+│   │   │   │   └── 📄 web_plugin_registrant.dart
+│   │   │   ├── 📁 extension_discovery
+│   │   │   │   ├── 📄 devtools.json
+│   │   │   │   └── 📄 vs_code.json
+│   │   │   ├── 📁 flutter_build
+│   │   │   │   ├── 📁 eac4a6a631d6615abb9cde939b697545
+│   │   │   │   │   ├── 📄 .filecache
+│   │   │   │   │   ├── 📄 app.dill
+│   │   │   │   │   ├── 📄 dart_build_result.json
+│   │   │   │   │   ├── 📄 dart_build.d
+│   │   │   │   │   ├── 📄 dart_build.stamp
+│   │   │   │   │   ├── 📄 debug_android_application.stamp
+│   │   │   │   │   ├── 📄 flutter_assets.d
+│   │   │   │   │   ├── 📄 gen_dart_plugin_registrant.stamp
+│   │   │   │   │   ├── 📄 gen_localizations.stamp
+│   │   │   │   │   ├── 📄 install_code_assets.d
+│   │   │   │   │   ├── 📄 install_code_assets.stamp
+│   │   │   │   │   ├── 📄 kernel_snapshot_program.d
+│   │   │   │   │   ├── 📄 kernel_snapshot_program.stamp
+│   │   │   │   │   ├── 📄 native_assets.json
+│   │   │   │   │   └── 📄 outputs.json
+│   │   │   │   └── 📄 dart_plugin_registrant.dart
+│   │   │   ├── 📄 package_config.json
+│   │   │   ├── 📄 package_graph.json
+│   │   │   └── 📄 version
 │   │   ├── 📁 android
 │   │   │   ├── 📁 .gradle
-│   │   │   │   ├── 📁 8.2.1
+│   │   │   │   ├── 📁 8.14
 │   │   │   │   │   ├── 📁 checksums
 │   │   │   │   │   │   ├── 📄 checksums.lock
 │   │   │   │   │   │   ├── 📄 md5-checksums.bin
 │   │   │   │   │   │   └── 📄 sha1-checksums.bin
-│   │   │   │   │   ├── 📁 dependencies-accessors
-│   │   │   │   │   │   ├── 📄 dependencies-accessors.lock
-│   │   │   │   │   │   └── 📄 gc.properties
 │   │   │   │   │   ├── 📁 executionHistory
 │   │   │   │   │   │   ├── 📄 executionHistory.bin
 │   │   │   │   │   │   └── 📄 executionHistory.lock
+│   │   │   │   │   ├── 📁 expanded
 │   │   │   │   │   ├── 📁 fileChanges
 │   │   │   │   │   │   └── 📄 last-build.bin
 │   │   │   │   │   ├── 📁 fileHashes
@@ -340,200 +427,201 @@
 │   │   │   │   │   │   └── 📄 resourceHashesCache.bin
 │   │   │   │   │   ├── 📁 vcsMetadata
 │   │   │   │   │   └── 📄 gc.properties
-│   │   │   │   ├── 📁 8.9
-│   │   │   │   │   ├── 📁 checksums
-│   │   │   │   │   │   ├── 📄 checksums.lock
-│   │   │   │   │   │   ├── 📄 md5-checksums.bin
-│   │   │   │   │   │   └── 📄 sha1-checksums.bin
-│   │   │   │   │   ├── 📁 dependencies-accessors
-│   │   │   │   │   │   └── 📄 gc.properties
-│   │   │   │   │   ├── 📁 executionHistory
-│   │   │   │   │   │   └── 📄 executionHistory.lock
-│   │   │   │   │   ├── 📁 expanded
-│   │   │   │   │   ├── 📁 fileChanges
-│   │   │   │   │   │   └── 📄 last-build.bin
-│   │   │   │   │   ├── 📁 fileHashes
-│   │   │   │   │   │   └── 📄 fileHashes.lock
-│   │   │   │   │   ├── 📁 vcsMetadata
-│   │   │   │   │   └── 📄 gc.properties
 │   │   │   │   ├── 📁 buildOutputCleanup
 │   │   │   │   │   ├── 📄 buildOutputCleanup.lock
 │   │   │   │   │   ├── 📄 cache.properties
 │   │   │   │   │   └── 📄 outputFiles.bin
+│   │   │   │   ├── 📁 kotlin
+│   │   │   │   │   └── 📁 errors
+│   │   │   │   │       ├── 📄 errors-1791388150391.log
+│   │   │   │   │       ├── 📄 errors-1791388150412.log
+│   │   │   │   │       └── 📄 errors-1791388150429.log
+│   │   │   │   ├── 📁 nb-cache
+│   │   │   │   │   ├── 📁 android-1011817984
+│   │   │   │   │   │   └── 📄 project-info.ser
+│   │   │   │   │   ├── 📁 android-264690323
+│   │   │   │   │   │   └── 📄 project-info.ser
+│   │   │   │   │   ├── 📁 app-599484997
+│   │   │   │   │   │   └── 📄 project-info.ser
+│   │   │   │   │   ├── 📁 app-994702130
+│   │   │   │   │   │   └── 📄 project-info.ser
+│   │   │   │   │   ├── 📁 trust
+│   │   │   │   │   │   ├── 📄 586E3E4AF1401E398CD3243CBEFCBE4368C69B63B4AD598E6D3372FB41F973E5
+│   │   │   │   │   │   └── 📄 B145B2563EB1D2BA511A149DE00611222D155B73A13B347C774DE8708A67B1CF
+│   │   │   │   │   └── 📄 subprojects.ser
+│   │   │   │   ├── 📁 noVersion
+│   │   │   │   │   └── 📄 buildLogic.lock
 │   │   │   │   ├── 📁 vcs-1
 │   │   │   │   │   └── 📄 gc.properties
 │   │   │   │   └── 📄 file-system.probe
+│   │   │   ├── 📁 .kotlin
+│   │   │   │   ├── 📁 errors
+│   │   │   │   │   ├── 📄 errors-1791388150391.log
+│   │   │   │   │   ├── 📄 errors-1791388150412.log
+│   │   │   │   │   └── 📄 errors-1791388150429.log
+│   │   │   │   └── 📁 sessions
 │   │   │   ├── 📁 app
 │   │   │   │   ├── 📁 src
-│   │   │   │   │   ├── 📁 androidTest
-│   │   │   │   │   │   └── 📁 java
-│   │   │   │   │   │       └── 📁 com
-│   │   │   │   │   │           └── 📁 getcapacitor
-│   │   │   │   │   │               └── 📁 myapp
-│   │   │   │   │   │                   └── 📄 ExampleInstrumentedTest.java
+│   │   │   │   │   ├── 📁 debug
+│   │   │   │   │   │   └── 📄 AndroidManifest.xml
 │   │   │   │   │   ├── 📁 main
-│   │   │   │   │   │   ├── 📁 assets
-│   │   │   │   │   │   │   ├── 📁 public
-│   │   │   │   │   │   │   │   ├── 📁 assets
-│   │   │   │   │   │   │   │   │   ├── 📄 index-Bt-oDxCG.js
-│   │   │   │   │   │   │   │   │   ├── 📄 index-D8vs_vIX.css
-│   │   │   │   │   │   │   │   │   ├── 📄 web-BsVwlM3y.js
-│   │   │   │   │   │   │   │   │   └── 📄 web-CthuAYli.js
-│   │   │   │   │   │   │   │   ├── 📄 cordova_plugins.js
-│   │   │   │   │   │   │   │   ├── 📄 cordova.js
-│   │   │   │   │   │   │   │   ├── 📄 favicon.ico
-│   │   │   │   │   │   │   │   └── 📄 index.html
-│   │   │   │   │   │   │   ├── 📄 capacitor.config.json
-│   │   │   │   │   │   │   └── 📄 capacitor.plugins.json
 │   │   │   │   │   │   ├── 📁 java
 │   │   │   │   │   │   │   └── 📁 io
+│   │   │   │   │   │   │       └── 📁 flutter
+│   │   │   │   │   │   │           └── 📁 plugins
+│   │   │   │   │   │   │               └── 📄 GeneratedPluginRegistrant.java
+│   │   │   │   │   │   ├── 📁 kotlin
+│   │   │   │   │   │   │   └── 📁 com
 │   │   │   │   │   │   │       └── 📁 trustpassz
-│   │   │   │   │   │   │           └── 📁 mobile
-│   │   │   │   │   │   │               └── 📄 MainActivity.java
+│   │   │   │   │   │   │           └── 📁 mb_user
+│   │   │   │   │   │   │               └── 📁 mb_user
+│   │   │   │   │   │   │                   └── 📄 MainActivity.kt
 │   │   │   │   │   │   ├── 📁 res
 │   │   │   │   │   │   │   ├── 📁 drawable
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_background.xml
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-land-hdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-land-mdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-land-xhdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-land-xxhdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-land-xxxhdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-port-hdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-port-mdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-port-xhdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-port-xxhdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-port-xxxhdpi
-│   │   │   │   │   │   │   │   └── 📄 splash.png
-│   │   │   │   │   │   │   ├── 📁 drawable-v24
-│   │   │   │   │   │   │   │   └── 📄 ic_launcher_foreground.xml
-│   │   │   │   │   │   │   ├── 📁 layout
-│   │   │   │   │   │   │   │   └── 📄 activity_main.xml
-│   │   │   │   │   │   │   ├── 📁 mipmap-anydpi-v26
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.xml
-│   │   │   │   │   │   │   │   └── 📄 ic_launcher.xml
+│   │   │   │   │   │   │   │   └── 📄 launch_background.xml
+│   │   │   │   │   │   │   ├── 📁 drawable-v21
+│   │   │   │   │   │   │   │   └── 📄 launch_background.xml
 │   │   │   │   │   │   │   ├── 📁 mipmap-hdpi
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
 │   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
 │   │   │   │   │   │   │   ├── 📁 mipmap-mdpi
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
 │   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
 │   │   │   │   │   │   │   ├── 📁 mipmap-xhdpi
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
 │   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
 │   │   │   │   │   │   │   ├── 📁 mipmap-xxhdpi
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
 │   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
 │   │   │   │   │   │   │   ├── 📁 mipmap-xxxhdpi
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_foreground.png
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_round.png
 │   │   │   │   │   │   │   │   └── 📄 ic_launcher.png
 │   │   │   │   │   │   │   ├── 📁 values
-│   │   │   │   │   │   │   │   ├── 📄 ic_launcher_background.xml
-│   │   │   │   │   │   │   │   ├── 📄 strings.xml
 │   │   │   │   │   │   │   │   └── 📄 styles.xml
-│   │   │   │   │   │   │   └── 📁 xml
-│   │   │   │   │   │   │       ├── 📄 config.xml
-│   │   │   │   │   │   │       └── 📄 file_paths.xml
+│   │   │   │   │   │   │   └── 📁 values-night
+│   │   │   │   │   │   │       └── 📄 styles.xml
 │   │   │   │   │   │   └── 📄 AndroidManifest.xml
-│   │   │   │   │   └── 📁 test
-│   │   │   │   │       └── 📁 java
-│   │   │   │   │           └── 📁 com
-│   │   │   │   │               └── 📁 getcapacitor
-│   │   │   │   │                   └── 📁 myapp
-│   │   │   │   │                       └── 📄 ExampleUnitTest.java
-│   │   │   │   ├── 📄 .gitignore
-│   │   │   │   ├── 📄 build.gradle
-│   │   │   │   ├── 📄 capacitor.build.gradle
-│   │   │   │   └── 📄 proguard-rules.pro
-│   │   │   ├── 📁 capacitor-cordova-android-plugins
-│   │   │   │   ├── 📁 src
-│   │   │   │   │   └── 📁 main
-│   │   │   │   │       ├── 📁 java
-│   │   │   │   │       │   └── 📄 .gitkeep
-│   │   │   │   │       ├── 📁 res
-│   │   │   │   │       │   └── 📄 .gitkeep
+│   │   │   │   │   └── 📁 profile
 │   │   │   │   │       └── 📄 AndroidManifest.xml
-│   │   │   │   ├── 📄 build.gradle
-│   │   │   │   └── 📄 cordova.variables.gradle
+│   │   │   │   └── 📄 build.gradle.kts
 │   │   │   ├── 📁 gradle
 │   │   │   │   └── 📁 wrapper
 │   │   │   │       ├── 📄 gradle-wrapper.jar
 │   │   │   │       └── 📄 gradle-wrapper.properties
 │   │   │   ├── 📄 .gitignore
-│   │   │   ├── 📄 build.gradle
-│   │   │   ├── 📄 capacitor.settings.gradle
+│   │   │   ├── 📄 build.gradle.kts
 │   │   │   ├── 📄 gradle.properties
 │   │   │   ├── 📄 gradlew
 │   │   │   ├── 📄 gradlew.bat
-│   │   │   ├── 📄 settings.gradle
-│   │   │   └── 📄 variables.gradle
-│   │   ├── 📁 public
-│   │   │   └── 📄 favicon.ico
-│   │   ├── 📁 src
-│   │   │   ├── 📁 components
-│   │   │   │   ├── 📁 common
-│   │   │   │   │   ├── 📄 AppHeader.tsx
-│   │   │   │   │   ├── 📄 CountdownTimer.tsx
-│   │   │   │   │   └── 📄 ServerStatusBar.tsx
-│   │   │   │   ├── 📁 deal
-│   │   │   │   │   ├── 📄 BargainSlider.tsx
-│   │   │   │   │   ├── 📄 DealCard.tsx
-│   │   │   │   │   └── 📄 VaultModal.tsx
-│   │   │   │   └── 📁 payment
-│   │   │   │       ├── 📄 DeepLinkButton.tsx
-│   │   │   │       └── 📄 VietQRCard.tsx
+│   │   │   ├── 📄 local.properties
+│   │   │   ├── 📄 mb_user_android.iml
+│   │   │   └── 📄 settings.gradle.kts
+│   │   ├── 📁 ios
+│   │   │   ├── 📁 Flutter
+│   │   │   │   ├── 📁 ephemeral
+│   │   │   │   │   ├── 📄 flutter_lldb_helper.py
+│   │   │   │   │   └── 📄 flutter_lldbinit
+│   │   │   │   ├── 📄 AppFrameworkInfo.plist
+│   │   │   │   ├── 📄 Debug.xcconfig
+│   │   │   │   ├── 📄 flutter_export_environment.sh
+│   │   │   │   ├── 📄 Generated.xcconfig
+│   │   │   │   └── 📄 Release.xcconfig
+│   │   │   ├── 📁 Runner
+│   │   │   │   ├── 📁 Assets.xcassets
+│   │   │   │   │   ├── 📁 AppIcon.appiconset
+│   │   │   │   │   │   ├── 📄 Contents.json
+│   │   │   │   │   │   ├── 📄 Icon-App-1024x1024@1x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-20x20@1x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-20x20@2x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-20x20@3x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-29x29@1x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-29x29@2x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-29x29@3x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-40x40@1x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-40x40@2x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-40x40@3x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-60x60@2x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-60x60@3x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-76x76@1x.png
+│   │   │   │   │   │   ├── 📄 Icon-App-76x76@2x.png
+│   │   │   │   │   │   └── 📄 Icon-App-83.5x83.5@2x.png
+│   │   │   │   │   └── 📁 LaunchImage.imageset
+│   │   │   │   │       ├── 📄 Contents.json
+│   │   │   │   │       ├── 📄 LaunchImage.png
+│   │   │   │   │       ├── 📄 LaunchImage@2x.png
+│   │   │   │   │       ├── 📄 LaunchImage@3x.png
+│   │   │   │   │       └── 📄 README.md
+│   │   │   │   ├── 📁 Base.lproj
+│   │   │   │   │   ├── 📄 LaunchScreen.storyboard
+│   │   │   │   │   └── 📄 Main.storyboard
+│   │   │   │   ├── 📄 AppDelegate.swift
+│   │   │   │   ├── 📄 GeneratedPluginRegistrant.h
+│   │   │   │   ├── 📄 GeneratedPluginRegistrant.m
+│   │   │   │   ├── 📄 Info.plist
+│   │   │   │   ├── 📄 Runner-Bridging-Header.h
+│   │   │   │   └── 📄 SceneDelegate.swift
+│   │   │   ├── 📁 Runner.xcodeproj
+│   │   │   │   ├── 📁 project.xcworkspace
+│   │   │   │   │   ├── 📁 xcshareddata
+│   │   │   │   │   │   ├── 📄 IDEWorkspaceChecks.plist
+│   │   │   │   │   │   └── 📄 WorkspaceSettings.xcsettings
+│   │   │   │   │   └── 📄 contents.xcworkspacedata
+│   │   │   │   ├── 📁 xcshareddata
+│   │   │   │   │   └── 📁 xcschemes
+│   │   │   │   │       └── 📄 Runner.xcscheme
+│   │   │   │   └── 📄 project.pbxproj
+│   │   │   ├── 📁 Runner.xcworkspace
+│   │   │   │   ├── 📁 xcshareddata
+│   │   │   │   │   ├── 📄 IDEWorkspaceChecks.plist
+│   │   │   │   │   └── 📄 WorkspaceSettings.xcsettings
+│   │   │   │   └── 📄 contents.xcworkspacedata
+│   │   │   ├── 📁 RunnerTests
+│   │   │   │   └── 📄 RunnerTests.swift
+│   │   │   └── 📄 .gitignore
+│   │   ├── 📁 lib
+│   │   │   ├── 📁 models
+│   │   │   │   ├── 📄 deal_model.dart
+│   │   │   │   └── 📄 user_model.dart
 │   │   │   ├── 📁 screens
-│   │   │   │   ├── 📁 auth
-│   │   │   │   │   ├── 📄 GreetingScreen.tsx
-│   │   │   │   │   └── 📄 LoginScreen.tsx
-│   │   │   │   └── 📁 main
-│   │   │   │       ├── 📄 DealRoomScreen.tsx
-│   │   │   │       ├── 📄 DisputeScreen.tsx
-│   │   │   │       └── 📄 HomeScreen.tsx
+│   │   │   │   ├── 📄 deal_room_screen.dart
+│   │   │   │   ├── 📄 dispute_screen.dart
+│   │   │   │   ├── 📄 greeting_screen.dart
+│   │   │   │   ├── 📄 home_screen.dart
+│   │   │   │   └── 📄 login_screen.dart
 │   │   │   ├── 📁 services
-│   │   │   │   ├── 📄 apiClient.ts
-│   │   │   │   ├── 📄 auth.service.ts
-│   │   │   │   ├── 📄 deal.service.ts
-│   │   │   │   ├── 📄 health.service.ts
-│   │   │   │   └── 📄 keyframe-extractor.ts
-│   │   │   ├── 📁 stores
-│   │   │   │   ├── 📄 useAuthStore.ts
-│   │   │   │   └── 📄 useDealStore.ts
-│   │   │   ├── 📁 types
-│   │   │   │   └── 📄 index.ts
-│   │   │   ├── 📄 App.tsx
-│   │   │   ├── 📄 index.css
-│   │   │   ├── 📄 main.tsx
-│   │   │   └── 📄 vite-env.d.ts
+│   │   │   │   ├── 📄 api_client.dart
+│   │   │   │   ├── 📄 auth_service.dart
+│   │   │   │   ├── 📄 deal_service.dart
+│   │   │   │   └── 📄 secure_clipboard_service.dart
+│   │   │   ├── 📁 widgets
+│   │   │   │   ├── 📄 bargain_slider.dart
+│   │   │   │   ├── 📄 deal_card.dart
+│   │   │   │   ├── 📄 vault_modal.dart
+│   │   │   │   └── 📄 vietqr_payment_view.dart
+│   │   │   └── 📄 main.dart
+│   │   ├── 📁 test
+│   │   │   └── 📄 widget_test.dart
+│   │   ├── 📁 web
+│   │   │   ├── 📁 icons
+│   │   │   │   ├── 📄 Icon-192.png
+│   │   │   │   ├── 📄 Icon-512.png
+│   │   │   │   ├── 📄 Icon-maskable-192.png
+│   │   │   │   └── 📄 Icon-maskable-512.png
+│   │   │   ├── 📄 favicon.png
+│   │   │   ├── 📄 index.html
+│   │   │   └── 📄 manifest.json
 │   │   ├── 📄 .env
 │   │   ├── 📄 .env.example
-│   │   ├── 📄 App.tsx
-│   │   ├── 📄 capacitor.config.ts
-│   │   ├── 📄 index.html
-│   │   ├── 📄 package-lock.json
-│   │   ├── 📄 package.json
-│   │   ├── 📄 postcss.config.js
-│   │   ├── 📄 tailwind.config.js
-│   │   ├── 📄 tsconfig.json
-│   │   └── 📄 vite.config.ts
+│   │   ├── 📄 .flutter-plugins-dependencies
+│   │   ├── 📄 .gitignore
+│   │   ├── 📄 .metadata
+│   │   ├── 📄 analysis_options.yaml
+│   │   ├── 📄 babel.config.js
+│   │   ├── 📄 devtools_options.yaml
+│   │   ├── 📄 metro.config.js
+│   │   ├── 📄 pubspec.lock
+│   │   ├── 📄 pubspec.yaml
+│   │   └── 📄 README.md
 │   └── 📁 server
 │       ├── 📁 prisma
 │       │   ├── 📁 migrations
 │       │   │   └── 📄 init_schema.sql
+│       │   ├── 📄 clean-all.ts
 │       │   ├── 📄 clean-deals.ts
 │       │   ├── 📄 schema.prisma
 │       │   └── 📄 seed.ts
@@ -553,6 +641,7 @@
 │       │   │   ├── 📁 filters
 │       │   │   │   └── 📄 filters.md
 │       │   │   ├── 📁 guards
+│       │   │   │   ├── 📄 app-throttler.guard.ts
 │       │   │   │   ├── 📄 auth.guard.ts
 │       │   │   │   ├── 📄 guards.md
 │       │   │   │   └── 📄 roles.guard.ts
@@ -568,7 +657,9 @@
 │       │   ├── 📁 config
 │       │   │   ├── 📄 app.config.ts
 │       │   │   ├── 📄 config.md
-│       │   │   └── 📄 env.config.ts
+│       │   │   ├── 📄 cors.config.ts
+│       │   │   ├── 📄 env.config.ts
+│       │   │   └── 📄 throttle.config.ts
 │       │   ├── 📁 constants
 │       │   │   ├── 📄 app.constant.ts
 │       │   │   └── 📄 constants.md
@@ -578,14 +669,27 @@
 │       │   │   ├── 📄 init_schema.sql
 │       │   │   ├── 📄 pg.provider.ts
 │       │   │   └── 📄 prisma.service.ts
+│       │   ├── 📁 health
+│       │   │   ├── 📄 health.controller.spec.ts
+│       │   │   ├── 📄 health.controller.ts
+│       │   │   ├── 📄 health.module.ts
+│       │   │   └── 📄 health.service.ts
 │       │   ├── 📁 integrations
 │       │   │   └── 📁 supabase
 │       │   │       ├── 📄 supabase.module.ts
 │       │   │       └── 📄 supabase.service.ts
+│       │   ├── 📁 keep-alive
+│       │   │   ├── 📄 keep-alive.controller.ts
+│       │   │   ├── 📄 keep-alive.module.ts
+│       │   │   └── 📄 keep-alive.service.ts
+│       │   ├── 📁 lib
+│       │   │   └── 📄 viem-client.ts
 │       │   ├── 📁 modules
 │       │   │   ├── 📁 auth
 │       │   │   │   ├── 📁 dto
 │       │   │   │   │   └── 📄 verify-auth.dto.ts
+│       │   │   │   ├── 📄 auth-nonce.service.ts
+│       │   │   │   ├── 📄 auth-verifier.service.ts
 │       │   │   │   ├── 📄 auth.controller.ts
 │       │   │   │   ├── 📄 auth.module.ts
 │       │   │   │   ├── 📄 auth.service.ts
@@ -626,7 +730,9 @@
 │       │   │   │   ├── 📄 payments.controller.ts
 │       │   │   │   ├── 📄 payments.module.ts
 │       │   │   │   ├── 📄 payments.service.spec.ts
-│       │   │   │   └── 📄 payments.service.ts
+│       │   │   │   ├── 📄 payments.service.ts
+│       │   │   │   ├── 📄 webhook.controller.spec.ts
+│       │   │   │   └── 📄 webhook.controller.ts
 │       │   │   ├── 📁 products
 │       │   │   │   ├── 📁 dto
 │       │   │   │   │   └── 📄 product.dto.ts
@@ -692,11 +798,15 @@
 │       │   ├── 📄 deals.e2e-spec.ts
 │       │   ├── 📄 jest-e2e.json
 │       │   ├── 📄 payments-webhook.e2e-spec.ts
+│       │   ├── 📄 task-a-10.e2e-spec.ts
 │       │   └── 📄 test.md
+│       ├── 📄 .dockerignore
 │       ├── 📄 .env
+│       ├── 📄 .env.deploy
 │       ├── 📄 .env.example
 │       ├── 📄 .gitignore
 │       ├── 📄 .prettierrc
+│       ├── 📄 Dockerfile
 │       ├── 📄 eslint.config.mjs
 │       ├── 📄 nest-cli.json
 │       ├── 📄 package-lock.json
@@ -705,8 +815,25 @@
 │       ├── 📄 server.md
 │       ├── 📄 tsconfig.build.json
 │       └── 📄 tsconfig.json
+├── 📁 artifacts
+│   ├── 📄 ai-pipeline-benchmark.json
+│   ├── 📄 oracle-balance-alert.json
+│   ├── 📄 quality-gate-report.json
+│   └── 📄 relayer-gas-report.json
+├── 📁 assets
+│   ├── 📄 landingpage_1.png
+│   └── 📄 logo.png
+├── 📁 deploy
+│   ├── 📁 iam
+│   │   ├── 📄 aws-secretsmanager-policy.json
+│   │   └── 📄 gcp-secretmanager-policy.json
+│   └── 📄 secrets.temp.template.txt
 ├── 📁 packages
 │   └── 📁 contracts
+│       ├── 📁 broadcast
+│       │   └── 📁 DeployEscrow.s.sol
+│       │       └── 📁 84532
+│       │           └── 📄 run-latest.json
 │       ├── 📁 lib
 │       │   ├── 📁 forge-std
 │       │   │   ├── 📁 .github
@@ -1283,8 +1410,83 @@
 │       │       │   └── 📄 task-test-get-files.js
 │       │       ├── 📁 lib
 │       │       │   ├── 📁 erc4626-tests
+│       │       │   │   ├── 📄 ERC4626.prop.sol
+│       │       │   │   ├── 📄 ERC4626.test.sol
+│       │       │   │   ├── 📄 LICENSE
+│       │       │   │   └── 📄 README.md
 │       │       │   ├── 📁 forge-std
+│       │       │   │   ├── 📁 .github
+│       │       │   │   │   └── 📁 workflows
+│       │       │   │   │       ├── 📄 ci.yml
+│       │       │   │   │       └── 📄 sync.yml
+│       │       │   │   ├── 📁 scripts
+│       │       │   │   │   └── 📄 vm.py
+│       │       │   │   ├── 📁 src
+│       │       │   │   │   ├── 📁 interfaces
+│       │       │   │   │   │   ├── 📄 IERC1155.sol
+│       │       │   │   │   │   ├── 📄 IERC165.sol
+│       │       │   │   │   │   ├── 📄 IERC20.sol
+│       │       │   │   │   │   ├── 📄 IERC4626.sol
+│       │       │   │   │   │   ├── 📄 IERC721.sol
+│       │       │   │   │   │   └── 📄 IMulticall3.sol
+│       │       │   │   │   ├── 📁 mocks
+│       │       │   │   │   │   ├── 📄 MockERC20.sol
+│       │       │   │   │   │   └── 📄 MockERC721.sol
+│       │       │   │   │   ├── 📄 Base.sol
+│       │       │   │   │   ├── 📄 console.sol
+│       │       │   │   │   ├── 📄 console2.sol
+│       │       │   │   │   ├── 📄 safeconsole.sol
+│       │       │   │   │   ├── 📄 Script.sol
+│       │       │   │   │   ├── 📄 StdAssertions.sol
+│       │       │   │   │   ├── 📄 StdChains.sol
+│       │       │   │   │   ├── 📄 StdCheats.sol
+│       │       │   │   │   ├── 📄 StdError.sol
+│       │       │   │   │   ├── 📄 StdInvariant.sol
+│       │       │   │   │   ├── 📄 StdJson.sol
+│       │       │   │   │   ├── 📄 StdMath.sol
+│       │       │   │   │   ├── 📄 StdStorage.sol
+│       │       │   │   │   ├── 📄 StdStyle.sol
+│       │       │   │   │   ├── 📄 StdToml.sol
+│       │       │   │   │   ├── 📄 StdUtils.sol
+│       │       │   │   │   ├── 📄 Test.sol
+│       │       │   │   │   └── 📄 Vm.sol
+│       │       │   │   ├── 📁 test
+│       │       │   │   │   ├── 📁 compilation
+│       │       │   │   │   │   ├── 📄 CompilationScript.sol
+│       │       │   │   │   │   ├── 📄 CompilationScriptBase.sol
+│       │       │   │   │   │   ├── 📄 CompilationTest.sol
+│       │       │   │   │   │   └── 📄 CompilationTestBase.sol
+│       │       │   │   │   ├── 📁 fixtures
+│       │       │   │   │   │   ├── 📄 broadcast.log.json
+│       │       │   │   │   │   ├── 📄 test.json
+│       │       │   │   │   │   └── 📄 test.toml
+│       │       │   │   │   ├── 📁 mocks
+│       │       │   │   │   │   ├── 📄 MockERC20.t.sol
+│       │       │   │   │   │   └── 📄 MockERC721.t.sol
+│       │       │   │   │   ├── 📄 StdAssertions.t.sol
+│       │       │   │   │   ├── 📄 StdChains.t.sol
+│       │       │   │   │   ├── 📄 StdCheats.t.sol
+│       │       │   │   │   ├── 📄 StdError.t.sol
+│       │       │   │   │   ├── 📄 StdJson.t.sol
+│       │       │   │   │   ├── 📄 StdMath.t.sol
+│       │       │   │   │   ├── 📄 StdStorage.t.sol
+│       │       │   │   │   ├── 📄 StdStyle.t.sol
+│       │       │   │   │   ├── 📄 StdToml.t.sol
+│       │       │   │   │   ├── 📄 StdUtils.t.sol
+│       │       │   │   │   └── 📄 Vm.t.sol
+│       │       │   │   ├── 📄 .gitattributes
+│       │       │   │   ├── 📄 .gitignore
+│       │       │   │   ├── 📄 foundry.toml
+│       │       │   │   ├── 📄 LICENSE-APACHE
+│       │       │   │   ├── 📄 LICENSE-MIT
+│       │       │   │   ├── 📄 package.json
+│       │       │   │   └── 📄 README.md
 │       │       │   └── 📁 halmos-cheatcodes
+│       │       │       ├── 📁 src
+│       │       │       │   ├── 📄 SVM.sol
+│       │       │       │   └── 📄 SymTest.sol
+│       │       │       ├── 📄 LICENSE
+│       │       │       └── 📄 README.md
 │       │       ├── 📁 scripts
 │       │       │   ├── 📁 checks
 │       │       │   │   ├── 📄 compare-layout.js
@@ -1595,6 +1797,7 @@
 │       │   └── 📄 DeployEscrow.s.sol
 │       ├── 📁 scripts
 │       │   ├── 📄 canonical-abi.json
+│       │   ├── 📄 deploy-onchain.js
 │       │   ├── 📄 export-abi.js
 │       │   └── 📄 export-artifacts.js
 │       ├── 📁 src
@@ -1640,11 +1843,44 @@
 │       └── 📄 src_types_EscrowTypes_sol_EscrowTypes.bin
 ├── 📁 scripts
 │   ├── 📄 apply-ddl.js
+│   ├── 📄 audit-secrets.sh
+│   ├── 📄 check-relayer-gas.ts
 │   ├── 📄 draw-structure.js
+│   ├── 📄 dump-secrets.sh
+│   ├── 📄 load-cloud-secrets.sh
+│   ├── 📄 monitor-oracle-balance.ts
+│   ├── 📄 quality-gate-check.ts
+│   ├── 📄 run-mb.js
 │   └── 📄 setup-db.sh
+├── 📁 tests
+│   └── 📁 e2e
+│       ├── 📁 fixtures
+│       │   ├── 📄 mock-payos-webhook.ts
+│       │   ├── 📄 sample-assets.ts
+│       │   └── 📄 test-wallets.ts
+│       ├── 📁 helpers
+│       │   ├── 📄 contract-helper.ts
+│       │   ├── 📄 crypto-helper.ts
+│       │   └── 📄 db-helper.ts
+│       ├── 📁 specs
+│       │   ├── 📄 01-happy-path.spec.ts
+│       │   ├── 📄 02-dispute-flow.spec.ts
+│       │   ├── 📄 03-realtime-concurrency.spec.ts
+│       │   └── 📄 04-system-health.spec.ts
+│       ├── 📄 jest.config.ts
+│       ├── 📄 package.json
+│       └── 📄 tsconfig.json
+├── 📄 .dockerignore
+├── 📄 .env
 ├── 📄 .gitignore
 ├── 📄 .gitmodules
+├── 📄 .npmrc
+├── 📄 analysis_options.yaml
+├── 📄 DEPLOYMENT_ENV_MATRIX.md
 ├── 📄 package-lock.json
 ├── 📄 package.json
-└── 📄 STRUCTURE.md
+├── 📄 README
+├── 📄 render.yaml
+├── 📄 STRUCTURE.md
+└── 📄 tsconfig.base.json
 ```
