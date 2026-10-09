@@ -1,0 +1,78 @@
+name: Oracle Relayer Balance Monitor & Alert Sentry
+
+on:
+  schedule:
+    # Triggered automatically every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode without sending real webhooks'
+        required: false
+        type: boolean
+        default: false
+      mock_balance_eth:
+        description: 'Mock balance in ETH to test alert triggering (e.g. 0.015)'
+        required: false
+        type: string
+        default: ''
+
+concurrency:
+  group: oracle-relayer-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor-balance:
+    name: Base Sepolia Relayer Gas Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          if [ -s package-lock.json ]; then
+            npm ci || npm install --no-audit --no-fund
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Execute Oracle Relayer Balance Check & Sentry
+        run: |
+          FLAGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            FLAGS="${FLAGS} --dry-run"
+          fi
+          if [ -n "${{ inputs.mock_balance_eth }}" ]; then
+            FLAGS="${FLAGS} --mock-balance=${{ inputs.mock_balance_eth }}"
+          fi
+          npx tsx scripts/monitor-oracle-balance.ts ${FLAGS}
+        env:
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          ORACLE_RELAYER_ADDRESS: ${{ secrets.ORACLE_RELAYER_ADDRESS }}
+          ORACLE_RELAYER_PRIVATE_KEY: ${{ secrets.ORACLE_RELAYER_PRIVATE_KEY }}
+          ORACLE_ALERT_THRESHOLD_ETH: '0.02'
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Upload Sentry Telemetry Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-balance-report
+          path: artifacts/oracle-balance-alert.json
+          retention-days: 7
+

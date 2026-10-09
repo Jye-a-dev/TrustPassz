@@ -1,0 +1,10 @@
+analyzer:
+  exclude:
+    - "node_modules/**"
+    - "**/node_modules/**"
+    - "apps/cl_user/**"
+    - "apps/cl_admin/**"
+    - "apps/server/**"
+    - "apps/ai_pipeline/**"
+    - "packages/**"
+

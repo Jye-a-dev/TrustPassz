@@ -23,6 +23,14 @@ export interface OracleRelayerConfig {
   contractAddress: `0x${string}`;
   /** HTTP or WS RPC endpoint for Base Sepolia */
   rpcUrl: string;
+  /** Optional Alchemy API Key for fallback RPC */
+  alchemyApiKey?: string;
+  /** Optional Infura API Key for fallback RPC */
+  infuraApiKey?: string;
+  /** Optional custom Alchemy RPC URL */
+  alchemyRpcUrl?: string;
+  /** Optional custom Infura RPC URL */
+  infuraRpcUrl?: string;
 }
 
 function requireEnv(key: string): string {
@@ -112,5 +120,18 @@ export function loadOracleRelayerConfig(): OracleRelayerConfig {
     );
   }
 
-  return { privateKey, contractAddress, rpcUrl };
+  const alchemyApiKey = process.env.ALCHEMY_API_KEY?.trim() || undefined;
+  const infuraApiKey = process.env.INFURA_API_KEY?.trim() || undefined;
+  const alchemyRpcUrl = process.env.ALCHEMY_RPC_URL?.trim() || undefined;
+  const infuraRpcUrl = process.env.INFURA_RPC_URL?.trim() || undefined;
+
+  return {
+    privateKey,
+    contractAddress,
+    rpcUrl,
+    alchemyApiKey,
+    infuraApiKey,
+    alchemyRpcUrl,
+    infuraRpcUrl,
+  };
 }

@@ -41,11 +41,15 @@ export class OrdersService {
     }
 
     if (currentUser && currentUser.id === product.sellerId) {
-      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
     }
 
     if (product.sellerId === dto.buyerId) {
-      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
     }
 
     if (dto.dealId) {
@@ -57,7 +61,9 @@ export class OrdersService {
           (currentUser && currentUser.id === existingDeal.sellerId) ||
           dto.buyerId === existingDeal.sellerId
         ) {
-          throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+          throw new ForbiddenException(
+            'Bạn không thể tự mua sản phẩm của chính mình.',
+          );
         }
       }
     }

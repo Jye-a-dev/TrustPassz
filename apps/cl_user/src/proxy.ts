@@ -25,8 +25,8 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/user/settings', request.url), 307);
   }
 
-  // 2. Protected Routes (/user/*)
-  if (pathname.startsWith('/user')) {
+  // 2. Protected Routes (/user and /user/*)
+  if (pathname === '/user' || pathname.startsWith('/user/')) {
     if (isExpired) {
       const loginUrl = new URL('/login', request.url);
       const callbackTarget = pathname + (request.nextUrl.search || '');
@@ -42,17 +42,21 @@ export function proxy(request: NextRequest) {
 
   // 3. Auth Routes (/login, /register)
   if (pathname === '/login' || pathname === '/register') {
-    if (!isExpired) {
-      const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
-      const target =
-        callbackUrl &&
-        callbackUrl.startsWith('/') &&
-        !callbackUrl.startsWith('/login') &&
-        !callbackUrl.startsWith('/register')
-          ? callbackUrl
-          : '/user';
-      return NextResponse.redirect(new URL(target, request.url), 307);
+    const isForceLogin =
+      request.nextUrl.searchParams.get('force') === '1' ||
+      request.nextUrl.searchParams.get('prompt') === 'login' ||
+      request.nextUrl.searchParams.get('logout') === '1' ||
+      request.nextUrl.searchParams.get('expired') === '1';
+
+    if (isForceLogin) {
+      const response = NextResponse.next();
+      response.cookies.delete('access_token');
+      return response;
     }
+
+    // Do NOT forcefully redirect /login to /user at the edge proxy level
+    // to prevent orphaned/httpOnly cookie bounce-back loops when client state is unauthenticated.
+    return NextResponse.next();
   }
 
   return NextResponse.next();
@@ -60,6 +64,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/user',
     '/user/:path*',
     '/dashboard/:path*',
     '/dashboard',

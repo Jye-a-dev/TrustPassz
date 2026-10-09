@@ -1,0 +1,12 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "relayerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "balanceEth": "0.05",
+  "thresholdEth": "0.02",
+  "gasPriceGwei": "0.006",
+  "remainingTxCapacity": 69444,
+  "timestamp": "2026-10-09T12:58:04.592Z",
+  "isMock": true,
+  "isBelowThreshold": false
+}

@@ -31,25 +31,32 @@ export function UnauthScreen({
     return `${pathname}${query ? `?${query}` : ""}`;
   }, [callbackUrl, pathname, searchParams]);
 
-  // Clean URL: If targetCallbackUrl is "/user" or root workspace, redirect cleanly to "/login"
+  // Clean URL: Force=1 ensures edge proxy invalidates any desynced/httpOnly cookie and renders login
   const loginHref = React.useMemo(() => {
     if (
       !targetCallbackUrl ||
       targetCallbackUrl === "/user" ||
       targetCallbackUrl === "/user/"
     ) {
-      return "/login";
+      return "/login?force=1";
     }
-    if (targetCallbackUrl.startsWith("/")) {
-      return `/login?callbackUrl=${targetCallbackUrl}`;
-    }
-    return `/login?callbackUrl=${encodeURIComponent(targetCallbackUrl)}`;
+    const safeTarget = targetCallbackUrl.startsWith("/")
+      ? targetCallbackUrl
+      : `/${targetCallbackUrl}`;
+    return `/login?force=1&callbackUrl=${encodeURIComponent(safeTarget)}`;
   }, [targetCallbackUrl]);
 
   const handleLogin = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Invalidate any orphaned JWT cookie to prevent proxy bounce-back loops
-    document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    // Invalidate any orphaned JWT cookie & localStorage session to prevent bounce-back loops
+    if (typeof document !== "undefined") {
+      document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+      document.cookie = "access_token=; path=/; Max-Age=0;";
+    }
+    try {
+      localStorage.removeItem("trustpassz-auth-session");
+      sessionStorage.clear();
+    } catch {}
     window.location.assign(loginHref);
   };
 

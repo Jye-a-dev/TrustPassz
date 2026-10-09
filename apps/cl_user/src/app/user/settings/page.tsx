@@ -6,18 +6,14 @@ import {
   CreditCard,
   KeyRound,
   ShieldCheck,
-  Building,
   Save,
-  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useAuthStore } from "@/lib/auth-store";
 
 export default function UserSettingsPage() {
-  const { user } = useAuthStore();
   const [bankAccount, setBankAccount] = React.useState("0123456789");
   const [bankName, setBankName] = React.useState("MBBank (Quân Đội)");
   const [accountName, setAccountName] = React.useState("NGUYEN VAN A");

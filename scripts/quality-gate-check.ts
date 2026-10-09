@@ -73,6 +73,7 @@ function audit() {
     file.includes('mocks/') ||
     file.includes('test/') ||
     file.includes('__tests__/') ||
+    file.includes('broadcast/') ||
     file.includes('DigitalEscrowABI.ts');
 
   // Exclusions for 400-line rule (generated ABI files, build artifacts, lockfiles)

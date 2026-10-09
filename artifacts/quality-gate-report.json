@@ -1,7 +1,28 @@
 {
   "secretLeaks": [],
   "trackedEnvFiles": [],
-  "oversizedFiles": [],
+  "oversizedFiles": [
+    {
+      "file": "apps/server/src/modules/deals/deals.controller.ts",
+      "lines": 402
+    },
+    {
+      "file": "apps/server/src/modules/deals/deals.service.ts",
+      "lines": 423
+    },
+    {
+      "file": "apps/server/src/modules/payments/payments.service.ts",
+      "lines": 430
+    },
+    {
+      "file": "apps/server/src/oracle-relayer/oracle-relayer.service.ts",
+      "lines": 405
+    },
+    {
+      "file": "apps/server/test/mocks/prisma.mock.ts",
+      "lines": 429
+    }
+  ],
   "envExampleStatus": [
     {
       "package": "contracts",
@@ -13,7 +34,7 @@
       "package": "server",
       "path": "apps/server/.env.example",
       "exists": true,
-      "varsCount": 29
+      "varsCount": 31
     },
     {
       "package": "ai_pipeline",
@@ -41,9 +62,9 @@
     }
   ],
   "summary": {
-    "passed": true,
-    "qualityScorePercent": 100,
-    "totalFilesAudited": 511,
-    "auditTimestamp": "2026-10-03T18:49:28.273Z"
+    "passed": false,
+    "qualityScorePercent": 75,
+    "totalFilesAudited": 569,
+    "auditTimestamp": "2026-10-09T13:18:36.741Z"
   }
 }

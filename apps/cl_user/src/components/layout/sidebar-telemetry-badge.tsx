@@ -12,7 +12,6 @@ export function SidebarTelemetryBadge() {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
           </span>
-          HỆ THỐNG BẢO VỆ TỰ ĐỘNG
         </span>
         <span className="text-slate-400 font-mono text-[11px]">24/7</span>
       </div>

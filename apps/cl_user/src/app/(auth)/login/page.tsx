@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { ShieldCheck, KeyRound, Mail, Sparkles, AlertTriangle, Zap } from "lucide-react";
+import { KeyRound, Mail, Sparkles, AlertTriangle, Zap } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -13,7 +13,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoginWeb3Tab } from "@/components/auth/login-web3-tab";
 import { LoginEmailForm } from "@/components/auth/login-email-form";
@@ -40,13 +39,19 @@ function LoginContent() {
   } = useAuthHandlers();
 
   React.useEffect(() => {
+    if (searchParams?.get("force") === "1" || isSessionExpired) {
+      if (typeof document !== "undefined") {
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        document.cookie = "access_token=; path=/; Max-Age=0;";
+      }
+    }
     if (isSessionExpired) {
       toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.", {
         id: "session-expired-toast",
         duration: 5000,
       });
     }
-  }, [isSessionExpired]);
+  }, [searchParams, isSessionExpired]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-[#0B0F17] overflow-hidden">
@@ -56,15 +61,6 @@ function LoginContent() {
 
       <Card className="relative w-full max-w-lg border border-slate-800 bg-slate-950/90 shadow-[0_0_35px_rgba(15,23,42,0.8)] backdrop-blur-xl">
         {/* Top Header Badge */}
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <Badge
-            variant="outline"
-            className="flex items-center gap-1.5 border-emerald-500/40 bg-slate-900/95 px-3 py-1 text-[11px] font-semibold text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
-          >
-            <ShieldCheck className="size-3.5 text-emerald-400" />
-            <span>Hệ Thống Bảo Vệ Tự Động v2.5</span>
-          </Badge>
-        </div>
 
         <CardHeader className="space-y-2 text-center pt-8">
           <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">

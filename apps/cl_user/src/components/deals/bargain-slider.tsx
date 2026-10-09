@@ -6,13 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   TrendingDown,
-  Wifi,
   WifiOff,
   UserCheck,
   CheckCircle,
-  Clock,
-  Sparkles,
-  ArrowRight,
 } from "lucide-react";
 
 export interface BargainSliderProps {
@@ -54,11 +50,11 @@ export function BargainSlider({
   const [localPrice, setLocalPrice] = React.useState<number>(defaultPrice);
   const [peerOffer, setPeerOffer] = React.useState<number | null>(null);
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
-  const [lastSyncedAt, setLastSyncedAt] = React.useState<Date | null>(null);
 
-  // References for debounce and channel tracking
+  // References for debounce, channel tracking, and touch gesture disambiguation
   const channelRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
   const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
 
   // 1. Establish Supabase Realtime channel for deal room
   React.useEffect(() => {
@@ -83,7 +79,6 @@ export function BargainSlider({
           // If the broadcast was sent by the other party
           if (payload.buyerId !== currentUserId && payload.senderId !== currentUserId) {
             setPeerOffer(payload.offeredPrice);
-            setLastSyncedAt(new Date());
           }
         }
       })
@@ -133,6 +128,33 @@ export function BargainSlider({
         });
       }
     }, 300);
+  };
+
+  // Touch gesture disambiguation: isolates horizontal drag without blocking vertical scrolling
+  const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
+    if (e.touches.length > 0) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
+    if (!touchStartRef.current || e.touches.length === 0) return;
+
+    const deltaX = Math.abs(e.touches[0].clientX - touchStartRef.current.x);
+    const deltaY = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
+
+    // If predominantly horizontal, prevent parent scroll container hijacking
+    if (deltaX > deltaY) {
+      e.stopPropagation();
+    }
+    // If predominantly vertical, let event bubble naturally so page scrolls smoothly
+  };
+
+  const handleTouchEnd = () => {
+    touchStartRef.current = null;
   };
 
   const discountPercent =
@@ -237,9 +259,12 @@ export function BargainSlider({
         </div>
       )}
 
-      {/* Touch-Friendly Slider Container */}
+      {/* Touch-Friendly Slider Container with touch-pan-x and non-blocking vertical scroll */}
       <div className="space-y-2 py-2">
-        <div className="relative flex items-center select-none" style={{ touchAction: "none" }}>
+        <div
+          className="relative flex items-center select-none touch-pan-x"
+          style={{ touchAction: "pan-y" }}
+        >
           <input
             type="range"
             min={minPrice}
@@ -247,11 +272,15 @@ export function BargainSlider({
             step={10000}
             value={localPrice}
             onChange={handleSliderChange}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
             disabled={disabled}
             aria-label="Thanh thương lượng giá"
-            className="w-full h-3 bg-slate-950 rounded-lg appearance-none cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed accent-cyan-400 [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-cyan-500/50 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900"
+            className="w-full h-3 bg-slate-950 rounded-lg appearance-none cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed accent-cyan-400 touch-pan-x [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-cyan-500/50 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900"
             style={{
-              touchAction: "none",
+              touchAction: "pan-y",
               background: `linear-gradient(to right, rgb(6 182 212) 0%, rgb(16 185 129) ${trackPercentage}%, rgb(15 23 42) ${trackPercentage}%, rgb(15 23 42) 100%)`,
             }}
           />

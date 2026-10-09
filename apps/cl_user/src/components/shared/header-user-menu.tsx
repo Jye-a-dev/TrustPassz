@@ -88,17 +88,17 @@ export function HeaderUserMenu({
       {/* Widget Số dư Két Giữ Tiền Tạm Khóa */}
       <Link
         href="/user/deals"
-        className="hidden xl:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-2.5 py-1 shadow-[0_0_12px_rgba(6,182,212,0.12)] hover:border-cyan-400/50 hover:bg-cyan-950/30 transition-all cursor-pointer"
+        className="hidden xl:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-50/60 dark:bg-cyan-950/20 px-2.5 py-1 shadow-[0_0_12px_rgba(6,182,212,0.1)] hover:border-cyan-500/50 hover:bg-cyan-100/60 dark:hover:bg-cyan-950/40 transition-all cursor-pointer"
         title="Tiền đang giữ an toàn trong két bảo vệ. Bấm để xem chi tiết."
       >
-        <div className="p-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 text-cyan-400">
+        <div className="p-1 rounded-md bg-cyan-100 dark:bg-cyan-950/80 border border-cyan-500/40 text-cyan-600 dark:text-cyan-400">
           <Lock className="size-3" />
         </div>
         <div className="flex flex-col text-left">
-          <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-400 leading-none">
+          <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 leading-none">
             Két Giữ Tiền
           </span>
-          <span className="font-mono text-[11px] font-bold text-cyan-300 leading-tight">
+          <span className="font-mono text-[11px] font-bold text-cyan-700 dark:text-cyan-300 leading-tight">
             {displayBalance.toLocaleString("vi-VN")} ₫
           </span>
         </div>
@@ -107,7 +107,7 @@ export function HeaderUserMenu({
       {/* Thông báo chuông biến động giao dịch */}
       <button
         type="button"
-        className="relative flex size-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
+        className="relative flex size-9 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
         title="Thông báo biến động giao dịch"
         aria-label="Thông báo"
       >
@@ -123,16 +123,16 @@ export function HeaderUserMenu({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 p-1 sm:px-2.5 sm:py-1 hover:border-slate-700 hover:bg-slate-800 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-1 sm:px-2.5 sm:py-1 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500/40"
           >
-            <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950 shadow-sm">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950 shadow-xs">
               {userInitials || "U"}
             </div>
             <div className="hidden sm:flex flex-col text-left">
-              <span className="text-xs font-bold text-slate-100 max-w-28 truncate leading-tight">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100 max-w-28 truncate leading-tight">
                 {displayName}
               </span>
-              <span className="text-[10px] text-slate-400 font-mono leading-none">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono leading-none">
                 {formattedWallet}
               </span>
             </div>
@@ -140,34 +140,34 @@ export function HeaderUserMenu({
           </button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" className="w-56 mt-1 border-slate-800 bg-[#0F172A]">
+        <DropdownMenuContent align="end" className="w-56 mt-1 border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] shadow-xl">
           <DropdownMenuLabel className="flex flex-col gap-0.5">
-            <span className="font-bold text-white text-xs">{displayName}</span>
-            <span className="text-[10px] font-mono text-cyan-400 truncate">
+            <span className="font-bold text-slate-900 dark:text-white text-xs">{displayName}</span>
+            <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 truncate">
               {user?.email || formattedWallet}
             </span>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-slate-800" />
+          <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-800" />
 
           <DropdownMenuItem asChild>
-            <Link href="/user" className="flex items-center gap-2 cursor-pointer">
-              <User className="size-3.5 text-slate-400" />
+            <Link href="/user" className="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+              <User className="size-3.5 text-slate-500 dark:text-slate-400" />
               <span>Hồ sơ cá nhân</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link href="/user/settings" className="flex items-center gap-2 cursor-pointer">
-              <Settings className="size-3.5 text-slate-400" />
+            <Link href="/user/settings" className="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+              <Settings className="size-3.5 text-slate-500 dark:text-slate-400" />
               <span>Cài đặt & Ví rút VietQR</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="bg-slate-800" />
+          <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-800" />
 
           <DropdownMenuItem
             onClick={onLogout}
-            className="text-rose-400 focus:text-rose-300 focus:bg-rose-950/40 cursor-pointer flex items-center gap-2"
+            className="text-rose-600 dark:text-rose-400 focus:text-rose-700 dark:focus:text-rose-300 focus:bg-rose-50 dark:focus:bg-rose-950/40 cursor-pointer flex items-center gap-2"
           >
             <LogOut className="size-3.5" />
             <span>Đăng xuất</span>

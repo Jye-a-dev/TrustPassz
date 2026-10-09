@@ -30,7 +30,9 @@ export class BargainsService {
     }
 
     if (product.sellerId === dto.buyerId) {
-      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
     }
 
     const ruleConfig = (product.ruleConfig as any) ?? {};

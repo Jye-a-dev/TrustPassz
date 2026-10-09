@@ -31,7 +31,7 @@ const getCookieOptions = () => ({
 
 @ApiTags('Authentication (Passwordless & Web3)')
 @Throttle({
-  auth: { limit: THROTTLE_CONFIG.authLimit, ttl: THROTTLE_CONFIG.ttlMs },
+  auth: { limit: THROTTLE_CONFIG.authLimit, ttl: THROTTLE_CONFIG.authTtlMs },
 })
 @Controller('api/v1/auth')
 export class AuthController {
@@ -39,7 +39,6 @@ export class AuthController {
 
   /**
    * Endpoint sinh Nonce cho SIWS (Sign-In With Solana).
-   * Client phải nhúng nonce vào message trước khi ký.
    */
   @Public()
   @Get('nonce')
@@ -64,6 +63,9 @@ export class AuthController {
   @Public()
   @Post('verify')
   @HttpCode(HttpStatus.OK)
+  @Throttle({
+    auth: { limit: THROTTLE_CONFIG.authLimit, ttl: THROTTLE_CONFIG.authTtlMs },
+  })
   @ApiOperation({
     summary: 'Verify Google ID Token or Privy Passkey Token & Issue JWT Cookie',
     description:
@@ -72,19 +74,6 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Authentication successful. JWT written to httpOnly cookie.',
-    schema: {
-      example: {
-        tokenType: 'Bearer',
-        expiresIn: 604800,
-        user: {
-          id: '11111111-1111-4111-a111-111111111111',
-          email: 'seller@trustpassz.io',
-          walletAddress: '0x1111111111111111111111111111111111111111',
-          displayName: 'Trusted Seller',
-          role: 'USER',
-        },
-      },
-    },
   })
   @ApiResponse({
     status: 400,
@@ -94,6 +83,10 @@ export class AuthController {
   @ApiResponse({
     status: 401,
     description: 'Signature verification failure or expired credentials.',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests — Rate limit exceeded on auth endpoint.',
   })
   async verify(
     @Body() verifyAuthDto: VerifyAuthDto,

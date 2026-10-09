@@ -102,7 +102,7 @@ describe("BargainSlider Realtime Component & Protocol Tests", () => {
     }
   });
 
-  it("should render element with touchAction: none to prevent mobile viewport scroll conflict", () => {
+  it("should render element with touch-pan-x and gesture handling without blocking vertical scroll", () => {
     const sliderElement = React.createElement(BargainSlider, {
       dealId: mockDealId,
       basePrice,

@@ -1,8 +1,10 @@
 {
-  "name": "trustpassz-root",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "apps/cl_admin",
+    "apps/cl_user",
+    "apps/server",
+    "apps/ai_pipeline",
     "packages/*",
     "tests/e2e"
   ],
@@ -10,17 +12,18 @@
     "build": "npm run build --workspace=cl_user",
     "build:user": "npm run build --workspace=cl_user",
     "build:admin": "npm run build --workspace=cl_admin",
-    "mb": "npm --prefix apps/mb_user run dev",
-    "mb:clean": "npm --prefix apps/mb_user run clean",
+    "mb": "node scripts/run-mb.js",
     "user": "npm --prefix apps/cl_user run dev",
     "admin": "npm --prefix apps/cl_admin run dev",
     "server": "npm --prefix apps/server run dev",
     "pipe": "npm --prefix apps/ai_pipeline run dev",
     "structure": "node scripts/draw-structure.js",
+    "typecheck": "tsc -p apps/server/tsconfig.json --noEmit && tsc -p apps/cl_user/tsconfig.json --noEmit && tsc -p apps/cl_admin/tsconfig.json --noEmit && tsc -p tests/e2e/tsconfig.json --noEmit",
     "test:e2e": "npm --prefix tests/e2e test"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@unrs/resolver-binding-win32-x64-msvc": "^1.12.2",
     "concurrently": "^9.2.4",
     "tailwindcss": "^4"
   }

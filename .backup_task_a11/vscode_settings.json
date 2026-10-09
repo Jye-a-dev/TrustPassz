@@ -1,0 +1,61 @@
+{
+  "eslint.workingDirectories": [
+    { "pattern": "./apps/*" }
+  ],
+  "dart.projectSearchPaths": [
+    "apps/mb_user"
+  ],
+  "dart.analysisExcludedFolders": [
+    "node_modules",
+    "apps/cl_user",
+    "apps/cl_admin",
+    "apps/server",
+    "apps/ai_pipeline",
+    "packages"
+  ],
+  "java.enabled": false,
+  "java.server.launchMode": "LightWeight",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.project.importOnFirstTimeStartup": "disabled",
+  "java.import.gradle.enabled": false,
+  "java.import.gradle.wrapper.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.autobuild.enabled": false,
+  "gradle.autoDetect": "off",
+  "gradle.nestedProjects": false,
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/.metadata/**",
+    "**/archetype-resources/**",
+    "**/META-INF/maven/**",
+    "**/apps/mb_user/android/**",
+    "**/android/**"
+  ],
+  "java.project.resourceFilters": [
+    "node_modules",
+    ".git",
+    "apps/mb_user/android/.gradle",
+    "apps/mb_user/android/app/build",
+    "apps/mb_user/android"
+  ],
+  "files.exclude": {
+    "**/apps/mb_user/android/.gradle": true,
+    "**/apps/mb_user/android/app/build": true,
+    "**/apps/mb_user/build": true,
+    "**/apps/mb_user/.dart_tool": true
+  },
+  "files.watcherExclude": {
+    "**/apps/mb_user/android/.gradle/**": true,
+    "**/apps/mb_user/android/app/build/**": true,
+    "**/apps/mb_user/build/**": true,
+    "**/apps/mb_user/.dart_tool/**": true,
+    "**/.gradle/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true
+  },
+  "files.associations": {
+    "deploy-contracts.yml": "yaml",
+    "**/.github/workflows/*.yml": "yaml",
+    "**/.github/workflows/*.yaml": "yaml"
+  }
+}

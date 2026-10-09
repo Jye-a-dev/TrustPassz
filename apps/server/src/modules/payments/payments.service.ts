@@ -54,7 +54,9 @@ export class PaymentsService {
     }
 
     if (currentUser && currentUser.id === deal.sellerId) {
-      throw new ForbiddenException('Bạn không thể tự mua sản phẩm của chính mình.');
+      throw new ForbiddenException(
+        'Bạn không thể tự mua sản phẩm của chính mình.',
+      );
     }
 
     if (deal.state !== DealState.PENDING) {
@@ -80,9 +82,7 @@ export class PaymentsService {
     // PayOS requires description length <= 25 characters
     const rawDesc = dto?.description || `Deal ${deal.id.slice(0, 8)}`;
     const description = rawDesc.slice(0, 25);
-    const amountNumber = Math.round(
-      Number((deal as any).price ?? deal.amount),
-    );
+    const amountNumber = Math.round(Number((deal as any).price ?? deal.amount));
 
     let gatewayResponse: Partial<CreatePaymentLinkResponse> | null = null;
 
@@ -222,7 +222,10 @@ export class PaymentsService {
       '998877';
 
     // Verify recipient account matches system escrow configuration to prevent redirection attacks
-    if (data.accountNumber && data.accountNumber.trim() !== expectedAccountNumber.trim()) {
+    if (
+      data.accountNumber &&
+      data.accountNumber.trim() !== expectedAccountNumber.trim()
+    ) {
       this.logger.error(
         `[Security Alert] Tiền chuyển vào tài khoản không hợp lệ! Nhận: ${data.accountNumber}, Két ký quỹ Escrow: ${expectedAccountNumber}`,
       );

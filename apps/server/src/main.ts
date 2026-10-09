@@ -19,6 +19,7 @@ for (const envPath of envCandidates) {
 
 import net from 'net';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -30,7 +31,10 @@ import './common/utils/bigint-serializer.util';
 /**
  * Resolves server listen port: strictly defaults to 3000 or accepts any available 30xx port (3000-3099).
  */
-async function resolvePort(preferredPort = 3000, fallbackMax = 3099): Promise<number> {
+async function resolvePort(
+  preferredPort = 3000,
+  fallbackMax = 3099,
+): Promise<number> {
   const isPortFree = (targetPort: number): Promise<boolean> => {
     return new Promise((resolve) => {
       const tester = net.createServer();
@@ -60,36 +64,43 @@ async function resolvePort(preferredPort = 3000, fallbackMax = 3099): Promise<nu
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
 
   // Trust upstream proxy when behind a Cloud Load Balancer / Reverse Proxy
-  const trustProxyEnv = process.env.TRUST_PROXY;
+  const trustProxyEnv = configService.get<string>('TRUST_PROXY');
   if (trustProxyEnv !== undefined && trustProxyEnv !== '') {
     const parsedProxy = /^\d+$/.test(trustProxyEnv)
       ? parseInt(trustProxyEnv, 10)
       : trustProxyEnv === 'true';
     app.set('trust proxy', parsedProxy);
-  } else if (process.env.NODE_ENV === 'production') {
+  } else if (configService.get<string>('NODE_ENV') === 'production') {
     app.set('trust proxy', 1);
   }
 
   // Parse cookies so AuthGuard can read httpOnly access_token cookie
   app.use(cookieParser());
 
-  // Enterprise Security Headers (TASK-15)
-  app.use((_req: unknown, res: { setHeader: (name: string, value: string) => void }, next: () => void) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader(
-      'Strict-Transport-Security',
-      'max-age=31536000; includeSubDomains; preload',
-    );
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    next();
-  });
+  // Enterprise Security Headers
+  app.use(
+    (
+      _req: unknown,
+      res: { setHeader: (name: string, value: string) => void },
+      next: () => void,
+    ) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '1; mode=block');
+      res.setHeader(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains; preload',
+      );
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+      next();
+    },
+  );
 
-  // Strict CORS Configuration (TASK-14)
-  app.enableCors(createCorsOptions());
+  // Strict Dynamic CORS Configuration (TASK-14 & TASK-a-10)
+  app.enableCors(createCorsOptions(configService));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -100,8 +111,8 @@ async function bootstrap() {
   );
 
   // Configure OpenAPI 3.0 / Swagger (disabled in production unless ENABLE_SWAGGER=true)
-  const isProd = process.env.NODE_ENV === 'production';
-  const enableSwagger = process.env.ENABLE_SWAGGER === 'true';
+  const isProd = configService.get<string>('NODE_ENV') === 'production';
+  const enableSwagger = configService.get<string>('ENABLE_SWAGGER') === 'true';
 
   if (!isProd || enableSwagger) {
     const swaggerConfig = new DocumentBuilder()
@@ -166,7 +177,9 @@ async function bootstrap() {
     });
   }
 
-  const configuredPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const configuredPort = configService.get<string>('PORT')
+    ? parseInt(configService.get<string>('PORT')!, 10)
+    : 3000;
   const port = await resolvePort(configuredPort, 3099);
   await app.listen(port, '0.0.0.0');
 

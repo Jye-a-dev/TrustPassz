@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "workspaces": [
+    "apps/cl_admin",
+    "apps/cl_user",
+    "apps/server",
+    "apps/ai_pipeline",
+    "packages/*",
+    "tests/e2e"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=cl_user",
+    "build:user": "npm run build --workspace=cl_user",
+    "build:admin": "npm run build --workspace=cl_admin",
+    "mb": "node scripts/run-mb.js",
+    "user": "npm --prefix apps/cl_user run dev",
+    "admin": "npm --prefix apps/cl_admin run dev",
+    "server": "npm --prefix apps/server run dev",
+    "pipe": "npm --prefix apps/ai_pipeline run dev",
+    "structure": "node scripts/draw-structure.js",
+    "test:e2e": "npm --prefix tests/e2e test"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@unrs/resolver-binding-win32-x64-msvc": "^1.12.2",
+    "concurrently": "^9.2.4",
+    "tailwindcss": "^4"
+  }
+}

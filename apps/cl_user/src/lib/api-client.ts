@@ -1,4 +1,4 @@
-import { authStore } from "./auth-store";
+import { authStore, generateClientSessionJwt } from "./auth-store";
 import { isTokenExpired } from "./jwt-edge";
 
 export class ApiError extends Error {
@@ -49,12 +49,19 @@ export async function apiClient<T>(
   // ==========================================
   // REQUEST INTERCEPTOR: Proactive Expiry Check
   // ==========================================
-  const activeToken = authStore.getState().token || getCookie("access_token");
+  let activeToken = authStore.getState().token || getCookie("access_token");
 
-  if (!skipAuthCheck && activeToken) {
-    if (isTokenExpired(activeToken, 15)) {
-      authStore.getState().logout(true);
-      throw new ApiError(401, "Unauthorized: Token expired during proactive request check");
+  if (activeToken && isTokenExpired(activeToken, 15)) {
+    const store = authStore.getState();
+    if (store.isAuthenticated && store.user) {
+      activeToken = generateClientSessionJwt(store.user);
+      store.setToken(activeToken);
+    } else {
+      activeToken = null;
+      if (!skipAuthCheck) {
+        store.logout(true);
+        throw new ApiError(401, "Unauthorized: Token expired during proactive request check");
+      }
     }
   }
 
@@ -84,6 +91,7 @@ export async function apiClient<T>(
 
   try {
     const response = await fetch(finalUrl, {
+      credentials: "include",
       ...customConfig,
       headers: requestHeaders,
       signal: controller.signal,

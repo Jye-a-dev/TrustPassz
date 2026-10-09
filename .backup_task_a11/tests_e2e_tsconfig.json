@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ES2022",
+    "moduleResolution": "NodeNext",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@prisma/client": ["../../apps/server/node_modules/@prisma/client"]
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../apps/server/node_modules/@types",
+      "../../node_modules/@types"
+    ],
+    "types": ["jest", "node"]
+  },
+  "include": ["fixtures/**/*", "helpers/**/*", "specs/**/*", "jest.config.ts"]
+}

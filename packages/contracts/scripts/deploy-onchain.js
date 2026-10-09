@@ -11,9 +11,10 @@ const { baseSepolia } = require('viem/chains');
 
 async function main() {
   const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
-  const privateKey =
-    process.env.DEPLOYER_PRIVATE_KEY ||
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+  const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+  if (!privateKey) {
+    throw new Error('DEPLOYER_PRIVATE_KEY environment variable is required');
+  }
 
   const account = privateKeyToAccount(privateKey);
   console.log('Deployer Address:', account.address);

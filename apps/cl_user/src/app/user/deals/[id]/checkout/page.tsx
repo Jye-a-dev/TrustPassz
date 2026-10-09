@@ -13,6 +13,7 @@ import { CheckoutQrCard } from "@/components/checkout/checkout-qr-card";
 import { CheckoutPaymentDetails } from "@/components/checkout/checkout-payment-details";
 import { CheckoutSandboxBar } from "@/components/checkout/checkout-sandbox-bar";
 import { CheckoutSellerWarning } from "@/components/checkout/checkout-seller-warning";
+import { secureClipboard } from "@/lib/secure-clipboard";
 import type { DealData, BankConfig } from "@/components/checkout/checkout.types";
 
 interface PaymentLinkResponse {
@@ -251,11 +252,10 @@ export default function DealCheckoutPage() {
     };
   }, [dealId, handlePaymentSuccess]);
 
-  const copyToClipboard = (text: string, fieldName: string, label: string) => {
-    if (!navigator?.clipboard) return;
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string, fieldName: string, label: string) => {
+    await secureClipboard.copy(text);
     setCopiedField(fieldName);
-    toast.success(`Đã sao chép ${label}!`);
+    toast.success(`Đã sao chép ${label}! (Tự động xóa sau 30s)`);
     setTimeout(() => setCopiedField(null), 2000);
   };
 
