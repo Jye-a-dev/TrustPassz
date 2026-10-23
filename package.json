@@ -5,21 +5,20 @@
     "apps/cl_user",
     "apps/server",
     "apps/ai_pipeline",
-    "packages/*",
-    "tests/e2e"
+    "packages/*"
   ],
   "scripts": {
     "build": "npm run build --workspace=cl_user",
     "build:user": "npm run build --workspace=cl_user",
     "build:admin": "npm run build --workspace=cl_admin",
-    "mb": "node scripts/run-mb.js",
+    "mb": "node packages/tooling/scripts/run-mb.js",
     "user": "npm --prefix apps/cl_user run dev",
     "admin": "npm --prefix apps/cl_admin run dev",
     "server": "npm --prefix apps/server run dev",
     "pipe": "npm --prefix apps/ai_pipeline run dev",
-    "structure": "node scripts/draw-structure.js",
-    "typecheck": "tsc -p apps/server/tsconfig.json --noEmit && tsc -p apps/cl_user/tsconfig.json --noEmit && tsc -p apps/cl_admin/tsconfig.json --noEmit && tsc -p tests/e2e/tsconfig.json --noEmit",
-    "test:e2e": "npm --prefix tests/e2e test"
+    "structure": "node packages/tooling/scripts/draw-structure.js",
+    "typecheck": "tsc -p apps/server/tsconfig.json --noEmit && tsc -p apps/cl_user/tsconfig.json --noEmit && tsc -p apps/cl_admin/tsconfig.json --noEmit && tsc -p packages/e2e-tests/tsconfig.json --noEmit",
+    "test:e2e": "npm --prefix packages/e2e-tests test"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -55,7 +55,7 @@ jobs:
           if [ -n "${{ inputs.mock_balance_eth }}" ]; then
             FLAGS="${FLAGS} --mock-balance=${{ inputs.mock_balance_eth }}"
           fi
-          npx tsx scripts/monitor-oracle-balance.ts ${FLAGS}
+          npx tsx packages/tooling/scripts/monitor-oracle-balance.ts ${FLAGS}
         env:
           BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
