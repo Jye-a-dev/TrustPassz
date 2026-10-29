@@ -1,5 +1,4 @@
 name: Oracle Relayer Balance Monitor & Alert Sentry
-
 on:
   schedule:
     # Triggered automatically every 30 minutes
@@ -55,9 +54,14 @@ jobs:
           if [ -n "${{ inputs.mock_balance_eth }}" ]; then
             FLAGS="${FLAGS} --mock-balance=${{ inputs.mock_balance_eth }}"
           fi
+
+          if [ -z "$BASE_SEPOLIA_RPC_URL" ]; then
+            export BASE_SEPOLIA_RPC_URL="https://sepolia.base.org"
+          fi
+
           npx tsx packages/tooling/scripts/monitor-oracle-balance.ts ${FLAGS}
         env:
-          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
           ORACLE_RELAYER_ADDRESS: ${{ secrets.ORACLE_RELAYER_ADDRESS }}
@@ -75,4 +79,3 @@ jobs:
           name: oracle-balance-report
           path: artifacts/oracle-balance-alert.json
           retention-days: 7
-
