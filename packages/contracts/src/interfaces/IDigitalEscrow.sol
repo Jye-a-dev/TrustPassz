@@ -19,6 +19,8 @@ interface IDigitalEscrow {
     event DealRefunded(bytes32 indexed dealId, address indexed buyer, uint256 amount);
     event DisputeRaised(bytes32 indexed dealId, address indexed initiator);
     event DisputeResolved(bytes32 indexed dealId, EscrowTypes.DealState finalState, address indexed recipient);
+    event DealEmergencyFrozen(bytes32 indexed dealId, address indexed trigger);
+    event EmergencyCircuitBreakerTriggered(address indexed admin, string reason);
 
     function createDeal(bytes32 dealId, EscrowTypes.DealConfig calldata config) external;
     function deposit(bytes32 dealId) external payable;
@@ -27,6 +29,12 @@ interface IDigitalEscrow {
     function settle(bytes32 dealId) external;
     function raiseDispute(bytes32 dealId) external;
     function resolveDispute(bytes32 dealId, bool refundBuyer) external;
+    function pause() external;
+    function pause(string calldata reason) external;
+    function unpause() external;
+    function emergencyFreezeDeal(bytes32 dealId) external;
+    function isInspectionExpired(bytes32 dealId) external view returns (bool);
+    function paused() external view returns (bool);
     function getDeal(bytes32 dealId)
         external
         view

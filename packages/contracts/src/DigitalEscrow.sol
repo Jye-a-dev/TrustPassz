@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {EscrowTypes} from "./types/EscrowTypes.sol";
 import {IDigitalEscrow} from "./interfaces/IDigitalEscrow.sol";
 import {EscrowAccessControl} from "./base/EscrowAccessControl.sol";
@@ -8,12 +9,13 @@ import {PaymentProcessor} from "./base/PaymentProcessor.sol";
 import {EscrowStateMachine} from "./base/EscrowStateMachine.sol";
 
 /// @title DigitalEscrow
-/// @notice Core trustless digital asset escrow engine with CEI pattern, storage packing, and gas optimizations
+/// @notice Core trustless digital asset escrow engine with CEI pattern, multi-sig access control, and circuit breaker
 contract DigitalEscrow is
     IDigitalEscrow,
     EscrowAccessControl,
     PaymentProcessor,
-    EscrowStateMachine
+    EscrowStateMachine,
+    Pausable
 {
     uint256 public constant DELIVERY_TIMEOUT = 48 hours;
 
@@ -27,7 +29,10 @@ contract DigitalEscrow is
     ) EscrowAccessControl(_owner, _oracleRelayer, _disputeResolver) {}
 
     /// @inheritdoc IDigitalEscrow
-    function createDeal(bytes32 dealId, EscrowTypes.DealConfig calldata config) external override {
+    function createDeal(
+        bytes32 dealId,
+        EscrowTypes.DealConfig calldata config
+    ) external override whenNotPaused {
         if (_dealStates[dealId].state != EscrowTypes.DealState.Uninitialized) {
             revert EscrowTypes.DealAlreadyExists();
         }
@@ -57,7 +62,7 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function deposit(bytes32 dealId) external payable override nonReentrant {
+    function deposit(bytes32 dealId) external payable override whenNotPaused nonReentrant {
         EscrowTypes.DealConfig storage config = _deals[dealId];
         address buyer = config.buyer;
         if (msg.sender != buyer) revert EscrowTypes.Unauthorized(msg.sender);
@@ -79,14 +84,14 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function startInspection(bytes32 dealId) external override {
+    function startInspection(bytes32 dealId) external override whenNotPaused {
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
         EscrowTypes.DealState currentState = stateData.state;
         _validateState(currentState, EscrowTypes.DealState.Deposited);
 
         EscrowTypes.DealConfig storage config = _deals[dealId];
         address seller = config.seller;
-        if (msg.sender != seller && msg.sender != oracleRelayer) {
+        if (msg.sender != seller && msg.sender != oracleRelayer && !hasRole(RELAYER_ROLE, msg.sender)) {
             revert EscrowTypes.Unauthorized(msg.sender);
         }
 
@@ -103,14 +108,14 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function cancelDepositedDeal(bytes32 dealId) external override nonReentrant {
+    function cancelDepositedDeal(bytes32 dealId) external override whenNotPaused nonReentrant {
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
         EscrowTypes.DealState currentState = stateData.state;
         _validateState(currentState, EscrowTypes.DealState.Deposited);
 
         EscrowTypes.DealConfig storage config = _deals[dealId];
         address buyer = config.buyer;
-        if (msg.sender != buyer && msg.sender != oracleRelayer) {
+        if (msg.sender != buyer && msg.sender != oracleRelayer && !hasRole(RELAYER_ROLE, msg.sender)) {
             revert EscrowTypes.Unauthorized(msg.sender);
         }
 
@@ -134,7 +139,7 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function settle(bytes32 dealId) external override nonReentrant {
+    function settle(bytes32 dealId) external override whenNotPaused nonReentrant {
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
         EscrowTypes.DealState currentState = stateData.state;
         _validateState(currentState, EscrowTypes.DealState.InInspection);
@@ -160,7 +165,7 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function raiseDispute(bytes32 dealId) external override {
+    function raiseDispute(bytes32 dealId) external override whenNotPaused {
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
         EscrowTypes.DealState currentState = stateData.state;
         _validateState(currentState, EscrowTypes.DealState.InInspection);
@@ -176,7 +181,10 @@ contract DigitalEscrow is
     }
 
     /// @inheritdoc IDigitalEscrow
-    function resolveDispute(bytes32 dealId, bool refundBuyer) external override onlyArbitratorOrOracle nonReentrant {
+    function resolveDispute(
+        bytes32 dealId,
+        bool refundBuyer
+    ) external override whenNotPaused onlyArbitratorOrOracle nonReentrant {
         EscrowTypes.DealStateData storage stateData = _dealStates[dealId];
         EscrowTypes.DealState currentState = stateData.state;
         _validateState(currentState, EscrowTypes.DealState.Disputed);
@@ -201,6 +209,43 @@ contract DigitalEscrow is
         emit DisputeResolved(dealId, finalState, recipient);
 
         _processDisbursement(token, recipient, amount);
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function pause() external override onlyEmergencyOrAdmin {
+        _pause();
+        emit EmergencyCircuitBreakerTriggered(msg.sender, "Emergency circuit breaker triggered");
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function pause(string calldata reason) external override onlyEmergencyOrAdmin {
+        _pause();
+        emit EmergencyCircuitBreakerTriggered(msg.sender, reason);
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function unpause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function emergencyFreezeDeal(bytes32 dealId) external override onlyEmergencyOrAdmin {
+        if (_dealStates[dealId].state == EscrowTypes.DealState.Uninitialized) {
+            revert EscrowTypes.DealNotFound();
+        }
+        emit DealEmergencyFrozen(dealId, msg.sender);
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function isInspectionExpired(bytes32 dealId) external view override returns (bool) {
+        uint40 deadline = _dealStates[dealId].inspectionDeadline;
+        if (deadline == 0) return false;
+        return block.timestamp >= deadline;
+    }
+
+    /// @inheritdoc IDigitalEscrow
+    function paused() public view virtual override(IDigitalEscrow, Pausable) returns (bool) {
+        return super.paused();
     }
 
     /// @inheritdoc IDigitalEscrow
