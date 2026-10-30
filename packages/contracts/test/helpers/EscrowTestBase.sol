@@ -53,9 +53,9 @@ abstract contract EscrowTestBase is Test {
     bytes32 internal dealIdEth = keccak256("DEAL_ETH_TEST_1");
     bytes32 internal dealIdUsdc = keccak256("DEAL_USDC_TEST_1");
 
-    uint256 internal constant ETH_AMOUNT = 1 ether;
-    uint256 internal constant USDC_AMOUNT = 1000e6;
-    uint256 internal constant DURATION = 3 days;
+    uint96 internal constant ETH_AMOUNT = 1 ether;
+    uint96 internal constant USDC_AMOUNT = 1000e6;
+    uint40 internal constant DURATION = 3 days;
 
     function setUp() public virtual {
         vm.deal(buyer, 100 ether);
@@ -74,9 +74,9 @@ abstract contract EscrowTestBase is Test {
         return EscrowTypes.DealConfig({
             buyer: buyer,
             seller: seller,
+            inspectionDuration: DURATION,
             token: token,
-            amount: amount,
-            inspectionDuration: DURATION
+            amount: uint96(amount)
         });
     }
 

@@ -15,19 +15,64 @@ contract DigitalEscrowInputValidationTest is EscrowTestBase {
 
     function test_RevertIf_CreateDeal_ZeroValues() external {
         vm.expectRevert(EscrowTypes.ZeroAddress.selector);
-        escrow.createDeal(dealIdEth, EscrowTypes.DealConfig(address(0), seller, address(0), 1 ether, 1 days));
+        escrow.createDeal(
+            dealIdEth,
+            EscrowTypes.DealConfig({
+                buyer: address(0),
+                seller: seller,
+                inspectionDuration: 1 days,
+                token: address(0),
+                amount: 1 ether
+            })
+        );
 
         vm.expectRevert(EscrowTypes.ZeroAddress.selector);
-        escrow.createDeal(dealIdEth, EscrowTypes.DealConfig(buyer, address(0), address(0), 1 ether, 1 days));
+        escrow.createDeal(
+            dealIdEth,
+            EscrowTypes.DealConfig({
+                buyer: buyer,
+                seller: address(0),
+                inspectionDuration: 1 days,
+                token: address(0),
+                amount: 1 ether
+            })
+        );
 
         vm.expectRevert(abi.encodeWithSelector(EscrowTypes.InvalidParticipant.selector, buyer));
-        escrow.createDeal(dealIdEth, EscrowTypes.DealConfig(buyer, buyer, address(0), 1 ether, 1 days));
+        escrow.createDeal(
+            dealIdEth,
+            EscrowTypes.DealConfig({
+                buyer: buyer,
+                seller: buyer,
+                inspectionDuration: 1 days,
+                token: address(0),
+                amount: 1 ether
+            })
+        );
 
         vm.expectRevert(EscrowTypes.ZeroAmount.selector);
-        escrow.createDeal(dealIdEth, EscrowTypes.DealConfig(buyer, seller, address(0), 0, 1 days));
+        escrow.createDeal(
+            dealIdEth,
+            EscrowTypes.DealConfig({
+                buyer: buyer,
+                seller: seller,
+                inspectionDuration: 1 days,
+                token: address(0),
+                amount: 0
+            })
+        );
 
         vm.expectRevert(EscrowTypes.ZeroDuration.selector);
-        escrow.createDeal(dealIdEth, EscrowTypes.DealConfig(buyer, seller, address(0), 1 ether, 0));
+        escrow.createDeal(
+            dealIdEth,
+            EscrowTypes.DealConfig({
+                buyer: buyer,
+                seller: seller,
+                inspectionDuration: 0,
+                token: address(0),
+                amount: 1 ether
+            })
+        );
     }
 
     function test_RevertIf_Deposit_MismatchedETH() external {

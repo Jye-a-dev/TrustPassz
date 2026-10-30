@@ -23,4 +23,16 @@ abstract contract EscrowStateMachine {
             revert EscrowTypes.InspectionPeriodStillActive(deadline, block.timestamp);
         }
     }
+
+    function _checkDeadlineNotPassed(uint256 deadline) internal view {
+        if (block.timestamp >= deadline) {
+            revert EscrowTypes.DeadlinePassed(deadline, block.timestamp);
+        }
+    }
+
+    function _checkDeadlinePassed(uint256 deadline) internal view {
+        if (block.timestamp < deadline) {
+            revert EscrowTypes.DeadlineNotPassed(deadline, block.timestamp);
+        }
+    }
 }

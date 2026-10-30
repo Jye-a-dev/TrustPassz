@@ -7,6 +7,7 @@ import {DigitalEscrowInputValidationTest} from "./components/DigitalEscrowInputV
 import {DigitalEscrowSecurityTest} from "./components/DigitalEscrowSecurity.t.sol";
 import {DigitalEscrowStateMatrixTest} from "./components/DigitalEscrowStateMatrix.t.sol";
 import {DigitalEscrowTimeoutTest} from "./components/DigitalEscrowTimeout.t.sol";
+import {DigitalEscrowGasAndSecurityTest} from "./DigitalEscrowGasAndSecurity.t.sol";
 
 /// @title DigitalEscrowTest
 /// @notice Aggregated test runner inheriting modular component test suites
@@ -15,7 +16,8 @@ contract DigitalEscrowTest is
     DigitalEscrowInputValidationTest,
     DigitalEscrowSecurityTest,
     DigitalEscrowStateMatrixTest,
-    DigitalEscrowTimeoutTest
+    DigitalEscrowTimeoutTest,
+    DigitalEscrowGasAndSecurityTest
 {
     function setUp() public virtual override(EscrowTestBase) {
         super.setUp();
