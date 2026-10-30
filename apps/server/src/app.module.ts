@@ -20,6 +20,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { ProductsModule } from './modules/products/products.module';
 import { UsersModule } from './modules/users/users.module';
 import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
+import { RelayerModule } from './relayer/relayer.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
     DisputesModule,
     PaymentsModule,
     OracleRelayerModule,
+    RelayerModule,
   ],
   controllers: [AppController],
   providers: [

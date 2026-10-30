@@ -40,6 +40,14 @@ enum DealState {
   @@map("deal_state_enum")
 }
 
+enum ChainType {
+  BASE_SEPOLIA
+  SOLANA_DEVNET
+  SOLANA_MAINNET
+
+  @@map("chain_type_enum")
+}
+
 enum AssetType {
   SOURCE_CODE
   LICENSE_KEY
@@ -176,7 +184,12 @@ model Product {
 
 model Deal {
   id                    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  onchainDealId         String?   @unique @map("onchain_deal_id") @db.VarChar(66)
+  chainType             ChainType @default(BASE_SEPOLIA) @map("chain_type")
+  onchainDealId         String?   @unique @map("onchain_deal_id") @db.VarChar(128)
+  solanaPdaAddress      String?   @map("solana_pda_address") @db.VarChar(64)
+  buyerWallet           String?   @map("buyer_wallet") @db.VarChar(100)
+  sellerWallet          String?   @map("seller_wallet") @db.VarChar(100)
+  depositTxHash         String?   @map("deposit_tx_hash") @db.VarChar(128)
   sellerId              String    @map("seller_id") @db.Uuid
   buyerId               String?   @map("buyer_id") @db.Uuid
   title                 String    @db.VarChar(255)
@@ -190,8 +203,8 @@ model Deal {
   paymentOrderCode      BigInt?   @unique @map("payment_order_code")
   paymentRefId          String?   @map("payment_ref_id") @db.VarChar(100)
   webhookIdempotencyKey String?   @unique @map("webhook_idempotency_key") @db.VarChar(128)
-  settleTxHash          String?   @map("settle_tx_hash") @db.VarChar(66)
-  disputeTxHash         String?   @map("dispute_tx_hash") @db.VarChar(66)
+  settleTxHash          String?   @map("settle_tx_hash") @db.VarChar(128)
+  disputeTxHash         String?   @map("dispute_tx_hash") @db.VarChar(128)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -206,6 +219,8 @@ model Deal {
   @@index([state])
   @@index([onchainDealId])
   @@index([paymentOrderCode])
+  @@index([chainType])
+  @@index([solanaPdaAddress])
   @@map("deals")
 }
 
