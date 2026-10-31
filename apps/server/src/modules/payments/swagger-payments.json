@@ -1,0 +1,731 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TrustPassz Multi-Channel Deposit Gateway (VietQR & Solana)",
+    "version": "1.0.0",
+    "description": "Đặc tả OpenAPI 3.0 cho TASK-b-04: Tích hợp Gateway nạp tiền đa kênh: Tài khoản Ngân hàng (VietQR / PayOS) & Địa chỉ ví Solana on-chain cho các hợp đồng ký quỹ Escrow."
+  },
+  "tags": [
+    {
+      "name": "Deposit Gateway (VietQR & Solana)",
+      "description": "Multi-channel escrow funding gateway: VietQR dynamic checkout & Solana on-chain deposits"
+    }
+  ],
+  "paths": {
+    "/api/v1/payments/vietqr/create-checkout": {
+      "post": {
+        "tags": ["Deposit Gateway (VietQR & Solana)"],
+        "summary": "Tạo link thanh toán và mã VietQR động qua PayOS cho Deal",
+        "description": "Tạo phiên nạp tiền ngân hàng nội địa, sinh mã orderCode duy nhất và ảnh VietQR chuẩn NAPAS 247 có cú pháp TPZ <dealId>.",
+        "security": [{ "JWT-auth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVietQrCheckoutDto"
+              },
+              "example": {
+                "dealId": "d0000000-0000-4000-a000-000000000001",
+                "returnUrl": "https://trustpassz.io/checkout/success",
+                "cancelUrl": "https://trustpassz.io/checkout/cancel",
+                "description": "TPZ d0000000"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Khởi tạo link thanh toán VietQR thành công.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VietQrCheckoutResponseDto"
+                },
+                "example": {
+                  "qrCodeUrl": "https://img.vietqr.io/image/970422-998877-compact2.png?amount=500000&addInfo=TPZ%20d0000000&accountName=TRUSTPASSZ%20ESCROW",
+                  "paymentUrl": "https://pay.payos.vn/web/88990011",
+                  "orderCode": 88990011,
+                  "amount": 500000,
+                  "memo": "TPZ d0000000",
+                  "bin": "970422",
+                  "accountNumber": "998877",
+                  "accountName": "TRUSTPASSZ ESCROW",
+                  "status": "PENDING"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Deal không ở trạng thái PENDING hoặc payload không hợp lệ.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "example": {
+                  "statusCode": 400,
+                  "message": "Không thể tạo link nạp tiền: Deal đang ở trạng thái 'DEPOSITED' (chỉ áp dụng cho PENDING)",
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập hoặc JWT Bearer Token không hợp lệ.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "example": {
+                  "statusCode": 401,
+                  "message": "Unauthorized",
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Người bán không thể tự nạp tiền cho sản phẩm của chính mình.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "example": {
+                  "statusCode": 403,
+                  "message": "Người bán không thể tự nạp tiền hoặc thanh toán cho sản phẩm của chính mình.",
+                  "error": "Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy Deal tương ứng.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "example": {
+                  "statusCode": 404,
+                  "message": "Deal with ID 'd0000000-0000-4000-a000-000000000001' not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/vietqr/webhook": {
+      "post": {
+        "tags": ["Deposit Gateway (VietQR & Solana)"],
+        "summary": "Tiếp nhận Webhook thanh toán VietQR PayOS (HMAC-SHA256 & Idempotent)",
+        "description": "Xác thực chữ ký HMAC-SHA256 PayOS, kiểm tra chống replay attack, đối soát amount >= deal.amount và chuyển Deal sang DEPOSITED.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PayOSWebhookDto" },
+              "example": {
+                "code": "00",
+                "desc": "Success",
+                "data": {
+                  "orderCode": 88990011,
+                  "amount": 500000,
+                  "description": "TPZ d0000000",
+                  "accountNumber": "998877",
+                  "reference": "FT240926001234",
+                  "transactionDateTime": "2026-11-01 02:00:00",
+                  "currency": "VND",
+                  "paymentLinkId": "pl_88990011",
+                  "code": "00",
+                  "desc": "Success",
+                  "counterAccountBankId": "970422",
+                  "counterAccountName": "NGUYEN VAN A",
+                  "counterAccountNumber": "0123456789"
+                },
+                "signature": "3a7b93de85390887190b200b3433eefde5a0601fbf9cf0d1fe300ec289069d67"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Xác thực webhook thành công hoặc đã ghi nhận (Idempotent).",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Payment verified and deal successfully transitioned to DEPOSITED",
+                  "deal": {
+                    "id": "d0000000-0000-4000-a000-000000000001",
+                    "state": "DEPOSITED",
+                    "depositedAt": "2026-11-01T02:00:00.000Z",
+                    "paymentOrderCode": 88990011,
+                    "paymentRefId": "FT240926001234"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chữ ký HMAC không hợp lệ hoặc số tiền thanh toán không đủ.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 400,
+                  "message": "HMAC-SHA256 signature verification failed. Untrusted webhook origin.",
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy Deal tương ứng với orderCode.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 404,
+                  "message": "No deal found matching paymentOrderCode 88990011",
+                  "error": "Not Found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Xung đột trạng thái giao dịch hoặc đã bị từ chối.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 409,
+                  "message": "Deal state conflict",
+                  "error": "Conflict"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Quá giới hạn tần suất yêu cầu webhook.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 429,
+                  "message": "ThrottlerException: Too Many Requests",
+                  "error": "Too Many Requests"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/solana/create-intent": {
+      "post": {
+        "tags": ["Deposit Gateway (VietQR & Solana)"],
+        "summary": "Khởi tạo phiên nạp tiền ký quỹ Solana (Escrow PDA / Vault Intent)",
+        "description": "Cung cấp địa chỉ ví tiếp nhận Escrow PDA, quy đổi số lượng Lamports/SOL tương ứng giá trị cọc và memo đối soát duy nhất.",
+        "security": [{ "JWT-auth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateSolanaIntentDto" },
+              "example": {
+                "dealId": "d0000000-0000-4000-a000-000000000001"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo phiên nạp tiền Solana on-chain thành công.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolanaIntentResponseDto"
+                },
+                "example": {
+                  "recipientAddress": "TrUsTEscrow111111111111111111111111111111111",
+                  "requiredSol": 0.1,
+                  "requiredLamports": "100000000",
+                  "referenceMemo": "TPZ-SOL-d0000000-0000-4000-a000-000000000001",
+                  "expiresAt": "2026-11-01T02:30:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Deal không ở trạng thái PENDING.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 400,
+                  "message": "Không thể tạo phiên nạp tiền: Deal đang ở trạng thái 'DEPOSITED' (chỉ áp dụng cho PENDING)",
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 401,
+                  "message": "Unauthorized",
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Người bán không thể tự nạp tiền ký quỹ.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 403,
+                  "message": "Người bán không thể tự nạp tiền ký quỹ cho Deal của chính mình.",
+                  "error": "Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy Deal.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 404,
+                  "message": "Deal with ID 'd0000000-0000-4000-a000-000000000001' not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/solana/verify-signature": {
+      "post": {
+        "tags": ["Deposit Gateway (VietQR & Solana)"],
+        "summary": "Xác thực giao dịch nạp tiền Solana on-chain qua TxHash (Anti-Replay)",
+        "description": "Nhận transaction signature từ client/watcher, đối soát trạng thái finalized/confirmed trên RPC, chống double-spend và kích hoạt Deal DEPOSITED.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifySolanaDepositDto"
+              },
+              "example": {
+                "dealId": "d0000000-0000-4000-a000-000000000001",
+                "signature": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9dTeUMnjp5nhEDXejP8M47pXmGFnnU2L8w9C57X33sB4qD"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Giao dịch on-chain hợp lệ, Deal đã chuyển sang DEPOSITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolanaVerifyResponseDto"
+                },
+                "example": {
+                  "success": true,
+                  "txHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9dTeUMnjp5nhEDXejP8M47pXmGFnnU2L8w9C57X33sB4qD",
+                  "status": "DEPOSITED",
+                  "confirmedAt": "2026-11-01T02:05:00.000Z",
+                  "slot": 312456789
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Không tìm thấy giao dịch on-chain hoặc giao dịch bị revert.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 400,
+                  "message": "Giao dịch on-chain trên mạng Solana bị revert hoặc thất bại.",
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy Deal.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 404,
+                  "message": "Deal with ID 'd0000000-0000-4000-a000-000000000001' not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Transaction signature đã từng được sử dụng (Replay Attack / Double Spend).",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 409,
+                  "message": "Transaction signature đã từng được sử dụng. Từ chối nạp tiền chống double-spend.",
+                  "error": "Conflict"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/deals/{dealId}/deposit-status": {
+      "get": {
+        "tags": ["Deposit Gateway (VietQR & Solana)"],
+        "summary": "Tra cứu trạng thái nạp tiền mới nhất của Deal",
+        "description": "Xem trạng thái ký quỹ, kênh nạp tiền (VietQR hoặc Solana), số tiền đã cọc và TxHash / mã đơn hàng.",
+        "parameters": [
+          {
+            "name": "dealId",
+            "in": "path",
+            "required": true,
+            "description": "UUID của Deal cần kiểm tra trạng thái nạp tiền",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "d0000000-0000-4000-a000-000000000001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin trạng thái nạp tiền của Deal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositStatusResponseDto"
+                },
+                "example": {
+                  "dealId": "d0000000-0000-4000-a000-000000000001",
+                  "state": "DEPOSITED",
+                  "currency": "VND",
+                  "amount": 500000,
+                  "depositedAt": "2026-11-01T02:00:00.000Z",
+                  "depositTxHash": null,
+                  "paymentOrderCode": 88990011,
+                  "paymentRefId": "FT240926001234",
+                  "channel": "VIETQR",
+                  "solanaPdaAddress": null
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "dealId không đúng định dạng UUID.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 400,
+                  "message": "Validation failed (uuid is expected)",
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy Deal tương ứng.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "statusCode": 404,
+                  "message": "Deal with ID 'd0000000-0000-4000-a000-000000000001' not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter JWT bearer token obtained from /api/v1/auth/verify"
+      }
+    },
+    "schemas": {
+      "CreateVietQrCheckoutDto": {
+        "type": "object",
+        "required": ["dealId"],
+        "properties": {
+          "dealId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d0000000-0000-4000-a000-000000000001",
+            "description": "UUID của Deal ký quỹ Escrow cần thanh toán đặt cọc"
+          },
+          "returnUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://trustpassz.io/checkout/success",
+            "description": "URL chuyển hướng sau khi hoàn tất giao dịch ngân hàng"
+          },
+          "cancelUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://trustpassz.io/checkout/cancel",
+            "description": "URL chuyển hướng khi người mua hủy thanh toán"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 25,
+            "example": "TPZ d0000000",
+            "description": "Nội dung chuyển khoản hiển thị trên VietQR (tối đa 25 ký tự theo quy định PayOS)"
+          }
+        }
+      },
+      "VietQrCheckoutResponseDto": {
+        "type": "object",
+        "required": ["qrCodeUrl", "paymentUrl", "orderCode", "amount", "memo"],
+        "properties": {
+          "qrCodeUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://img.vietqr.io/image/970422-998877-compact2.png?amount=500000&addInfo=TPZ%20d0000000&accountName=TRUSTPASSZ%20ESCROW",
+            "description": "URL ảnh mã VietQR động chuẩn NAPAS 247"
+          },
+          "paymentUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://pay.payos.vn/web/88990011",
+            "description": "Đường dẫn cổng thanh toán PayOS Checkout"
+          },
+          "orderCode": {
+            "type": "integer",
+            "example": 88990011,
+            "description": "Mã đơn hàng định danh duy nhất (Safe Integer)"
+          },
+          "amount": {
+            "type": "number",
+            "example": 500000,
+            "description": "Số tiền nạp ký quỹ (VND)"
+          },
+          "memo": {
+            "type": "string",
+            "example": "TPZ d0000000",
+            "description": "Cú pháp nội dung chuyển khoản định danh tự động"
+          },
+          "bin": {
+            "type": "string",
+            "example": "970422",
+            "description": "Mã BIN ngân hàng thụ hưởng MBBank Escrow"
+          },
+          "accountNumber": {
+            "type": "string",
+            "example": "998877",
+            "description": "Số tài khoản két ký quỹ hệ thống TrustPassz"
+          },
+          "accountName": {
+            "type": "string",
+            "example": "TRUSTPASSZ ESCROW",
+            "description": "Tên chủ tài khoản ngân hàng thụ hưởng"
+          },
+          "status": {
+            "type": "string",
+            "example": "PENDING",
+            "description": "Trạng thái phiên thanh toán khởi tạo"
+          }
+        }
+      },
+      "CreateSolanaIntentDto": {
+        "type": "object",
+        "required": ["dealId"],
+        "properties": {
+          "dealId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d0000000-0000-4000-a000-000000000001",
+            "description": "UUID của Deal cần tạo phiên nạp tiền ký quỹ Solana on-chain"
+          }
+        }
+      },
+      "SolanaIntentResponseDto": {
+        "type": "object",
+        "required": [
+          "recipientAddress",
+          "requiredSol",
+          "requiredLamports",
+          "referenceMemo",
+          "expiresAt"
+        ],
+        "properties": {
+          "recipientAddress": {
+            "type": "string",
+            "example": "TrUsTEscrow111111111111111111111111111111111",
+            "description": "Địa chỉ Escrow PDA hoặc ví tiếp nhận tiền ký quỹ on-chain của hệ thống"
+          },
+          "requiredSol": {
+            "type": "number",
+            "example": 0.05,
+            "description": "Số lượng SOL cần chuyển để đủ giá trị đặt cọc"
+          },
+          "requiredLamports": {
+            "type": "string",
+            "example": "50000000",
+            "description": "Số lượng Lamports tương ứng (1 SOL = 1,000,000,000 Lamports)"
+          },
+          "referenceMemo": {
+            "type": "string",
+            "example": "TPZ-SOL-d0000000-0000-4000-a000-000000000001",
+            "description": "Memo định danh giao dịch nạp tiền độc nhất để đối soát on-chain"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-11-01T02:30:00.000Z",
+            "description": "Thời điểm hết hạn hiệu lực của phiên nạp tiền (ISO 8601)"
+          }
+        }
+      },
+      "VerifySolanaDepositDto": {
+        "type": "object",
+        "required": ["dealId", "signature"],
+        "properties": {
+          "dealId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d0000000-0000-4000-a000-000000000001",
+            "description": "UUID của Deal cần xác thực giao dịch nạp tiền ký quỹ"
+          },
+          "signature": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 88,
+            "example": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9dTeUMnjp5nhEDXejP8M47pXmGFnnU2L8w9C57X33sB4qD",
+            "description": "Transaction Signature (TxHash) ghi nhận trên mạng Solana (Base58, 64-88 ký tự)"
+          }
+        }
+      },
+      "SolanaVerifyResponseDto": {
+        "type": "object",
+        "required": ["success", "txHash", "status", "confirmedAt"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true,
+            "description": "Trạng thái xác thực giao dịch on-chain thành công"
+          },
+          "txHash": {
+            "type": "string",
+            "example": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9dTeUMnjp5nhEDXejP8M47pXmGFnnU2L8w9C57X33sB4qD",
+            "description": "Solana Transaction Signature (TxHash) đã đối soát"
+          },
+          "status": {
+            "type": "string",
+            "example": "DEPOSITED",
+            "description": "Trạng thái Deal sau khi kích hoạt ký quỹ thành công"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-11-01T02:05:00.000Z",
+            "description": "Thời điểm giao dịch được xác thực và cập nhật DB (ISO 8601)"
+          },
+          "slot": {
+            "type": "integer",
+            "example": 312456789,
+            "description": "Solana Slot number xác nhận giao dịch"
+          }
+        }
+      },
+      "DepositStatusResponseDto": {
+        "type": "object",
+        "required": ["dealId", "state", "currency", "amount"],
+        "properties": {
+          "dealId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d0000000-0000-4000-a000-000000000001",
+            "description": "UUID của Deal"
+          },
+          "state": {
+            "type": "string",
+            "example": "DEPOSITED",
+            "description": "Trạng thái hiện tại của Deal trong quy trình Escrow"
+          },
+          "currency": {
+            "type": "string",
+            "example": "VND",
+            "description": "Đơn vị tiền tệ của Deal (VND hoặc SOL)"
+          },
+          "amount": {
+            "type": "number",
+            "example": 500000,
+            "description": "Giá trị nạp tiền ký quỹ của Deal"
+          },
+          "depositedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-11-01T02:05:00.000Z",
+            "description": "Thời điểm tiền cọc được ghi nhận thành công"
+          },
+          "depositTxHash": {
+            "type": "string",
+            "nullable": true,
+            "example": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9dTeUMnjp5nhEDXejP8M47pXmGFnnU2L8w9C57X33sB4qD",
+            "description": "TxHash giao dịch on-chain (nếu nạp qua Solana)"
+          },
+          "paymentOrderCode": {
+            "type": "integer",
+            "nullable": true,
+            "example": 88990011,
+            "description": "Mã đơn hàng PayOS (nếu nạp qua VietQR)"
+          },
+          "paymentRefId": {
+            "type": "string",
+            "nullable": true,
+            "example": "FT240926001234",
+            "description": "Mã tham chiếu ngân hàng (nếu nạp qua VietQR)"
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true,
+            "example": "VIETQR",
+            "description": "Kênh nạp tiền phát hiện (VIETQR | SOLANA | ONCHAIN)"
+          },
+          "solanaPdaAddress": {
+            "type": "string",
+            "nullable": true,
+            "example": "TrUsTEscrow111111111111111111111111111111111",
+            "description": "Địa chỉ ví Escrow PDA Solana gắn với Deal"
+          }
+        }
+      },
+      "PayOSWebhookDto": {
+        "type": "object",
+        "required": ["code", "desc", "data", "signature"],
+        "properties": {
+          "code": { "type": "string", "example": "00" },
+          "desc": { "type": "string", "example": "Success" },
+          "data": { "type": "object" },
+          "signature": {
+            "type": "string",
+            "example": "3a7b93de85390887190b200b3433eefde5a0601fbf9cf0d1fe300ec289069d67"
+          }
+        }
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "required": ["statusCode", "message", "error"],
+        "properties": {
+          "statusCode": { "type": "integer", "example": 400 },
+          "message": { "type": "string", "example": "Validation error" },
+          "error": { "type": "string", "example": "Bad Request" }
+        }
+      }
+    }
+  }
+}
+

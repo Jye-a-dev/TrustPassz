@@ -163,6 +163,10 @@ async function bootstrap() {
         'Dispute submission, evidence audit, AI confidence scoring, and admin resolution',
       )
       .addTag(
+        'Deposit Gateway (VietQR & Solana)',
+        'Multi-channel escrow funding gateway: VietQR dynamic checkout & Solana on-chain deposits',
+      )
+      .addTag(
         'Payments & Payment Gateway Webhooks',
         'PayOS checkout links and idempotent payment webhook reconciliation',
       )
