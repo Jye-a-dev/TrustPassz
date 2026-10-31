@@ -82,9 +82,15 @@ export function loadBalanceMonitorConfig(
     'ORACLE_RELAYER_PRIVATE_KEY',
   );
 
-  if (!rawEvmAddress && rawEvmPrivateKey && /^0x[0-9a-fA-F]{64}$/.test(rawEvmPrivateKey)) {
+  if (
+    !rawEvmAddress &&
+    rawEvmPrivateKey &&
+    /^0x[0-9a-fA-F]{64}$/.test(rawEvmPrivateKey)
+  ) {
     try {
-      rawEvmAddress = privateKeyToAccount(rawEvmPrivateKey as `0x${string}`).address;
+      rawEvmAddress = privateKeyToAccount(
+        rawEvmPrivateKey as `0x${string}`,
+      ).address;
     } catch {
       // Fall through to validation check
     }
@@ -142,9 +148,13 @@ export function loadBalanceMonitorConfig(
     'https://api.devnet.solana.com';
 
   // 5. Alert Integrations
-  const telegramBotToken = configService.get<string>('TELEGRAM_BOT_TOKEN')?.trim();
+  const telegramBotToken = configService
+    .get<string>('TELEGRAM_BOT_TOKEN')
+    ?.trim();
   const telegramChatId = configService.get<string>('TELEGRAM_CHAT_ID')?.trim();
-  const discordWebhookUrl = configService.get<string>('DISCORD_WEBHOOK_URL')?.trim();
+  const discordWebhookUrl = configService
+    .get<string>('DISCORD_WEBHOOK_URL')
+    ?.trim();
   const sentryDsn = configService.get<string>('SENTRY_DSN')?.trim();
 
   const alchemyApiKey = configService.get<string>('ALCHEMY_API_KEY')?.trim();
@@ -157,8 +167,12 @@ export function loadBalanceMonitorConfig(
   return {
     oracleRelayerAddress: rawEvmAddress as `0x${string}`,
     solanaRelayerPublicKey: rawSolanaKey.trim(),
-    alertThresholdEth: Number.isNaN(alertThresholdEth) ? 0.02 : alertThresholdEth,
-    alertThresholdSol: Number.isNaN(alertThresholdSol) ? 0.1 : alertThresholdSol,
+    alertThresholdEth: Number.isNaN(alertThresholdEth)
+      ? 0.02
+      : alertThresholdEth,
+    alertThresholdSol: Number.isNaN(alertThresholdSol)
+      ? 0.1
+      : alertThresholdSol,
     telegramBotToken: telegramBotToken || undefined,
     telegramChatId: telegramChatId || undefined,
     discordWebhookUrl: discordWebhookUrl || undefined,
