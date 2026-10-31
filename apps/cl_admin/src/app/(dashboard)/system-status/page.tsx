@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ServiceHealthCard } from '@/components/status/service-health-card';
+import { RelayerFundingCard } from '@/components/funding/relayer-funding-card';
 import { checkAllPillars, CONTRACT_ADDRESS } from '@/lib/system-monitor';
 import type { SystemPillarStatus } from '@/types';
 import { toast } from 'sonner';
@@ -144,6 +145,9 @@ export default function SystemStatusPage() {
           </div>
         </div>
       </div>
+
+      {/* Global Solana Relayer Gas Funding & Realtime Balance Card */}
+      <RelayerFundingCard />
 
       {/* 5 Pillar Health Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

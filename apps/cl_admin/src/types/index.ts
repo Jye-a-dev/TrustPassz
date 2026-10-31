@@ -131,3 +131,33 @@ export interface SystemPillarStatus {
   details: Record<string, string | number | boolean>;
   lastChecked: string;
 }
+
+export interface RelayerBalanceInfo {
+  relayerAddress: string;
+  balanceSol: number;
+  balanceLamports: string;
+  thresholdSol: number;
+  isLowBalance: boolean;
+  network: string;
+  timestamp: string;
+}
+
+export interface ConfirmFundingPayload {
+  txHash: string;
+  senderWallet: string;
+  amountSol: number;
+  twoFactorCode?: string;
+}
+
+export interface ConfirmFundingResult {
+  success: boolean;
+  message: string;
+  txHash: string;
+  amountSol: number;
+  amountLamports: string;
+  senderWallet: string;
+  relayerAddress: string;
+  newBalanceSol: number;
+  recordedAt: string;
+}
+

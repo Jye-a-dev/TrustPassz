@@ -24,6 +24,7 @@ datasource db {
 enum UserRole {
   USER
   ADMIN
+  SUPER_ADMIN
   ARBITRATOR
 
   @@map("user_role_enum")
@@ -131,8 +132,9 @@ model User {
   buyerOrders       Order[]        @relation("BuyerOrders")
   sellerOrders      Order[]        @relation("SellerOrders")
   bargainOffers     BargainOffer[] @relation("BuyerBargains")
-  initiatedDisputes DisputeLog[]   @relation("InitiatorDisputes")
-  resolvedDisputes  DisputeLog[]   @relation("ResolverDisputes")
+  initiatedDisputes DisputeLog[]        @relation("InitiatorDisputes")
+  resolvedDisputes  DisputeLog[]        @relation("ResolverDisputes")
+  relayerFundingLogs RelayerFundingLog[] @relation("AdminRelayerFunding")
 
   @@map("users")
 }
@@ -318,4 +320,28 @@ model DisputeLog {
   @@index([dealId])
   @@index([status])
   @@map("dispute_logs")
+}
+
+// ==============================================================================
+// 5. RELAYER GAS FUNDING & AUDIT LOGS
+// ==============================================================================
+
+model RelayerFundingLog {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  txHash         String   @unique @map("tx_hash") @db.VarChar(128)
+  senderWallet   String   @map("sender_wallet") @db.VarChar(100)
+  relayerWallet  String   @map("relayer_wallet") @db.VarChar(100)
+  amountSol      Decimal  @map("amount_sol") @db.Decimal(18, 9)
+  amountLamports BigInt   @map("amount_lamports")
+  adminUserId    String?  @map("admin_user_id") @db.Uuid
+  status         String   @default("CONFIRMED") @db.VarChar(20)
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  adminUser      User?    @relation("AdminRelayerFunding", fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([senderWallet])
+  @@index([relayerWallet])
+  @@index([createdAt])
+  @@map("relayer_funding_logs")
 }

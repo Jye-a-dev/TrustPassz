@@ -20,6 +20,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { ProductsModule } from './modules/products/products.module';
 import { UsersModule } from './modules/users/users.module';
 import { BalanceMonitorModule } from './modules/balance-monitor/balance-monitor.module';
+import { RelayerFundingModule } from './modules/relayer-funding/relayer-funding.module';
 import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
 import { RelayerModule } from './relayer/relayer.module';
 
@@ -48,6 +49,7 @@ import { RelayerModule } from './relayer/relayer.module';
     DisputesModule,
     PaymentsModule,
     BalanceMonitorModule,
+    RelayerFundingModule,
     OracleRelayerModule,
     RelayerModule,
   ],
