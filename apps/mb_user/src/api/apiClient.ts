@@ -104,7 +104,7 @@ export class ApiClient {
     const url = `${baseUrl}${cleanEndpoint}`;
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      ...(typeof FormData !== 'undefined' && body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
       Accept: 'application/json',
       ...(options?.headers || {}),
     };
@@ -122,7 +122,7 @@ export class ApiClient {
       const res = await fetch(url, {
         method,
         headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        body: typeof FormData !== 'undefined' && body instanceof FormData ? (body as unknown as BodyInit) : body !== undefined ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
 

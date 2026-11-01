@@ -45,6 +45,18 @@ declare module 'react-native' {
   export const SafeAreaView: React.ComponentType<any>;
   export const ActivityIndicator: React.ComponentType<any>;
   export const Image: React.ComponentType<any>;
+  export const ScrollView: React.ComponentType<any>;
+  export const TextInput: React.ComponentType<any>;
+  export const Alert: {
+    alert: (
+      title: string,
+      message?: string,
+      buttons?: Array<{ text: string; onPress?: () => void; style?: 'default' | 'cancel' | 'destructive' }>,
+    ) => void;
+  };
+  export const Dimensions: {
+    get: (dim: 'window' | 'screen') => { width: number; height: number; scale: number; fontScale: number };
+  };
 
   export class Animated {
     static Value: any;
