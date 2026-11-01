@@ -98,8 +98,10 @@ export class AuthService {
     }
     // 2. Google OAuth Authentication (Official verifyIdToken)
     else if (normalizedProvider === 'google') {
-      if (!rawToken) {
-        throw new BadRequestException('Google ID token is required');
+      if (!rawToken || rawToken.split('.').length !== 3) {
+        throw new BadRequestException(
+          'Token không đúng định dạng JWT (yêu cầu 3 segments phân tách bởi dấu chấm)',
+        );
       }
       const googleClaims =
         await this.verifierService.verifyGoogleIdToken(rawToken);

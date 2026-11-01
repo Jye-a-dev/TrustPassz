@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/deal_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/common/trustpassz_icon.dart';
 
 class DisputeScreen extends StatefulWidget {
   final String? initialDealId;
@@ -114,8 +115,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
           backgroundColor: const Color(0xFF0F172A),
           title: const Row(
             children: [
-              Icon(Icons.check_circle, color: Color(0xFF10B981)),
-              SizedBox(width: 8),
+              TrustPasszIcon(size: 24, glow: true),
+              SizedBox(width: 10),
               Text(
                 'Khiếu Nại Đã Gửi!',
                 style: TextStyle(color: Colors.white, fontSize: 16),

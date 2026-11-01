@@ -23,6 +23,7 @@ import { BalanceMonitorModule } from './modules/balance-monitor/balance-monitor.
 import { RelayerFundingModule } from './modules/relayer-funding/relayer-funding.module';
 import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
 import { RelayerModule } from './relayer/relayer.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { RelayerModule } from './relayer/relayer.module';
     RelayerFundingModule,
     OracleRelayerModule,
     RelayerModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
