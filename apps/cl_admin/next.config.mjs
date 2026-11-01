@@ -32,7 +32,7 @@ const nextConfig = {
   },
   reactStrictMode: true,
   experimental: {
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: [],
   },
   async headers() {
     return [

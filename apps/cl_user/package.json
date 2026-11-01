@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5000",
-    "build": "next build",
+    "dev": "next dev --webpack -p 5000",
+    "build": "next build --webpack",
     "start": "next start -p 5000",
     "lint": "eslint",
     "test": "npx tsx --test src/__tests__/crypto.test.ts src/__tests__/bargain-slider.test.tsx src/__tests__/countdown-timer.test.ts src/__tests__/session-lifecycle.test.ts"

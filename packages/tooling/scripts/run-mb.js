@@ -29,9 +29,10 @@ const hasSubcommand = userArgs.length > 0 && subcommands.includes(userArgs[0]);
 if (!hasOnlineDevice && !userArgs.includes('-d') && !isInfoQuery && !hasSubcommand) {
   try {
     const emulators = execSync(`${flutterCmd} emulators`, { encoding: 'utf8', shell: true, stdio: ['ignore', 'pipe', 'ignore'] });
-    if (emulators.includes('Pixel_7_API_36')) {
-      console.log('[TrustPassz] Đang khởi động Android Emulator (Pixel_7_API_36)...');
-      spawn(flutterCmd, ['emulators', '--launch', 'Pixel_7_API_36'], {
+    const targetEmulator = emulators.includes('Pixel_10_Pro_XL') ? 'Pixel_10_Pro_XL' : (emulators.includes('Pixel_7_API_36') ? 'Pixel_7_API_36' : null);
+    if (targetEmulator) {
+      console.log(`[TrustPassz] Đang khởi động Android Emulator (${targetEmulator})...`);
+      spawn(flutterCmd, ['emulators', '--launch', targetEmulator], {
         detached: true,
         stdio: 'ignore',
         shell: true,

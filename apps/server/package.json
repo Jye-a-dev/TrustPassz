@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "node run-dev.js",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -32,6 +32,7 @@
     "@nestjs/throttler": "^6.7.1",
     "@payos/node": "^2.0.5",
     "@prisma/client": "^6.4.1",
+    "@prisma/engines": "^6.4.1",
     "@supabase/supabase-js": "^2.117.2",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
