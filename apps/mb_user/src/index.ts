@@ -17,3 +17,8 @@ export * from './components/dispute/KeyframeModalViewer';
 export * from './components/dispute/VideoDropZone';
 export * from './components/dispute/DisputeSuccessModal';
 export * from './screens/main/DisputeScreen';
+export * from './i18n/types';
+export * from './i18n/i18n';
+export * from './hooks/useAppTranslation';
+export * from './screens/main/SettingsScreen';
+export * from './App';
