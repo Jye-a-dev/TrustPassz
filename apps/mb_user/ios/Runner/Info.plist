@@ -71,5 +71,7 @@
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>TrustPassz yêu cầu xác thực FaceID / TouchID để mở khóa Két số Digital Vault và xác thực giao dịch ký quỹ an toàn.</string>
 </dict>
 </plist>

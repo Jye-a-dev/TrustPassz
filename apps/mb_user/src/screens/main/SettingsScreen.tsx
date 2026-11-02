@@ -18,6 +18,7 @@ import {
 import { useAppTranslation } from '../../hooks/useAppTranslation';
 import { SupportedLanguage } from '../../i18n/types';
 import { TrustPasszIcon } from '../../components/common/TrustPasszIcon';
+import { SecuritySettingsScreen } from '../settings/SecuritySettingsScreen';
 
 export interface SettingsScreenProps {
   onBack?: () => void;
@@ -33,6 +34,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [switchingCode, setSwitchingCode] = useState<SupportedLanguage | null>(
     null
   );
+  const [showSecurity, setShowSecurity] = useState<boolean>(false);
+
+  if (showSecurity) {
+    return <SecuritySettingsScreen onBack={() => setShowSecurity(false)} />;
+  }
 
   const handleSelectLanguage = async (code: SupportedLanguage) => {
     if (code === currentLanguage) return;
@@ -174,8 +180,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </View>
         </View>
 
-        {/* Section: Security */}
-        <View style={styles.sectionCard}>
+        {/* Section: Security & Biometrics */}
+        <TouchableOpacity
+          style={styles.sectionCard}
+          onPress={() => setShowSecurity(true)}
+          activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.securitySection')}
+        >
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionIcon}>🔒</Text>
             <View style={styles.sectionHeaderTextContainer}>
@@ -186,8 +198,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 {t('settings.biometricAuth')}
               </Text>
             </View>
+            <Text style={styles.navChevron}>→</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Section: About & Build */}
         <View style={styles.sectionCard}>
@@ -351,11 +364,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkmarkText: {
-    color: '#080C14',
-    fontSize: 14,
-    fontWeight: '800',
-  },
+  checkmarkText: { color: '#080C14', fontSize: 14, fontWeight: '800' },
   inactiveRadioCircle: {
     width: 22,
     height: 22,
@@ -373,10 +382,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 8,
   },
-  logoutText: {
-    color: '#FDA4AF',
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  logoutText: { color: '#FDA4AF', fontSize: 15, fontWeight: '700' },
+  navChevron: { color: '#06B6D4', fontSize: 20, fontWeight: '700', paddingHorizontal: 6 },
 });
 

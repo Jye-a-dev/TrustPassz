@@ -158,3 +158,74 @@ declare module '@notifee/react-native' {
 
   export default notifee;
 }
+
+
+declare module 'expo-local-authentication' {
+  export enum AuthenticationType {
+    FINGERPRINT = 1,
+    FACIAL_RECOGNITION = 2,
+    IRIS = 3,
+  }
+
+  export enum SecurityLevel {
+    NONE = 0,
+    SECRET = 1,
+    BIOMETRIC_WEAK = 2,
+    BIOMETRIC_STRONG = 3,
+  }
+
+  export interface LocalAuthenticationOptions {
+    promptMessage?: string;
+    cancelLabel?: string;
+    fallbackLabel?: string;
+    disableDeviceFallback?: boolean;
+    requireConfirmation?: boolean;
+  }
+
+  export type LocalAuthenticationResult =
+    | { success: true }
+    | { success: false; error: string; warning?: string };
+
+  export function hasHardwareAsync(): Promise<boolean>;
+  export function isEnrolledAsync(): Promise<boolean>;
+  export function supportedAuthenticationTypesAsync(): Promise<AuthenticationType[]>;
+  export function getEnrolledLevelAsync(): Promise<SecurityLevel>;
+  export function authenticateAsync(
+    options?: LocalAuthenticationOptions
+  ): Promise<LocalAuthenticationResult>;
+  export function cancelAuthenticate(): Promise<void>;
+}
+
+declare module 'expo-secure-store' {
+  export enum KeychainAccessibilityConstant {
+    WHEN_UNLOCKED = 'WHEN_UNLOCKED',
+    AFTER_FIRST_UNLOCK = 'AFTER_FIRST_UNLOCK',
+    ALWAYS = 'ALWAYS',
+    WHEN_PASSCODE_SET_THIS_DEVICE_ONLY = 'WHEN_PASSCODE_SET_THIS_DEVICE_ONLY',
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY = 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+    AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY = 'AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY',
+    ALWAYS_THIS_DEVICE_ONLY = 'ALWAYS_THIS_DEVICE_ONLY',
+  }
+
+  export interface SecureStoreOptions {
+    keychainService?: string;
+    keychainAccessible?: KeychainAccessibilityConstant;
+    requireAuthentication?: boolean;
+    authenticationPrompt?: string;
+  }
+
+  export function setItemAsync(
+    key: string,
+    value: string,
+    options?: SecureStoreOptions
+  ): Promise<void>;
+  export function getItemAsync(
+    key: string,
+    options?: SecureStoreOptions
+  ): Promise<string | null>;
+  export function deleteItemAsync(
+    key: string,
+    options?: SecureStoreOptions
+  ): Promise<void>;
+  export function isAvailableAsync(): Promise<boolean>;
+}
