@@ -202,6 +202,30 @@ export class DisputesService {
     };
   }
 
+  async findByDealId(dealId: string) {
+    const dispute = await this.prisma.disputeLog.findFirst({
+      where: { dealId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        deal: {
+          include: {
+            seller: { select: { id: true, displayName: true, email: true, walletAddress: true } },
+            buyer: { select: { id: true, displayName: true, email: true, walletAddress: true } },
+            digitalAsset: true,
+          },
+        },
+        initiator: {
+          select: { id: true, displayName: true, email: true },
+        },
+        resolvedBy: {
+          select: { id: true, displayName: true, role: true },
+        },
+      },
+    });
+
+    return dispute;
+  }
+
   async findOne(id: string) {
     const dispute = await this.prisma.disputeLog.findUnique({
       where: { id },
