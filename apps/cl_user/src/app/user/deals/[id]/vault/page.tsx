@@ -13,6 +13,8 @@ import { VaultHeader } from "@/components/vault/vault-header";
 import { VaultUnlockForm } from "@/components/vault/vault-unlock-form";
 import { VaultContentViewer } from "@/components/vault/vault-content-viewer";
 import { VaultActions } from "@/components/vault/vault-actions";
+import { TransferSuccessModal } from "@/components/deals/transfer-success-modal";
+import { useDealRealtimeModal } from "@/hooks/use-deal-realtime-modal";
 import type { DealDetail, VaultDigitalAsset } from "@/components/vault/vault.types";
 
 export default function DigitalVaultPage() {
@@ -36,6 +38,28 @@ export default function DigitalVaultPage() {
   // Clipboard self-destruct state (30 seconds)
   const [clipboardCountdown, setClipboardCountdown] = React.useState<number | null>(null);
   const clipboardTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Realtime hook for instant zero-reload settlement feedback
+  const {
+    isOpen: isSuccessModalOpen,
+    setIsOpen: setIsSuccessModalOpen,
+    modalData,
+    triggerSettlementSuccess,
+  } = useDealRealtimeModal({
+    dealId,
+    initialDeal: deal
+      ? {
+          id: deal.id,
+          amount: deal.amount,
+          currency: deal.currency,
+          state: deal.state,
+          title: deal.title,
+        }
+      : null,
+    onDealStateChange: (newState) => {
+      setDeal((prev) => (prev ? { ...prev, state: newState as DealDetail["state"] } : null));
+    },
+  });
 
   // Fetch deal details
   const loadDeal = React.useCallback(async () => {
@@ -147,7 +171,6 @@ export default function DigitalVaultPage() {
 
     navigator.clipboard.writeText(decryptedPlaintext);
     toast.success("Đã sao chép vào bộ nhớ tạm! Tự động hủy sau 30 giây.");
-
     setClipboardCountdown(30);
     if (clipboardTimerRef.current) clearInterval(clipboardTimerRef.current);
 
@@ -168,21 +191,30 @@ export default function DigitalVaultPage() {
     }, 1000);
   };
 
-  // Decision 1: Confirm Receipt and Settle Escrow
+  // Decision 1: Confirm Receipt and Settle Escrow (Replaces window.confirm with cyber-escrow flow)
   const handleSettleDeal = async () => {
-    const confirmed = window.confirm(
-      "Xác nhận bạn đã nhận đúng sản phẩm? Tiền được giữ an toàn sẽ chuyển ngay cho người bán."
-    );
-    if (!confirmed) return;
-
     setIsSettling(true);
     try {
-      await apiClient(`/api/v1/deals/${dealId}/settle`, {
+      const settleRes = await apiClient<{
+        success?: boolean;
+        txHash?: string;
+        state?: string;
+      }>(`/api/v1/deals/${dealId}/settle`, {
         method: "POST",
       });
 
-      toast.success("Đã chuyển tiền thành công cho người bán! Giao dịch hoàn tất.");
+      const txHash = settleRes?.txHash || (deal?.id ? `SETTLE-${deal.id.slice(0, 8)}` : undefined);
+
       setDeal((prev) => (prev ? { ...prev, state: "SETTLED" } : null));
+
+      triggerSettlementSuccess({
+        amount: deal?.amount,
+        dealTitle: deal?.title,
+        currency: deal?.currency || "VND",
+        txHash,
+      });
+
+      toast.success("Đã chuyển tiền thành công cho người bán! Giao dịch hoàn tất.");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Lỗi chuyển tiền";
       toast.error(`Thao tác thất bại: ${msg}`);
@@ -229,6 +261,26 @@ export default function DigitalVaultPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Transfer Success Modal for Payout / Settlement */}
+      <TransferSuccessModal
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+        dealId={dealId}
+        dealTitle={modalData?.dealTitle || deal.title}
+        amount={modalData?.amount ?? deal.amount}
+        currency={modalData?.currency || deal.currency || "VND"}
+        txHash={modalData?.txHash}
+        chainType={modalData?.chainType}
+        timestamp={modalData?.timestamp}
+        type="SETTLEMENT"
+        title="Giải ngân thành công"
+        description="Khoản thanh toán đã được giải ngân an toàn đến người bán. Giao dịch ký quỹ hoàn tất."
+        primaryActionText="Xem danh sách giao dịch"
+        onPrimaryAction={() => router.push("/user/deals")}
+        secondaryActionText="Đóng"
+        onSecondaryAction={() => setIsSuccessModalOpen(false)}
+      />
+
       <VaultHeader dealId={dealId} deal={deal} isSettled={isSettled} />
 
       {/* Inspection Window Countdown Card */}

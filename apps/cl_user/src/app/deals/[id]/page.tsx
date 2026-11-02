@@ -11,8 +11,11 @@ import { DealVaultStatusCard } from "@/components/deals/deal-vault-status-card";
 import { DealSellerPanel } from "@/components/deals/deal-seller-panel";
 import { DealRoomCta } from "@/components/deals/deal-room-cta";
 import { DealEditDialog } from "@/components/deals/deal-edit-dialog";
+import { TransferSuccessModal } from "@/components/deals/transfer-success-modal";
+import { useDealRealtimeModal } from "@/hooks/use-deal-realtime-modal";
 import {
   type DealDetail,
+  type DealState,
   STATE_CONFIG,
 } from "@/components/deals/deal-room.types";
 import { Button } from "@/components/ui/button";
@@ -32,6 +35,32 @@ export default function DealRoomPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+
+  // Realtime hook to trigger custom modal upon deposit confirmation or payout settlement
+  const {
+    isOpen: isSuccessModalOpen,
+    setIsOpen: setIsSuccessModalOpen,
+    modalData,
+  } = useDealRealtimeModal({
+    dealId,
+    initialDeal: deal
+      ? {
+          id: deal.id,
+          amount: deal.amount,
+          currency: deal.currency,
+          state: deal.state,
+          title: deal.title,
+        }
+      : null,
+    onDealStateChange: (newState) => {
+      setDeal((prev) => (prev ? { ...prev, state: newState as DealState } : prev));
+      toast.success(
+        newState === "SETTLED"
+          ? "Giao dịch đã được giải ngân thành công!"
+          : "Két bảo chứng đã xác nhận nạp tiền an toàn!"
+      );
+    },
+  });
 
   React.useEffect(() => {
     let isMounted = true;
@@ -144,6 +173,34 @@ export default function DealRoomPage() {
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 overflow-x-hidden">
       {/* Background radial gradient */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/5 blur-[140px] pointer-events-none" />
+
+      {/* Transfer Success Realtime Modal (Zero-Reload) */}
+      <TransferSuccessModal
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+        dealId={dealId}
+        dealTitle={modalData?.dealTitle || deal.title}
+        amount={modalData?.amount ?? amountNum}
+        currency={modalData?.currency || deal.currency || "VND"}
+        txHash={modalData?.txHash}
+        chainType={modalData?.chainType}
+        timestamp={modalData?.timestamp}
+        type={modalData?.type || (deal.state === "SETTLED" ? "SETTLEMENT" : "DEPOSIT")}
+        primaryActionText={
+          modalData?.type === "SETTLEMENT" || deal.state === "SETTLED"
+            ? "Xem chi tiết giao dịch"
+            : "Vào két Digital Vault"
+        }
+        onPrimaryAction={() => {
+          if (modalData?.type === "SETTLEMENT" || deal.state === "SETTLED") {
+            setIsSuccessModalOpen(false);
+          } else {
+            router.push(`/user/deals/${dealId}/vault`);
+          }
+        }}
+        secondaryActionText="Xem danh sách giao dịch"
+        onSecondaryAction={() => router.push("/user/deals")}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
         {/* Navigation & Status Header */}
