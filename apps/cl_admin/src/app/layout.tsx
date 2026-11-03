@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/shared/providers";
-import "@/styles/globals.css";
+import "@/app/globals.css";
 
 export const viewport: Viewport = {
   themeColor: "#080C14",

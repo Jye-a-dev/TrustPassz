@@ -24,6 +24,7 @@ import { RelayerFundingModule } from './modules/relayer-funding/relayer-funding.
 import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
 import { RelayerModule } from './relayer/relayer.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     OracleRelayerModule,
     RelayerModule,
     NotificationsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

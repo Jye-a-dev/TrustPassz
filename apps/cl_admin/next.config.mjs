@@ -33,6 +33,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: [],
+    cpus: 1,
   },
   async headers() {
     return [
