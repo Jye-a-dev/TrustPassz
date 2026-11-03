@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { supabase } from "@/lib/supabase-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +9,13 @@ import {
   UserCheck,
   CheckCircle,
 } from "lucide-react";
+import {
+  useBargainSync,
+  type BargainSliderBroadcastPayload,
+} from "@/hooks/useBargainSync";
+import { QuickBidPresets } from "./quick-bid-presets";
+
+export type { BargainSliderBroadcastPayload };
 
 export interface BargainSliderProps {
   dealId: string;
@@ -20,117 +26,50 @@ export interface BargainSliderProps {
   isBuyer?: boolean;
   disabled?: boolean;
   onOfferSubmit?: (offeredPrice: number) => void;
-}
-
-export interface BargainSliderBroadcastPayload {
-  dealId: string;
-  offeredPrice: number;
-  buyerId: string;
-  senderId?: string;
-  timestamp?: number;
+  onPriceChange?: (price: number) => void;
 }
 
 export function BargainSlider({
   dealId,
   basePrice,
-  floorPrice = Math.round(basePrice * 0.7),
+  floorPrice,
   initialOffer,
   currentUserId,
   isBuyer = true,
   disabled = false,
   onOfferSubmit,
+  onPriceChange,
 }: BargainSliderProps) {
   // Normalize boundaries
-  const minPrice = Math.max(0, floorPrice);
+  const defaultFloor = Math.round(basePrice * 0.7);
+  const minPrice = Math.max(0, floorPrice ?? defaultFloor);
   const maxPrice = Math.max(minPrice, basePrice);
-  const defaultPrice = initialOffer && initialOffer >= minPrice && initialOffer <= maxPrice
-    ? initialOffer
-    : Math.round((minPrice + maxPrice) / 2);
+  const defaultPrice =
+    initialOffer && initialOffer >= minPrice && initialOffer <= maxPrice
+      ? initialOffer
+      : Math.round((minPrice + maxPrice) / 2);
 
-  const [localPrice, setLocalPrice] = React.useState<number>(defaultPrice);
-  const [peerOffer, setPeerOffer] = React.useState<number | null>(null);
-  const [isConnected, setIsConnected] = React.useState<boolean>(false);
-
-  // References for debounce, channel tracking, and touch gesture disambiguation
-  const channelRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
-
-  // 1. Establish Supabase Realtime channel for deal room
-  React.useEffect(() => {
-    if (!dealId) return;
-
-    const channelName = `deal-room:${dealId}`;
-    const channel = supabase.channel(channelName, {
-      config: {
-        broadcast: {
-          self: false, // Don't loopback own events
-          ack: false,
-        },
-      },
-    });
-
-    channelRef.current = channel;
-
-    channel
-      .on("broadcast", { event: "bargain:slider_update" }, (message) => {
-        const payload = message.payload as BargainSliderBroadcastPayload;
-        if (payload && payload.dealId === dealId) {
-          // If the broadcast was sent by the other party
-          if (payload.buyerId !== currentUserId && payload.senderId !== currentUserId) {
-            setPeerOffer(payload.offeredPrice);
-          }
-        }
-      })
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          setIsConnected(true);
-        } else if (status === "CLOSED" || status === "CHANNEL_ERROR") {
-          setIsConnected(false);
-        }
-      });
-
-    // Cleanup: Mandatory removal of Realtime channel subscription
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [dealId, currentUserId]);
-
-  // 2. Broadcast price update with 300ms debounce
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPrice = Number(e.target.value);
-    setLocalPrice(newPrice);
-
-    if (disabled) return;
-
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    debounceTimerRef.current = setTimeout(() => {
-      if (channelRef.current && isConnected) {
-        channelRef.current.send({
-          type: "broadcast",
-          event: "bargain:slider_update",
-          payload: {
-            dealId,
-            offeredPrice: newPrice,
-            buyerId: currentUserId,
-            senderId: currentUserId,
-            timestamp: Date.now(),
-          },
-        });
-      }
-    }, 300);
-  };
+  const {
+    visualPrice,
+    peerOffer,
+    isConnected,
+    isCoolingDown,
+    setPrice,
+    adoptPeerOffer,
+  } = useBargainSync({
+    dealId,
+    initialPrice: defaultPrice,
+    currentUserId,
+    minPrice,
+    maxPrice,
+    debounceMs: 350,
+    cooldownMs: 200,
+    onDebouncedChange: onPriceChange,
+  });
 
   // Touch gesture disambiguation: isolates horizontal drag without blocking vertical scrolling
+  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
+
   const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
     if (e.touches.length > 0) {
       touchStartRef.current = {
@@ -146,35 +85,27 @@ export function BargainSlider({
     const deltaX = Math.abs(e.touches[0].clientX - touchStartRef.current.x);
     const deltaY = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
 
-    // If predominantly horizontal, prevent parent scroll container hijacking
     if (deltaX > deltaY) {
       e.stopPropagation();
     }
-    // If predominantly vertical, let event bubble naturally so page scrolls smoothly
   };
 
   const handleTouchEnd = () => {
     touchStartRef.current = null;
   };
 
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    setPrice(Number(e.target.value));
+  };
+
   const discountPercent =
-    basePrice > 0 ? Math.round(((basePrice - localPrice) / basePrice) * 100) : 0;
+    basePrice > 0 ? Math.round(((basePrice - visualPrice) / basePrice) * 100) : 0;
 
-  const handleApplyOffer = () => {
-    if (onOfferSubmit) {
-      onOfferSubmit(localPrice);
-    }
-  };
-
-  const adoptPeerOffer = () => {
-    if (peerOffer !== null) {
-      setLocalPrice(peerOffer);
-    }
-  };
-
-  // Calculate track filling percentage for gradient styling
   const trackPercentage =
-    maxPrice > minPrice ? ((localPrice - minPrice) / (maxPrice - minPrice)) * 100 : 50;
+    maxPrice > minPrice
+      ? ((visualPrice - minPrice) / (maxPrice - minPrice)) * 100
+      : 50;
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 sm:p-5 space-y-4 shadow-xl">
@@ -187,7 +118,7 @@ export function BargainSlider({
               {isBuyer ? "Thanh Thương Lượng Giá" : "Đề Xuất Giá Từ Người Mua"}
             </h4>
             <span className="text-[11px] text-slate-400">
-              Kéo thanh này để đề xuất mức giá bạn mong muốn
+              Kéo thanh hoặc chọn đề xuất nhanh mức giá mong muốn
             </span>
           </div>
         </div>
@@ -211,10 +142,10 @@ export function BargainSlider({
       <div className="grid grid-cols-2 gap-3 items-center rounded-lg bg-slate-950/80 p-3.5 border border-slate-800/60">
         <div>
           <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">
-            Mức giá đang đề xuất
+            Mức giá thương lượng
           </span>
           <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
-            {localPrice.toLocaleString("vi-VN")}{" "}
+            {visualPrice.toLocaleString("vi-VN")}{" "}
             <span className="text-xs font-normal text-slate-400">₫</span>
           </span>
         </div>
@@ -260,7 +191,7 @@ export function BargainSlider({
       )}
 
       {/* Touch-Friendly Slider Container with touch-pan-x and non-blocking vertical scroll */}
-      <div className="space-y-2 py-2">
+      <div className="space-y-2 py-1">
         <div
           className="relative flex items-center select-none touch-pan-x"
           style={{ touchAction: "pan-y" }}
@@ -269,8 +200,8 @@ export function BargainSlider({
             type="range"
             min={minPrice}
             max={maxPrice}
-            step={10000}
-            value={localPrice}
+            step={1000}
+            value={visualPrice}
             onChange={handleSliderChange}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -289,26 +220,40 @@ export function BargainSlider({
         {/* Boundary Marks */}
         <div className="flex justify-between items-center text-[11px] font-mono text-slate-400 px-0.5">
           <span>
-            Giá thấp nhất (-30%):{" "}
-            <strong className="text-slate-300">{minPrice.toLocaleString("vi-VN")} ₫</strong>
+            Giá sàn chấp nhận:{" "}
+            <strong className="text-slate-300">
+              {minPrice.toLocaleString("vi-VN")} ₫
+            </strong>
           </span>
           <span>
             Giá ban đầu:{" "}
-            <strong className="text-slate-300">{maxPrice.toLocaleString("vi-VN")} ₫</strong>
+            <strong className="text-slate-300">
+              {maxPrice.toLocaleString("vi-VN")} ₫
+            </strong>
           </span>
         </div>
       </div>
+
+      {/* Quick-bid Presets Section */}
+      <QuickBidPresets
+        basePrice={maxPrice}
+        floorPrice={minPrice}
+        currentPrice={visualPrice}
+        onSelectPreset={setPrice}
+        disabled={disabled}
+        isCoolingDown={isCoolingDown}
+      />
 
       {/* Action CTA */}
       {onOfferSubmit && (
         <Button
           type="button"
-          onClick={handleApplyOffer}
-          disabled={disabled}
-          className="w-full min-h-11 text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md shadow-cyan-950 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          onClick={() => onOfferSubmit(visualPrice)}
+          disabled={disabled || isCoolingDown}
+          className="w-full min-h-[44px] text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md shadow-cyan-950 transition-all flex items-center justify-center gap-2 cursor-pointer touch-manipulation active:scale-[0.99]"
         >
           <CheckCircle className="w-4 h-4" />
-          Xác nhận đề xuất {localPrice.toLocaleString("vi-VN")} ₫
+          Xác nhận đề xuất {visualPrice.toLocaleString("vi-VN")} ₫
         </Button>
       )}
     </div>
