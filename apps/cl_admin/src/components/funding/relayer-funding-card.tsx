@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import {
   AlertCircle,
   ArrowUpRight,
@@ -25,6 +25,10 @@ import { apiClient } from "@/lib/api-client";
 import type { ConfirmFundingResult, RelayerBalanceInfo } from "@/types";
 import { ConfirmFundingDialog } from "./confirm-funding-dialog";
 
+const DEFAULT_RELAYER_ADDRESS =
+  process.env.NEXT_PUBLIC_SOLANA_RELAYER_ADDRESS ||
+  "F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn";
+
 export function RelayerFundingCard() {
   const { connection } = useConnection();
   const { publicKey, connected, disconnect } = useWallet();
@@ -41,16 +45,45 @@ export function RelayerFundingCard() {
   const [fundAmount, setFundAmount] = React.useState<string>("0.5");
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  // Fetch Relayer Balance from Backend API
+  // Fetch Relayer Balance directly on-chain from Solana Devnet RPC
   const fetchRelayerBalance = React.useCallback(async (showToast = false) => {
     setIsLoading(true);
+    const targetAddress =
+      process.env.NEXT_PUBLIC_SOLANA_RELAYER_ADDRESS ||
+      DEFAULT_RELAYER_ADDRESS;
+
     try {
-      const data = await apiClient<RelayerBalanceInfo>(
-        "/api/v1/admin/relayer/balance",
-      );
-      setBalanceInfo(data);
+      // 1. Authoritative on-chain query directly from Solana Devnet RPC
+      const pubkey = new PublicKey(targetAddress);
+      const lamports = await connection.getBalance(pubkey, "confirmed");
+      const balanceSol = Number((lamports / LAMPORTS_PER_SOL).toFixed(4));
+
+      // 2. Fetch server-side configuration metadata if backend is reachable
+      let network = "devnet";
+      let thresholdSol = 0.1;
+
+      try {
+        const apiData = await apiClient<RelayerBalanceInfo>(
+          "/api/v1/admin/relayer/balance",
+        );
+        network = apiData.network || network;
+        thresholdSol = apiData.thresholdSol ?? thresholdSol;
+      } catch {
+        // Backend API offline or unauthenticated; on-chain RPC balance is authoritative
+      }
+
+      setBalanceInfo({
+        relayerAddress: targetAddress,
+        balanceSol,
+        balanceLamports: lamports.toString(),
+        thresholdSol,
+        isLowBalance: balanceSol < thresholdSol,
+        network,
+        timestamp: new Date().toISOString(),
+      });
+
       if (showToast) {
-        toast.success("Đã làm mới số dư ví Relayer thành công.");
+        toast.success("Đã làm mới số dư ví Relayer on-chain thành công.");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -58,7 +91,7 @@ export function RelayerFundingCard() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [connection]);
 
   // Fetch Connected Admin Wallet Balance
   const fetchAdminBalance = React.useCallback(async () => {

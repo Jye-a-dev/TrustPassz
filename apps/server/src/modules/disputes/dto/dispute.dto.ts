@@ -76,6 +76,22 @@ export class ResolveDisputeDto {
   @IsString()
   @IsNotEmpty()
   resolutionNote: string;
+
+  @ApiPropertyOptional({
+    example: '123456',
+    description: '6-digit Admin 2FA verification PIN',
+  })
+  @IsOptional()
+  @IsString()
+  twoFactorCode?: string;
+
+  @ApiPropertyOptional({
+    example: 'Trọng tài can thiệp giải ngân do người mua không phản hồi sau 48h',
+    description: 'Detailed audit rationale for on-chain override',
+  })
+  @IsOptional()
+  @IsString()
+  auditReason?: string;
 }
 
 export class QueryDisputeDto {

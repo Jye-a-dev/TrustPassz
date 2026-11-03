@@ -23,6 +23,11 @@ import {
   ConfirmFundingResponseDto,
   RelayerBalanceResponseDto,
 } from './dto/relayer-funding.dto';
+import {
+  DEFAULT_SOLANA_RELAYER_PUBLIC_KEY,
+  parseSolanaKeypair,
+  resolveSolanaRelayerPublicKey,
+} from '../../relayer/solana-keypair.util';
 
 interface SystemTransferInfo {
   source: string;
@@ -67,26 +72,13 @@ export class RelayerFundingService implements OnModuleInit {
       const relayerSecret = this.configService.get<string>(
         'SOLANA_RELAYER_PRIVATE_KEY',
       );
-      if (relayerSecret) {
-        try {
-          const decoded = bs58.decode(relayerSecret.trim());
-          const keypair = Keypair.fromSecretKey(decoded);
-          pubKeyStr = keypair.publicKey.toBase58();
-        } catch {
-          pubKeyStr = 'TrUsT11111111111111111111111111111111111111';
-        }
-      } else {
-        pubKeyStr = 'TrUsT11111111111111111111111111111111111111';
+      const keypair = parseSolanaKeypair(relayerSecret);
+      if (keypair) {
+        pubKeyStr = keypair.publicKey.toBase58();
       }
     }
 
-    try {
-      this.relayerPublicKey = new PublicKey(pubKeyStr.trim());
-    } catch {
-      this.relayerPublicKey = new PublicKey(
-        'TrUsT11111111111111111111111111111111111111',
-      );
-    }
+    this.relayerPublicKey = resolveSolanaRelayerPublicKey(pubKeyStr);
 
     this.logger.log(
       `[RelayerFundingService] Initialized — Relayer: ${this.relayerPublicKey.toBase58()} | Network: ${this.networkName} | Threshold: ${this.alertThresholdSol} SOL`,

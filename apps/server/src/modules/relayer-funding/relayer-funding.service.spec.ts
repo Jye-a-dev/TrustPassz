@@ -22,7 +22,7 @@ describe('RelayerFundingService', () => {
         case 'SOLANA_RPC_URL':
           return 'https://api.devnet.solana.com';
         case 'SOLANA_RELAYER_PUBLIC_KEY':
-          return 'TrUsT11111111111111111111111111111111111111';
+          return 'F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn';
         case 'ALERT_THRESHOLD_SOL':
           return '0.1';
         case 'ADMIN_2FA_PIN':

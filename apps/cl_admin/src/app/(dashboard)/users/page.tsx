@@ -2,155 +2,113 @@
 
 import * as React from 'react';
 import {
-  Users,
-  Search,
   Ban,
-  Key,
-  Loader2,
+  Filter,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  Users,
+  Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import type { AdminUser, UserRole } from '@/types';
-import { logAdminAction } from '@/lib/audit-logger';
+import { UserSearchTable } from '@/components/users/user-search-table';
 import { apiClient } from '@/lib/api-client';
+import { useAuditLogger } from '@/hooks/use-audit-logger';
+import type { AdminUser, UserRole } from '@/types';
 import { toast } from 'sonner';
 
-interface UserRecord extends AdminUser {
-  status: 'ACTIVE' | 'FROZEN' | 'BLACKLISTED';
-  dealCount: number;
-}
-
-export default function UsersPage() {
-  const [users, setUsers] = React.useState<UserRecord[]>([]);
+export default function UsersManagementPage() {
+  const [users, setUsers] = React.useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [search, setSearch] = React.useState('');
+  const [searchInput, setSearchInput] = React.useState('');
+  const [debouncedSearch, setDebouncedSearch] = React.useState('');
   const [roleFilter, setRoleFilter] = React.useState<string>('ALL');
-  const [editingUser, setEditingUser] = React.useState<UserRecord | null>(null);
-  const [selectedRole, setSelectedRole] = React.useState<UserRole>('USER');
+  const [freezeFilter, setFreezeFilter] = React.useState<string>('ALL');
 
+  const { logRoleChange, logWalletFreeze } = useAuditLogger();
+
+  // 300ms Search Debounce
   React.useEffect(() => {
-    let ignore = false;
-    apiClient<AdminUser[]>('/api/v1/users', {
-      params: {
-        role: roleFilter === 'ALL' ? undefined : roleFilter,
-      },
-    })
-      .then((res) => {
-        if (!ignore) {
-          const mapped: UserRecord[] = res.map((u) => ({
-            ...u,
-            status: 'ACTIVE',
-            dealCount: 0,
-          }));
-          setUsers(mapped);
-          setIsLoading(false);
-        }
-      })
-      .catch((err: unknown) => {
-        if (!ignore) {
-          const msg = err instanceof Error ? err.message : 'Lỗi truy vấn người dùng';
-          toast.error(msg);
-          setIsLoading(false);
-        }
-      });
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
 
-    return () => {
-      ignore = true;
-    };
-  }, [roleFilter]);
-
-  const filteredUsers = users.filter((u) => {
-    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
-    const matchesSearch =
-      (u.displayName || '').toLowerCase().includes(search.toLowerCase()) ||
-      (u.email || '').toLowerCase().includes(search.toLowerCase()) ||
-      (u.walletAddress || '').toLowerCase().includes(search.toLowerCase());
-    return matchesRole && matchesSearch;
-  });
-
-  const handleOpenEdit = (user: UserRecord) => {
-    setEditingUser(user);
-    setSelectedRole(user.role);
-  };
-
-  const handleSaveRole = async () => {
-    if (!editingUser) return;
-
+  const fetchUsers = React.useCallback(async (showToast = false) => {
+    setIsLoading(true);
     try {
-      await apiClient(`/api/v1/users/${editingUser.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role: selectedRole }),
-      });
+      const params: Record<string, string> = {};
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (roleFilter !== 'ALL') params.role = roleFilter;
+      if (freezeFilter === 'FROZEN') params.isFrozen = 'true';
+      if (freezeFilter === 'ACTIVE') params.isFrozen = 'false';
 
-      await logAdminAction('UPDATE_USER_ROLE', 'users', editingUser.id, {
-        previousRole: editingUser.role,
-        newRole: selectedRole,
-        userEmail: editingUser.email,
-      });
-
-      setUsers((prev) =>
-        prev.map((u) => (u.id === editingUser.id ? { ...u, role: selectedRole } : u))
+      const response = await apiClient<{ data: AdminUser[]; meta: any }>(
+        '/api/v1/admin/users',
+        { params },
       );
 
-      toast.success(`Đã cập nhật vai trò người dùng sang ${selectedRole}.`);
-      setEditingUser(null);
+      setUsers(response.data || []);
+      if (showToast) {
+        toast.success('Đã làm mới danh sách người dùng');
+      }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Cập nhật vai trò thất bại';
+      const msg = err instanceof Error ? err.message : 'Lỗi truy vấn người dùng';
       toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearch, roleFilter, freezeFilter]);
+
+  React.useEffect(() => {
+    void fetchUsers();
+  }, [fetchUsers]);
+
+  const handleUpdateRole = async (user: AdminUser, role: UserRole, reason: string) => {
+    try {
+      await apiClient(`/api/v1/admin/users/${user.id}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role, auditReason: reason }),
+      });
+      await logRoleChange(user.id, user.role, role, reason);
+      toast.success(`Đã cập nhật vai trò của ${user.displayName || user.email} thành ${role}`);
+      void fetchUsers();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể cập nhật vai trò';
+      toast.error(msg);
+      throw err;
     }
   };
 
-  const handleToggleFreeze = async (user: UserRecord) => {
-    const newStatus = user.status === 'FROZEN' || user.status === 'BLACKLISTED' ? 'ACTIVE' : 'BLACKLISTED';
-
-    await logAdminAction('CHANGE_USER_STATUS', 'users', user.id, {
-      previousStatus: user.status,
-      newStatus,
-      userEmail: user.email,
-    });
-
-    setUsers((prev) =>
-      prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
-    );
-
-    toast.success(
-      newStatus === 'BLACKLISTED'
-        ? `Đã khóa (Blacklist) tài khoản ${user.displayName}.`
-        : `Đã mở khóa tài khoản ${user.displayName}.`
-    );
-  };
-
-  const getRoleBadge = (role: UserRole) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'border-rose-800 text-rose-400 bg-rose-950/40';
-      case 'ARBITRATOR':
-        return 'border-cyan-800 text-cyan-400 bg-cyan-950/40';
-      case 'SELLER':
-        return 'border-emerald-800 text-emerald-400 bg-emerald-950/40';
-      case 'BUYER':
-        return 'border-blue-800 text-blue-400 bg-blue-950/40';
-      default:
-        return 'border-slate-800 text-slate-400 bg-slate-900';
+  const handleToggleFreeze = async (user: AdminUser, freeze: boolean, reason: string) => {
+    try {
+      await apiClient(`/api/v1/admin/users/${user.id}/freeze`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isFrozen: freeze, auditReason: reason }),
+      });
+      await logWalletFreeze(user.id, freeze, reason);
+      toast.success(
+        freeze
+          ? `Đã đóng băng ví của ${user.displayName || user.email}`
+          : `Đã mở khóa ví của ${user.displayName || user.email}`,
+      );
+      void fetchUsers();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể thay đổi trạng thái ví';
+      toast.error(msg);
+      throw err;
     }
   };
+
+  const totalCount = users.length;
+  const frozenCount = users.filter((u) => u.isFrozen).length;
+  const arbitratorCount = users.filter((u) => u.role === 'ARBITRATOR').length;
+  const web3Count = users.filter((u) => u.walletAddress).length;
 
   return (
     <div className="space-y-6">
@@ -159,182 +117,123 @@ export default function UsersPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
             <Users className="h-6 w-6 text-cyan-400" />
-            Quản Trị Người Dùng & Phân Quyền (RBAC)
+            Quản Trị Người Dùng & Phân Quyền RBAC
           </h2>
           <p className="text-xs text-slate-400">
-            Quản lý tài khoản, nâng/hạ quyền Admin & Arbitrator, kiểm soát Smart Account và đóng băng vi phạm.
+            Tra cứu tức thì theo UUID, Email, Địa chỉ ví Solana (Base58) và Base Sepolia (0x). Kiểm soát đóng băng ví và phân quyền trọng tài.
           </p>
         </div>
-        <Badge variant="outline" className="border-cyan-800 text-cyan-400 font-mono text-xs w-fit">
-          {filteredUsers.length} Tài khoản
-        </Badge>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fetchUsers(true)}
+          disabled={isLoading}
+          className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-200 text-xs h-9 min-h-[44px] gap-1.5 self-start sm:self-auto"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin text-cyan-400' : ''}`} />
+          <span>Làm Mới</span>
+        </Button>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md w-full">
+      {/* KPI Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-slate-800 bg-[#0F172A] p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono text-slate-400">Tổng Người Dùng</span>
+            <Users className="h-4 w-4 text-cyan-400" />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-mono text-slate-100">{totalCount}</div>
+        </Card>
+
+        <Card className="border-slate-800 bg-[#0F172A] p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono text-slate-400">Ví Web3 Đã Liên Kết</span>
+            <Wallet className="h-4 w-4 text-emerald-400" />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">{web3Count}</div>
+        </Card>
+
+        <Card className="border-slate-800 bg-[#0F172A] p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono text-slate-400">Trọng Tài Viên</span>
+            <ShieldCheck className="h-4 w-4 text-cyan-400" />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-mono text-cyan-400">{arbitratorCount}</div>
+        </Card>
+
+        <Card className="border-slate-800 bg-[#0F172A] p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono text-slate-400">Ví Đang Đóng Băng</span>
+            <Ban className="h-4 w-4 text-rose-400" />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-mono text-rose-400">{frozenCount}</div>
+        </Card>
+      </div>
+
+      {/* Filters & Debounced Search Toolbar */}
+      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="relative w-full md:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo tên hiển thị, email hoặc địa chỉ ví..."
-            className="pl-9 border-slate-800 bg-[#0F172A] text-xs text-white"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Tìm theo UUID, Email, ví Base58 Solana hoặc 0x..."
+            className="pl-9 bg-slate-900 border-slate-800 text-xs min-h-[44px] text-slate-200 placeholder:text-slate-500"
           />
         </div>
 
-        <div className="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto">
-          {['ALL', 'ADMIN', 'ARBITRATOR', 'SELLER', 'BUYER', 'USER'].map((r) => (
-            <button
-              key={r}
-              onClick={() => {
-                setIsLoading(true);
-                setRoleFilter(r);
-              }}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                roleFilter === r
-                  ? 'bg-cyan-950 text-cyan-400 border border-cyan-800 font-semibold'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-              }`}
-            >
-              {r}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          {/* Role Filter Buttons */}
+          <div className="inline-flex rounded-lg border border-slate-800 bg-slate-900 p-1">
+            {['ALL', 'USER', 'ARBITRATOR', 'ADMIN'].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRoleFilter(r)}
+                className={`px-3 py-1 text-xs font-mono rounded-md transition-colors min-h-[32px] ${
+                  roleFilter === r
+                    ? 'bg-cyan-500/20 text-cyan-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+
+          {/* Freeze Filter */}
+          <div className="inline-flex rounded-lg border border-slate-800 bg-slate-900 p-1">
+            {[
+              { id: 'ALL', label: 'Tất cả' },
+              { id: 'ACTIVE', label: 'Bình thường' },
+              { id: 'FROZEN', label: 'Đã khóa' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFreezeFilter(f.id)}
+                className={`px-3 py-1 text-xs font-mono rounded-md transition-colors min-h-[32px] ${
+                  freezeFilter === f.id
+                    ? 'bg-rose-500/20 text-rose-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] shadow-md overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-65">Người dùng</TableHead>
-              <TableHead>Địa chỉ ví Smart Account</TableHead>
-              <TableHead>Vai trò RBAC</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Số Kèo</TableHead>
-              <TableHead className="text-right">Thao tác</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-slate-500 text-xs">
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
-                    <span>Đang tải danh sách người dùng...</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : filteredUsers.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-slate-500 text-xs">
-                  Không tìm thấy người dùng nào.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="space-y-0.5">
-                      <p className="font-semibold text-white text-xs">{user.displayName}</p>
-                      <p className="text-[11px] text-slate-400">{user.email}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-slate-300">
-                    {user.walletAddress ? (
-                      <span className="text-cyan-400">
-                        {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
-                      </span>
-                    ) : (
-                      <span className="text-slate-600">Chưa liên kết</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`font-mono text-[10px] ${getRoleBadge(user.role)}`}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`font-mono text-[10px] ${
-                        user.status === 'ACTIVE'
-                          ? 'border-emerald-800 text-emerald-400 bg-emerald-950/40'
-                          : 'border-rose-800 text-rose-400 bg-rose-950/40'
-                      }`}
-                    >
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-slate-300">{user.dealCount}</TableCell>
-                  <TableCell className="text-right space-x-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleOpenEdit(user)}
-                      className="h-8 px-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800"
-                    >
-                      <Key className="h-3.5 w-3.5 mr-1 text-cyan-400" />
-                      Đổi Role
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleToggleFreeze(user)}
-                      className={`h-8 px-2 text-xs ${
-                        user.status === 'BLACKLISTED'
-                          ? 'text-emerald-400 hover:bg-emerald-950/30'
-                          : 'text-rose-400 hover:bg-rose-950/30'
-                      }`}
-                    >
-                      <Ban className="h-3.5 w-3.5 mr-1" />
-                      {user.status === 'BLACKLISTED' ? 'Bỏ Chặn' : 'Blacklist'}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Role Modifier Dialog */}
-      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-        <DialogContent className="border-slate-800 bg-[#0F172A] text-slate-100 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-white">
-              Cập Nhật Quyền Hạn Người Dùng
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-400">
-              User: <strong className="text-white">{editingUser?.displayName}</strong> ({editingUser?.email})
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 py-2 text-xs">
-            <label className="font-semibold text-slate-300">Chọn vai trò mới (Role Assignment):</label>
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-              className="w-full h-9 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-            >
-              <option value="USER">USER (Người dùng thông thường)</option>
-              <option value="BUYER">BUYER (Người mua đã KYC)</option>
-              <option value="SELLER">SELLER (Người bán có Digital Storefront)</option>
-              <option value="ARBITRATOR">ARBITRATOR (Trọng tài viên phân xử khiếu nại)</option>
-              <option value="ADMIN">ADMIN (Super Admin toàn quyền)</option>
-            </select>
-          </div>
-
-          <DialogFooter className="border-t border-slate-800 pt-3">
-            <Button variant="ghost" size="sm" onClick={() => setEditingUser(null)} className="text-xs text-slate-400">
-              Hủy
-            </Button>
-            <Button size="sm" onClick={handleSaveRole} className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs h-8">
-              Lưu Thay Đổi
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Users Data Table */}
+      <UserSearchTable
+        users={users}
+        isLoading={isLoading}
+        onRefresh={() => fetchUsers(true)}
+        onUpdateRole={handleUpdateRole}
+        onToggleFreeze={handleToggleFreeze}
+      />
     </div>
   );
 }

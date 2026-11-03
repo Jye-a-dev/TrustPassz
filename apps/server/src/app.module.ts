@@ -25,6 +25,8 @@ import { OracleRelayerModule } from './oracle-relayer/oracle-relayer.module';
 import { RelayerModule } from './relayer/relayer.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { FiatOnrampModule } from './modules/fiat-onramp/fiat-onramp.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     RelayerModule,
     NotificationsModule,
     AnalyticsModule,
+    AuditLogModule,
+    FiatOnrampModule,
   ],
   controllers: [AppController],
   providers: [

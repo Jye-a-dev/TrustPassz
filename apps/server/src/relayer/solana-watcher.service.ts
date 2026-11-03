@@ -26,13 +26,16 @@ import {
   ANCHOR_DISCRIMINATORS,
   DealWithDualChain,
 } from './relayer.types';
+import { DEFAULT_SOLANA_RELAYER_PUBLIC_KEY } from './solana-keypair.util';
 
 @Injectable()
 export class SolanaWatcherService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SolanaWatcherService.name);
   private connection: Connection | null = null;
   private subscriptionId: number | null = null;
-  private programId!: PublicKey;
+  private programId: PublicKey = new PublicKey(
+    DEFAULT_SOLANA_RELAYER_PUBLIC_KEY,
+  );
 
   /** Anti-replay cache of processed transaction signatures */
   private readonly processedSignatures = new Set<string>();
@@ -47,7 +50,8 @@ export class SolanaWatcherService implements OnModuleInit, OnModuleDestroy {
       process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
     const programIdStr =
       process.env.SOLANA_PROGRAM_ID ||
-      'TrUsT11111111111111111111111111111111111111';
+      process.env.SOLANA_RELAYER_PUBLIC_KEY ||
+      DEFAULT_SOLANA_RELAYER_PUBLIC_KEY;
 
     try {
       this.programId = new PublicKey(programIdStr);

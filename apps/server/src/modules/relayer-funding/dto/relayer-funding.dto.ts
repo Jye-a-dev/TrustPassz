@@ -57,7 +57,7 @@ export class ConfirmFundingDto {
 export class RelayerBalanceResponseDto {
   @ApiProperty({
     description: 'Địa chỉ ví Solana Relayer toàn cục hệ thống (Base58)',
-    example: 'TrUsT11111111111111111111111111111111111111',
+    example: 'F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn',
   })
   relayerAddress!: string;
 
@@ -137,7 +137,7 @@ export class ConfirmFundingResponseDto {
 
   @ApiProperty({
     description: 'Địa chỉ ví nhận (Relayer)',
-    example: 'TrUsT11111111111111111111111111111111111111',
+    example: 'F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn',
   })
   relayerAddress!: string;
 

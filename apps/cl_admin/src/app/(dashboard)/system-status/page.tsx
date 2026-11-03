@@ -12,15 +12,18 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ServiceHealthCard } from '@/components/status/service-health-card';
 import { RelayerFundingCard } from '@/components/funding/relayer-funding-card';
+import { SolanaFaucetHubModal } from '@/components/funding/solana-faucet-hub-modal';
 import { checkAllPillars, CONTRACT_ADDRESS } from '@/lib/system-monitor';
 import type { SystemPillarStatus } from '@/types';
 import { toast } from 'sonner';
+import { Zap } from 'lucide-react';
 
 export default function SystemStatusPage() {
   const [pillars, setPillars] = React.useState<SystemPillarStatus[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [lastUpdated, setLastUpdated] = React.useState<string>('');
   const [autoRefreshCount, setAutoRefreshCount] = React.useState(15);
+  const [isFaucetHubOpen, setIsFaucetHubOpen] = React.useState(false);
 
   const fetchStatus = React.useCallback(async (showToast = false) => {
     setIsLoading(true);
@@ -83,9 +86,19 @@ export default function SystemStatusPage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setIsFaucetHubOpen(true)}
+            className="border-cyan-500/30 bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 text-xs h-9 min-h-11 gap-1.5"
+          >
+            <Zap className="h-4 w-4 text-cyan-400" />
+            <span>Hub Nạp Faucet & VietQR</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => fetchStatus(true)}
             disabled={isLoading}
-            className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-200 text-xs h-9 gap-1.5"
+            className="border-slate-800 bg-cyber-card hover:bg-slate-800 text-slate-200 text-xs h-9 min-h-11 gap-1.5"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin text-cyan-400' : ''}`} />
             <span>Ping Toàn Hệ Thống</span>
@@ -94,7 +107,7 @@ export default function SystemStatusPage() {
       </div>
 
       {/* Overview Status Bar */}
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="rounded-xl border border-slate-800 bg-cyber-card p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-lg border ${
@@ -131,7 +144,7 @@ export default function SystemStatusPage() {
 
         {/* Global Contract Quick Info */}
         <div className="flex items-center space-x-3 text-xs font-mono">
-          <div className="rounded-lg border border-slate-800 bg-[#080C14] px-3 py-1.5 text-right">
+          <div className="rounded-lg border border-slate-800 bg-cyber-bg px-3 py-1.5 text-right">
             <span className="text-[10px] text-slate-500 block">Base Sepolia Contract</span>
             <a
               href={`https://sepolia.basescan.org/address/${CONTRACT_ADDRESS}`}
@@ -161,23 +174,33 @@ export default function SystemStatusPage() {
       </div>
 
       {/* Architecture Topology Overview */}
-      <Card className="border-slate-800 bg-[#0F172A] p-4 text-xs">
+      <Card className="border-slate-800 bg-cyber-card p-4 text-xs">
         <h4 className="font-semibold text-white mb-2">Cấu Trúc Luồng Dữ Liệu Tự Động Hóa (Escrow Flow Architecture):</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-[11px] text-slate-300">
-          <div className="rounded border border-slate-800 bg-[#080C14] p-3 space-y-1">
+          <div className="rounded border border-slate-800 bg-cyber-bg p-3 space-y-1">
             <span className="text-cyan-400 font-bold">1. Digital Asset Vault:</span>
             <p className="text-slate-400">AES-256-GCM + IV + SHA-256 hash lưu tại PostgreSQL & Webhook PayOS trigger.</p>
           </div>
-          <div className="rounded border border-slate-800 bg-[#080C14] p-3 space-y-1">
+          <div className="rounded border border-slate-800 bg-cyber-bg p-3 space-y-1">
             <span className="text-amber-400 font-bold">2. sVLM Vision Pipeline:</span>
             <p className="text-slate-400">Qwen2-VL phân tích ảnh bằng chứng lỗi unbox + Outlines JSON FSM guardrails.</p>
           </div>
-          <div className="rounded border border-slate-800 bg-[#080C14] p-3 space-y-1">
+          <div className="rounded border border-slate-800 bg-cyber-bg p-3 space-y-1">
             <span className="text-emerald-400 font-bold">3. Atomic Relayer:</span>
             <p className="text-slate-400">Viem async queue serialised nonce broadcast trực tiếp Base Sepolia Smart Contract.</p>
           </div>
         </div>
       </Card>
+
+      <SolanaFaucetHubModal
+        isOpen={isFaucetHubOpen}
+        onClose={() => setIsFaucetHubOpen(false)}
+        relayerAddress={
+          process.env.NEXT_PUBLIC_SOLANA_RELAYER_ADDRESS ||
+          'F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn'
+        }
+        onSuccessFund={() => fetchStatus(true)}
+      />
     </div>
   );
 }

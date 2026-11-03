@@ -26,13 +26,23 @@ import {
   ANCHOR_DISCRIMINATORS,
   DealWithDualChain,
 } from './relayer.types';
+import {
+  DEFAULT_SOLANA_RELAYER_PUBLIC_KEY,
+  parseSolanaKeypair,
+  resolveSolanaRelayerPublicKey,
+} from './solana-keypair.util';
 
 @Injectable()
 export class UnifiedRelayerService implements OnModuleInit {
   private readonly logger = new Logger(UnifiedRelayerService.name);
   private solanaConnection: Connection | null = null;
-  private solanaProgramId!: PublicKey;
-  private solanaRelayerKeypair!: Keypair;
+  private solanaProgramId: PublicKey = new PublicKey(
+    DEFAULT_SOLANA_RELAYER_PUBLIC_KEY,
+  );
+  private solanaRelayerKeypair: Keypair | null = null;
+  private solanaRelayerPublicKey: PublicKey = new PublicKey(
+    DEFAULT_SOLANA_RELAYER_PUBLIC_KEY,
+  );
 
   /** In-flight locks per deal to prevent race conditions & double-spends */
   private readonly inFlightLocks = new Map<string, AsyncMutex>();
@@ -47,26 +57,28 @@ export class UnifiedRelayerService implements OnModuleInit {
       process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
     const programIdStr =
       process.env.SOLANA_PROGRAM_ID ||
-      'TrUsT11111111111111111111111111111111111111';
+      process.env.SOLANA_RELAYER_PUBLIC_KEY ||
+      DEFAULT_SOLANA_RELAYER_PUBLIC_KEY;
 
     this.solanaProgramId = new PublicKey(programIdStr);
     this.solanaConnection = new Connection(rpcUrl, 'confirmed');
 
     const relayerSecret = process.env.SOLANA_RELAYER_PRIVATE_KEY;
-    if (relayerSecret) {
-      try {
-        const decoded = bs58.decode(relayerSecret);
-        this.solanaRelayerKeypair = Keypair.fromSecretKey(decoded);
-      } catch {
-        this.solanaRelayerKeypair = Keypair.generate();
-      }
-    } else {
-      this.solanaRelayerKeypair = Keypair.generate();
-    }
-
-    this.logger.log(
-      `Unified Relayer initialized — Solana Relayer Pubkey: ${this.solanaRelayerKeypair.publicKey.toBase58()}`,
+    this.solanaRelayerKeypair = parseSolanaKeypair(relayerSecret);
+    this.solanaRelayerPublicKey = resolveSolanaRelayerPublicKey(
+      process.env.SOLANA_RELAYER_PUBLIC_KEY,
+      this.solanaRelayerKeypair,
     );
+
+    if (this.solanaRelayerKeypair) {
+      this.logger.log(
+        `Unified Relayer initialized with signing authority — Solana Relayer Pubkey: ${this.solanaRelayerPublicKey.toBase58()}`,
+      );
+    } else {
+      this.logger.warn(
+        `Unified Relayer initialized in read/monitor mode — Solana Relayer Pubkey: ${this.solanaRelayerPublicKey.toBase58()}`,
+      );
+    }
   }
 
   /**
@@ -278,12 +290,13 @@ export class UnifiedRelayerService implements OnModuleInit {
   private async executeSolanaStartInspection(deal: DealWithDualChain): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
     const { escrowPda } = this.derivePdaAddresses(dealIdRaw);
+    const relayerPubkey = this.solanaRelayerPublicKey;
 
     const instruction = new TransactionInstruction({
       programId: this.solanaProgramId,
       keys: [
         { pubkey: escrowPda, isSigner: false, isWritable: true },
-        { pubkey: this.solanaRelayerKeypair.publicKey, isSigner: true, isWritable: false },
+        { pubkey: relayerPubkey, isSigner: true, isWritable: false },
       ],
       data: ANCHOR_DISCRIMINATORS.start_inspection,
     });
@@ -294,7 +307,8 @@ export class UnifiedRelayerService implements OnModuleInit {
   private async executeSolanaSettle(deal: DealWithDualChain): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
     const { escrowPda, vaultPda } = this.derivePdaAddresses(dealIdRaw);
-    const sellerPubkey = new PublicKey(deal.sellerWallet || this.solanaRelayerKeypair.publicKey);
+    const relayerPubkey = this.solanaRelayerPublicKey;
+    const sellerPubkey = new PublicKey(deal.sellerWallet || relayerPubkey);
 
     const instruction = new TransactionInstruction({
       programId: this.solanaProgramId,
@@ -302,7 +316,7 @@ export class UnifiedRelayerService implements OnModuleInit {
         { pubkey: escrowPda, isSigner: false, isWritable: true },
         { pubkey: vaultPda, isSigner: false, isWritable: true },
         { pubkey: sellerPubkey, isSigner: false, isWritable: true },
-        { pubkey: this.solanaRelayerKeypair.publicKey, isSigner: true, isWritable: false },
+        { pubkey: relayerPubkey, isSigner: true, isWritable: false },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       ],
       data: ANCHOR_DISCRIMINATORS.settle,
@@ -317,8 +331,9 @@ export class UnifiedRelayerService implements OnModuleInit {
   ): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
     const { escrowPda, vaultPda } = this.derivePdaAddresses(dealIdRaw);
-    const buyerPubkey = new PublicKey(deal.buyerWallet || this.solanaRelayerKeypair.publicKey);
-    const sellerPubkey = new PublicKey(deal.sellerWallet || this.solanaRelayerKeypair.publicKey);
+    const relayerPubkey = this.solanaRelayerPublicKey;
+    const buyerPubkey = new PublicKey(deal.buyerWallet || relayerPubkey);
+    const sellerPubkey = new PublicKey(deal.sellerWallet || relayerPubkey);
 
     const dataBuffer = Buffer.concat([
       ANCHOR_DISCRIMINATORS.resolve_dispute,
@@ -332,7 +347,7 @@ export class UnifiedRelayerService implements OnModuleInit {
         { pubkey: vaultPda, isSigner: false, isWritable: true },
         { pubkey: buyerPubkey, isSigner: false, isWritable: true },
         { pubkey: sellerPubkey, isSigner: false, isWritable: true },
-        { pubkey: this.solanaRelayerKeypair.publicKey, isSigner: true, isWritable: false },
+        { pubkey: relayerPubkey, isSigner: true, isWritable: false },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       ],
       data: dataBuffer,
@@ -346,6 +361,13 @@ export class UnifiedRelayerService implements OnModuleInit {
   ): Promise<string> {
     if (!this.solanaConnection) {
       return `mock_solana_tx_${Date.now()}`;
+    }
+
+    if (!this.solanaRelayerKeypair) {
+      this.logger.warn(
+        `SOLANA_RELAYER_PRIVATE_KEY is not configured. Transaction broadcast simulated for: ${this.solanaRelayerPublicKey.toBase58()}`,
+      );
+      return `solana_sig_simulated_${bs58.encode(Buffer.from(Date.now().toString()))}`;
     }
 
     try {

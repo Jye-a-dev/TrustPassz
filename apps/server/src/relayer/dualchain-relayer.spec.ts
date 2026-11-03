@@ -84,6 +84,7 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
   };
 
   beforeAll(async () => {
+    process.env.SOLANA_WATCHER_ENABLED = 'false';
     moduleRef = await Test.createTestingModule({
       providers: [
         SolanaWatcherService,
@@ -96,6 +97,8 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
     prisma = moduleRef.get<PrismaService>(PrismaService);
     solanaWatcher = moduleRef.get<SolanaWatcherService>(SolanaWatcherService);
     unifiedRelayer = moduleRef.get<UnifiedRelayerService>(UnifiedRelayerService);
+    unifiedRelayer.onModuleInit();
+    solanaWatcher.onModuleInit();
   });
 
   afterAll(async () => {

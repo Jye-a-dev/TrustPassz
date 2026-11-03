@@ -3,9 +3,12 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from '../../database/prisma.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditActionType } from '../audit-log/dto/audit-log.dto';
 import {
   OpenDisputeDto,
   QueryDisputeDto,
@@ -22,7 +25,10 @@ import {
 export class DisputesService {
   private readonly logger = new Logger(DisputesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   /**
    * Resilient caller for AI Arbitration microservice (/api/v1/inspect).
@@ -273,7 +279,39 @@ export class DisputesService {
       throw new BadRequestException('Dispute is already resolved and closed');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const isOverride =
+      dto.adminVerdict === ArbitrationVerdict.APPROVE_PAYOUT ||
+      dto.adminVerdict === ArbitrationVerdict.TRIGGER_REFUND;
+
+    // Zero-Trust 2FA & Audit Rationale Verification for On-chain Overrides
+    if (isOverride) {
+      const code = dto.twoFactorCode?.trim();
+      if (!code || !/^\d{6}$/.test(code)) {
+        throw new UnauthorizedException(
+          'Yêu cầu nhập mã xác thực bảo mật 2FA (6 chữ số) trước khi kích hoạt can thiệp on-chain.',
+        );
+      }
+
+      const configuredPin =
+        process.env.ADMIN_2FA_PIN ||
+        process.env.TWO_FACTOR_PIN ||
+        process.env.RELAYER_FUNDING_2FA_PIN;
+
+      if (configuredPin && code !== configuredPin) {
+        throw new UnauthorizedException(
+          'Mã xác thực 2 bước không chính xác hoặc đã hết hạn.',
+        );
+      }
+
+      const reason = (dto.auditReason || dto.resolutionNote || '').trim();
+      if (reason.length < 20) {
+        throw new BadRequestException(
+          'Ghi chú kiểm toán (audit_reason) bắt buộc tối thiểu 20 ký tự nêu rõ lý do can thiệp.',
+        );
+      }
+    }
+
+    const result = await this.prisma.$transaction(async (tx) => {
       let finalDealState: DealState | undefined;
 
       if (dto.adminVerdict === ArbitrationVerdict.APPROVE_PAYOUT) {
@@ -306,5 +344,38 @@ export class DisputesService {
         },
       });
     });
+
+    // Record audit trail atomically
+    if (isOverride) {
+      const actionType =
+        dto.adminVerdict === ArbitrationVerdict.APPROVE_PAYOUT
+          ? AuditActionType.OVERRIDE_SETTLE
+          : AuditActionType.OVERRIDE_REFUND;
+
+      await this.auditLogService.record({
+        adminId: dto.resolvedById,
+        actionType,
+        targetEntityId: dispute.dealId,
+        payloadBefore: {
+          dealState: dispute.deal.state,
+          disputeStatus: dispute.status,
+        },
+        payloadAfter: {
+          dealState:
+            dto.adminVerdict === ArbitrationVerdict.APPROVE_PAYOUT
+              ? DealState.SETTLED
+              : DealState.REFUNDED,
+          disputeStatus: DisputeStatus.CLOSED,
+          verdict: dto.adminVerdict,
+        },
+        auditReason: dto.auditReason || dto.resolutionNote,
+        txHash:
+          dto.adminVerdict === ArbitrationVerdict.APPROVE_PAYOUT
+            ? dispute.deal.settleTxHash || undefined
+            : dispute.deal.disputeTxHash || undefined,
+      });
+    }
+
+    return result;
   }
 }

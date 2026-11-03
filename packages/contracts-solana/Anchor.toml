@@ -7,10 +7,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-trustpassz_escrow = "TrUsT11111111111111111111111111111111111111"
+trustpassz_escrow = "F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn"
 
 [programs.devnet]
-trustpassz_escrow = "TrUsT11111111111111111111111111111111111111"
+trustpassz_escrow = "F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn"
 
 [registry]
 url = "https://api.apr.dev"

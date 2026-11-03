@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 
-declare_id!("TrUsT11111111111111111111111111111111111111");
+declare_id!("F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn");
 
 pub const DELIVERY_TIMEOUT: i64 = 48 * 3600; // 48 hours delivery grace period
 

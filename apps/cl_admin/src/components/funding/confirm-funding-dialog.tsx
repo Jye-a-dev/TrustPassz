@@ -32,10 +32,14 @@ import { Input } from "@/components/ui/input";
 import { apiClient } from "@/lib/api-client";
 import type { ConfirmFundingResult } from "@/types";
 
+const DEFAULT_RELAYER_ADDRESS =
+  process.env.NEXT_PUBLIC_SOLANA_RELAYER_ADDRESS ||
+  "F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn";
+
 interface ConfirmFundingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  relayerAddress: string;
+  relayerAddress?: string;
   amountSol: number;
   network?: string;
   onSuccess: (result: ConfirmFundingResult) => void;
@@ -44,11 +48,12 @@ interface ConfirmFundingDialogProps {
 export function ConfirmFundingDialog({
   open,
   onOpenChange,
-  relayerAddress,
+  relayerAddress = DEFAULT_RELAYER_ADDRESS,
   amountSol,
   network = "devnet",
   onSuccess,
 }: ConfirmFundingDialogProps) {
+  const effectiveRelayerAddress = relayerAddress || DEFAULT_RELAYER_ADDRESS;
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
 
@@ -103,7 +108,7 @@ export function ConfirmFundingDialog({
 
     try {
       // 1. Construct Solana SystemProgram transfer
-      const recipientPubKey = new PublicKey(relayerAddress);
+      const recipientPubKey = new PublicKey(effectiveRelayerAddress);
       const transferIx = SystemProgram.transfer({
         fromPubkey: publicKey,
         toPubkey: recipientPubKey,
@@ -222,7 +227,7 @@ export function ConfirmFundingDialog({
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Ví đích (Relayer):</span>
               <span className="font-mono font-medium text-cyan-400">
-                {truncateAddress(relayerAddress)}
+                {truncateAddress(effectiveRelayerAddress)}
               </span>
             </div>
 

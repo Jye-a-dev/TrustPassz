@@ -117,9 +117,9 @@ export function loadBalanceMonitorConfig(
         '[BalanceMonitorConfig] SOLANA_RELAYER_PUBLIC_KEY is required in production.',
       );
     }
-    rawSolanaKey = 'TrUsT11111111111111111111111111111111111111';
+    rawSolanaKey = 'F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn';
     logger.warn(
-      `[BalanceMonitorConfig] SOLANA_RELAYER_PUBLIC_KEY missing. Using development key: ${rawSolanaKey}`,
+      `[BalanceMonitorConfig] SOLANA_RELAYER_PUBLIC_KEY missing. Using development Solflare Devnet key: ${rawSolanaKey}`,
     );
   }
 

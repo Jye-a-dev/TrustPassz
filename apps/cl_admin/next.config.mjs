@@ -32,8 +32,33 @@ const nextConfig = {
   },
   reactStrictMode: true,
   experimental: {
-    optimizePackageImports: [],
-    cpus: 1,
+    optimizePackageImports: [
+      "lucide-react",
+      "@solana/web3.js",
+      "@solana/wallet-adapter-react",
+      "@solana/wallet-adapter-react-ui",
+      "recharts",
+      "motion",
+    ],
+  },
+  async redirects() {
+    return [
+      {
+        source: '/admin/users',
+        destination: '/users',
+        permanent: true,
+      },
+      {
+        source: '/admin/funding',
+        destination: '/funding',
+        permanent: true,
+      },
+      {
+        source: '/admin/system-status',
+        destination: '/system-status',
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [
@@ -53,6 +78,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
       },
     ],
   },
