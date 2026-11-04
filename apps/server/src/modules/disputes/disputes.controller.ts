@@ -57,6 +57,18 @@ export class DisputesController {
     return this.disputesService.findAll(query);
   }
 
+  @Get('deal/:dealId')
+  @ApiOperation({
+    summary: 'Get dispute details by deal UUID',
+    description:
+      'Returns latest dispute audit log, AI confidence score, and arbitration status for a given deal.',
+  })
+  @ApiParam({ name: 'dealId', description: 'Deal UUID v4' })
+  @ApiResponse({ status: 200, description: 'Dispute details or null.' })
+  async findByDeal(@Param('dealId', new ParseUUIDPipe()) dealId: string) {
+    return this.disputesService.findByDealId(dealId);
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Get dispute details, AI reasoning, and evidence by UUID',

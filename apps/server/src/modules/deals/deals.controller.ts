@@ -134,9 +134,9 @@ export class DealsController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateDealDto: UpdateDealDto,
-    @CurrentUser('userId') _userId: string,
+    @CurrentUser() user: RequestUser,
   ) {
-    return this.dealsService.update(id, updateDealDto);
+    return this.dealsService.update(id, updateDealDto, user);
   }
 
   @Delete(':id')

@@ -31,10 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (provider == 'GOOGLE') {
-        // Authenticate with Google ID Token via backend verification
-        await AuthService.instance.verifyAndAuthenticate(
-          provider: 'GOOGLE',
-          token: 'google_oauth_bearer_credential',
+        // Google OAuth requires a valid 3-segment JWT ID token from GoogleSignin SDK
+        throw Exception(
+          'Google OAuth yêu cầu chuỗi JWT ID Token thật (3 segments: Header.Payload.Signature). '
+          'Vui lòng cấu hình GoogleSignin SDK hoặc sử dụng chế độ Đăng Nhập DEV API bên dưới.',
         );
       } else if (provider == 'SOLANA') {
         await AuthService.instance.verifyAndAuthenticate(

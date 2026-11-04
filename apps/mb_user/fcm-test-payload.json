@@ -1,0 +1,129 @@
+{
+  "$schema": "https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages",
+  "scenarios": {
+    "scenario_1_deal_or_offer_updated": {
+      "description": "Kịch bản 1: Thông báo Deal mới hoặc đối tác thay đổi mức giá trên Bargain Slider",
+      "message": {
+        "token": "DEVICE_FCM_TOKEN_PLACEHOLDER",
+        "notification": {
+          "title": "Đề xuất giá mới từ đối tác",
+          "body": "Người mua đã cập nhật mức giá thỏa thuận xuống 2,450,000 VND trên Bargain Slider."
+        },
+        "data": {
+          "type": "OFFER_UPDATED",
+          "dealId": "d798a623-289b-4467-bc18-2e21b711a19f",
+          "dealTitle": "Tài khoản Cloud Enterprise - Tier 3",
+          "price": "2450000",
+          "proposedBy": "buyer_0x4b21",
+          "route": "/deal-room",
+          "action": "VIEW_DEAL"
+        },
+        "android": {
+          "priority": "high",
+          "notification": {
+            "channel_id": "trustpassz_escrow_alerts",
+            "color": "#10B981",
+            "icon": "ic_notification",
+            "default_sound": true,
+            "default_vibrate_timings": true
+          }
+        },
+        "apns": {
+          "payload": {
+            "aps": {
+              "alert": {
+                "title": "Đề xuất giá mới từ đối tác",
+                "body": "Người mua đã cập nhật mức giá thỏa thuận xuống 2,450,000 VND trên Bargain Slider."
+              },
+              "badge": 1,
+              "sound": "default"
+            }
+          }
+        }
+      }
+    },
+    "scenario_2_deposit_success": {
+      "description": "Kịch bản 2: Thông báo tức thì khi Webhook VietQR thanh toán cọc thành công (DEPOSITED)",
+      "message": {
+        "token": "DEVICE_FCM_TOKEN_PLACEHOLDER",
+        "notification": {
+          "title": "Xác nhận cọc tiền VietQR thành công",
+          "body": "Khoản ký quỹ 5,000,000 VND đã vào hợp đồng bảo chứng. Người bán chuẩn bị bàn giao tài sản."
+        },
+        "data": {
+          "type": "DEPOSIT_SUCCESS",
+          "dealId": "d798a623-289b-4467-bc18-2e21b711a19f",
+          "dealTitle": "Tài khoản Cloud Enterprise - Tier 3",
+          "amount": "5000000",
+          "txHash": "0x9812f8a42cbe81248011fa9230578129712a8398104812f0",
+          "status": "DEPOSITED",
+          "route": "/deal-room",
+          "action": "INSPECT_ESCROW"
+        },
+        "android": {
+          "priority": "high",
+          "notification": {
+            "channel_id": "trustpassz_escrow_alerts",
+            "color": "#10B981",
+            "icon": "ic_notification",
+            "default_sound": true,
+            "default_vibrate_timings": true
+          }
+        },
+        "apns": {
+          "payload": {
+            "aps": {
+              "alert": {
+                "title": "Xác nhận cọc tiền VietQR thành công",
+                "body": "Khoản ký quỹ 5,000,000 VND đã vào hợp đồng bảo chứng. Người bán chuẩn bị bàn giao tài sản."
+              },
+              "badge": 1,
+              "sound": "default"
+            }
+          }
+        }
+      }
+    },
+    "scenario_3_vault_unlocked": {
+      "description": "Kịch bản 3: Kích hoạt đồng kiểm - Người mua giải mã Digital Vault AES-256-GCM và đếm ngược inspection window",
+      "message": {
+        "token": "DEVICE_FCM_TOKEN_PLACEHOLDER",
+        "notification": {
+          "title": "Két số đã mở - Bắt đầu đồng kiểm",
+          "body": "Người mua đã giải mã Vault AES-256-GCM. Cửa sổ nghiệm thu 24 giờ bắt đầu đếm ngược."
+        },
+        "data": {
+          "type": "VAULT_UNLOCKED",
+          "dealId": "d798a623-289b-4467-bc18-2e21b711a19f",
+          "vaultId": "vlt_8921bca9104",
+          "inspectionDeadline": "2026-11-02T16:30:00.000Z",
+          "route": "/vault",
+          "action": "START_INSPECTION"
+        },
+        "android": {
+          "priority": "high",
+          "notification": {
+            "channel_id": "trustpassz_escrow_alerts",
+            "color": "#10B981",
+            "icon": "ic_notification",
+            "default_sound": true,
+            "default_vibrate_timings": true
+          }
+        },
+        "apns": {
+          "payload": {
+            "aps": {
+              "alert": {
+                "title": "Két số đã mở - Bắt đầu đồng kiểm",
+                "body": "Người mua đã giải mã Vault AES-256-GCM. Cửa sổ nghiệm thu 24 giờ bắt đầu đếm ngược."
+              },
+              "badge": 1,
+              "sound": "default"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

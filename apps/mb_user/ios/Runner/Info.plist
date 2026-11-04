@@ -66,5 +66,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>TrustPassz yêu cầu xác thực FaceID / TouchID để mở khóa Két số Digital Vault và xác thực giao dịch ký quỹ an toàn.</string>
 </dict>
 </plist>

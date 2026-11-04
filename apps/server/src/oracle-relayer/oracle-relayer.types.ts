@@ -14,6 +14,7 @@ export interface TxResult {
 }
 
 export interface ViemPublicClient {
+  readContract(args: any): Promise<any>;
   simulateContract(args: any): Promise<unknown>;
   getTransactionCount(args: {
     address: `0x${string}`;

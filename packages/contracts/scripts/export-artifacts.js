@@ -30,6 +30,13 @@ const TARGET_PACKAGES = [
     envKey: "NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS",
   },
   {
+    name: "cl_admin",
+    abiDir: path.join(MONOREPO_ROOT, "apps", "cl_admin", "src", "abi"),
+    envFile: path.join(MONOREPO_ROOT, "apps", "cl_admin", ".env.local"),
+    envExample: path.join(MONOREPO_ROOT, "apps", "cl_admin", ".env.example"),
+    envKey: "NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS",
+  },
+  {
     name: "mb_user",
     abiDir: path.join(MONOREPO_ROOT, "apps", "mb_user", "src", "abi"),
     envFile: path.join(MONOREPO_ROOT, "apps", "mb_user", ".env"),
@@ -61,7 +68,7 @@ function resolveContractAddress() {
   }
 
   // Fallback to active Base Sepolia deployed contract
-  return "0xef976eb14fdba8cb722789b451e2b9f903005c26";
+  return "0x165B47291B87569b91696DCE6f1207eE15C9f783";
 }
 
 function resolveAbi() {

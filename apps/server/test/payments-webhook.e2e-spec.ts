@@ -62,7 +62,7 @@ describe('Payments & Webhooks (e2e)', () => {
     jwtService = moduleFixture.get<JwtService>(JwtService);
     authToken = await jwtService.signAsync({
       sub: '22222222-2222-4222-a222-222222222222',
-      email: 'buyer@trustpassz.io',
+      email: 'buyer@test.internal',
       role: 'USER',
     });
   });

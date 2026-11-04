@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -6,13 +6,15 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { CountdownTimer } from "@/components/deals/countdown-timer";
-import { decryptSecret } from "@/lib/crypto";
+import { decryptVaultPayload, hashContent, IntegrityViolationException } from "@/lib/crypto";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { VaultHeader } from "@/components/vault/vault-header";
 import { VaultUnlockForm } from "@/components/vault/vault-unlock-form";
 import { VaultContentViewer } from "@/components/vault/vault-content-viewer";
 import { VaultActions } from "@/components/vault/vault-actions";
+import { TransferSuccessModal } from "@/components/deals/transfer-success-modal";
+import { useDealRealtimeModal } from "@/hooks/use-deal-realtime-modal";
 import type { DealDetail, VaultDigitalAsset } from "@/components/vault/vault.types";
 
 export default function DigitalVaultPage() {
@@ -36,6 +38,28 @@ export default function DigitalVaultPage() {
   // Clipboard self-destruct state (30 seconds)
   const [clipboardCountdown, setClipboardCountdown] = React.useState<number | null>(null);
   const clipboardTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Realtime hook for instant zero-reload settlement feedback
+  const {
+    isOpen: isSuccessModalOpen,
+    setIsOpen: setIsSuccessModalOpen,
+    modalData,
+    triggerSettlementSuccess,
+  } = useDealRealtimeModal({
+    dealId,
+    initialDeal: deal
+      ? {
+          id: deal.id,
+          amount: deal.amount,
+          currency: deal.currency,
+          state: deal.state,
+          title: deal.title,
+        }
+      : null,
+    onDealStateChange: (newState) => {
+      setDeal((prev) => (prev ? { ...prev, state: newState as DealDetail["state"] } : null));
+    },
+  });
 
   // Fetch deal details
   const loadDeal = React.useCallback(async () => {
@@ -70,7 +94,7 @@ export default function DigitalVaultPage() {
     };
   }, []);
 
-  // Handle Client-Side AES-256-GCM Decryption
+  // Handle Client-Side AES-256-GCM Decryption with Strict Zero-Garbage Policy
   const handleUnlockAndDecrypt = async () => {
     setIsUnlocking(true);
     try {
@@ -106,34 +130,60 @@ export default function DigitalVaultPage() {
         throw new Error("Không tìm thấy thông tin bàn giao được khóa trong kho lưu trữ.");
       }
 
+      const trimmedPassphrase = passphrase.trim();
+      if (!trimmedPassphrase) {
+        throw new Error("Chưa nhận được khóa mã hóa từ người bán hoặc chưa nhập mật khẩu mở khóa.");
+      }
+
       let decrypted: string;
       try {
-        decrypted = await decryptSecret(
+        decrypted = await decryptVaultPayload(
           {
             encryptedContent: assetPayload.encryptedContent,
             encryptionIv: assetPayload.encryptionIv,
             authTag: assetPayload.authTag,
             expectedHash: assetPayload.contentHash,
           },
-          passphrase
+          trimmedPassphrase,
+          dealId
         );
-      } catch {
-        // Attempt UTF-8 base64 decode if payload was stored base64 plaintext
-        try {
-          decrypted = atob(assetPayload.encryptedContent);
-        } catch {
-          throw new Error("Mật khẩu mở khóa nhận hàng không đúng hoặc thông tin đã bị thay đổi.");
+      } catch (decryptErr: unknown) {
+        setIntegrityVerified(false);
+        setDecryptedPlaintext(null);
+        setIsPlaintextVisible(false);
+        if (decryptErr instanceof IntegrityViolationException) {
+          throw new Error("Cảnh báo toàn vẹn: Dữ liệu bàn giao đã bị can thiệp hoặc sai lệch SHA-256!");
+        }
+        // Loại bỏ hoàn toàn fallback atob(encryptedContent) để tránh vỡ font/ký tự rác
+        throw new Error("Mật khẩu mở khóa không chính xác hoặc dữ liệu mã hóa đã bị hỏng.");
+      }
+
+      // Strictly verify SHA-256 hash match against assetPayload.contentHash
+      let isVerified = false;
+      if (assetPayload.contentHash && assetPayload.contentHash.trim().length > 0) {
+        const computedHash = await hashContent(decrypted);
+        isVerified = computedHash.toLowerCase() === assetPayload.contentHash.trim().toLowerCase();
+        if (!isVerified) {
+          setIntegrityVerified(false);
+          setDecryptedPlaintext(null);
+          setIsPlaintextVisible(false);
+          throw new IntegrityViolationException("Chữ ký SHA-256 không trùng khớp với mã gốc lưu trên chuỗi!");
         }
       }
 
-      setIntegrityVerified(true);
+      setIntegrityVerified(isVerified);
       setDecryptedPlaintext(decrypted);
       setIsPlaintextVisible(true);
 
       toast.success("Mở khóa nhận hàng thành công!", {
-        description: "Thông tin bàn giao hiển thị an toàn trên thiết bị của bạn.",
+        description: isVerified
+          ? "Đã xác thực tính toàn vẹn SHA-256: Dữ liệu nguyên vẹn 100%."
+          : "Thông tin bàn giao hiển thị an toàn trên thiết bị của bạn.",
       });
     } catch (err: unknown) {
+      setIntegrityVerified(false);
+      setDecryptedPlaintext(null);
+      setIsPlaintextVisible(false);
       const msg = err instanceof Error ? err.message : "Mở khóa thất bại";
       toast.error(`Lỗi mở kho lưu trữ: ${msg}`);
     } finally {
@@ -145,9 +195,8 @@ export default function DigitalVaultPage() {
   const handleCopyWithSelfDestruct = () => {
     if (!decryptedPlaintext) return;
 
-    navigator.clipboard.writeText(decryptedPlaintext);
-    toast.success("Đã sao chép vào bộ nhớ tạm! Tự động hủy sau 30 giây.");
-
+    void navigator.clipboard.writeText(decryptedPlaintext);
+    toast.success("Đã sao chép nội dung bàn giao vào bộ nhớ tạm! Tự động hủy sau 30 giây.");
     setClipboardCountdown(30);
     if (clipboardTimerRef.current) clearInterval(clipboardTimerRef.current);
 
@@ -156,7 +205,7 @@ export default function DigitalVaultPage() {
         if (prev === null || prev <= 1) {
           if (clipboardTimerRef.current) clearInterval(clipboardTimerRef.current);
           try {
-            navigator.clipboard.writeText("");
+            void navigator.clipboard.writeText("");
             toast.info("Đã xóa sạch bộ nhớ tạm (Clipboard Cleared) vì lý do an toàn.");
           } catch {
             // Ignore if focus lost
@@ -170,19 +219,28 @@ export default function DigitalVaultPage() {
 
   // Decision 1: Confirm Receipt and Settle Escrow
   const handleSettleDeal = async () => {
-    const confirmed = window.confirm(
-      "Xác nhận bạn đã nhận đúng sản phẩm? Tiền được giữ an toàn sẽ chuyển ngay cho người bán."
-    );
-    if (!confirmed) return;
-
     setIsSettling(true);
     try {
-      await apiClient(`/api/v1/deals/${dealId}/settle`, {
+      const settleRes = await apiClient<{
+        success?: boolean;
+        txHash?: string;
+        state?: string;
+      }>(`/api/v1/deals/${dealId}/settle`, {
         method: "POST",
       });
 
-      toast.success("Đã chuyển tiền thành công cho người bán! Giao dịch hoàn tất.");
+      const txHash = settleRes?.txHash || (deal?.id ? `SETTLE-${deal.id.slice(0, 8)}` : undefined);
+
       setDeal((prev) => (prev ? { ...prev, state: "SETTLED" } : null));
+
+      triggerSettlementSuccess({
+        amount: deal?.amount,
+        dealTitle: deal?.title,
+        currency: deal?.currency || "VND",
+        txHash,
+      });
+
+      toast.success("Đã chuyển tiền thành công cho người bán! Giao dịch hoàn tất.");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Lỗi chuyển tiền";
       toast.error(`Thao tác thất bại: ${msg}`);
@@ -229,6 +287,26 @@ export default function DigitalVaultPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Transfer Success Modal for Payout / Settlement */}
+      <TransferSuccessModal
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+        dealId={dealId}
+        dealTitle={modalData?.dealTitle || deal.title}
+        amount={modalData?.amount ?? deal.amount}
+        currency={modalData?.currency || deal.currency || "VND"}
+        txHash={modalData?.txHash}
+        chainType={modalData?.chainType}
+        timestamp={modalData?.timestamp}
+        type="SETTLEMENT"
+        title="Giải ngân thành công"
+        description="Khoản thanh toán đã được giải ngân an toàn đến người bán. Giao dịch ký quỹ hoàn tất."
+        primaryActionText="Xem danh sách giao dịch"
+        onPrimaryAction={() => router.push("/user/deals")}
+        secondaryActionText="Đóng"
+        onSecondaryAction={() => setIsSuccessModalOpen(false)}
+      />
+
       <VaultHeader dealId={dealId} deal={deal} isSettled={isSettled} />
 
       {/* Inspection Window Countdown Card */}

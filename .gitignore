@@ -77,6 +77,12 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 coverage/
 .nyc_output/
 
+# Generated CI Artifacts & Reports (runtime-generated, not committed)
+artifacts/
+
+# Temporary backup directories
+.backup_task_a11/
+
 # IDEs & System files
 .DS_Store
 Thumbs.db

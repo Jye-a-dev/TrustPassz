@@ -11,16 +11,21 @@ import { DealVaultStatusCard } from "@/components/deals/deal-vault-status-card";
 import { DealSellerPanel } from "@/components/deals/deal-seller-panel";
 import { DealRoomCta } from "@/components/deals/deal-room-cta";
 import { DealEditDialog } from "@/components/deals/deal-edit-dialog";
+import { TransferSuccessModal } from "@/components/deals/transfer-success-modal";
+import { useDealRealtimeModal } from "@/hooks/use-deal-realtime-modal";
 import {
   type DealDetail,
+  type DealState,
+  type BuyerBargainStatus,
   STATE_CONFIG,
 } from "@/components/deals/deal-room.types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/lib/auth-store";
+import { supabase } from "@/lib/supabase-client";
 
-export type { DealState, DealDetail } from "@/components/deals/deal-room.types";
+export type { DealState, DealDetail, BuyerBargainStatus } from "@/components/deals/deal-room.types";
 
 export default function DealRoomPage() {
   const params = useParams();
@@ -33,6 +38,41 @@ export default function DealRoomPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
 
+  // Bargain flow states for Buyer
+  const [bargainStatus, setBargainStatus] = React.useState<BuyerBargainStatus>("IDLE");
+  const [proposedPrice, setProposedPrice] = React.useState<number | null>(null);
+
+  const currentUserId = user?.id || "";
+  const isBuyer = Boolean(currentUserId && currentUserId === deal?.buyer?.id);
+  const isSeller = Boolean(currentUserId && currentUserId === deal?.seller?.id);
+
+  // Realtime modal hook for settlement
+  const {
+    isOpen: isSuccessModalOpen,
+    setIsOpen: setIsSuccessModalOpen,
+    modalData,
+  } = useDealRealtimeModal({
+    dealId,
+    initialDeal: deal
+      ? {
+          id: deal.id,
+          amount: deal.amount,
+          currency: deal.currency,
+          state: deal.state,
+          title: deal.title,
+        }
+      : null,
+    onDealStateChange: (newState) => {
+      setDeal((prev) => (prev ? { ...prev, state: newState as DealState } : prev));
+      toast.success(
+        newState === "SETTLED"
+          ? "Giao dịch đã được giải ngân thành công!"
+          : "Két bảo chứng đã xác nhận nạp tiền an toàn!"
+      );
+    },
+  });
+
+  // Fetch deal details
   React.useEffect(() => {
     let isMounted = true;
     if (!dealId) return;
@@ -67,46 +107,139 @@ export default function DealRoomPage() {
     };
   }, [dealId]);
 
-  const currentUserId = user?.id || "";
-  const isBuyer = Boolean(currentUserId && currentUserId === deal?.buyer?.id);
-  const isSeller = Boolean(currentUserId && currentUserId === deal?.seller?.id);
+  // Hydrate user's current offer for this Deal upon mounting to survive page reload
+  const fetchExistingOffer = React.useCallback(async () => {
+    if (!dealId || !currentUserId || isSeller) return;
+    try {
+      const res = await apiClient<{
+        data?: Array<{
+          id: string;
+          status: "PENDING" | "ACCEPTED" | "REJECTED";
+          offeredPrice: number | string;
+        }>;
+      }>(`/api/v1/bargains?dealId=${dealId}&buyerId=${currentUserId}`);
+
+      const offers = res?.data || [];
+      if (offers.length > 0) {
+        const latest = offers[0];
+        setProposedPrice(Number(latest.offeredPrice));
+        if (latest.status === "PENDING") {
+          setBargainStatus("PENDING_SELLER_CONFIRMATION");
+        } else if (latest.status === "ACCEPTED") {
+          setBargainStatus("BARGAIN_ACCEPTED");
+        } else if (latest.status === "REJECTED") {
+          setBargainStatus("BARGAIN_REJECTED");
+        }
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+  }, [dealId, currentUserId, isSeller]);
+
+  React.useEffect(() => {
+    void fetchExistingOffer();
+  }, [fetchExistingOffer]);
+
+  // Listen to Supabase Realtime channel deal-room:${deal.id} for bargain decisions
+  React.useEffect(() => {
+    if (!deal?.id) return;
+    const channelName = `deal-room:${deal.id}`;
+    const channel = supabase.channel(channelName, {
+      config: { broadcast: { self: false } },
+    });
+
+    channel
+      .on("broadcast", { event: "bargain:offer_accepted" }, (msg) => {
+        const payload = msg.payload as {
+          dealId?: string;
+          offeredPrice?: number;
+        };
+        if (payload && (!payload.dealId || payload.dealId === deal.id)) {
+          if (payload.offeredPrice) {
+            const acceptedVal = Number(payload.offeredPrice);
+            setProposedPrice(acceptedVal);
+            setDeal((prev) => (prev ? { ...prev, amount: acceptedVal } : prev));
+          }
+          setBargainStatus("BARGAIN_ACCEPTED");
+          toast.success("Người bán đã chấp thuận mức giá đề xuất của bạn!");
+        }
+      })
+      .on("broadcast", { event: "bargain:offer_rejected" }, (msg) => {
+        const payload = msg.payload as { dealId?: string };
+        if (payload && (!payload.dealId || payload.dealId === deal.id)) {
+          setBargainStatus("BARGAIN_REJECTED");
+          toast.error("Người bán đã từ chối mức giá đề xuất.");
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [deal?.id]);
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
+      void navigator.clipboard.writeText(window.location.href);
       toast.success("Đã sao chép liên kết Kèo để gửi cho Người mua!");
     }
   };
 
+  // Instant Buy Flow: Navigates straight to Checkout without seller approval
+  const handleInstantBuy = () => {
+    if (!deal) return;
+    if (isSeller) {
+      toast.error("Bạn không thể tự mua sản phẩm của chính mình.");
+      return;
+    }
+    toast.info("Đang chuyển tiếp sang Cổng thanh toán VietQR PayOS...");
+    router.push(`/user/deals/${deal.id}/checkout`);
+  };
+
+  // Bargain Flow: Submits offer via POST /api/v1/bargains and locks UI in pending confirmation
   const handleOfferSubmit = async (newOffer: number) => {
     if (!deal) return;
     if (isSeller) {
       toast.error("Bạn không thể tự mua hoặc thương lượng sản phẩm của chính mình.");
       return;
     }
-    toast.info("Đang cập nhật giá thỏa thuận và chuyển tiếp...");
-    try {
-      await apiClient(`/api/v1/deals/${deal.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ amount: newOffer }),
-      });
-    } catch {
-      // Graceful fallback if offline or guest mode
-    }
-    toast.success(
-      `Đã ghi nhận đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫. Chuyển sang thanh toán VietQR.`
-    );
-    router.push(`/user/deals/${deal.id}/checkout?amount=${newOffer}`);
-  };
-
-  const handleProceedToPayment = () => {
-    if (!deal) return;
-    if (isSeller) {
-      toast.error("Bạn không thể tự mua hoặc thanh toán sản phẩm của chính mình.");
+    if (!currentUserId) {
+      toast.error("Vui lòng đăng nhập để gửi đề xuất trả giá.");
       return;
     }
-    toast.info("Đang chuyển tiếp sang Cổng thanh toán VietQR PayOS...");
+
+    try {
+      await apiClient("/api/v1/bargains", {
+        method: "POST",
+        body: JSON.stringify({
+          dealId: deal.id,
+          productId: deal.order?.productId,
+          buyerId: currentUserId,
+          offeredPrice: newOffer,
+          negotiationData: {
+            dealId: deal.id,
+          },
+        }),
+      });
+
+      setProposedPrice(newOffer);
+      setBargainStatus("PENDING_SELLER_CONFIRMATION");
+      toast.info(
+        `Đã gửi đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫ đến Người bán. Vui lòng chờ duyệt.`
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gửi đề xuất trả giá thất bại";
+      toast.error(`Lỗi: ${msg}`);
+    }
+  };
+
+  const handleProceedToBargainPayment = () => {
+    if (!deal) return;
     router.push(`/user/deals/${deal.id}/checkout`);
+  };
+
+  const handleResetBargain = () => {
+    setBargainStatus("IDLE");
   };
 
   if (isLoading) {
@@ -139,11 +272,38 @@ export default function DealRoomPage() {
 
   const stateCfg = STATE_CONFIG[deal.state] || STATE_CONFIG.PENDING;
   const amountNum = Number(deal.amount || 0);
+  const basePrice = Number(deal.order?.product?.basePrice ?? amountNum);
+  const floorPrice = deal.order?.product?.floorPrice
+    ? Number(deal.order.product.floorPrice)
+    : Math.round(basePrice * 0.7);
 
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 overflow-x-hidden">
-      {/* Background radial gradient */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/5 blur-[140px] pointer-events-none" />
+
+      {/* Transfer Success Realtime Modal */}
+      <TransferSuccessModal
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+        dealId={dealId}
+        dealTitle={modalData?.dealTitle || deal.title}
+        amount={modalData?.amount ?? amountNum}
+        currency={modalData?.currency || deal.currency || "VND"}
+        txHash={modalData?.txHash}
+        chainType={modalData?.chainType}
+        timestamp={modalData?.timestamp}
+        type={modalData?.type || (deal.state === "SETTLED" ? "SETTLEMENT" : "DEPOSIT")}
+        primaryActionText={modalData?.type === "SETTLEMENT" || deal.state === "SETTLED" ? "Xem chi tiết giao dịch" : "Vào két Digital Vault"}
+        onPrimaryAction={() => {
+          if (modalData?.type === "SETTLEMENT" || deal.state === "SETTLED") {
+            setIsSuccessModalOpen(false);
+          } else {
+            router.push(`/user/deals/${dealId}/vault`);
+          }
+        }}
+        secondaryActionText="Xem danh sách giao dịch"
+        onSecondaryAction={() => router.push("/user/deals")}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
         {/* Navigation & Status Header */}
@@ -173,7 +333,7 @@ export default function DealRoomPage() {
         {/* Deal Header Overview */}
         <DealHeaderOverview deal={deal} />
 
-        {/* Realtime Bargain Negotiation Slider (For Buyer) OR Seller Management Panel (For Seller) */}
+        {/* Realtime Bargain Negotiation Slider (Buyer) OR Seller Management Panel (Seller) */}
         {deal.state === "PENDING" && (
           isSeller ? (
             <DealSellerPanel
@@ -181,15 +341,20 @@ export default function DealRoomPage() {
               amountNum={amountNum}
               onEditClick={() => setIsEditDialogOpen(true)}
               onCopyLink={handleCopyLink}
+              onDealPriceUpdated={(newPrice) =>
+                setDeal((prev) => (prev ? { ...prev, amount: newPrice } : prev))
+              }
             />
           ) : (
             <section className="space-y-2">
               <BargainSlider
                 dealId={deal.id}
-                basePrice={amountNum}
-                floorPrice={Math.round(amountNum * 0.7)}
+                basePrice={basePrice}
+                floorPrice={floorPrice}
+                initialOffer={proposedPrice ?? undefined}
                 currentUserId={currentUserId}
                 isBuyer={isBuyer}
+                disabled={bargainStatus === "PENDING_SELLER_CONFIRMATION"}
                 onOfferSubmit={handleOfferSubmit}
               />
             </section>
@@ -206,9 +371,14 @@ export default function DealRoomPage() {
         <DealRoomCta
           deal={deal}
           isSeller={isSeller}
+          basePrice={basePrice}
+          bargainStatus={bargainStatus}
+          proposedPrice={proposedPrice}
           onEditClick={() => setIsEditDialogOpen(true)}
           onCopyLink={handleCopyLink}
-          onProceedToPayment={handleProceedToPayment}
+          onInstantBuy={handleInstantBuy}
+          onProceedToBargainPayment={handleProceedToBargainPayment}
+          onResetBargain={handleResetBargain}
         />
 
         {/* Seller Deal Edit Dialog */}

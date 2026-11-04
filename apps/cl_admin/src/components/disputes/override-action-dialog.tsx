@@ -15,6 +15,7 @@ import { logAdminAction } from '@/lib/audit-logger';
 import { apiClient } from '@/lib/api-client';
 import { useAdminAuthStore } from '@/lib/admin-auth-store';
 import { ShieldAlert, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
+import { TwoFactorOverrideModal } from './two-factor-override-modal';
 import { toast } from 'sonner';
 
 export type OverrideDecisionType = 'SETTLE_SELLER' | 'REFUND_BUYER' | 'REQUEST_EVIDENCE';
@@ -266,6 +267,19 @@ function OverrideActionDialogInner({
 
 export function OverrideActionDialog(props: OverrideActionDialogProps) {
   if (!props.isOpen || !props.decisionType) return null;
+
+  if (props.decisionType === 'SETTLE_SELLER' || props.decisionType === 'REFUND_BUYER') {
+    return (
+      <TwoFactorOverrideModal
+        isOpen={props.isOpen}
+        onClose={props.onClose}
+        deal={props.deal}
+        dispute={props.dispute}
+        decisionType={props.decisionType}
+        onSuccess={(type, tx) => props.onSuccess(type, tx || 'CONFIRMED')}
+      />
+    );
+  }
 
   return (
     <Dialog open={props.isOpen} onOpenChange={props.onClose}>

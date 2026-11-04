@@ -1,0 +1,72 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalDependencies": ["**/.env.*local"],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "JWT_SECRET",
+    "NODE_OPTIONS",
+    "NEXT_TELEMETRY_DISABLED",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS",
+    "NEXT_PUBLIC_CHAIN_ID",
+    "NEXT_PUBLIC_RPC_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+    "NEXT_PUBLIC_SOLANA_NETWORK",
+    "NEXT_PUBLIC_SOLANA_RPC_URL"
+  ],
+  "tasks": {
+    "prisma:generate": {
+      "cache": true,
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["node_modules/.prisma/**", "node_modules/@prisma/client/**"]
+    },
+    "build": {
+      "dependsOn": ["^build", "prisma:generate"],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "NODE_OPTIONS",
+        "NEXT_TELEMETRY_DISABLED",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS",
+        "NEXT_PUBLIC_CHAIN_ID",
+        "NEXT_PUBLIC_RPC_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "JWT_SECRET"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "prisma:generate"],
+      "outputs": []
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build", "prisma:generate"],
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "test/**/*.ts",
+        "test/**/*.tsx"
+      ]
+    }
+  }
+}
+

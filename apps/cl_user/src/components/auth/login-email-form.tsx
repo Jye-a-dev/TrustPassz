@@ -49,7 +49,7 @@ export function LoginEmailForm({ onSubmit, isLoading }: LoginEmailFormProps) {
           <Input
             id="email"
             type="email"
-            placeholder="seller@trustpassz.io"
+            placeholder="user@example.com"
             className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
             {...register("email")}
           />

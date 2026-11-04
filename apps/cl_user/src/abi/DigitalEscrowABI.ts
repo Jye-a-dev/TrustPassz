@@ -77,19 +77,19 @@ export const DIGITAL_ESCROW_ABI = [
             "internalType": "address"
           },
           {
+            "name": "inspectionDuration",
+            "type": "uint40",
+            "internalType": "uint40"
+          },
+          {
             "name": "token",
             "type": "address",
             "internalType": "address"
           },
           {
             "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "inspectionDuration",
-            "type": "uint256",
-            "internalType": "uint256"
+            "type": "uint96",
+            "internalType": "uint96"
           }
         ]
       }
@@ -150,19 +150,19 @@ export const DIGITAL_ESCROW_ABI = [
             "internalType": "address"
           },
           {
+            "name": "inspectionDuration",
+            "type": "uint40",
+            "internalType": "uint40"
+          },
+          {
             "name": "token",
             "type": "address",
             "internalType": "address"
           },
           {
             "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "inspectionDuration",
-            "type": "uint256",
-            "internalType": "uint256"
+            "type": "uint96",
+            "internalType": "uint96"
           }
         ]
       },
@@ -177,24 +177,29 @@ export const DIGITAL_ESCROW_ABI = [
             "internalType": "enum EscrowTypes.DealState"
           },
           {
+            "name": "inspectionDuration",
+            "type": "uint40",
+            "internalType": "uint40"
+          },
+          {
             "name": "depositedAt",
-            "type": "uint256",
-            "internalType": "uint256"
+            "type": "uint40",
+            "internalType": "uint40"
           },
           {
             "name": "inspectionDeadline",
-            "type": "uint256",
-            "internalType": "uint256"
+            "type": "uint40",
+            "internalType": "uint40"
+          },
+          {
+            "name": "createdAt",
+            "type": "uint40",
+            "internalType": "uint40"
           },
           {
             "name": "disputeInitiator",
             "type": "address",
             "internalType": "address"
-          },
-          {
-            "name": "createdAt",
-            "type": "uint256",
-            "internalType": "uint256"
           }
         ]
       }
@@ -558,6 +563,11 @@ export const DIGITAL_ESCROW_ABI = [
   {
     "type": "error",
     "name": "DealAlreadyExists",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DealNotFound",
     "inputs": []
   },
   {

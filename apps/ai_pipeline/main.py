@@ -10,7 +10,7 @@ Zero Cloud API — all inference runs locally via OutlinesVisionEngine
 (Qwen2-VL-2B-Instruct + Outlines Logit Masking).
 
 CORS configured for:
-  - apps/cl_user  http://localhost:3000
+  - apps/cl_user  http://localhost:5000
   - apps/server   http://localhost:3001
   - Additional via ALLOWED_ORIGINS env var (comma-separated)
 """
@@ -23,8 +23,15 @@ import os
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from dotenv import load_dotenv
-from fastapi import (
+try:
+    load_dotenv = __import__("dotenv").load_dotenv
+except ImportError:  # pragma: no cover - optional dependency for local dev
+
+    def load_dotenv(*args, **kwargs):
+        return False
+
+
+from fastapi import (  # pyright: ignore[reportMissingImports]
     Depends,
     FastAPI,
     HTTPException,
@@ -32,10 +39,22 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from PIL import Image
-from pydantic import ValidationError
+from fastapi.middleware.cors import (  # pyright: ignore[reportMissingImports]
+    CORSMiddleware,
+)
+from fastapi.responses import JSONResponse  # pyright: ignore[reportMissingImports]
+from PIL import Image  # pyright: ignore[reportMissingImports]
+
+try:
+    from pydantic import ValidationError  # pyright: ignore[reportMissingImports]
+except ImportError:  # pragma: no cover - fallback for minimal/local envs
+
+    class ValidationError(ValueError):
+        """Fallback stub for environments without pydantic installed."""
+
+        def errors(self):
+            return [{"msg": str(self), "type": "validation_error"}]
+
 
 from core.factory import EngineFactory
 from core.interfaces import IConstrainedVisionEngine
@@ -60,8 +79,8 @@ _ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 _AI_MODEL_PATH = os.getenv("AI_MODEL_PATH", "Qwen/Qwen2-VL-2B-Instruct")
 
 _DEFAULT_ORIGINS = [
-    "http://localhost:3000",  # apps/cl_user
-    "http://localhost:3001",  # apps/server (NestJS)
+    "http://localhost:5000",  # apps/cl_user
+    "http://localhost:3000",  # apps/server (NestJS)
     "http://localhost:5100",  # apps/cl_admin
 ]
 _extra = os.getenv("ALLOWED_ORIGINS", "")
@@ -144,6 +163,7 @@ async def _pydantic_error_handler(
 
 # ── Dependencies ───────────────────────────────────────────────────────────────
 
+
 def get_engine() -> IConstrainedVisionEngine:
     return EngineFactory.get_engine()
 
@@ -155,6 +175,7 @@ def get_service(
 
 
 # ── Image upload helper ────────────────────────────────────────────────────────
+
 
 async def _decode_upload(file: UploadFile) -> Image.Image:
     allowed = {"image/jpeg", "image/png", "image/webp", "image/gif"}
@@ -178,13 +199,16 @@ async def _decode_upload(file: UploadFile) -> Image.Image:
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
 
+
 @app.get(
     "/health",
     response_model=HealthResponse,
     summary="Healthcheck & Engine readiness probe",
     tags=["Infrastructure"],
 )
-def health_check(engine: IConstrainedVisionEngine = Depends(get_engine)) -> HealthResponse:
+def health_check(
+    engine: IConstrainedVisionEngine = Depends(get_engine),
+) -> HealthResponse:
     ready = engine.is_ready()
     engine_name = type(engine).__name__
     return HealthResponse(
@@ -247,10 +271,13 @@ async def suggest_deal(
         return service.suggest_from_json(deal_req)
 
     # ── Form-data path ─────────────────────────────────────────────────────
-    if "multipart/form-data" in content_type or "application/x-www-form-urlencoded" in content_type:
+    if (
+        "multipart/form-data" in content_type
+        or "application/x-www-form-urlencoded" in content_type
+    ):
         form = await request.form()
 
-        title: str = form.get("title", "")        # type: ignore[assignment]
+        title: str = form.get("title", "")  # type: ignore[assignment]
         description: str = form.get("description", "")  # type: ignore[assignment]
 
         if len(title) < 3:
@@ -300,7 +327,10 @@ async def suggest_deal(
 
 # ── Entry point ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    import uvicorn
+    from importlib import import_module
+
+    uvicorn = import_module("uvicorn")
+
     port = int(os.getenv("PORT", "3100"))
     uvicorn.run(
         "main:app",

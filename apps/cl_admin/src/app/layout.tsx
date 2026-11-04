@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Providers } from "@/components/shared/providers";
-import "@/styles/globals.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import "@/app/globals.css";
+import { Providers } from "@/components/shared/providers";
 
 export const viewport: Viewport = {
   themeColor: "#080C14",
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen bg-[#080C14] font-sans text-slate-100 antialiased overflow-x-hidden">
+      <body className="min-h-screen bg-cyber-bg font-sans text-slate-100 antialiased overflow-x-hidden">
         <Providers>{children}</Providers>
       </body>
     </html>

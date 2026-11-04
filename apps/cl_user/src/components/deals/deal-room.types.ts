@@ -6,6 +6,12 @@ export type DealState =
   | "REFUNDED"
   | "DISPUTED";
 
+export type BuyerBargainStatus =
+  | "IDLE"
+  | "PENDING_SELLER_CONFIRMATION"
+  | "BARGAIN_ACCEPTED"
+  | "BARGAIN_REJECTED";
+
 export interface DealDetail {
   id: string;
   title: string;
@@ -25,6 +31,17 @@ export interface DealDetail {
     displayName: string;
     walletAddress?: string | null;
   };
+  order?: {
+    id: string;
+    productId: string;
+    product?: {
+      id: string;
+      title: string;
+      basePrice: string | number;
+      floorPrice?: string | number | null;
+      currency?: string;
+    };
+  } | null;
   digitalAsset?: {
     assetType?: string;
     encryptedContent?: string;

@@ -3,11 +3,13 @@ import assert from "node:assert/strict";
 import {
   encryptSecret,
   decryptSecret,
+  decryptVaultPayload,
   hashContent,
   bufferToHex,
   hexToBuffer,
   bufferToBase64,
   base64ToBuffer,
+  IntegrityViolationException,
 } from "../lib/crypto.ts";
 
 describe("Web Crypto API AES-256-GCM Digital Vault Unit Tests", () => {
@@ -136,5 +138,47 @@ describe("Web Crypto API AES-256-GCM Digital Vault Unit Tests", () => {
     const base64 = bufferToBase64(testBytes);
     const fromBase64 = base64ToBuffer(base64);
     assert.deepEqual(Array.from(fromBase64), Array.from(testBytes));
+  });
+
+  it("should preserve 100% Vietnamese unicode, special characters, tokens and URLs", async () => {
+    const vietnamesePayload =
+      "Tài khoản quản trị Cloud: admin@example.com | Mật khẩu: ChàoBuổiSáng#2026!₫-đ-ê-ư-ô | Token: eyJhbGciOiJIUzI1NiJ9.cGF5bG9hZA";
+    const testDealId = "deal-uuid-1234-5678-90ab";
+
+    const encrypted = await encryptSecret(vietnamesePayload, samplePassphrase, testDealId);
+    const decrypted = await decryptVaultPayload(
+      {
+        encryptedContent: encrypted.encryptedContent,
+        encryptionIv: encrypted.encryptionIv,
+        authTag: encrypted.authTag,
+        expectedHash: encrypted.contentHash,
+      },
+      samplePassphrase,
+      testDealId
+    );
+
+    assert.equal(decrypted, vietnamesePayload);
+  });
+
+  it("should throw IntegrityViolationException when payload expectedHash is tampered", async () => {
+    const testPayload = "Tài khoản bảo mật";
+    const encrypted = await encryptSecret(testPayload, samplePassphrase);
+
+    await assert.rejects(
+      async () => {
+        await decryptVaultPayload(
+          {
+            encryptedContent: encrypted.encryptedContent,
+            encryptionIv: encrypted.encryptionIv,
+            authTag: encrypted.authTag,
+            expectedHash: "0000000000000000000000000000000000000000000000000000000000000000",
+          },
+          samplePassphrase
+        );
+      },
+      (err: Error) => {
+        return err instanceof IntegrityViolationException;
+      }
+    );
   });
 });

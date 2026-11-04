@@ -1,4 +1,10 @@
-export type UserRole = 'USER' | 'SELLER' | 'BUYER' | 'ARBITRATOR' | 'ADMIN';
+export type UserRole =
+  | 'USER'
+  | 'SELLER'
+  | 'BUYER'
+  | 'ARBITRATOR'
+  | 'ADMIN'
+  | 'SUPER_ADMIN';
 
 export type DealState =
   | 'PENDING'
@@ -34,7 +40,34 @@ export interface AdminUser {
   walletAddress?: string | null;
   role: UserRole;
   avatarUrl?: string | null;
+  isFrozen?: boolean;
+  kycStatus?: string;
+  totalDeals?: number;
+  totalDisputes?: number;
+  disputeRate?: number;
+  walletBalanceSol?: number | null;
   createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface FiatFundingOrderRecord {
+  id: string;
+  orderCode: string;
+  adminId?: string | null;
+  recipientWallet: string;
+  fiatCurrency: 'VND' | 'USD';
+  fiatAmount: number;
+  cryptoCurrency: string;
+  cryptoAmount: number;
+  exchangeRate: number;
+  status: 'PENDING' | 'PAID' | 'FULFILLED' | 'FAILED' | 'CANCELLED';
+  paymentGateway: string;
+  paymentRefId?: string | null;
+  qrUrl?: string | null;
+  solanaTxHash?: string | null;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface DigitalAsset {
@@ -131,3 +164,33 @@ export interface SystemPillarStatus {
   details: Record<string, string | number | boolean>;
   lastChecked: string;
 }
+
+export interface RelayerBalanceInfo {
+  relayerAddress: string;
+  balanceSol: number;
+  balanceLamports: string;
+  thresholdSol: number;
+  isLowBalance: boolean;
+  network: string;
+  timestamp: string;
+}
+
+export interface ConfirmFundingPayload {
+  txHash: string;
+  senderWallet: string;
+  amountSol: number;
+  twoFactorCode?: string;
+}
+
+export interface ConfirmFundingResult {
+  success: boolean;
+  message: string;
+  txHash: string;
+  amountSol: number;
+  amountLamports: string;
+  senderWallet: string;
+  relayerAddress: string;
+  newBalanceSol: number;
+  recordedAt: string;
+}
+

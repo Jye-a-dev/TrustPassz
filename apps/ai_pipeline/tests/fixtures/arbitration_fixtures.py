@@ -132,6 +132,7 @@ async def client_refund():
 
     EngineFactory.reset()
     mock = _make_mock_engine(ready=True, verdict_dict=VERDICT_REFUND)
+    EngineFactory._instance = mock
     app.dependency_overrides[get_engine] = lambda: mock
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
@@ -149,6 +150,7 @@ async def client_approve():
 
     EngineFactory.reset()
     mock = _make_mock_engine(ready=True, verdict_dict=VERDICT_APPROVE)
+    EngineFactory._instance = mock
     app.dependency_overrides[get_engine] = lambda: mock
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
@@ -166,6 +168,7 @@ async def client_low_confidence():
 
     EngineFactory.reset()
     mock = _make_mock_engine(ready=True, verdict_dict=VERDICT_ESCALATE)
+    EngineFactory._instance = mock
     app.dependency_overrides[get_engine] = lambda: mock
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
@@ -183,6 +186,7 @@ async def client_engine_down():
 
     EngineFactory.reset()
     mock = _make_mock_engine(ready=False)
+    EngineFactory._instance = mock
     app.dependency_overrides[get_engine] = lambda: mock
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:

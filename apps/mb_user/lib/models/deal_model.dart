@@ -94,6 +94,20 @@ class DigitalAsset {
       contentHash: json['contentHash'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'dealId': dealId,
+      'assetType': assetType,
+      'fileName': fileName,
+      'fileSizeBytes': fileSizeBytes,
+      'encryptedContent': encryptedContent,
+      'encryptionIv': encryptionIv,
+      'authTag': authTag,
+      'contentHash': contentHash,
+    };
+  }
 }
 
 class DealModel {
@@ -147,6 +161,23 @@ class DealModel {
           ? DigitalAsset.fromJson(json['digitalAsset'] as Map<String, dynamic>)
           : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'sellerId': sellerId,
+      'buyerId': buyerId,
+      'title': title,
+      'description': description,
+      'amount': amount,
+      'currency': currency,
+      'state': state.label,
+      'inspectionDuration': inspectionDuration,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'digitalAsset': digitalAsset?.toJson(),
+    };
   }
 }
 

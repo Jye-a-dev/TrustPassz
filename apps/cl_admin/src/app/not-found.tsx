@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Compass, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default function NotFound() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
@@ -11,10 +13,10 @@ export default function NotFound() {
       <span className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
         404 - Not Found
       </span>
-      <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+      <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
         Không tìm thấy trang yêu cầu
       </h1>
-      <p className="mt-3 text-sm text-muted-foreground max-w-md">
+      <p className="mt-3 text-sm text-slate-400 max-w-md">
         Đường dẫn bạn đang truy cập không tồn tại hoặc đã được di dời sang vị trí khác.
       </p>
       <div className="mt-6">
@@ -28,4 +30,3 @@ export default function NotFound() {
     </div>
   );
 }
-

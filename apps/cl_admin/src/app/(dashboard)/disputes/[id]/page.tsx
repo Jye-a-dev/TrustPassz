@@ -3,24 +3,16 @@
 import * as React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  RotateCcw,
-  CheckCircle2,
-  MessageSquarePlus,
-  Scale,
-  Fuel,
-} from 'lucide-react';
+import { ArrowLeft, RotateCcw, Scale, Fuel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DisputeEvidenceViewer } from '@/components/disputes/dispute-evidence-viewer';
 import { AiVerdictCard } from '@/components/disputes/ai-verdict-card';
-import {
-  OverrideActionDialog,
-  type OverrideDecisionType,
-} from '@/components/disputes/override-action-dialog';
-import type { Deal, DisputeLog } from '@/types';
+import { ParallelEvidenceViewer } from '@/components/disputes/parallel-evidence-viewer';
+import { DisputeAuditNotes } from '@/components/disputes/dispute-audit-notes';
+import type { Deal, DisputeLog, ArbitrationVerdict } from '@/types';
 import { apiClient } from '@/lib/api-client';
+import { logAdminAction } from '@/lib/audit-logger';
+import { useAdminAuthStore } from '@/lib/admin-auth-store';
 import { toast } from 'sonner';
 
 export default function DisputeDetailPage() {
@@ -30,8 +22,7 @@ export default function DisputeDetailPage() {
   const [currentDispute, setCurrentDispute] = React.useState<DisputeLog | null>(null);
   const [deal, setDeal] = React.useState<Deal | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [decisionType, setDecisionType] = React.useState<OverrideDecisionType | null>(null);
+  const [isResolving, setIsResolving] = React.useState(false);
 
   const loadData = React.useCallback(async () => {
     if (!disputeIdOrDealId) return;
@@ -59,7 +50,9 @@ export default function DisputeDetailPage() {
       if (disp) {
         setCurrentDispute(disp);
         if (disp.dealId) {
-          const dealData = await apiClient<Deal>(`/api/v1/deals/${disp.dealId}`).catch(() => disp?.deal as Deal);
+          const dealData = await apiClient<Deal>(`/api/v1/deals/${disp.dealId}`).catch(
+            () => disp?.deal as Deal
+          );
           setDeal(dealData);
         } else if (disp.deal) {
           setDeal(disp.deal as Deal);
@@ -74,25 +67,68 @@ export default function DisputeDetailPage() {
   }, [disputeIdOrDealId]);
 
   React.useEffect(() => {
-    const run = async () => {
-      await loadData();
-    };
-
-    void run();
+    void loadData();
   }, [loadData]);
 
-  const handleOpenDialog = (type: OverrideDecisionType) => {
-    setDecisionType(type);
-    setDialogOpen(true);
-  };
+  const handleResolveAction = async (
+    action: ArbitrationVerdict | 'REQUEST_EVIDENCE',
+    resolutionNote: string
+  ) => {
+    if (!currentDispute || !deal) return;
+    setIsResolving(true);
+    const adminUser = useAdminAuthStore.getState().user;
+    const adminId = adminUser?.id || '33333333-3333-4333-a333-333333333333';
 
-  const handleOverrideSuccess = () => {
-    void loadData();
+    try {
+      if (action === 'APPROVE_PAYOUT' || action === 'TRIGGER_REFUND') {
+        await apiClient(`/api/v1/disputes/${currentDispute.id}/resolve`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            adminVerdict: action,
+            resolutionNote,
+            resolvedById: adminId,
+          }),
+        });
+
+        await logAdminAction(`DISPUTE_OVERRIDE_${action}`, 'dispute_logs', currentDispute.id, {
+          dealId: deal.id,
+          verdict: action,
+          resolutionNote,
+          amount: deal.amount,
+          resolvedById: adminId,
+        });
+
+        toast.success(
+          action === 'APPROVE_PAYOUT'
+            ? 'Đã duyệt giải ngân cho Người Bán thành công.'
+            : 'Đã duyệt hoàn tiền cho Người Mua thành công.'
+        );
+      } else {
+        await apiClient(`/api/v1/disputes/${currentDispute.id}/escalate`, {
+          method: 'POST',
+        });
+
+        await logAdminAction('REQUEST_ADDITIONAL_EVIDENCE', 'dispute_logs', currentDispute.id, {
+          dealId: deal.id,
+          resolutionNote,
+          resolvedById: adminId,
+        });
+
+        toast.info('Đã gửi yêu cầu bổ sung chứng cứ tới các bên.');
+      }
+
+      await loadData();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác phân xử thất bại';
+      toast.error(msg);
+    } finally {
+      setIsResolving(false);
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center text-xs text-slate-400">
+      <div className="flex h-64 items-center justify-center text-xs text-slate-400 font-mono">
         <RotateCcw className="mr-2 h-4 w-4 animate-spin text-cyan-400" />
         Đang tải hồ sơ phân xử từ Neon PostgreSQL...
       </div>
@@ -104,7 +140,7 @@ export default function DisputeDetailPage() {
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-8 text-center text-xs text-slate-400 space-y-3">
         <p>Không tìm thấy hồ sơ tranh chấp hợp lệ.</p>
         <Link href="/disputes">
-          <Button variant="outline" size="sm" className="border-slate-800 text-cyan-400">
+          <Button variant="outline" size="sm" className="border-slate-800 text-cyan-400 min-h-[44px]">
             Trở về Hàng đợi Tranh chấp
           </Button>
         </Link>
@@ -114,21 +150,21 @@ export default function DisputeDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Back button and navigation breadcrumb */}
+      {/* Top Header & Breadcrumb */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center space-x-3">
           <Link href="/disputes">
             <Button
               variant="outline"
               size="sm"
-              className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-300 text-xs h-9"
+              className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-300 text-xs min-h-[44px]"
             >
               <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
               Trở về Hàng đợi
             </Button>
           </Link>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
               <span>Hồ Sơ Phân Xử:</span>
               <span className="text-cyan-400 font-mono text-sm">{currentDispute.id}</span>
             </h2>
@@ -155,61 +191,41 @@ export default function DisputeDetailPage() {
         </div>
       </div>
 
-      {/* Action Bar with Super Admin Override Buttons */}
+      {/* Escrow Dispute Overview Banner */}
       <div className="flex flex-col sm:flex-row items-center justify-between rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-md gap-3">
         <div className="flex items-center space-x-2 text-xs text-slate-300">
           <Scale className="h-4 w-4 text-cyan-400" />
-          <span className="font-semibold text-white">Quyền Phán Xuyết Cuối Cùng (Super Arbitrator):</span>
+          <span className="font-semibold text-white">Quyền Phán Quyết Trọng Tài (Arbitrator Override):</span>
           <span className="text-slate-400">
-            Số tiền tranh chấp:{' '}
+            Số tiền ký quỹ:{' '}
             <strong className="text-cyan-400 font-mono">
               {Number(deal.amount).toLocaleString('vi-VN')} {deal.currency}
             </strong>
           </span>
         </div>
-
-        {/* Override 3 Buttons */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <Button
-            size="sm"
-            onClick={() => handleOpenDialog('SETTLE_SELLER')}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs h-9 gap-1.5"
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Duyệt giải ngân cho Seller</span>
-          </Button>
-
-          <Button
-            size="sm"
-            onClick={() => handleOpenDialog('REFUND_BUYER')}
-            className="bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs h-9 gap-1.5"
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span>Duyệt hoàn tiền cho Buyer</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleOpenDialog('REQUEST_EVIDENCE')}
-            className="border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-200 text-xs h-9 gap-1.5"
-          >
-            <MessageSquarePlus className="h-4 w-4 text-cyan-400" />
-            <span>Yêu cầu bổ sung chứng cứ</span>
-          </Button>
+        <div className="text-[11px] font-mono text-slate-400">
+          Người khiếu nại: <strong className="text-slate-200">{currentDispute.initiatorId?.slice(0, 8)}...</strong>
         </div>
       </div>
 
-      {/* AI Verdict Evaluation Card */}
+      {/* Module 1: AI Verdict Evaluation Card */}
       <AiVerdictCard dispute={currentDispute} />
 
-      {/* Side-by-side Evidence & Commitment Comparison */}
-      <DisputeEvidenceViewer deal={deal} dispute={currentDispute} />
+      {/* Module 2: Parallel Evidence Viewer (Side-by-side with Zoom Canvas & PII Protection) */}
+      <ParallelEvidenceViewer deal={deal} dispute={currentDispute} />
 
-      {/* On-chain Relayer Transaction info */}
+      {/* Module 3: Dispute Audit Notes & Override Action Dispatcher */}
+      <DisputeAuditNotes
+        deal={deal}
+        dispute={currentDispute}
+        onResolve={handleResolveAction}
+        isResolving={isResolving}
+      />
+
+      {/* Module 4: Oracle Relayer Protocol Info */}
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 text-xs space-y-2">
         <div className="flex items-center justify-between text-slate-300">
-          <span className="font-semibold text-white flex items-center gap-1.5">
+          <span className="font-semibold text-white flex items-center gap-1.5 font-mono">
             <Fuel className="h-4 w-4 text-cyan-400" />
             Oracle Relayer Signing Protocol (Base Sepolia)
           </span>
@@ -221,16 +237,6 @@ export default function DisputeDetailPage() {
           <code className="text-cyan-300 font-mono">DigitalEscrow.resolveDispute(dealId, isRefund)</code>.
         </p>
       </div>
-
-      {/* 2-Step Confirmation Modal */}
-      <OverrideActionDialog
-        deal={deal}
-        dispute={currentDispute}
-        isOpen={dialogOpen}
-        decisionType={decisionType}
-        onClose={() => setDialogOpen(false)}
-        onSuccess={handleOverrideSuccess}
-      />
     </div>
   );
 }

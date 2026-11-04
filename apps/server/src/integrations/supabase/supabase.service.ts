@@ -113,6 +113,41 @@ export class SupabaseService implements OnModuleInit {
   }
 
   /**
+   * Broadcasts realtime bargain events (e.g. bargain:offer_accepted, bargain:offer_rejected) to deal-room.
+   */
+  async broadcastBargainEvent(
+    dealId: string,
+    event: 'bargain:offer_accepted' | 'bargain:offer_rejected' | string,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const channelName = `deal-room:${dealId}`;
+      const channel = this.client.channel(channelName);
+
+      const messagePayload = {
+        dealId,
+        timestamp: new Date().toISOString(),
+        ...payload,
+      };
+
+      if (typeof (channel as any).httpSend === 'function') {
+        await (channel as any).httpSend(event, messagePayload);
+      } else {
+        await channel.send({
+          type: 'broadcast',
+          event,
+          payload: messagePayload,
+        });
+      }
+
+      this.logger.log(`Broadcasted ${event} to ${channelName}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Failed to broadcast ${event} to deal-room:${dealId}: ${msg}`);
+    }
+  }
+
+  /**
    * Broadcasts realtime payment confirmation to connected deal room peers.
    */
   async broadcastPaymentSuccess(

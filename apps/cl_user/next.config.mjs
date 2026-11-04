@@ -41,7 +41,7 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: [
-      "lucide-react",
+
       "@solana/web3.js",
       "@solana/wallet-adapter-react",
       "@solana/wallet-adapter-wallets",

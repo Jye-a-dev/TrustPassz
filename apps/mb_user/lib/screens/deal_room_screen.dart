@@ -5,6 +5,8 @@ import '../services/deal_service.dart';
 import '../widgets/bargain_slider.dart';
 import '../widgets/vietqr_payment_view.dart';
 import '../widgets/vault_modal.dart';
+import 'deal_room/deal_status_badge.dart';
+import 'deal_room/deal_audit_timeline.dart';
 
 class DealRoomScreen extends StatefulWidget {
   final String dealId;
@@ -290,25 +292,7 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF0891B2).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: const Color(0xFF06B6D4)),
-                          ),
-                          child: Text(
-                            deal.state.label,
-                            style: const TextStyle(
-                              color: Color(0xFF22D3EE),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ),
+                        DealStatusBadge(state: deal.state),
                       ],
                     ),
                     if (deal.description != null &&
@@ -320,29 +304,13 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
                             color: Color(0xFF94A3B8), fontSize: 12),
                       ),
                     ],
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Thời hạn đồng kiểm:',
-                          style:
-                              TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                        ),
-                        Text(
-                          '${deal.inspectionDuration ~/ 3600} Giờ',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+
+              // Audit Timeline & Inspection Window
+              DealAuditTimeline(deal: deal),
               const SizedBox(height: 16),
 
               // Pending State: Bargain Slider & VietQR Payment View
@@ -355,6 +323,7 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
                 ),
                 const SizedBox(height: 16),
                 VietQrPaymentView(
+                  dealId: deal.id,
                   bankName: 'MBBank',
                   bin: '970422',
                   accountNo: '0385966888',
@@ -364,6 +333,7 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
                       'TPZ ${deal.id.length > 8 ? deal.id.substring(0, 8).toUpperCase() : deal.id}',
                   deepLink:
                       'vietqr://pay?acc=0385966888&bin=970422&amount=${deal.amount.toInt()}&memo=TPZ${deal.id.length > 8 ? deal.id.substring(0, 8) : deal.id}',
+                  onPaymentConfirmed: _fetchDeal,
                 ),
               ],
 
@@ -407,6 +377,7 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
                       ElevatedButton(
                         onPressed: _handleOpenVault,
                         style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
                           backgroundColor: const Color(0xFF10B981),
                           foregroundColor: const Color(0xFF020617),
                           padding: const EdgeInsets.symmetric(vertical: 14),

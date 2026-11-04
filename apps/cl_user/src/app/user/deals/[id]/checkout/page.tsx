@@ -3,16 +3,17 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, QrCode, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/lib/auth-store";
-import { supabase } from "@/lib/supabase-client";
 import { apiClient } from "@/lib/api-client";
 import { CheckoutQrCard } from "@/components/checkout/checkout-qr-card";
 import { CheckoutPaymentDetails } from "@/components/checkout/checkout-payment-details";
 import { CheckoutSandboxBar } from "@/components/checkout/checkout-sandbox-bar";
 import { CheckoutSellerWarning } from "@/components/checkout/checkout-seller-warning";
+import { TransferSuccessModal } from "@/components/deals/transfer-success-modal";
+import { useDealRealtimeModal } from "@/hooks/use-deal-realtime-modal";
 import { secureClipboard } from "@/lib/secure-clipboard";
 import type { DealData, BankConfig } from "@/components/checkout/checkout.types";
 
@@ -35,15 +36,40 @@ export default function DealCheckoutPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuthStore();
-  const dealId = params?.id;
+  const dealId = params?.id || "";
 
   const [deal, setDeal] = React.useState<DealData | null>(null);
   const [, setLoading] = React.useState(true);
-  const [isSuccessGlow, setIsSuccessGlow] = React.useState(false);
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = React.useState<PaymentLinkResponse | null>(null);
 
   const isSeller = Boolean(user?.id && deal?.seller?.id && user.id === deal.seller.id);
+
+  // Realtime hook trigger for zero-reload payment confirmation modal
+  const {
+    isOpen: isModalOpen,
+    setIsOpen: setIsModalOpen,
+    modalData,
+    triggerDepositSuccess,
+  } = useDealRealtimeModal({
+    dealId,
+    initialDeal: deal
+      ? {
+          id: deal.id,
+          amount: deal.price ?? deal.amount,
+          currency: deal.currency,
+          state: deal.state,
+          title: deal.title,
+        }
+      : null,
+    onDealStateChange: (newState) => {
+      setDeal((prev) => (prev ? { ...prev, state: newState as DealData["state"] } : prev));
+      toast.success(
+        "Thanh toán VietQR thành công! Tiền đã được giữ an toàn trong Két bảo chứng.",
+        { duration: 4500 }
+      );
+    },
+  });
 
   // Bank Account Info derived dynamically from PayOS / API metadata
   const bankConfig = React.useMemo<BankConfig>(() => {
@@ -58,7 +84,8 @@ export default function DealCheckoutPage() {
         ? paymentInfo.amount
         : dealPrice;
 
-    const orderCode = paymentInfo?.orderCode || deal?.orderCode || (dealId ? dealId.slice(0, 8).toUpperCase() : "");
+    const orderCode =
+      paymentInfo?.orderCode || deal?.orderCode || (dealId ? dealId.slice(0, 8).toUpperCase() : "");
     const memo = paymentInfo?.description || `TPZ ${orderCode}`;
     const accountNo = paymentInfo?.accountNumber || paymentInfo?.accountNo || "";
     const accountName = paymentInfo?.accountName || "TRUSTPASSZ ESCROW";
@@ -91,57 +118,6 @@ export default function DealCheckoutPage() {
     };
   }, [dealId, deal?.price, deal?.amount, deal?.orderCode, paymentInfo]);
 
-  // Audio chime feedback upon successful escrow receipt
-  const playSuccessChime = React.useCallback(() => {
-    try {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-
-      const playTone = (freq: number, start: number, dur: number) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime + start);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + start);
-        osc.stop(ctx.currentTime + start + dur);
-      };
-
-      playTone(523.25, 0, 0.2); // C5
-      playTone(659.25, 0.12, 0.2); // E5
-      playTone(783.99, 0.24, 0.25); // G5
-      playTone(1046.5, 0.36, 0.5); // C6
-    } catch {
-      // Audio autoplay policy fallback
-    }
-  }, []);
-
-  const handlePaymentSuccess = React.useCallback(() => {
-    if (!dealId) return;
-    setIsSuccessGlow(true);
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "hidden";
-    }
-    playSuccessChime();
-    toast.success(
-      "Thanh toán VietQR thành công! Tiền đã được giữ an toàn trong Két bảo chứng.",
-      { duration: 4000 }
-    );
-
-    setTimeout(() => {
-      if (typeof document !== "undefined") {
-        document.body.style.overflow = "";
-      }
-      router.replace(`/user/deals/${dealId}/vault`);
-    }, 1500);
-  }, [dealId, playSuccessChime, router]);
-
   // Fetch deal details and generate VietQR payment link
   const initPaymentData = React.useCallback(async () => {
     if (!dealId) {
@@ -152,7 +128,8 @@ export default function DealCheckoutPage() {
 
     try {
       const dealRes = await apiClient<{ data?: DealData } | DealData>(`/api/v1/deals/${dealId}`);
-      const dealData: DealData = ("data" in dealRes && dealRes.data ? dealRes.data : dealRes) as DealData;
+      const dealData: DealData =
+        "data" in dealRes && dealRes.data ? (dealRes.data as DealData) : (dealRes as DealData);
       setDeal(dealData);
 
       if (user?.id && dealData.seller?.id && user.id === dealData.seller.id) {
@@ -162,7 +139,11 @@ export default function DealCheckoutPage() {
       }
 
       if (dealData.state === "DEPOSITED" || dealData.state === "IN_INSPECTION") {
-        handlePaymentSuccess();
+        triggerDepositSuccess({
+          amount: dealData.price ?? dealData.amount,
+          dealTitle: dealData.title,
+          currency: dealData.currency,
+        });
         return;
       }
 
@@ -188,7 +169,7 @@ export default function DealCheckoutPage() {
     } finally {
       setLoading(false);
     }
-  }, [dealId, handlePaymentSuccess, router, user]);
+  }, [dealId, router, triggerDepositSuccess, user]);
 
   React.useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -197,60 +178,8 @@ export default function DealCheckoutPage() {
 
     return () => {
       window.clearTimeout(timeoutId);
-      if (typeof document !== "undefined") {
-        document.body.style.overflow = "";
-      }
     };
   }, [initPaymentData]);
-
-  // Realtime Supabase Subscription & Fallback Polling
-  React.useEffect(() => {
-    if (!dealId) return;
-
-    const channelName = `deal-room:${dealId}`;
-    const channel = supabase.channel(channelName);
-
-    channel
-      .on("broadcast" as never, { event: "PAYMENT_RECEIVED" } as never, (payload: { payload?: { state: string } }) => {
-        if (payload.payload?.state === "DEPOSITED" || payload.payload?.state === "IN_INSPECTION") {
-          handlePaymentSuccess();
-        }
-      })
-      .on("broadcast" as never, { event: "DEPOSIT_CONFIRMED" } as never, () => {
-        handlePaymentSuccess();
-      })
-      .on(
-        "postgres_changes" as never,
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "deals",
-          filter: `id=eq.${dealId}`,
-        },
-        (payload: { new: { state: string } }) => {
-          if (payload.new?.state === "DEPOSITED" || payload.new?.state === "IN_INSPECTION") {
-            handlePaymentSuccess();
-          }
-        }
-      )
-      .subscribe();
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const res = await apiClient<DealData>(`/api/v1/deals/${dealId}`);
-        if (res?.state === "DEPOSITED" || res?.state === "IN_INSPECTION") {
-          handlePaymentSuccess();
-        }
-      } catch {
-        // Polling silent error suppression
-      }
-    }, 3000);
-
-    return () => {
-      supabase.removeChannel(channel);
-      clearInterval(pollInterval);
-    };
-  }, [dealId, handlePaymentSuccess]);
 
   const copyToClipboard = async (text: string, fieldName: string, label: string) => {
     await secureClipboard.copy(text);
@@ -270,7 +199,12 @@ export default function DealCheckoutPage() {
     } catch {
       // Standalone sandbox fallback
     }
-    handlePaymentSuccess();
+    triggerDepositSuccess({
+      amount: bankConfig.amount,
+      dealTitle: deal?.title,
+      currency: deal?.currency || "VND",
+      txHash: paymentInfo?.orderCode ? `PAYOS-${paymentInfo.orderCode}` : undefined,
+    });
   };
 
   if (!dealId) return null;
@@ -281,23 +215,23 @@ export default function DealCheckoutPage() {
 
   return (
     <div className="relative max-w-4xl mx-auto space-y-6">
-      {isSuccessGlow && (
-        <div className="fixed inset-0 z-50 bg-[#0B0F17]/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-          <div className="size-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center animate-bounce shadow-[0_0_60px_rgba(16,185,129,0.7)]">
-            <CheckCircle2 className="size-14 text-emerald-400" />
-          </div>
-          <h2 className="mt-6 text-3xl font-black text-white tracking-tight">
-            GIỮ TIỀN AN TOÀN THÀNH CÔNG!
-          </h2>
-          <p className="mt-2 text-sm text-emerald-300 font-semibold max-w-md">
-            Hệ thống đã xác nhận tiền vào Két giữ an toàn. Đang chuyển hướng vào Kho lưu trữ nhận hàng...
-          </p>
-          <div className="mt-6 flex items-center gap-2 text-xs text-slate-400 font-mono">
-            <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>Mở kho nhận hàng tự động...</span>
-          </div>
-        </div>
-      )}
+      {/* Transfer Success Custom Modal */}
+      <TransferSuccessModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        dealId={dealId}
+        dealTitle={modalData?.dealTitle || deal?.title}
+        amount={modalData?.amount ?? bankConfig.amount}
+        currency={modalData?.currency || deal?.currency || "VND"}
+        txHash={modalData?.txHash}
+        chainType={modalData?.chainType || "VIETQR"}
+        timestamp={modalData?.timestamp}
+        type="DEPOSIT"
+        primaryActionText="Vào két Digital Vault"
+        onPrimaryAction={() => router.push(`/user/deals/${dealId}/vault`)}
+        secondaryActionText="Xem lịch sử giao dịch"
+        onSecondaryAction={() => router.push("/user/deals")}
+      />
 
       <div className="flex items-center justify-between">
         <Link
@@ -317,13 +251,7 @@ export default function DealCheckoutPage() {
         </Badge>
       </div>
 
-      <div
-        className={`rounded-2xl border transition-all duration-700 bg-linear-to-b from-slate-900/90 to-[#0F172A] p-6 sm:p-8 space-y-6 ${
-          isSuccessGlow
-            ? "border-emerald-400 shadow-[0_0_50px_rgba(16,185,129,0.4)] ring-2 ring-emerald-400"
-            : "border-slate-800 shadow-2xl"
-        }`}
-      >
+      <div className="rounded-2xl border border-slate-800 shadow-2xl bg-linear-to-b from-slate-900/90 to-[#0F172A] p-6 sm:p-8 space-y-6">
         <div className="text-center space-y-2 max-w-lg mx-auto">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-300">
             <QrCode className="size-3.5" />
@@ -342,7 +270,7 @@ export default function DealCheckoutPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           <CheckoutQrCard
             vietQrUrl={bankConfig.vietQrUrl}
-            isSuccessGlow={isSuccessGlow}
+            isSuccessGlow={isModalOpen}
           />
 
           <CheckoutPaymentDetails

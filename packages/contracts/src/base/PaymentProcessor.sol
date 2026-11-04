@@ -23,13 +23,8 @@ abstract contract PaymentProcessor is ReentrancyGuard {
 
     function _processDisbursement(address token, address recipient, uint256 amount) internal {
         if (token == address(0)) {
-            (bool success, bytes memory data) = recipient.call{value: amount}("");
+            (bool success, ) = recipient.call{value: amount}("");
             if (!success) {
-                if (data.length > 0) {
-                    assembly {
-                        revert(add(32, data), mload(data))
-                    }
-                }
                 revert EscrowTypes.NativeTransferFailed(recipient, amount);
             }
         } else {
@@ -38,6 +33,9 @@ abstract contract PaymentProcessor is ReentrancyGuard {
     }
 
     function _safeTransfer(address token, address to, uint256 amount) internal {
+        if (token == address(0)) {
+            revert EscrowTypes.InvalidTokenAddress(token);
+        }
         if (token.code.length == 0) {
             revert EscrowTypes.ERC20TransferFailed(token, to, amount);
         }
@@ -50,6 +48,9 @@ abstract contract PaymentProcessor is ReentrancyGuard {
     }
 
     function _safeTransferFrom(address token, address from, address to, uint256 amount) internal {
+        if (token == address(0)) {
+            revert EscrowTypes.InvalidTokenAddress(token);
+        }
         if (token.code.length == 0) {
             revert EscrowTypes.ERC20TransferFailed(token, to, amount);
         }

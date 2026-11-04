@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/deal_model.dart';
 import '../services/secure_clipboard_service.dart';
+import 'common/trustpassz_icon.dart';
 
 class VaultModal extends StatelessWidget {
   final DealModel deal;
@@ -86,8 +87,8 @@ class VaultModal extends StatelessWidget {
             const SizedBox(height: 16),
             const Row(
               children: [
-                Icon(Icons.lock_open, color: Color(0xFF10B981), size: 22),
-                SizedBox(width: 8),
+                TrustPasszIcon(size: 24, glow: true),
+                SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Két Số Digital Vault (AES-256-GCM)',
@@ -128,7 +129,8 @@ class VaultModal extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: const Color(0xFF064E3B),
                           borderRadius: BorderRadius.circular(4),
@@ -169,10 +171,12 @@ class VaultModal extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
                       onPressed: () => _copyContent(context, secretData),
-                      icon: const Icon(Icons.copy, size: 14, color: Color(0xFF38BDF8)),
+                      icon: const Icon(Icons.copy,
+                          size: 14, color: Color(0xFF38BDF8)),
                       label: const Text(
                         'Sao chép (Tự xóa sau 30s)',
-                        style: TextStyle(color: Color(0xFF38BDF8), fontSize: 12),
+                        style:
+                            TextStyle(color: Color(0xFF38BDF8), fontSize: 12),
                       ),
                     ),
                   ),
@@ -223,4 +227,3 @@ class VaultModal extends StatelessWidget {
     );
   }
 }
-

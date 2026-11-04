@@ -19,13 +19,13 @@ const isLiveConfig = Boolean(
 
 class MockRealtimeChannel {
   topic: string;
-  private listeners: Map<string, Array<(payload: any) => void>> = new Map();
+  private listeners: Map<string, Array<(payload: unknown) => void>> = new Map();
 
   constructor(topic: string) {
     this.topic = topic;
   }
 
-  on(_type: string, filter: { event: string }, callback: (payload: any) => void): this {
+  on(_type: string, filter: { event: string }, callback: (payload: unknown) => void): this {
     const event = filter.event;
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
@@ -41,7 +41,7 @@ class MockRealtimeChannel {
     return this;
   }
 
-  async send(data: { type: string; event: string; payload: any }): Promise<"ok" | "error"> {
+  async send(data: { type: string; event: string; payload: unknown }): Promise<"ok" | "error"> {
     const list = this.listeners.get(data.event);
     if (list) {
       list.forEach((cb) => {
@@ -63,13 +63,13 @@ function createMockSupabaseClient(): SupabaseClient {
   const channels = new Map<string, MockRealtimeChannel>();
 
   const mockClient = {
-    channel(name: string, _opts?: any) {
+    channel(name: string, _opts?: unknown) {
       if (!channels.has(name)) {
         channels.set(name, new MockRealtimeChannel(name));
       }
       return channels.get(name)!;
     },
-    removeChannel(channel: any) {
+    removeChannel(channel: { topic?: string }) {
       const topic = channel?.topic;
       if (topic) {
         channels.delete(topic);

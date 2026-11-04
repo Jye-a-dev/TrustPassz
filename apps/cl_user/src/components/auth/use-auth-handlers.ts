@@ -160,22 +160,29 @@ export function useAuthHandlers() {
         description: "Quét vân tay hoặc FaceID trên thiết bị của bạn...",
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
 
-      const mockEmail = "passkey-user@trustpassz.io";
-      const passkeyUser = {
-        id: "passkey-user-001",
-        email: mockEmail,
-        displayName: "Passkey Verified Trader",
-        role: "USER" as const,
-      };
-      const passkeyToken = generateClientSessionJwt(passkeyUser);
+      const credential = (await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          timeout: 60000,
+          userVerification: "preferred",
+        },
+      })) as PublicKeyCredential | null;
+
+      if (!credential) {
+        throw new Error("Không nhận được chứng thực Passkey từ thiết bị.");
+      }
+
+      const rawId = credential.rawId
+        ? btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
+        : credential.id;
 
       const result = await verifyAuthApi({
         provider: "privy",
-        email: mockEmail,
-        displayName: "Passkey Verified Trader",
-        token: passkeyToken,
+        token: rawId,
+        walletAddress: credential.id,
       });
 
       handleAuthSuccess(result, "Đăng nhập Passkey");
@@ -206,27 +213,6 @@ export function useAuthHandlers() {
     }
   };
 
-  const handleDemoSignIn = () => {
-    const demoUser = {
-      id: "11111111-1111-4111-a111-111111111111",
-      email: "seller@trustpassz.io",
-      walletAddress: "0x1111111111111111111111111111111111111111",
-      displayName: "Trusted Seller",
-      avatarUrl: null,
-      role: "USER" as const,
-    };
-    const demoToken = generateClientSessionJwt(demoUser);
-    handleAuthSuccess(
-      {
-        accessToken: demoToken,
-        tokenType: "Bearer",
-        expiresIn: 604800,
-        user: demoUser,
-      },
-      "Đăng nhập tài khoản Demo"
-    );
-  };
-
   return {
     connected,
     publicKey,
@@ -239,6 +225,5 @@ export function useAuthHandlers() {
     handleGoogleSuccess,
     handlePasskeySignIn,
     onEmailSubmit,
-    handleDemoSignIn,
   };
 }

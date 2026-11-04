@@ -24,6 +24,7 @@ datasource db {
 enum UserRole {
   USER
   ADMIN
+  SUPER_ADMIN
   ARBITRATOR
 
   @@map("user_role_enum")
@@ -38,6 +39,14 @@ enum DealState {
   DISPUTED
 
   @@map("deal_state_enum")
+}
+
+enum ChainType {
+  BASE_SEPOLIA
+  SOLANA_DEVNET
+  SOLANA_MAINNET
+
+  @@map("chain_type_enum")
 }
 
 enum AssetType {
@@ -113,6 +122,8 @@ model User {
   avatarUrl     String?  @map("avatar_url") @db.Text
   password      String?  @db.VarChar(255)
   role          UserRole @default(USER)
+  isFrozen      Boolean  @default(false) @map("is_frozen")
+  kycStatus     String   @default("VERIFIED") @map("kyc_status") @db.VarChar(30)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -123,8 +134,11 @@ model User {
   buyerOrders       Order[]        @relation("BuyerOrders")
   sellerOrders      Order[]        @relation("SellerOrders")
   bargainOffers     BargainOffer[] @relation("BuyerBargains")
-  initiatedDisputes DisputeLog[]   @relation("InitiatorDisputes")
-  resolvedDisputes  DisputeLog[]   @relation("ResolverDisputes")
+  initiatedDisputes DisputeLog[]        @relation("InitiatorDisputes")
+  resolvedDisputes  DisputeLog[]        @relation("ResolverDisputes")
+  relayerFundingLogs RelayerFundingLog[] @relation("AdminRelayerFunding")
+  auditLogs          AuditLog[]          @relation("AdminAuditLogs")
+  fiatFundingOrders  FiatCryptoFundingOrder[] @relation("AdminFiatOrders")
 
   @@map("users")
 }
@@ -176,7 +190,12 @@ model Product {
 
 model Deal {
   id                    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  onchainDealId         String?   @unique @map("onchain_deal_id") @db.VarChar(66)
+  chainType             ChainType @default(BASE_SEPOLIA) @map("chain_type")
+  onchainDealId         String?   @unique @map("onchain_deal_id") @db.VarChar(128)
+  solanaPdaAddress      String?   @map("solana_pda_address") @db.VarChar(64)
+  buyerWallet           String?   @map("buyer_wallet") @db.VarChar(100)
+  sellerWallet          String?   @map("seller_wallet") @db.VarChar(100)
+  depositTxHash         String?   @map("deposit_tx_hash") @db.VarChar(128)
   sellerId              String    @map("seller_id") @db.Uuid
   buyerId               String?   @map("buyer_id") @db.Uuid
   title                 String    @db.VarChar(255)
@@ -190,8 +209,8 @@ model Deal {
   paymentOrderCode      BigInt?   @unique @map("payment_order_code")
   paymentRefId          String?   @map("payment_ref_id") @db.VarChar(100)
   webhookIdempotencyKey String?   @unique @map("webhook_idempotency_key") @db.VarChar(128)
-  settleTxHash          String?   @map("settle_tx_hash") @db.VarChar(66)
-  disputeTxHash         String?   @map("dispute_tx_hash") @db.VarChar(66)
+  settleTxHash          String?   @map("settle_tx_hash") @db.VarChar(128)
+  disputeTxHash         String?   @map("dispute_tx_hash") @db.VarChar(128)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -206,6 +225,8 @@ model Deal {
   @@index([state])
   @@index([onchainDealId])
   @@index([paymentOrderCode])
+  @@index([chainType])
+  @@index([solanaPdaAddress])
   @@map("deals")
 }
 
@@ -303,4 +324,104 @@ model DisputeLog {
   @@index([dealId])
   @@index([status])
   @@map("dispute_logs")
+}
+
+// ==============================================================================
+// 5. RELAYER GAS FUNDING & AUDIT LOGS
+// ==============================================================================
+
+model RelayerFundingLog {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  txHash         String   @unique @map("tx_hash") @db.VarChar(128)
+  senderWallet   String   @map("sender_wallet") @db.VarChar(100)
+  relayerWallet  String   @map("relayer_wallet") @db.VarChar(100)
+  amountSol      Decimal  @map("amount_sol") @db.Decimal(18, 9)
+  amountLamports BigInt   @map("amount_lamports")
+  adminUserId    String?  @map("admin_user_id") @db.Uuid
+  status         String   @default("CONFIRMED") @db.VarChar(20)
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  adminUser      User?    @relation("AdminRelayerFunding", fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([senderWallet])
+  @@index([relayerWallet])
+  @@index([createdAt])
+  @@map("relayer_funding_logs")
+}
+
+// ==============================================================================
+// 6. ADMINISTRATIVE AUDIT & FIAT-CRYPTO ON-RAMP MODELS
+// ==============================================================================
+
+enum AuditActionType {
+  OVERRIDE_SETTLE
+  OVERRIDE_REFUND
+  FREEZE_USER
+  UNFREEZE_USER
+  ROLE_CHANGE
+  FUND_RELAYER
+  FIAT_CRYPTO_SWAP
+
+  @@map("audit_action_type_enum")
+}
+
+enum FiatFundingStatus {
+  PENDING
+  PAID
+  FULFILLED
+  FAILED
+  CANCELLED
+
+  @@map("fiat_funding_status_enum")
+}
+
+model AuditLog {
+  id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  adminId        String?         @map("admin_id") @db.Uuid
+  actionType     AuditActionType @map("action_type")
+  targetEntityId String          @map("target_entity_id") @db.VarChar(128)
+  payloadBefore  Json?           @map("payload_before")
+  payloadAfter   Json?           @map("payload_after")
+  auditReason    String          @map("audit_reason") @db.Text
+  txHash         String?         @map("tx_hash") @db.VarChar(128)
+  ipAddress      String?         @map("ip_address") @db.VarChar(45)
+  userAgent      String?         @map("user_agent") @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  admin          User?           @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([actionType])
+  @@index([targetEntityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model FiatCryptoFundingOrder {
+  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  orderCode       BigInt            @unique @map("order_code")
+  adminId         String?           @map("admin_id") @db.Uuid
+  recipientWallet String            @map("recipient_wallet") @db.VarChar(100)
+  fiatCurrency    String            @default("VND") @map("fiat_currency") @db.VarChar(10)
+  fiatAmount      Decimal           @map("fiat_amount") @db.Decimal(18, 4)
+  cryptoCurrency  String            @default("SOL") @map("crypto_currency") @db.VarChar(10)
+  cryptoAmount    Decimal           @map("crypto_amount") @db.Decimal(18, 9)
+  exchangeRate    Decimal           @map("exchange_rate") @db.Decimal(18, 4)
+  status          FiatFundingStatus @default(PENDING)
+  paymentGateway  String            @default("VIETQR_PAYOS") @map("payment_gateway") @db.VarChar(50)
+  paymentRefId    String?           @map("payment_ref_id") @db.VarChar(100)
+  qrUrl           String?           @map("qr_url") @db.Text
+  solanaTxHash    String?           @map("solana_tx_hash") @db.VarChar(128)
+  metadata        Json              @default("{}")
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  admin           User?             @relation("AdminFiatOrders", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([recipientWallet])
+  @@index([status])
+  @@index([orderCode])
+  @@map("fiat_crypto_funding_orders")
 }

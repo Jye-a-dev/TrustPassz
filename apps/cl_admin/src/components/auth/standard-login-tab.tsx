@@ -69,7 +69,7 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
               setEmail(e.target.value);
               if (formError) setFormError(null);
             }}
-            placeholder="admin@trustpassz.io"
+            placeholder="admin@example.com"
             className="h-11 min-h-[44px] rounded-xl border-slate-800 bg-[#070A12]/90 pl-10 pr-4 text-xs text-white placeholder:text-slate-600 focus-visible:border-cyan-500/60 focus-visible:ring-2 focus-visible:ring-cyan-500/30 transition-all"
           />
         </div>

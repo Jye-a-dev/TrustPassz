@@ -11,8 +11,8 @@ contract DeployEscrow is Script {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
 
-        // Required Oracle Relayer address from environment
-        address oracleRelayer = vm.envAddress("ORACLE_RELAYER_ADDRESS");
+        // Oracle Relayer address from environment (defaults to deployer if unspecified)
+        address oracleRelayer = vm.envOr("ORACLE_RELAYER_ADDRESS", deployer);
 
         // Dispute Resolver address defaults to deployer if unspecified
         address disputeResolver = vm.envOr("DISPUTE_RESOLVER_ADDRESS", deployer);
