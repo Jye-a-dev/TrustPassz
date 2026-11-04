@@ -20,7 +20,7 @@ Autonomous Web3 & AI-Driven Digital Escrow Platform.
 
 - apps/server:
   - Runtime: Node.js (NestJS)
-  - Default Port: 3001
+  - Default Port: 3000
   - Endpoints: REST API (`/api/v1`), WebSocket Gateway, PayOS Webhook (`/api/v1/payments/webhook`), Health Check (`/api/v1/health`), Swagger Docs (`/api/v1/docs`)
 - apps/cl_user:
   - Runtime: Next.js (App Router)
@@ -152,7 +152,7 @@ cd ../..
 
 Khởi chạy các service từ thư mục root:
 
-- Chạy Backend Server (Port 3001):
+- Chạy Backend Server (Port 3000):
   ```bash
   npm run server
   ```

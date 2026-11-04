@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { DealState } from '@prisma/client';
+import { ChainType, DealState } from '@prisma/client';
 import {
   IsDateString,
   IsEnum,
@@ -18,6 +18,15 @@ export class UpdateDealDto extends PartialType(CreateDealDto) {
   @IsOptional()
   @IsEnum(DealState, { message: 'Invalid deal state' })
   state?: DealState;
+
+  @ApiPropertyOptional({
+    description: 'Target blockchain network for escrow settlement',
+    enum: ChainType,
+    example: ChainType.BASE_SEPOLIA,
+  })
+  @IsOptional()
+  @IsEnum(ChainType, { message: 'Invalid chain type' })
+  chainType?: ChainType;
 
   @ApiPropertyOptional({
     description: 'Settlement transaction hash on-chain',

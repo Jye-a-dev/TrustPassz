@@ -63,6 +63,7 @@ export function buildDealWhereInput(
 ): Prisma.DealWhereInput {
   return {
     ...(query.state ? { state: query.state } : {}),
+    ...(query.chainType ? { chainType: query.chainType } : {}),
     ...(query.sellerId ? { sellerId: query.sellerId } : {}),
     ...(query.buyerId ? { buyerId: query.buyerId } : {}),
     ...(query.search
@@ -89,6 +90,7 @@ export function buildDealCreateData(
     state: DealState.PENDING,
     inspectionDuration: dealData.inspectionDuration || 86400,
     onchainDealId: dealData.onchainDealId || null,
+    ...(dealData.chainType ? { chainType: dealData.chainType } : {}),
   };
 }
 
@@ -158,6 +160,9 @@ export function buildDealUpdateData(
       inspectionDeadline: dealUpdates.inspectionDeadline
         ? new Date(dealUpdates.inspectionDeadline)
         : null,
+    }),
+    ...(dealUpdates.chainType !== undefined && {
+      chainType: dealUpdates.chainType,
     }),
   };
 }

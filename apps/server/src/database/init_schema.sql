@@ -10,7 +10,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. ENUMS
 -- ============================================================================
 DO $$ BEGIN
-    CREATE TYPE user_role_enum AS ENUM ('USER', 'ADMIN', 'ARBITRATOR');
+    CREATE TYPE user_role_enum AS ENUM ('USER', 'ADMIN', 'SUPER_ADMIN', 'ARBITRATOR');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
+    CREATE TYPE chain_type_enum AS ENUM ('BASE_SEPOLIA', 'SOLANA_DEVNET', 'SOLANA_MAINNET');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
@@ -102,7 +106,12 @@ CREATE TABLE IF NOT EXISTS "products" (
 
 CREATE TABLE IF NOT EXISTS "deals" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "onchain_deal_id" VARCHAR(66) UNIQUE,
+    "chain_type" chain_type_enum NOT NULL DEFAULT 'BASE_SEPOLIA',
+    "onchain_deal_id" VARCHAR(128) UNIQUE,
+    "solana_pda_address" VARCHAR(64),
+    "buyer_wallet" VARCHAR(100),
+    "seller_wallet" VARCHAR(100),
+    "deposit_tx_hash" VARCHAR(128),
     "seller_id" UUID NOT NULL,
     "buyer_id" UUID,
     "title" VARCHAR(255) NOT NULL,
@@ -116,8 +125,8 @@ CREATE TABLE IF NOT EXISTS "deals" (
     "payment_order_code" BIGINT UNIQUE,
     "payment_ref_id" VARCHAR(100),
     "webhook_idempotency_key" VARCHAR(128) UNIQUE,
-    "settle_tx_hash" VARCHAR(66),
-    "dispute_tx_hash" VARCHAR(66),
+    "settle_tx_hash" VARCHAR(128),
+    "dispute_tx_hash" VARCHAR(128),
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_deals_seller FOREIGN KEY ("seller_id") REFERENCES "users"("id") ON DELETE RESTRICT,
@@ -125,6 +134,23 @@ CREATE TABLE IF NOT EXISTS "deals" (
     CONSTRAINT chk_deals_amount_positive CHECK ("amount" > 0),
     CONSTRAINT chk_deals_duration_positive CHECK ("inspection_duration" > 0)
 );
+
+-- Dual-Chain columns upgrade for existing databases
+DO $$ BEGIN
+    ALTER TYPE user_role_enum ADD VALUE IF NOT EXISTS 'SUPER_ADMIN';
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+ALTER TABLE "deals"
+    ADD COLUMN IF NOT EXISTS "chain_type" chain_type_enum NOT NULL DEFAULT 'BASE_SEPOLIA',
+    ADD COLUMN IF NOT EXISTS "solana_pda_address" VARCHAR(64),
+    ADD COLUMN IF NOT EXISTS "buyer_wallet" VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS "seller_wallet" VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS "deposit_tx_hash" VARCHAR(128);
+
+ALTER TABLE "deals"
+    ALTER COLUMN "onchain_deal_id" TYPE VARCHAR(128),
+    ALTER COLUMN "settle_tx_hash" TYPE VARCHAR(128),
+    ALTER COLUMN "dispute_tx_hash" TYPE VARCHAR(128);
 
 CREATE TABLE IF NOT EXISTS "orders" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -232,6 +258,8 @@ CREATE INDEX IF NOT EXISTS idx_deals_buyer_id ON "deals"("buyer_id");
 CREATE INDEX IF NOT EXISTS idx_deals_state ON "deals"("state");
 CREATE INDEX IF NOT EXISTS idx_deals_onchain_deal_id ON "deals"("onchain_deal_id");
 CREATE INDEX IF NOT EXISTS idx_deals_payment_order_code ON "deals"("payment_order_code");
+CREATE INDEX IF NOT EXISTS idx_deals_chain_type ON "deals"("chain_type");
+CREATE INDEX IF NOT EXISTS idx_deals_solana_pda_address ON "deals"("solana_pda_address");
 CREATE INDEX IF NOT EXISTS idx_digital_assets_deal_id ON "digital_assets"("deal_id");
 CREATE INDEX IF NOT EXISTS idx_dispute_logs_deal_id ON "dispute_logs"("deal_id");
 CREATE INDEX IF NOT EXISTS idx_dispute_logs_status ON "dispute_logs"("status");

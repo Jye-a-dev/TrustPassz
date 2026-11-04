@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const serverDir = path.join(__dirname, '..', 'apps', 'server');
+const rootDir = path.resolve(__dirname, '../../..');
+const serverDir = path.resolve(rootDir, 'apps', 'server');
 
 // Load environment variables from apps/server/.env
 const envPath = path.join(serverDir, '.env');
@@ -23,13 +24,17 @@ if (fs.existsSync(envPath)) {
 // Support both hoisted and local module resolution
 function resolveModule(moduleName) {
   try {
-    return require(path.join(serverDir, 'node_modules', moduleName));
+    const resolved = require.resolve(moduleName, {
+      paths: [
+        serverDir,
+        path.join(serverDir, 'node_modules'),
+        rootDir,
+        path.join(rootDir, 'node_modules'),
+      ],
+    });
+    return require(resolved);
   } catch (e) {
-    try {
-      return require(path.join(__dirname, '..', 'node_modules', moduleName));
-    } catch (e2) {
-      return require(moduleName);
-    }
+    return require(moduleName);
   }
 }
 

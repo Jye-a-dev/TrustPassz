@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { DealState } from '@prisma/client';
+import { ChainType, DealState } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -43,6 +43,15 @@ export class QueryDealDto {
   @IsOptional()
   @IsEnum(DealState, { message: 'Invalid deal state filter' })
   state?: DealState;
+
+  @ApiPropertyOptional({
+    description: 'Filter deals matching specific blockchain network',
+    enum: ChainType,
+    example: ChainType.BASE_SEPOLIA,
+  })
+  @IsOptional()
+  @IsEnum(ChainType, { message: 'Invalid chain type filter' })
+  chainType?: ChainType;
 
   @ApiPropertyOptional({
     description: 'Filter deals created by specific seller UUID',

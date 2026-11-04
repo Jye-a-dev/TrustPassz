@@ -1,6 +1,13 @@
 {
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/ai_pipeline/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/apps/ai_pipeline"
+  ],
+  "python.analysis.autoSearchPaths": true,
   "eslint.workingDirectories": [
-    { "pattern": "./apps/*" }
+    {
+      "pattern": "./apps/*"
+    }
   ],
   "dart.projectSearchPaths": [
     "apps/mb_user"

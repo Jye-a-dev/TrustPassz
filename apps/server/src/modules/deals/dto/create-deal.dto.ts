@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AssetType } from '@prisma/client';
+import { AssetType, ChainType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -184,6 +184,17 @@ export class CreateDealDto {
   @ValidateNested()
   @Type(() => EncryptedAssetDto)
   digitalAsset?: EncryptedAssetDto;
+
+  @ApiPropertyOptional({
+    description:
+      'Target blockchain network for escrow settlement (Base Sepolia or Solana)',
+    enum: ChainType,
+    example: ChainType.BASE_SEPOLIA,
+    default: ChainType.BASE_SEPOLIA,
+  })
+  @IsOptional()
+  @IsEnum(ChainType, { message: 'Invalid chain type' })
+  chainType?: ChainType = ChainType.BASE_SEPOLIA;
 
   @ApiPropertyOptional({
     description:
