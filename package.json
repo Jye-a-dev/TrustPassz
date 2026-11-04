@@ -11,6 +11,9 @@
     "build": "npm run build --workspace=cl_user",
     "build:user": "npm run build --workspace=cl_user",
     "build:admin": "npm run build --workspace=cl_admin",
+    "turbo": "turbo",
+    "lint": "turbo run lint",
+    "prisma:generate": "npm run prisma:generate --workspace=server",
     "mb": "node packages/tooling/scripts/run-mb.js",
     "user": "npm --prefix apps/cl_user run dev",
     "admin": "npm --prefix apps/cl_admin run dev",
@@ -23,6 +26,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "concurrently": "^9.2.4",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "turbo": "^2.4.4"
   }
 }
