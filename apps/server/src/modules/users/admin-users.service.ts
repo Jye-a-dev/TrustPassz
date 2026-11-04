@@ -60,7 +60,7 @@ export class AdminUsersService {
       }
       const pubkey = new PublicKey(walletAddress);
       const lamports = await this.solanaConnection.getBalance(pubkey);
-      return Number((lamports / LAMPORTS_PER_SOL).toFixed(4));
+      return Number((Number(lamports) / Number(LAMPORTS_PER_SOL)).toFixed(4));
     } catch {
       return null;
     }

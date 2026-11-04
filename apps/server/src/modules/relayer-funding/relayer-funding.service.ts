@@ -42,7 +42,7 @@ export class RelayerFundingService implements OnModuleInit {
     private readonly configService: ConfigService,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     const rpcUrl =
       this.configService.get<string>('SOLANA_RPC_URL') ||
       'https://api.devnet.solana.com';
@@ -64,7 +64,7 @@ export class RelayerFundingService implements OnModuleInit {
     let pubKeyStr = this.configService.get<string>('SOLANA_RELAYER_PUBLIC_KEY');
     if (!pubKeyStr || pubKeyStr.trim().length === 0) {
       const relayerSecret = this.configService.get<string>('SOLANA_RELAYER_PRIVATE_KEY');
-      const keypair = parseSolanaKeypair(relayerSecret);
+      const keypair = await parseSolanaKeypair(relayerSecret);
       if (keypair) {
         pubKeyStr = keypair.publicKey.toBase58();
       }
@@ -82,7 +82,7 @@ export class RelayerFundingService implements OnModuleInit {
   async getRelayerBalance(): Promise<RelayerBalanceResponseDto> {
     try {
       const lamports = await this.connection.getBalance(this.relayerPublicKey, 'confirmed');
-      const balanceSol = Number((lamports / LAMPORTS_PER_SOL).toFixed(4));
+      const balanceSol = Number((Number(lamports) / Number(LAMPORTS_PER_SOL)).toFixed(4));
 
       // Query Base Sepolia EVM Relayer balance
       let evmBalance = 0.4852;
