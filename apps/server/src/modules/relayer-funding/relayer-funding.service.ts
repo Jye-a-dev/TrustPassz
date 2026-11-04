@@ -63,7 +63,9 @@ export class RelayerFundingService implements OnModuleInit {
 
     let pubKeyStr = this.configService.get<string>('SOLANA_RELAYER_PUBLIC_KEY');
     if (!pubKeyStr || pubKeyStr.trim().length === 0) {
-      const relayerSecret = this.configService.get<string>('SOLANA_RELAYER_PRIVATE_KEY');
+      const relayerSecret = this.configService.get<string>(
+        'SOLANA_RELAYER_PRIVATE_KEY',
+      );
       const keypair = await parseSolanaKeypair(relayerSecret);
       if (keypair) {
         pubKeyStr = keypair.publicKey.toBase58();
@@ -81,25 +83,35 @@ export class RelayerFundingService implements OnModuleInit {
    */
   async getRelayerBalance(): Promise<RelayerBalanceResponseDto> {
     try {
-      const lamports = await this.connection.getBalance(this.relayerPublicKey, 'confirmed');
-      const balanceSol = Number((Number(lamports) / Number(LAMPORTS_PER_SOL)).toFixed(4));
+      const lamports = await this.connection.getBalance(
+        this.relayerPublicKey,
+        'confirmed',
+      );
+      const balanceSol = Number(
+        (Number(lamports) / Number(LAMPORTS_PER_SOL)).toFixed(4),
+      );
 
       // Query Base Sepolia EVM Relayer balance
       let evmBalance = 0.4852;
-      const evmAddress = (this.configService.get<string>('ORACLE_RELAYER_ADDRESS') ||
-        '0x70997970C51812dc3A010C7d01b50e0d17dc79C8') as `0x${string}`;
+      const evmAddress = (this.configService.get<string>(
+        'ORACLE_RELAYER_ADDRESS',
+      ) || '0x70997970C51812dc3A010C7d01b50e0d17dc79C8') as `0x${string}`;
       const thresholdEth = 0.02;
 
       try {
         const publicClient = createPublicClient({
           chain: baseSepolia,
           transport: createViemFallbackTransport({
-            primaryRpcUrl: this.configService.get<string>('BASE_SEPOLIA_RPC_URL'),
+            primaryRpcUrl: this.configService.get<string>(
+              'BASE_SEPOLIA_RPC_URL',
+            ),
           }),
         });
         const wei = await Promise.race([
           publicClient.getBalance({ address: evmAddress }),
-          new Promise<bigint>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
+          new Promise<bigint>((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), 5000),
+          ),
         ]);
         evmBalance = Number(parseFloat(formatEther(wei)).toFixed(4));
       } catch {
@@ -108,8 +120,12 @@ export class RelayerFundingService implements OnModuleInit {
 
       const ethPriceUsd = 2650;
       const solPriceUsd = 155;
-      const totalEquivalentUsd = Number((evmBalance * ethPriceUsd + balanceSol * solPriceUsd).toFixed(2));
-      const totalEquivalentEth = Number((evmBalance + (balanceSol * solPriceUsd) / ethPriceUsd).toFixed(4));
+      const totalEquivalentUsd = Number(
+        (evmBalance * ethPriceUsd + balanceSol * solPriceUsd).toFixed(2),
+      );
+      const totalEquivalentEth = Number(
+        (evmBalance + (balanceSol * solPriceUsd) / ethPriceUsd).toFixed(4),
+      );
 
       return {
         relayerAddress: this.relayerPublicKey.toBase58(),
@@ -149,21 +165,33 @@ export class RelayerFundingService implements OnModuleInit {
 
     const parsedTx = await this.fetchParsedTransaction(dto.txHash);
     if (parsedTx.meta?.err) {
-      throw new BadRequestException('Giao dịch on-chain thất bại (Status Error).');
+      throw new BadRequestException(
+        'Giao dịch on-chain thất bại (Status Error).',
+      );
     }
 
     const relayerAddressStr = this.relayerPublicKey.toBase58();
-    const transfer = this.findMatchingTransfer(parsedTx, dto.senderWallet, relayerAddressStr);
+    const transfer = this.findMatchingTransfer(
+      parsedTx,
+      dto.senderWallet,
+      relayerAddressStr,
+    );
 
     if (!transfer) {
-      throw new BadRequestException('Không tìm thấy lệnh chuyển SOL hợp lệ từ sender đến Relayer.');
+      throw new BadRequestException(
+        'Không tìm thấy lệnh chuyển SOL hợp lệ từ sender đến Relayer.',
+      );
     }
 
     const transferredLamports = BigInt(transfer.lamports);
-    const expectedLamports = BigInt(Math.round(dto.amountSol * LAMPORTS_PER_SOL));
+    const expectedLamports = BigInt(
+      Math.round(dto.amountSol * LAMPORTS_PER_SOL),
+    );
 
     if (transferredLamports < expectedLamports) {
-      throw new BadRequestException('Số lượng Lamports on-chain nhỏ hơn giá trị khai báo.');
+      throw new BadRequestException(
+        'Số lượng Lamports on-chain nhỏ hơn giá trị khai báo.',
+      );
     }
 
     const recordedAt = new Date();
@@ -201,11 +229,14 @@ export class RelayerFundingService implements OnModuleInit {
 
   private verifyTwoFactor(twoFactorCode?: string): void {
     const configuredPin = this.configService.get<string>('ADMIN_2FA_PIN');
-    const enforce2fa = this.configService.get<string>('ENFORCE_2FA', 'true') === 'true';
+    const enforce2fa =
+      this.configService.get<string>('ENFORCE_2FA', 'true') === 'true';
 
     if (!enforce2fa && !twoFactorCode) return;
     if (!twoFactorCode || twoFactorCode.trim().length !== 6) {
-      throw new UnauthorizedException('Yêu cầu mã PIN 2FA (6 số) trước khi cấp vốn.');
+      throw new UnauthorizedException(
+        'Yêu cầu mã PIN 2FA (6 số) trước khi cấp vốn.',
+      );
     }
     if (configuredPin && twoFactorCode !== configuredPin) {
       throw new UnauthorizedException('Mã xác thực 2 bước không chính xác.');
@@ -215,11 +246,15 @@ export class RelayerFundingService implements OnModuleInit {
   private async assertTransactionNotRecorded(txHash: string): Promise<void> {
     try {
       if ((this.prisma as any).relayerFundingLog?.findUnique) {
-        const existing = await (this.prisma as any).relayerFundingLog.findUnique({
+        const existing = await (
+          this.prisma as any
+        ).relayerFundingLog.findUnique({
           where: { txHash },
         });
         if (existing) {
-          throw new ConflictException('Chữ ký TxHash đã được ghi nhận trước đó (Replay Prevention).');
+          throw new ConflictException(
+            'Chữ ký TxHash đã được ghi nhận trước đó (Replay Prevention).',
+          );
         }
         return;
       }
@@ -232,7 +267,9 @@ export class RelayerFundingService implements OnModuleInit {
     `.catch(() => []);
 
     if (existingRows.length > 0) {
-      throw new ConflictException('Chữ ký TxHash đã được ghi nhận trước đó (Replay Prevention).');
+      throw new ConflictException(
+        'Chữ ký TxHash đã được ghi nhận trước đó (Replay Prevention).',
+      );
     }
   }
 
@@ -251,7 +288,9 @@ export class RelayerFundingService implements OnModuleInit {
     }
 
     if (!parsedTx) {
-      throw new BadRequestException('Không tìm thấy giao dịch trên Solana RPC (chưa confirmed).');
+      throw new BadRequestException(
+        'Không tìm thấy giao dịch trên Solana RPC (chưa confirmed).',
+      );
     }
 
     return parsedTx;
@@ -271,7 +310,11 @@ export class RelayerFundingService implements OnModuleInit {
     const innerSets = parsedTx.meta?.innerInstructions ?? [];
     for (const set of innerSets) {
       for (const ix of set.instructions ?? []) {
-        const match = this.extractTransferInfo(ix, senderWallet, relayerAddress);
+        const match = this.extractTransferInfo(
+          ix,
+          senderWallet,
+          relayerAddress,
+        );
         if (match) return match;
       }
     }
@@ -333,7 +376,9 @@ export class RelayerFundingService implements OnModuleInit {
       }
     } catch (err: any) {
       if (err?.code === 'P2002') {
-        throw new ConflictException('Giao dịch này đã được ghi nhận trong cơ sở dữ liệu.');
+        throw new ConflictException(
+          'Giao dịch này đã được ghi nhận trong cơ sở dữ liệu.',
+        );
       }
     }
 

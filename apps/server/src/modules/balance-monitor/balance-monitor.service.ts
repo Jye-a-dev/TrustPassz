@@ -56,13 +56,34 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(BalanceMonitorService.name);
 
   private config!: BalanceMonitorConfig;
-  private publicClient!: { getBalance(args: { address: `0x${string}` }): Promise<bigint> };
+  private publicClient!: {
+    getBalance(args: { address: `0x${string}` }): Promise<bigint>;
+  };
   private solanaConnection!: Connection;
   private cronJob?: CronJob;
 
-  private readonly alertStates = new Map<'base-sepolia' | 'solana', ChainAlertState>([
-    ['base-sepolia', { chain: 'base-sepolia', isAlertActive: false, lastAlertTimestamp: 0, lastReportedBalance: 0 }],
-    ['solana', { chain: 'solana', isAlertActive: false, lastAlertTimestamp: 0, lastReportedBalance: 0 }],
+  private readonly alertStates = new Map<
+    'base-sepolia' | 'solana',
+    ChainAlertState
+  >([
+    [
+      'base-sepolia',
+      {
+        chain: 'base-sepolia',
+        isAlertActive: false,
+        lastAlertTimestamp: 0,
+        lastReportedBalance: 0,
+      },
+    ],
+    [
+      'solana',
+      {
+        chain: 'solana',
+        isAlertActive: false,
+        lastAlertTimestamp: 0,
+        lastReportedBalance: 0,
+      },
+    ],
   ]);
 
   constructor(
@@ -82,7 +103,9 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       }),
     });
 
-    this.solanaConnection = new Connection(this.config.solanaRpcUrl, { commitment: 'confirmed' });
+    this.solanaConnection = new Connection(this.config.solanaRpcUrl, {
+      commitment: 'confirmed',
+    });
 
     if (!this.config.enabled) {
       this.logger.log('BalanceMonitorService background cron is disabled.');
@@ -95,17 +118,25 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
           await this.checkBalances();
         } catch (jobErr: unknown) {
           const msg = jobErr instanceof Error ? jobErr.message : String(jobErr);
-          this.logger.error(`Error during scheduled balance monitor cycle: ${msg}`);
+          this.logger.error(
+            `Error during scheduled balance monitor cycle: ${msg}`,
+          );
         }
       });
 
       if (this.schedulerRegistry) {
-        this.schedulerRegistry.addCronJob('oracle-relayer-balance-monitor', this.cronJob);
+        this.schedulerRegistry.addCronJob(
+          'oracle-relayer-balance-monitor',
+          this.cronJob,
+        );
       }
       this.cronJob.start();
-      this.logger.log(`BalanceMonitorService scheduled with cron pattern [${this.config.cronSchedule}]`);
+      this.logger.log(
+        `BalanceMonitorService scheduled with cron pattern [${this.config.cronSchedule}]`,
+      );
     } catch (schedErr: unknown) {
-      const msg = schedErr instanceof Error ? schedErr.message : String(schedErr);
+      const msg =
+        schedErr instanceof Error ? schedErr.message : String(schedErr);
       this.logger.warn(`Failed to schedule balance monitor cron: ${msg}`);
     }
   }
@@ -115,7 +146,9 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       this.cronJob.stop();
       if (this.schedulerRegistry) {
         try {
-          this.schedulerRegistry.deleteCronJob('oracle-relayer-balance-monitor');
+          this.schedulerRegistry.deleteCronJob(
+            'oracle-relayer-balance-monitor',
+          );
         } catch {
           // Job already disposed
         }
@@ -126,7 +159,9 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
 
   async checkBalances(): Promise<BalanceCheckReport> {
     const timestamp = new Date().toISOString();
-    this.logger.log(`[BalanceMonitor] Starting multi-chain balance check cycle`);
+    this.logger.log(
+      `[BalanceMonitor] Starting multi-chain balance check cycle`,
+    );
 
     const [evm, solana] = await Promise.all([
       this.queryEvmBalance(),
@@ -150,7 +185,10 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       const balanceWei = await Promise.race([
         this.publicClient.getBalance({ address }),
         new Promise<never>((_, reject) => {
-          timerId = setTimeout(() => reject(new Error('Base Sepolia RPC timeout (10s)')), 10_000);
+          timerId = setTimeout(
+            () => reject(new Error('Base Sepolia RPC timeout (10s)')),
+            10_000,
+          );
         }),
       ]);
       clearTimeout(timerId);
@@ -199,7 +237,10 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       const lamports = await Promise.race([
         this.solanaConnection.getBalance(pubKey),
         new Promise<never>((_, reject) => {
-          timerId = setTimeout(() => reject(new Error('Solana RPC timeout (10s)')), 10_000);
+          timerId = setTimeout(
+            () => reject(new Error('Solana RPC timeout (10s)')),
+            10_000,
+          );
         }),
       ]);
       clearTimeout(timerId);
@@ -245,15 +286,24 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
 
     const now = Date.now();
     const unit = result.chain === 'base-sepolia' ? 'ETH' : 'SOL';
-    const chainName = result.chain === 'base-sepolia' ? 'Base Sepolia (EVM)' : 'Solana (SVM)';
-    const explorerUrl = result.chain === 'base-sepolia'
-      ? `https://sepolia.basescan.org/address/${result.address}`
-      : `https://solscan.io/account/${result.address}?cluster=devnet`;
+    const chainName =
+      result.chain === 'base-sepolia' ? 'Base Sepolia (EVM)' : 'Solana (SVM)';
+    const explorerUrl =
+      result.chain === 'base-sepolia'
+        ? `https://sepolia.basescan.org/address/${result.address}`
+        : `https://solscan.io/account/${result.address}?cluster=devnet`;
 
     if (result.isLowBalance) {
-      if (state.isAlertActive && now - state.lastAlertTimestamp < this.config.cooldownMs) {
-        const remainingMin = Math.round((this.config.cooldownMs - (now - state.lastAlertTimestamp)) / 60000);
-        this.logger.log(`[Debounce] Alert for ${result.chain} suppressed. Cooldown active (${remainingMin}m remaining)`);
+      if (
+        state.isAlertActive &&
+        now - state.lastAlertTimestamp < this.config.cooldownMs
+      ) {
+        const remainingMin = Math.round(
+          (this.config.cooldownMs - (now - state.lastAlertTimestamp)) / 60000,
+        );
+        this.logger.log(
+          `[Debounce] Alert for ${result.chain} suppressed. Cooldown active (${remainingMin}m remaining)`,
+        );
         return;
       }
 
@@ -262,12 +312,21 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       state.lastReportedBalance = result.balance;
 
       const title = `🚨 [RELAYER GAS ALERT] ${chainName}`;
-      this.logger.warn(`${title} — Balance: ${result.formattedBalance} ${unit} < Threshold: ${result.threshold} ${unit}`);
+      this.logger.warn(
+        `${title} — Balance: ${result.formattedBalance} ${unit} < Threshold: ${result.threshold} ${unit}`,
+      );
 
       await this.sendSentryWarning(
         `[RELAYER GAS ALERT] ${result.chain} balance (${result.formattedBalance} ${unit}) is below threshold (${result.threshold} ${unit})`,
-        { chain: result.chain, address: result.address, balance: result.formattedBalance },
-        { threshold: result.threshold, estimatedTxRemaining: result.estimatedTxRemaining },
+        {
+          chain: result.chain,
+          address: result.address,
+          balance: result.formattedBalance,
+        },
+        {
+          threshold: result.threshold,
+          estimatedTxRemaining: result.estimatedTxRemaining,
+        },
       );
 
       const telegramHtml =
@@ -278,26 +337,47 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
 
       const discordEmbed = {
         title,
-        description: 'Oracle Relayer gas is critically low. Refill wallet immediately.',
+        description:
+          'Oracle Relayer gas is critically low. Refill wallet immediately.',
         color: 0xef4444,
         fields: [
           { name: 'Chain', value: chainName, inline: true },
-          { name: 'Current Balance', value: `${result.formattedBalance} ${unit}`, inline: true },
-          { name: 'Threshold', value: `${result.threshold} ${unit}`, inline: true },
-          { name: 'Est. Remaining Txs', value: `~${result.estimatedTxRemaining} txs`, inline: true },
-          { name: 'Wallet Address', value: `[\`${result.address}\`](${explorerUrl})` },
+          {
+            name: 'Current Balance',
+            value: `${result.formattedBalance} ${unit}`,
+            inline: true,
+          },
+          {
+            name: 'Threshold',
+            value: `${result.threshold} ${unit}`,
+            inline: true,
+          },
+          {
+            name: 'Est. Remaining Txs',
+            value: `~${result.estimatedTxRemaining} txs`,
+            inline: true,
+          },
+          {
+            name: 'Wallet Address',
+            value: `[\`${result.address}\`](${explorerUrl})`,
+          },
         ],
         timestamp: new Date().toISOString(),
         footer: { text: 'TrustPassz Reliability Engine' },
       };
 
-      await Promise.allSettled([this.sendTelegram(telegramHtml), this.sendDiscord(discordEmbed)]);
+      await Promise.allSettled([
+        this.sendTelegram(telegramHtml),
+        this.sendDiscord(discordEmbed),
+      ]);
     } else if (state.isAlertActive) {
       state.isAlertActive = false;
       state.lastAlertTimestamp = 0;
       state.lastReportedBalance = result.balance;
 
-      this.logger.log(`[Recovery] Relayer wallet ${result.chain} refilled to ${result.formattedBalance} ${unit}. Cooldown reset.`);
+      this.logger.log(
+        `[Recovery] Relayer wallet ${result.chain} refilled to ${result.formattedBalance} ${unit}. Cooldown reset.`,
+      );
 
       const telegramRecovery =
         `✅ <b>[RELAYER GAS RECOVERED]</b>\n<b>Status:</b> RESOLVED / FUNDED\n<b>Chain:</b> ${chainName}\n` +
@@ -306,23 +386,39 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
 
       const discordRecovery = {
         title: `✅ [RELAYER GAS RECOVERED] ${chainName}`,
-        description: 'RESOLVED / FUNDED: Ví Relayer đã được nạp đủ số dư an toàn.',
+        description:
+          'RESOLVED / FUNDED: Ví Relayer đã được nạp đủ số dư an toàn.',
         color: 0x10b981,
         fields: [
           { name: 'Chain', value: chainName, inline: true },
-          { name: 'Balance', value: `${result.formattedBalance} ${unit}`, inline: true },
-          { name: 'Threshold', value: `${result.threshold} ${unit}`, inline: true },
+          {
+            name: 'Balance',
+            value: `${result.formattedBalance} ${unit}`,
+            inline: true,
+          },
+          {
+            name: 'Threshold',
+            value: `${result.threshold} ${unit}`,
+            inline: true,
+          },
           { name: 'Wallet', value: `[\`${result.address}\`](${explorerUrl})` },
         ],
         timestamp: new Date().toISOString(),
         footer: { text: 'TrustPassz Reliability Engine' },
       };
 
-      await Promise.allSettled([this.sendTelegram(telegramRecovery), this.sendDiscord(discordRecovery)]);
+      await Promise.allSettled([
+        this.sendTelegram(telegramRecovery),
+        this.sendDiscord(discordRecovery),
+      ]);
     }
   }
 
-  private async sendSentryWarning(message: string, tags: Record<string, string>, extra: Record<string, unknown>): Promise<void> {
+  private async sendSentryWarning(
+    message: string,
+    tags: Record<string, string>,
+    extra: Record<string, unknown>,
+  ): Promise<void> {
     if (!this.config.sentryDsn) return;
     try {
       const url = new URL(this.config.sentryDsn);
@@ -330,7 +426,8 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       await axios.post(
         endpoint,
         {
-          event_id: Math.random().toString(36).substring(2) + Date.now().toString(36),
+          event_id:
+            Math.random().toString(36).substring(2) + Date.now().toString(36),
           timestamp: new Date().toISOString(),
           platform: 'node',
           level: 'warning',
@@ -359,7 +456,12 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       const endpoint = `https://api.telegram.org/bot${this.config.telegramBotToken}/sendMessage`;
       await axios.post(
         endpoint,
-        { chat_id: this.config.telegramChatId, text: htmlText, parse_mode: 'HTML', disable_web_page_preview: true },
+        {
+          chat_id: this.config.telegramChatId,
+          text: htmlText,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true,
+        },
         { timeout: 8000 },
       );
     } catch (err: unknown) {
@@ -373,7 +475,11 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
     try {
       await axios.post(
         this.config.discordWebhookUrl,
-        { username: 'TrustPassz Relayer Sentinel', avatar_url: 'https://trustpassz.io/favicon.ico', embeds: [embed] },
+        {
+          username: 'TrustPassz Relayer Sentinel',
+          avatar_url: 'https://trustpassz.io/favicon.ico',
+          embeds: [embed],
+        },
         { timeout: 8000 },
       );
     } catch (err: unknown) {

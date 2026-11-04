@@ -37,9 +37,21 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
         for (const deal of inMemoryDeals.values()) {
           if (where.OR) {
             for (const condition of where.OR) {
-              if (condition.onchainDealId && deal.onchainDealId === condition.onchainDealId) return deal;
-              if (condition.solanaPdaAddress && deal.solanaPdaAddress === condition.solanaPdaAddress) return deal;
-              if (condition.sellerWallet && deal.sellerWallet === condition.sellerWallet) return deal;
+              if (
+                condition.onchainDealId &&
+                deal.onchainDealId === condition.onchainDealId
+              )
+                return deal;
+              if (
+                condition.solanaPdaAddress &&
+                deal.solanaPdaAddress === condition.solanaPdaAddress
+              )
+                return deal;
+              if (
+                condition.sellerWallet &&
+                deal.sellerWallet === condition.sellerWallet
+              )
+                return deal;
             }
           }
         }
@@ -72,15 +84,18 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
         receipt: { blockNumber: 12345688n },
       };
     }),
-    resolveDispute: jest.fn().mockImplementation(async (dealId: string, action: string) => {
-      const deal = inMemoryDeals.get(dealId);
-      const state = action === 'TRIGGER_REFUND' ? DealState.REFUNDED : DealState.SETTLED;
-      if (deal) deal.state = state;
-      return {
-        txHash: '0xevm_dispute_hash_789',
-        receipt: { blockNumber: 12345699n },
-      };
-    }),
+    resolveDispute: jest
+      .fn()
+      .mockImplementation(async (dealId: string, action: string) => {
+        const deal = inMemoryDeals.get(dealId);
+        const state =
+          action === 'TRIGGER_REFUND' ? DealState.REFUNDED : DealState.SETTLED;
+        if (deal) deal.state = state;
+        return {
+          txHash: '0xevm_dispute_hash_789',
+          receipt: { blockNumber: 12345699n },
+        };
+      }),
   };
 
   beforeAll(async () => {
@@ -96,8 +111,10 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
 
     prisma = moduleRef.get<PrismaService>(PrismaService);
     solanaWatcher = moduleRef.get<SolanaWatcherService>(SolanaWatcherService);
-    unifiedRelayer = moduleRef.get<UnifiedRelayerService>(UnifiedRelayerService);
-    unifiedRelayer.onModuleInit();
+    unifiedRelayer = moduleRef.get<UnifiedRelayerService>(
+      UnifiedRelayerService,
+    );
+    await unifiedRelayer.onModuleInit();
     solanaWatcher.onModuleInit();
   });
 
@@ -110,7 +127,8 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
       data: {
         id: 'deal_evm_001',
         chainType: 'BASE_SEPOLIA',
-        onchainDealId: '0x1111222233334444555566667777888899990000111122223333444455556666',
+        onchainDealId:
+          '0x1111222233334444555566667777888899990000111122223333444455556666',
         sellerId: 'user_seller_1',
         buyerId: 'user_buyer_1',
         title: 'Cyberpunk Game Engine Assets',
@@ -135,7 +153,9 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
     expect(settleRes.targetState).toBe(DealState.SETTLED);
     expect(settleRes.txHash).toBe('0xevm_settle_hash_456');
 
-    const updatedEvmDeal = await prisma.deal.findUnique({ where: { id: evmDeal.id } });
+    const updatedEvmDeal = await prisma.deal.findUnique({
+      where: { id: evmDeal.id },
+    });
     expect(updatedEvmDeal?.state).toBe(DealState.SETTLED);
   });
 
@@ -163,8 +183,11 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
       } as any,
     });
 
-    const { escrowPda } = await unifiedRelayer.derivePdaAddresses(new Uint8Array(rawDealId));
-    const depositSig = '5wHu8vK3bXyKzR798J1h6dGvK3bXyKzR798J1h6dGvK3bXyKzR798J1h6dGvK3bX';
+    const { escrowPda } = await unifiedRelayer.derivePdaAddresses(
+      new Uint8Array(rawDealId),
+    );
+    const depositSig =
+      '5wHu8vK3bXyKzR798J1h6dGvK3bXyKzR798J1h6dGvK3bXyKzR798J1h6dGvK3bX';
 
     const depositEvent: SolanaDepositParsedEvent = {
       dealIdHex,
@@ -181,7 +204,9 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
     const ingested = await solanaWatcher.processDepositEvent(depositEvent);
     expect(ingested).toBe(true);
 
-    const depositedDeal = (await prisma.deal.findUnique({ where: { id: solDeal.id } })) as unknown as DealWithDualChain;
+    const depositedDeal = (await prisma.deal.findUnique({
+      where: { id: solDeal.id },
+    })) as unknown as DealWithDualChain;
     expect(depositedDeal?.state).toBe(DealState.DEPOSITED);
     expect(depositedDeal?.depositTxHash).toBe(depositSig);
     expect(depositedDeal?.solanaPdaAddress).toBe(escrowPda.toBase58());
@@ -192,7 +217,9 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
     expect(inspectRes.targetState).toBe(DealState.IN_INSPECTION);
     expect(inspectRes.txHash).toBeDefined();
 
-    const inInspectionDeal = await prisma.deal.findUnique({ where: { id: solDeal.id } });
+    const inInspectionDeal = await prisma.deal.findUnique({
+      where: { id: solDeal.id },
+    });
     expect(inInspectionDeal?.state).toBe(DealState.IN_INSPECTION);
     expect(inInspectionDeal?.inspectionDeadline).toBeDefined();
 
@@ -201,12 +228,15 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
     expect(settleRes.chainType).toBe('SOLANA_DEVNET');
     expect(settleRes.targetState).toBe(DealState.SETTLED);
 
-    const finalDeal = await prisma.deal.findUnique({ where: { id: solDeal.id } });
+    const finalDeal = await prisma.deal.findUnique({
+      where: { id: solDeal.id },
+    });
     expect(finalDeal?.state).toBe(DealState.SETTLED);
     expect(finalDeal?.settleTxHash).toBeDefined();
   });
 
   it('3. Should block replay attack when duplicate Solana deposit event is submitted', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const rawDealId = Buffer.alloc(32, 9);
     const depositSig = 'duplicate_sig_replay_attempt_999';
 
