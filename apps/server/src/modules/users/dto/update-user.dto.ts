@@ -27,12 +27,12 @@ export class UpdateUserDto {
   phone?: string;
 
   @ApiPropertyOptional({
-    example: '0x1111111111111111111111111111111111111111',
-    description: 'EVM compatible wallet address',
+    example: '0x1111111111111111111111111111111111111111 or F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn',
+    description: 'EVM 0x or Solana Base58 compatible wallet address',
   })
   @IsOptional()
-  @Matches(/^0x[a-fA-F0-9]{40}$/, {
-    message: 'walletAddress must be a valid 42-character EVM address',
+  @Matches(/(^0x[a-fA-F0-9]{40}$)|(^[1-9A-HJ-NP-za-km-z]{32,44}$)/, {
+    message: 'walletAddress must be a valid 42-character EVM address or 32-44 character Solana Base58 public key',
   })
   walletAddress?: string;
 

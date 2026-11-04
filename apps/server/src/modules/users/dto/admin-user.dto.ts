@@ -40,6 +40,14 @@ export class QueryAdminUsersDto {
   @IsEnum(UserRole)
   role?: UserRole;
 
+  @ApiPropertyOptional({
+    description: 'Filter segmentation: CUSTOMERS (excludes staff), STAFF (Admin & Arbitrator), or ALL',
+    enum: ['CUSTOMERS', 'STAFF', 'ALL'],
+  })
+  @IsOptional()
+  @IsString()
+  type?: 'CUSTOMERS' | 'STAFF' | 'ALL';
+
   @ApiPropertyOptional({ description: 'Filter by frozen wallet status' })
   @IsOptional()
   @Type(() => Boolean)

@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ShieldCheck,
   BarChart3,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,11 @@ const NAV_ITEMS: NavItem[] = [
     label: "Người dùng & RBAC",
     href: "/users",
     icon: Users,
+  },
+  {
+    label: "Hồ sơ & Bảo mật",
+    href: "/admin/profile",
+    icon: UserCog,
   },
   {
     label: "Super API Explorer",

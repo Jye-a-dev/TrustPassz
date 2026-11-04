@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Fuel,
   LogOut,
+  UserCog,
 } from "lucide-react";
 import {
   Sheet,
@@ -68,6 +69,11 @@ const NAV_ITEMS: NavItem[] = [
     label: "Người dùng & RBAC",
     href: "/users",
     icon: Users,
+  },
+  {
+    label: "Hồ sơ & Bảo mật",
+    href: "/admin/profile",
+    icon: UserCog,
   },
   {
     label: "Super API Explorer",

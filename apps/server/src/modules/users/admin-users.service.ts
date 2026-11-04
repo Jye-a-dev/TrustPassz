@@ -79,6 +79,14 @@ export class AdminUsersService {
 
     if (query.role) {
       where.role = query.role;
+    } else if (query.type === 'STAFF') {
+      where.role = { in: [UserRole.ADMIN, UserRole.ARBITRATOR] };
+    } else if (query.type === 'CUSTOMERS') {
+      where.role = { notIn: [UserRole.ADMIN, UserRole.ARBITRATOR] };
+    }
+
+    if (query.isFrozen !== undefined) {
+      where.isFrozen = query.isFrozen;
     }
 
     if (searchTerm) {

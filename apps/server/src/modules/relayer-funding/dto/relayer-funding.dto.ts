@@ -96,6 +96,27 @@ export class RelayerBalanceResponseDto {
     example: '2026-11-01T03:00:00.000Z',
   })
   timestamp!: string;
+
+  @ApiPropertyOptional({
+    description: 'Chi tiết số dư ví Relayer Base Sepolia EVM',
+  })
+  evm?: {
+    address: string;
+    balanceEth: number;
+    formattedBalance: string;
+    thresholdEth: number;
+    isLowBalance: boolean;
+  };
+
+  @ApiPropertyOptional({
+    description: 'Quy đổi tương đương năng lực chi trả đa chuỗi (USD & ETH equivalent)',
+  })
+  conversion?: {
+    ethPriceUsd: number;
+    solPriceUsd: number;
+    totalEquivalentUsd: number;
+    totalEquivalentEth: number;
+  };
 }
 
 export class ConfirmFundingResponseDto {

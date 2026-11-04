@@ -55,7 +55,9 @@ export class UsersService {
           ...(dto.email !== undefined && { email: dto.email }),
           ...(dto.phone !== undefined && { phone: dto.phone }),
           ...(dto.walletAddress !== undefined && {
-            walletAddress: dto.walletAddress.toLowerCase(),
+            walletAddress: dto.walletAddress.startsWith('0x')
+              ? dto.walletAddress.toLowerCase()
+              : dto.walletAddress.trim(),
           }),
           ...(dto.displayName !== undefined && {
             displayName: dto.displayName,
