@@ -70,7 +70,7 @@ jobs:
       - name: Resolve Multi-RPC Fallback Endpoint
         id: rpc-resolver
         env:
-          BASE_SEPOLIA_RPC_URL: ${{ secrets[format('{0}', 'BASE_SEPOLIA_RPC_URL')] }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
         run: |
           RPC_CANDIDATES=()
           if [ -n "$BASE_SEPOLIA_RPC_URL" ]; then

@@ -1,0 +1,102 @@
+name: Render Cloud Anti-Idle Keep-Alive Probe
+
+# ==============================================================================
+# KEEP-ALIVE STRATEGY & ARCHITECTURE NOTE:
+# Render Free/Hobby Tier containers scale to zero after 15 minutes of inactivity.
+# Waking up a sleeping container causes a 30-50 second cold-start delay.
+#
+# This workflow executes every 14 minutes to ping the lightweight health probes
+# (/api/v1/health and /health), ensuring instances stay warm and responsive.
+#
+# Free External Zero-Maintenance Alternatives:
+# 1. UptimeRobot (https://uptimerobot.com): Create HTTP(s) monitor pointing to:
+#    - https://${RENDER_SERVER_HOST}/api/v1/health (Interval: 5 mins)
+#    - https://${RENDER_PIPELINE_HOST}/health (Interval: 5 mins)
+# 2. Cron-job.org (https://cron-job.org): Free schedule HTTP GET every 10 mins.
+# ==============================================================================
+
+on:
+  schedule:
+    # Trigger every 14 minutes (render sleep threshold is 15 minutes)
+    - cron: '*/14 * * * *'
+  workflow_dispatch:
+    inputs:
+      force_deep:
+        description: 'Execute deep database & RPC probe instead of lightweight'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: render-keepalive-cron
+  cancel-in-progress: true
+
+jobs:
+  ping-instances:
+    name: Ping Render Instances (Anti-Idle)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Resolve Target Endpoints
+        id: endpoints
+        run: |
+          SERVER_HOST="${{ secrets.RENDER_SERVER_HOST || vars.RENDER_SERVER_HOST }}"
+          PIPELINE_HOST="${{ secrets.RENDER_PIPELINE_HOST || vars.RENDER_PIPELINE_HOST }}"
+
+          if [ -z "$SERVER_HOST" ]; then
+            echo "::warning ::RENDER_SERVER_HOST is empty. Using default or skipping."
+            SERVER_HOST="trustpassz-server.onrender.com"
+          fi
+
+          if [ -z "$PIPELINE_HOST" ]; then
+            echo "::warning ::RENDER_PIPELINE_HOST is empty. Using default or skipping."
+            PIPELINE_HOST="trustpassz-ai.onrender.com"
+          fi
+
+          # Strip protocols
+          SERVER_HOST=$(echo "$SERVER_HOST" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||')
+          PIPELINE_HOST=$(echo "$PIPELINE_HOST" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||')
+
+          echo "server_url=https://${SERVER_HOST}" >> "$GITHUB_OUTPUT"
+          echo "pipeline_url=https://${PIPELINE_HOST}" >> "$GITHUB_OUTPUT"
+
+      - name: Ping Render Server (NestJS)
+        run: |
+          SERVER_URL="${{ steps.endpoints.outputs.server_url }}"
+          PATH_SUFFIX="/api/v1/health"
+          if [ "${{ github.event.inputs.force_deep }}" = "true" ]; then
+            PATH_SUFFIX="/api/v1/health?deep=true"
+          fi
+
+          TARGET="${SERVER_URL}${PATH_SUFFIX}"
+          echo "[Keep-Alive] Pinging Server: ${TARGET}"
+          START=$(date +%s%3N)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 45 "$TARGET" || echo "000")
+          END=$(date +%s%3N)
+          LATENCY=$((END - START))
+
+          echo "Response: HTTP ${HTTP_CODE} (${LATENCY}ms)"
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 400 ]; then
+            echo "::notice ::Server instance is warm and responsive (HTTP ${HTTP_CODE})."
+          else
+            echo "::warning ::Server ping returned HTTP ${HTTP_CODE} after ${LATENCY}ms."
+          fi
+
+      - name: Ping Render AI Pipeline (FastAPI)
+        run: |
+          PIPELINE_URL="${{ steps.endpoints.outputs.pipeline_url }}"
+          TARGET="${PIPELINE_URL}/health"
+
+          echo "[Keep-Alive] Pinging AI Pipeline: ${TARGET}"
+          START=$(date +%s%3N)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 45 "$TARGET" || echo "000")
+          END=$(date +%s%3N)
+          LATENCY=$((END - START))
+
+          echo "Response: HTTP ${HTTP_CODE} (${LATENCY}ms)"
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 400 ]; then
+            echo "::notice ::AI Pipeline instance is warm and responsive (HTTP ${HTTP_CODE})."
+          else
+            echo "::warning ::AI Pipeline ping returned HTTP ${HTTP_CODE} after ${LATENCY}ms."
+          fi
+
