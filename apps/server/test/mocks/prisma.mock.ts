@@ -53,7 +53,7 @@ export interface MockDeal {
 
 export const sellerUser: MockUser = {
   id: '11111111-1111-4111-a111-111111111111',
-  email: 'seller@trustpassz.io',
+  email: 'seller@test.internal',
   walletAddress: '0x1111111111111111111111111111111111111111',
   displayName: 'Trusted Seller',
   avatarUrl: 'https://trustpassz.io/avatars/seller.png',
@@ -64,7 +64,7 @@ export const sellerUser: MockUser = {
 
 export const buyerUser: MockUser = {
   id: '22222222-2222-4222-a222-222222222222',
-  email: 'buyer@trustpassz.io',
+  email: 'buyer@test.internal',
   walletAddress: '0x2222222222222222222222222222222222222222',
   displayName: 'Verified Buyer',
   avatarUrl: 'https://trustpassz.io/avatars/buyer.png',

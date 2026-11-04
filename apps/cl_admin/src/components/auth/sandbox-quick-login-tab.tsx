@@ -34,7 +34,7 @@ export const SANDBOX_PRESETS: SandboxPreset[] = [
     role: 'ADMIN',
     label: 'Super Admin Quản Trị',
     subLabel: 'Toàn quyền cấu hình Escrow & Quản lý User',
-    email: 'admin@trustpassz.io',
+    email: 'admin@sandbox.internal',
     displayName: 'Alexander Vance (Super Admin)',
     walletAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
     badgeText: 'ROLE: ADMIN',
@@ -172,7 +172,7 @@ export function SandboxQuickLoginTab({
                   size="sm"
                   disabled={isLoading}
                   onClick={() => handleSelectPreset(preset)}
-                  className={`h-9 min-h-[36px] px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                  className={`h-9 min-h-9 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                     is403
                       ? 'bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700/60'
                       : preset.role === 'ADMIN'

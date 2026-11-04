@@ -130,6 +130,11 @@ export default function DigitalVaultPage() {
         throw new Error("Không tìm thấy thông tin bàn giao được khóa trong kho lưu trữ.");
       }
 
+      const trimmedPassphrase = passphrase.trim();
+      if (!trimmedPassphrase) {
+        throw new Error("Chưa nhận được khóa mã hóa từ người bán hoặc chưa nhập mật khẩu mở khóa.");
+      }
+
       let decrypted: string;
       try {
         decrypted = await decryptVaultPayload(
@@ -139,18 +144,18 @@ export default function DigitalVaultPage() {
             authTag: assetPayload.authTag,
             expectedHash: assetPayload.contentHash,
           },
-          passphrase,
+          trimmedPassphrase,
           dealId
         );
       } catch (decryptErr: unknown) {
         setIntegrityVerified(false);
         setDecryptedPlaintext(null);
         setIsPlaintextVisible(false);
-        const errMsg =
-          decryptErr instanceof IntegrityViolationException
-            ? "Cảnh báo toàn vẹn: Dữ liệu bàn giao đã bị can thiệp hoặc sai lệch SHA-256!"
-            : "Mật khẩu mở khóa không chính xác hoặc dữ liệu mã hóa đã bị hỏng.";
-        throw new Error(errMsg);
+        if (decryptErr instanceof IntegrityViolationException) {
+          throw new Error("Cảnh báo toàn vẹn: Dữ liệu bàn giao đã bị can thiệp hoặc sai lệch SHA-256!");
+        }
+        // Loại bỏ hoàn toàn fallback atob(encryptedContent) để tránh vỡ font/ký tự rác
+        throw new Error("Mật khẩu mở khóa không chính xác hoặc dữ liệu mã hóa đã bị hỏng.");
       }
 
       // Strictly verify SHA-256 hash match against assetPayload.contentHash

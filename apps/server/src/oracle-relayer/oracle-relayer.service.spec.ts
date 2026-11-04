@@ -97,6 +97,7 @@ describe('OracleRelayerService', () => {
   let mockGetTransactionCount: jest.Mock;
   let mockWaitForTransactionReceipt: jest.Mock;
   let mockWriteContract: jest.Mock;
+  let mockReadContract: jest.Mock;
 
   beforeEach(async () => {
     // --- Env config mock ---
@@ -120,11 +121,15 @@ describe('OracleRelayerService', () => {
     mockWaitForTransactionReceipt = jest
       .fn()
       .mockResolvedValue(makeReceipt('success'));
+    mockReadContract = jest
+      .fn()
+      .mockResolvedValue([{}, { state: 2 }]);
 
     (createPublicClient as jest.Mock).mockReturnValue({
       simulateContract: mockSimulateContract,
       getTransactionCount: mockGetTransactionCount,
       waitForTransactionReceipt: mockWaitForTransactionReceipt,
+      readContract: mockReadContract,
     });
 
     // --- Wallet client mock ---

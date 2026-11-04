@@ -1,4 +1,4 @@
-import { encryptSecret } from "@/lib/crypto";
+import { encryptSecret, DEFAULT_VAULT_PASSPHRASE } from "@/lib/crypto";
 import { apiClient } from "@/lib/api-client";
 import {
   type AssetCategory,
@@ -125,7 +125,7 @@ export class CreateDealService {
   ): Promise<PreparedDealPayload> {
     const vaultPayload = await encryptSecret(
       input.rawSecret.trim(),
-      input.passphrase?.trim() || undefined,
+      input.passphrase?.trim() || DEFAULT_VAULT_PASSPHRASE,
     );
 
     const vaultAudit: VaultAuditData = {

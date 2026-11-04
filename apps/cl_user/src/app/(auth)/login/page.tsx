@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { KeyRound, Mail, Sparkles, AlertTriangle, Zap } from "lucide-react";
+import { KeyRound, Mail, Sparkles, AlertTriangle } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -35,7 +35,6 @@ function LoginContent() {
     handleGoogleSuccess,
     handlePasskeySignIn,
     onEmailSubmit,
-    handleDemoSignIn,
   } = useAuthHandlers();
 
   React.useEffect(() => {
@@ -84,29 +83,6 @@ function LoginContent() {
               </div>
             </div>
           )}
-
-          {/* Quick Demo Access Bar */}
-          <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3 flex items-center justify-between gap-3 shadow-inner">
-            <div className="flex items-center gap-2">
-              <Zap className="size-4 text-cyan-400 shrink-0 animate-pulse" />
-              <div className="text-left">
-                <span className="text-xs font-bold text-cyan-200 block">
-                  Trải Nghiệm Nhanh Bản Thử Nghiệm
-                </span>
-                <span className="text-[10px] text-slate-400">
-                  Vào thẳng trang quản lý giao dịch (1 Chạm)
-                </span>
-              </div>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleDemoSignIn}
-              className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs h-8 px-3 rounded-lg shadow-[0_0_12px_rgba(6,182,212,0.3)] cursor-pointer shrink-0"
-            >
-              Dùng Thử Ngay
-            </Button>
-          </div>
 
           {/* Method Selector Tabs */}
           <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-800">

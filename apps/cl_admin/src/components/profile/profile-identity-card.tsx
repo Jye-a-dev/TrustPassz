@@ -14,12 +14,14 @@ export function ProfileIdentityCard() {
   const { user, updateUser } = useAdminAuthStore();
   const [displayName, setDisplayName] = React.useState(user?.displayName || "Jyye yee");
   const [avatarUrl, setAvatarUrl] = React.useState(user?.avatarUrl || "");
+  const [previousUserId, setPreviousUserId] = React.useState(user?.id);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  React.useEffect(() => {
-    if (user?.displayName) setDisplayName(user.displayName);
-    if (user?.avatarUrl) setAvatarUrl(user.avatarUrl);
-  }, [user]);
+  if (user?.id !== previousUserId) {
+    setPreviousUserId(user?.id);
+    setDisplayName(user?.displayName || "Jyye yee");
+    setAvatarUrl(user?.avatarUrl || "");
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +61,7 @@ export function ProfileIdentityCard() {
     : "JY";
 
   return (
-    <Card className="border-slate-800 bg-[#0F172A] p-5 shadow-xl">
+    <Card className="border-slate-800 bg-cyber-card p-5 shadow-xl">
       <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-5">
         <div className="flex size-10 items-center justify-center rounded-lg border border-cyan-500/30 bg-cyan-950/40 text-cyan-400">
           <User className="size-5" />
@@ -95,7 +97,7 @@ export function ProfileIdentityCard() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Nhập tên hiển thị quản trị viên..."
-              className="bg-slate-950 border-slate-800 text-xs text-white min-h-[44px]"
+              className="bg-slate-950 border-slate-800 text-xs text-white min-h-11"
               required
             />
           </div>
@@ -108,7 +110,7 @@ export function ProfileIdentityCard() {
             value={avatarUrl}
             onChange={(e) => setAvatarUrl(e.target.value)}
             placeholder="https://example.com/avatar.png"
-            className="bg-slate-900 border-slate-800 text-xs text-slate-200 min-h-[44px]"
+            className="bg-slate-900 border-slate-800 text-xs text-slate-200 min-h-11"
           />
         </div>
 
@@ -120,7 +122,7 @@ export function ProfileIdentityCard() {
               Email Công Việc (Cảnh Báo Khẩn Cấp)
             </span>
             <div className="flex items-center h-11 px-3 rounded-md border border-slate-800 bg-slate-950 text-xs font-mono text-slate-300">
-              {user?.email || "admin@trustpassz.io"}
+              {user?.email || "Chưa thiết lập email"}
             </div>
           </div>
 
@@ -145,7 +147,7 @@ export function ProfileIdentityCard() {
           <Button
             type="submit"
             disabled={isSaving}
-            className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs min-h-[44px] px-5 gap-2"
+            className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs min-h-11 px-5 gap-2"
           >
             {isSaving ? (
               <Loader2 className="size-4 animate-spin" />

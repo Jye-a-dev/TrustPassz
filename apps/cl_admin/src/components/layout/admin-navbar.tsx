@@ -216,7 +216,7 @@ export function AdminNavbar() {
             <DropdownMenuLabel className="p-2">
               <div className="flex flex-col space-y-1">
                 <span className="font-semibold text-white">{user?.displayName || "Jyye yee"}</span>
-                <span className="text-xs text-slate-400 font-mono truncate">{user?.email || "admin@trustpassz.io"}</span>
+                <span className="text-xs text-slate-400 font-mono truncate">{user?.email || user?.walletAddress || "Quản trị viên"}</span>
                 <Badge variant="outline" className="w-fit text-[10px] border-cyan-800 text-cyan-400 bg-cyan-950/40">
                   Role: {user?.role || "ADMIN"}
                 </Badge>

@@ -142,7 +142,7 @@ describe("Web Crypto API AES-256-GCM Digital Vault Unit Tests", () => {
 
   it("should preserve 100% Vietnamese unicode, special characters, tokens and URLs", async () => {
     const vietnamesePayload =
-      "Tài khoản quản trị Cloud: admin@trustpassz.io | Mật khẩu: ChàoBuổiSáng#2026!₫-đ-ê-ư-ô | Token: eyJhbGciOiJIUzI1NiJ9.cGF5bG9hZA";
+      "Tài khoản quản trị Cloud: admin@example.com | Mật khẩu: ChàoBuổiSáng#2026!₫-đ-ê-ư-ô | Token: eyJhbGciOiJIUzI1NiJ9.cGF5bG9hZA";
     const testDealId = "deal-uuid-1234-5678-90ab";
 
     const encrypted = await encryptSecret(vietnamesePayload, samplePassphrase, testDealId);

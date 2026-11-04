@@ -1132,5 +1132,80 @@
     "type": "error",
     "name": "AccessControlBadConfirmation",
     "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidDealState",
+    "inputs": [
+      {
+        "name": "dealId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "current",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "required",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "DealAlreadyExists",
+    "inputs": [
+      {
+        "name": "dealId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "DeadlineNotPassed",
+    "inputs": [
+      {
+        "name": "deadline",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentTimestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "DeadlinePassed",
+    "inputs": [
+      {
+        "name": "deadline",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentTimestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidTokenAddress",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
   }
 ]

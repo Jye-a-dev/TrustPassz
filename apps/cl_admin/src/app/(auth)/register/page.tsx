@@ -83,7 +83,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <Card className="border-slate-800 bg-[#0F172A] shadow-2xl">
+    <Card className="border-slate-800 bg-cyber-card shadow-2xl">
       <CardHeader className="space-y-1 pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold tracking-tight text-white">
@@ -111,7 +111,7 @@ export default function RegisterPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="e.g. Lead Arbitrator Alex"
-              className="border-slate-800 bg-[#080C14] text-xs text-white"
+              className="border-slate-800 bg-cyber-bg text-xs text-white"
               required
             />
           </div>
@@ -122,8 +122,8 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="arbitrator@trustpassz.io"
-              className="border-slate-800 bg-[#080C14] text-xs text-white"
+              placeholder="admin@example.com"
+              className="border-slate-800 bg-cyber-bg text-xs text-white"
               required
             />
           </div>
@@ -134,7 +134,7 @@ export default function RegisterPage() {
               value={walletAddress}
               onChange={(e) => setWalletAddress(e.target.value)}
               placeholder="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
-              className="border-slate-800 bg-[#080C14] text-xs text-white font-mono"
+              className="border-slate-800 bg-cyber-bg text-xs text-white font-mono"
             />
           </div>
 
@@ -143,7 +143,7 @@ export default function RegisterPage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'ARBITRATOR' | 'ADMIN')}
-              className="w-full h-9 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full h-9 rounded-md border border-slate-800 bg-cyber-bg px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
             >
               <option value="ARBITRATOR">ARBITRATOR (Trọng tài viên phân xử khiếu nại)</option>
               <option value="ADMIN">ADMIN (Super Admin toàn quyền hệ thống)</option>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
               value={inviteToken}
               onChange={(e) => setInviteToken(e.target.value)}
               placeholder="Nhập secret key của bạn"
-              className="border-slate-800 bg-[#080C14] text-xs text-white font-mono"
+              className="border-slate-800 bg-cyber-bg text-xs text-white font-mono"
               required
             />
           </div>

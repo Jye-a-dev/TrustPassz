@@ -103,5 +103,8 @@
     "moduleNameMapper": {
       "^uuid$": "<rootDir>/../../../node_modules/uuid/dist/index.js"
     }
+  },
+  "prisma": {
+    "seed": "ts-node -r dotenv/config prisma/seed.ts"
   }
 }

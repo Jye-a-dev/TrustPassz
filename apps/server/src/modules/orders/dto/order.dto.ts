@@ -39,7 +39,7 @@ export class CreateOrderDto {
   @ApiPropertyOptional({
     example: {
       is_physical: false,
-      recipient_email: 'buyer@trustpassz.io',
+      recipient_email: 'buyer@example.com',
       shipping_address: null,
       carrier_name: null,
       shipping_fee: 0,

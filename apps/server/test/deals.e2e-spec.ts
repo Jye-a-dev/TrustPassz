@@ -53,7 +53,7 @@ describe('DealsController (e2e)', () => {
           const req = context.switchToHttp().getRequest();
           req.user = {
             id: req.body?.sellerId || sellerUser.id,
-            email: 'seller@trustpassz.io',
+            email: 'seller@test.internal',
             role: 'USER',
           };
           return true;

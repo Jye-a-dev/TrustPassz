@@ -4,6 +4,8 @@
  * Hardened against memory leaks, binary corruption, and stack overflows.
  */
 
+export const DEFAULT_VAULT_PASSPHRASE = "trustpassz-secret-escrow-key";
+
 export interface EncryptedVaultPayload {
   encryptedContent: string; // Base64 encoded ciphertext (without tag)
   encryptionIv: string; // 12-byte IV in 24-character hexadecimal
@@ -232,7 +234,7 @@ async function resolveAesGcmKey(
     }
   }
 
-  // Generate random 256-bit key
+  // Generate random 256-bit key when secretPassphrase is omitted
   const randomKeyBytes = (typeof window !== "undefined" ? window.crypto : globalThis.crypto).getRandomValues(
     new Uint8Array(32)
   );

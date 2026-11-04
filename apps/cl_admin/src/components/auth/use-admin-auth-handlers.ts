@@ -185,22 +185,26 @@ export function useAdminAuthHandlers() {
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
 
-      try {
-        await navigator.credentials.get({
-          publicKey: {
-            challenge,
-            timeout: 60000,
-            userVerification: "preferred",
-          },
-        });
-      } catch {
-        // Fallback for browsers without platform authenticator
+      const credential = (await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          timeout: 60000,
+          userVerification: "preferred",
+        },
+      })) as PublicKeyCredential | null;
+
+      if (!credential) {
+        throw new Error("Không nhận được chứng thực Passkey từ thiết bị");
       }
+
+      const rawId = credential.rawId
+        ? btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
+        : credential.id;
 
       const result = await verifyAuthApi({
         provider: "privy",
-        email: "admin@trustpassz.io",
-        displayName: "Passkey Verified Admin",
+        token: rawId,
+        walletAddress: credential.id,
       });
 
       handleAuthSuccess(result, "Đăng nhập Passkey");

@@ -65,7 +65,7 @@ export class VerifyAuthDto {
 
   @ApiPropertyOptional({
     description: 'Email address of the authenticated user',
-    example: 'seller@trustpassz.io',
+    example: 'user@example.com',
   })
   @IsOptional()
   @IsEmail({}, { message: 'Email must be a valid email address' })

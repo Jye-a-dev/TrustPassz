@@ -11,7 +11,7 @@ import { UserRole } from '@prisma/client';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
-    example: 'seller@trustpassz.io',
+    example: 'user@example.com',
     description: 'Updated email address',
   })
   @IsOptional()
