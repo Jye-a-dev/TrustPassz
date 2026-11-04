@@ -43,7 +43,7 @@ export class FiatOnrampService implements OnModuleInit {
     private readonly configService: ConfigService,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     const rpcUrl =
       this.configService.get<string>('SOLANA_RPC_URL') ||
       'https://api.devnet.solana.com';
@@ -56,9 +56,10 @@ export class FiatOnrampService implements OnModuleInit {
     if (secretKeyStr) {
       try {
         const decoded = bs58.decode(secretKeyStr.trim());
-        this.masterTreasuryKeypair = Keypair.fromSecretKey(decoded);
+        const keypair = await Keypair.fromSecretKey(decoded);
+        this.masterTreasuryKeypair = keypair;
         this.logger.log(
-          `[FiatOnrampService] Treasury Keypair loaded: ${this.masterTreasuryKeypair.publicKey.toBase58()}`,
+          `[FiatOnrampService] Treasury Keypair loaded: ${keypair.publicKey.toBase58()}`,
         );
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);

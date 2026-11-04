@@ -284,7 +284,7 @@ export class SolanaDepositService {
                 amount: Number(deal.amount),
                 currency: deal.currency,
                 confirmedAt: confirmedAt.toISOString(),
-                slot: parsedTx?.slot,
+                slot: parsedTx?.slot != null ? Number(parsedTx.slot) : undefined,
               },
             },
           });
@@ -311,7 +311,7 @@ export class SolanaDepositService {
         txHash: signature,
         status: 'DEPOSITED',
         confirmedAt: confirmedAt.toISOString(),
-        slot: parsedTx?.slot,
+        slot: parsedTx?.slot != null ? Number(parsedTx.slot) : undefined,
       };
     } finally {
       release();

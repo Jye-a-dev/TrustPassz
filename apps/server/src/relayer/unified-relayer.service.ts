@@ -52,7 +52,7 @@ export class UnifiedRelayerService implements OnModuleInit {
     private readonly evmRelayer: OracleRelayerService,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     const rpcUrl =
       process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
     const programIdStr =
@@ -64,7 +64,7 @@ export class UnifiedRelayerService implements OnModuleInit {
     this.solanaConnection = new Connection(rpcUrl, 'confirmed');
 
     const relayerSecret = process.env.SOLANA_RELAYER_PRIVATE_KEY;
-    this.solanaRelayerKeypair = parseSolanaKeypair(relayerSecret);
+    this.solanaRelayerKeypair = await parseSolanaKeypair(relayerSecret);
     this.solanaRelayerPublicKey = resolveSolanaRelayerPublicKey(
       process.env.SOLANA_RELAYER_PUBLIC_KEY,
       this.solanaRelayerKeypair,
@@ -110,17 +110,17 @@ export class UnifiedRelayerService implements OnModuleInit {
   /**
    * Derives Solana Escrow PDA and Vault PDA.
    */
-  public derivePdaAddresses(dealIdBytes: Uint8Array): {
+  public async derivePdaAddresses(dealIdBytes: Uint8Array): Promise<{
     escrowPda: PublicKey;
     escrowBump: number;
     vaultPda: PublicKey;
     vaultBump: number;
-  } {
-    const [escrowPda, escrowBump] = PublicKey.findProgramAddressSync(
+  }> {
+    const [escrowPda, escrowBump] = await PublicKey.findProgramAddress(
       [Buffer.from('escrow'), Buffer.from(dealIdBytes)],
       this.solanaProgramId,
     );
-    const [vaultPda, vaultBump] = PublicKey.findProgramAddressSync(
+    const [vaultPda, vaultBump] = await PublicKey.findProgramAddress(
       [Buffer.from('vault'), Buffer.from(dealIdBytes)],
       this.solanaProgramId,
     );
@@ -289,7 +289,7 @@ export class UnifiedRelayerService implements OnModuleInit {
 
   private async executeSolanaStartInspection(deal: DealWithDualChain): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
-    const { escrowPda } = this.derivePdaAddresses(dealIdRaw);
+    const { escrowPda } = await this.derivePdaAddresses(dealIdRaw);
     const relayerPubkey = this.solanaRelayerPublicKey;
 
     const instruction = new TransactionInstruction({
@@ -306,7 +306,7 @@ export class UnifiedRelayerService implements OnModuleInit {
 
   private async executeSolanaSettle(deal: DealWithDualChain): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
-    const { escrowPda, vaultPda } = this.derivePdaAddresses(dealIdRaw);
+    const { escrowPda, vaultPda } = await this.derivePdaAddresses(dealIdRaw);
     const relayerPubkey = this.solanaRelayerPublicKey;
     const sellerPubkey = new PublicKey(deal.sellerWallet || relayerPubkey);
 
@@ -330,7 +330,7 @@ export class UnifiedRelayerService implements OnModuleInit {
     refundBuyer: boolean,
   ): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
-    const { escrowPda, vaultPda } = this.derivePdaAddresses(dealIdRaw);
+    const { escrowPda, vaultPda } = await this.derivePdaAddresses(dealIdRaw);
     const relayerPubkey = this.solanaRelayerPublicKey;
     const buyerPubkey = new PublicKey(deal.buyerWallet || relayerPubkey);
     const sellerPubkey = new PublicKey(deal.sellerWallet || relayerPubkey);

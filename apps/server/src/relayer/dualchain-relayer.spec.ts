@@ -140,8 +140,8 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
   });
 
   it('2. Should ingest Solana deposit event and orchestrate Solana Escrow lifecycle', async () => {
-    const solanaBuyer = Keypair.generate().publicKey.toBase58();
-    const solanaSeller = Keypair.generate().publicKey.toBase58();
+    const solanaBuyer = (await Keypair.generate()).publicKey.toBase58();
+    const solanaSeller = (await Keypair.generate()).publicKey.toBase58();
     const rawDealId = Buffer.alloc(32, 7);
     const dealIdHex = `0x${rawDealId.toString('hex')}`;
     const dealIdBase58 = bs58.encode(rawDealId);
@@ -163,7 +163,7 @@ describe('Dual-Chain Relayer Integration Test (TASK-b-03)', () => {
       } as any,
     });
 
-    const { escrowPda } = unifiedRelayer.derivePdaAddresses(new Uint8Array(rawDealId));
+    const { escrowPda } = await unifiedRelayer.derivePdaAddresses(new Uint8Array(rawDealId));
     const depositSig = '5wHu8vK3bXyKzR798J1h6dGvK3bXyKzR798J1h6dGvK3bXyKzR798J1h6dGvK3bX';
 
     const depositEvent: SolanaDepositParsedEvent = {

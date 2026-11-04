@@ -204,7 +204,7 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       ]);
       clearTimeout(timerId);
 
-      const balance = lamports / LAMPORTS_PER_SOL;
+      const balance = Number(lamports) / Number(LAMPORTS_PER_SOL);
       return {
         chain: 'solana',
         address,
