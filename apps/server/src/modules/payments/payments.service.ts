@@ -13,6 +13,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import { CreatePaymentLinkDto, PayOSWebhookDto } from './dto/payment.dto';
 import { RequestUser } from '../../common/decorators/current-user.decorator';
+import { verifyPayOsSignature, executeSimulatedDeposit } from './payments.helper';
 
 @Injectable()
 export class PaymentsService {
@@ -46,7 +47,11 @@ export class PaymentsService {
   ) {
     const deal = await this.prisma.deal.findUnique({
       where: { id: dealId },
-      include: { order: true, buyer: true, seller: true },
+      include: {
+        order: { include: { product: true } },
+        buyer: true,
+        seller: true,
+      },
     });
 
     if (!deal) {
@@ -57,6 +62,29 @@ export class PaymentsService {
       throw new ForbiddenException(
         'Bạn không thể tự mua sản phẩm của chính mình.',
       );
+    }
+
+    // Xác thực giá tiền đối với deal giảm giá thấp hơn basePrice của sản phẩm
+    const product = deal.order?.product;
+    if (product && Number(deal.amount) < Number(product.basePrice)) {
+      if (!deal.buyerId) {
+        throw new ForbiddenException(
+          'Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.',
+        );
+      }
+      const acceptedOffer = await this.prisma.bargainOffer.findFirst({
+        where: {
+          productId: product.id,
+          buyerId: deal.buyerId,
+          offeredPrice: deal.amount,
+          status: 'ACCEPTED',
+        },
+      });
+      if (!acceptedOffer) {
+        throw new ForbiddenException(
+          'Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.',
+        );
+      }
     }
 
     if (deal.state !== DealState.PENDING) {
@@ -335,42 +363,7 @@ export class PaymentsService {
       return { success: true, message: 'Already deposited', deal };
     }
 
-    const depositedAt = new Date();
-    const inspectionDurationSeconds = deal.inspectionDuration || 86400;
-    const inspectionDeadline = new Date(
-      depositedAt.getTime() + inspectionDurationSeconds * 1000,
-    );
-
-    const result = await this.prisma.$transaction(async (tx) => {
-      const updatedDeal = await tx.deal.update({
-        where: { id: deal.id },
-        data: {
-          state: DealState.DEPOSITED,
-          depositedAt,
-          inspectionDeadline,
-          paymentRefId: `SIM_${Date.now()}`,
-          webhookIdempotencyKey: `SIM_${Date.now()}`,
-        },
-      });
-
-      let updatedOrder: Order | null = null;
-      if (deal.order) {
-        updatedOrder = await tx.order.update({
-          where: { id: deal.order.id },
-          data: {
-            status: OrderStatus.PAID_ESCROW,
-          },
-        });
-      }
-
-      return {
-        success: true,
-        message:
-          'Simulated payment verified and deal transitioned to DEPOSITED',
-        deal: updatedDeal,
-        order: updatedOrder,
-      };
-    });
+    const result = await executeSimulatedDeposit(this.prisma, deal);
 
     if (this.supabaseService) {
       await this.supabaseService.broadcastPaymentSuccess(
@@ -386,44 +379,6 @@ export class PaymentsService {
    * Validates PayOS webhook signature using SDK verify and native HMAC-SHA256 fallback.
    */
   private async verifySignature(payload: PayOSWebhookDto): Promise<boolean> {
-    try {
-      // Primary: Official PayOS SDK verification
-      await this.payOS.webhooks.verify(payload as unknown as Webhook);
-      return true;
-    } catch {
-      // Secondary: Standard HMAC-SHA256 signature verification over sorted keys
-      try {
-        const key = process.env.PAYOS_CHECKSUM_KEY || this.checksumKey;
-        if (!key) return false;
-
-        const dataObj = payload.data as unknown as Record<string, unknown>;
-        const sortedKeys = Object.keys(dataObj).sort();
-        const queryParts: string[] = [];
-
-        for (const k of sortedKeys) {
-          const val = dataObj[k];
-          if (val !== undefined && val !== null) {
-            const strVal =
-              typeof val === 'string'
-                ? val
-                : typeof val === 'number' || typeof val === 'boolean'
-                  ? `${val}`
-                  : JSON.stringify(val);
-            queryParts.push(`${k}=${strVal}`);
-          }
-        }
-
-        const queryString = queryParts.join('&');
-        const calculatedSignature = crypto
-          .createHmac('sha256', key)
-          .update(queryString)
-          .digest('hex');
-
-        return calculatedSignature === payload.signature;
-      } catch (err: any) {
-        this.logger.error(`Signature computation error: ${err?.message}`);
-        return false;
-      }
-    }
+    return verifyPayOsSignature(this.payOS, payload, this.checksumKey);
   }
 }

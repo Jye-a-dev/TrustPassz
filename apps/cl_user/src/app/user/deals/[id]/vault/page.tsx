@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { CountdownTimer } from "@/components/deals/countdown-timer";
-import { decryptSecret } from "@/lib/crypto";
+import { decryptVaultPayload, hashContent, IntegrityViolationException } from "@/lib/crypto";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { VaultHeader } from "@/components/vault/vault-header";
@@ -94,7 +94,7 @@ export default function DigitalVaultPage() {
     };
   }, []);
 
-  // Handle Client-Side AES-256-GCM Decryption
+  // Handle Client-Side AES-256-GCM Decryption with Strict Zero-Garbage Policy
   const handleUnlockAndDecrypt = async () => {
     setIsUnlocking(true);
     try {
@@ -132,32 +132,53 @@ export default function DigitalVaultPage() {
 
       let decrypted: string;
       try {
-        decrypted = await decryptSecret(
+        decrypted = await decryptVaultPayload(
           {
             encryptedContent: assetPayload.encryptedContent,
             encryptionIv: assetPayload.encryptionIv,
             authTag: assetPayload.authTag,
             expectedHash: assetPayload.contentHash,
           },
-          passphrase
+          passphrase,
+          dealId
         );
-      } catch {
-        // Attempt UTF-8 base64 decode if payload was stored base64 plaintext
-        try {
-          decrypted = atob(assetPayload.encryptedContent);
-        } catch {
-          throw new Error("Mật khẩu mở khóa nhận hàng không đúng hoặc thông tin đã bị thay đổi.");
+      } catch (decryptErr: unknown) {
+        setIntegrityVerified(false);
+        setDecryptedPlaintext(null);
+        setIsPlaintextVisible(false);
+        const errMsg =
+          decryptErr instanceof IntegrityViolationException
+            ? "Cảnh báo toàn vẹn: Dữ liệu bàn giao đã bị can thiệp hoặc sai lệch SHA-256!"
+            : "Mật khẩu mở khóa không chính xác hoặc dữ liệu mã hóa đã bị hỏng.";
+        throw new Error(errMsg);
+      }
+
+      // Strictly verify SHA-256 hash match against assetPayload.contentHash
+      let isVerified = false;
+      if (assetPayload.contentHash && assetPayload.contentHash.trim().length > 0) {
+        const computedHash = await hashContent(decrypted);
+        isVerified = computedHash.toLowerCase() === assetPayload.contentHash.trim().toLowerCase();
+        if (!isVerified) {
+          setIntegrityVerified(false);
+          setDecryptedPlaintext(null);
+          setIsPlaintextVisible(false);
+          throw new IntegrityViolationException("Chữ ký SHA-256 không trùng khớp với mã gốc lưu trên chuỗi!");
         }
       }
 
-      setIntegrityVerified(true);
+      setIntegrityVerified(isVerified);
       setDecryptedPlaintext(decrypted);
       setIsPlaintextVisible(true);
 
       toast.success("Mở khóa nhận hàng thành công!", {
-        description: "Thông tin bàn giao hiển thị an toàn trên thiết bị của bạn.",
+        description: isVerified
+          ? "Đã xác thực tính toàn vẹn SHA-256: Dữ liệu nguyên vẹn 100%."
+          : "Thông tin bàn giao hiển thị an toàn trên thiết bị của bạn.",
       });
     } catch (err: unknown) {
+      setIntegrityVerified(false);
+      setDecryptedPlaintext(null);
+      setIsPlaintextVisible(false);
       const msg = err instanceof Error ? err.message : "Mở khóa thất bại";
       toast.error(`Lỗi mở kho lưu trữ: ${msg}`);
     } finally {
@@ -169,8 +190,8 @@ export default function DigitalVaultPage() {
   const handleCopyWithSelfDestruct = () => {
     if (!decryptedPlaintext) return;
 
-    navigator.clipboard.writeText(decryptedPlaintext);
-    toast.success("Đã sao chép vào bộ nhớ tạm! Tự động hủy sau 30 giây.");
+    void navigator.clipboard.writeText(decryptedPlaintext);
+    toast.success("Đã sao chép nội dung bàn giao vào bộ nhớ tạm! Tự động hủy sau 30 giây.");
     setClipboardCountdown(30);
     if (clipboardTimerRef.current) clearInterval(clipboardTimerRef.current);
 
@@ -179,7 +200,7 @@ export default function DigitalVaultPage() {
         if (prev === null || prev <= 1) {
           if (clipboardTimerRef.current) clearInterval(clipboardTimerRef.current);
           try {
-            navigator.clipboard.writeText("");
+            void navigator.clipboard.writeText("");
             toast.info("Đã xóa sạch bộ nhớ tạm (Clipboard Cleared) vì lý do an toàn.");
           } catch {
             // Ignore if focus lost
@@ -191,7 +212,7 @@ export default function DigitalVaultPage() {
     }, 1000);
   };
 
-  // Decision 1: Confirm Receipt and Settle Escrow (Replaces window.confirm with cyber-escrow flow)
+  // Decision 1: Confirm Receipt and Settle Escrow
   const handleSettleDeal = async () => {
     setIsSettling(true);
     try {

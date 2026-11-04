@@ -50,7 +50,11 @@ export class VietQrService {
     const { dealId } = dto;
     const deal = await this.prisma.deal.findUnique({
       where: { id: dealId },
-      include: { order: true, buyer: true, seller: true },
+      include: {
+        order: { include: { product: true } },
+        buyer: true,
+        seller: true,
+      },
     });
 
     if (!deal) {
@@ -61,6 +65,29 @@ export class VietQrService {
       throw new ForbiddenException(
         'Người bán không thể tự nạp tiền hoặc thanh toán cho sản phẩm của chính mình.',
       );
+    }
+
+    // Xác thực giá tiền đối với deal giảm giá thấp hơn basePrice của sản phẩm
+    const product = deal.order?.product;
+    if (product && Number(deal.amount) < Number(product.basePrice)) {
+      if (!deal.buyerId) {
+        throw new ForbiddenException(
+          'Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.',
+        );
+      }
+      const acceptedOffer = await this.prisma.bargainOffer.findFirst({
+        where: {
+          productId: product.id,
+          buyerId: deal.buyerId,
+          offeredPrice: deal.amount,
+          status: 'ACCEPTED',
+        },
+      });
+      if (!acceptedOffer) {
+        throw new ForbiddenException(
+          'Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.',
+        );
+      }
     }
 
     if (deal.state !== DealState.PENDING) {
@@ -243,12 +270,12 @@ export class VietQrService {
     const dealPrice = Math.round(Number((deal as any).price ?? deal.amount));
     const receivedAmount = Math.round(Number(data.amount));
 
-    if (receivedAmount < dealPrice) {
+    if (receivedAmount !== dealPrice) {
       this.logger.error(
-        `[Webhook Underpaid] Số tiền thanh toán không đủ cho Deal ${deal.id}: Cần ${dealPrice} ${deal.currency}, nhận ${receivedAmount} ${data.currency}.`,
+        `[Webhook Discrepancy Alert] Số tiền thanh toán không khớp cho Deal ${deal.id}: Cần chính xác ${dealPrice} ${deal.currency}, nhận ${receivedAmount} ${data.currency}.`,
       );
       throw new BadRequestException(
-        `Payment amount mismatch: Số tiền thanh toán không đủ. (Yêu cầu ${dealPrice} ${deal.currency}, nhận ${receivedAmount} ${data.currency}).`,
+        `Payment amount mismatch: Số tiền thanh toán không khớp với Kèo đã phê duyệt. (Yêu cầu ${dealPrice} ${deal.currency}, nhận ${receivedAmount} ${data.currency}).`,
       );
     }
 

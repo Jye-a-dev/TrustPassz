@@ -23,26 +23,21 @@ import {
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
+import { RequestUser } from '../../common/decorators/current-user.decorator';
 import { OracleRelayerService } from '../../oracle-relayer/oracle-relayer.service';
-
 @Injectable()
 export class DealsService {
   private readonly logger = new Logger(DealsService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly oracleRelayer: OracleRelayerService,
   ) {}
-
-  /**
-   * Aggregates total deals and breakdown by state with optional seller/buyer filters.
-   */
+    /** Aggregates total deals and breakdown by state with optional seller/buyer filters. */
   async countDeals(sellerId?: string, buyerId?: string) {
     const where: Prisma.DealWhereInput = {
       ...(sellerId ? { sellerId } : {}),
       ...(buyerId ? { buyerId } : {}),
     };
-
     try {
       const [total, grouped] = await Promise.all([
         this.prisma.deal.count({ where }),
@@ -60,11 +55,7 @@ export class DealsService {
       throw new InternalServerErrorException('Failed to calculate deal counts');
     }
   }
-
-  /**
-   * Creates a new deal and associates an encrypted digital vault asset in an ACID transaction.
-   * Multi-layer idempotency guard: In-flight coalescing + cache + DB deduplication.
-   */
+    /** Creates a new deal and associates an encrypted digital vault asset in an ACID transaction. */
   async create(createDealDto: CreateDealDto, explicitKey?: string) {
     const { digitalAsset, ...dealData } = createDealDto;
     const effectiveKey = explicitKey || createDealDto.idempotencyKey;
@@ -81,7 +72,6 @@ export class DealsService {
       dealData.amount,
       digitalAsset?.contentHash,
     );
-
     // 1. In-memory response cache check (idempotency key or semantic match)
     const cached =
       DealIdempotencyManager.getCached(dedupKey) ||
@@ -90,7 +80,6 @@ export class DealsService {
       this.logger.log(`[create] Idempotent cache hit: ${dedupKey}`);
       return cached;
     }
-
     // 2. Coalesce concurrent requests (single-flight execution)
     const inFlight =
       DealIdempotencyManager.getInFlight(dedupKey) ||
@@ -99,7 +88,6 @@ export class DealsService {
       this.logger.log(`[create] Coalescing concurrent request: ${dedupKey}`);
       return inFlight;
     }
-
     const executionPromise = (async () => {
       // 3. Database-level deduplication: check recent pending deal created in last 60 seconds
       const recentDuplicate = await findRecentDuplicateDeal(
@@ -110,14 +98,12 @@ export class DealsService {
         digitalAsset?.contentHash,
         60000,
       );
-
       if (recentDuplicate) {
         this.logger.warn(`[create] Duplicate prevented: ${recentDuplicate.id}`);
         DealIdempotencyManager.setCache(dedupKey, recentDuplicate);
         DealIdempotencyManager.setCache(semanticKey, recentDuplicate);
         return recentDuplicate;
       }
-
       const seller = await this.prisma.user.findUnique({
         where: { id: dealData.sellerId },
       });
@@ -126,7 +112,6 @@ export class DealsService {
           `Seller user with ID ${dealData.sellerId} not found`,
         );
       }
-
       if (dealData.buyerId) {
         if (dealData.buyerId === dealData.sellerId) {
           throw new ForbiddenException(
@@ -142,14 +127,12 @@ export class DealsService {
           );
         }
       }
-
       try {
         const created = await executeDealCreateTransaction(
           this.prisma,
           dealData,
           digitalAsset,
         );
-
         DealIdempotencyManager.setCache(dedupKey, created);
         DealIdempotencyManager.setCache(semanticKey, created);
         return created;
@@ -162,7 +145,6 @@ export class DealsService {
         );
       }
     })();
-
     DealIdempotencyManager.setInFlight(dedupKey, executionPromise);
     DealIdempotencyManager.setInFlight(semanticKey, executionPromise);
     try {
@@ -172,16 +154,12 @@ export class DealsService {
       DealIdempotencyManager.deleteInFlight(semanticKey);
     }
   }
-
-  /**
-   * Retrieves paginated list of deals with filtering and full-text search capability.
-   */
+    /** Retrieves paginated list of deals with filtering and full-text search capability. */
   async findAll(query: QueryDealDto) {
     const page = query.page && query.page > 0 ? Number(query.page) : 1;
     const limit = query.limit && query.limit > 0 ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
     const where = buildDealWhereInput(query);
-
     try {
       const [deals, total] = await Promise.all([
         this.prisma.deal.findMany({
@@ -193,7 +171,6 @@ export class DealsService {
         }),
         this.prisma.deal.count({ where }),
       ]);
-
       return {
         data: deals,
         meta: { total, page, limit, totalPages: Math.ceil(total / limit) || 1 },
@@ -205,37 +182,41 @@ export class DealsService {
       throw new InternalServerErrorException('Failed to retrieve deals');
     }
   }
-
-  /**
-   * Retrieves single deal details with relations (seller, buyer, digitalAsset, disputeLogs).
-   */
+    /** Retrieves single deal details with relations (seller, buyer, digitalAsset, disputeLogs). */
   async findOne(id: string) {
     const deal = await this.prisma.deal.findUnique({
       where: { id },
       include: DEAL_DETAIL_INCLUDE,
     });
-
     if (!deal) {
       throw new NotFoundException(`Deal with ID ${id} not found`);
     }
-
     return deal;
   }
-
-  /**
-   * Partially updates a deal and optionally upserts its associated digital vault asset.
-   * Blocks updates if deal is in terminal states (SETTLED or REFUNDED).
-   */
-  async update(id: string, updateDealDto: UpdateDealDto) {
+    /** Partially updates a deal and optionally upserts its associated digital vault asset. */
+  async update(
+    id: string,
+    updateDealDto: UpdateDealDto,
+    currentUser?: RequestUser,
+  ) {
     const existingDeal = await this.prisma.deal.findUnique({
       where: { id },
       include: { digitalAsset: true },
     });
-
     if (!existingDeal) {
       throw new NotFoundException(`Deal with ID ${id} not found`);
     }
-
+    if (currentUser && currentUser.id !== existingDeal.sellerId) {
+      throw new ForbiddenException('Chỉ người bán mới có quyền cập nhật Kèo');
+    }
+    if (
+      updateDealDto.amount !== undefined &&
+      Number(updateDealDto.amount) !== Number(existingDeal.amount)
+    ) {
+      throw new BadRequestException(
+        'Không thể cập nhật giá trực tiếp. Vui lòng sử dụng quy trình Trả giá (Bargain Flow)',
+      );
+    }
     if (
       existingDeal.state === DealState.SETTLED ||
       existingDeal.state === DealState.REFUNDED
@@ -275,10 +256,7 @@ export class DealsService {
     }
   }
 
-  /**
-   * Deletes a deal only if it is in PENDING state.
-   * Rejects deletion if deal has progressed to DEPOSITED or subsequent escrow states.
-   */
+    /** Deletes a deal only if it is in PENDING state. */
   async remove(id: string) {
     const deal = await this.prisma.deal.findUnique({
       where: { id },
@@ -305,10 +283,7 @@ export class DealsService {
     }
   }
 
-  /**
-   * Unlocks digital asset from vault, auditing decryption attempts and enforcing access quota.
-   * On first unlock (accessCount === 0), triggers startInspection on-chain via Oracle Relayer.
-   */
+    /** Unlocks digital asset from vault, auditing decryption attempts and enforcing access quota. */
   async unlockVault(id: string) {
     const deal = await this.prisma.deal.findUnique({
       where: { id },
@@ -364,13 +339,7 @@ export class DealsService {
     return formatVaultUnlockResponse(id, updatedAsset);
   }
 
-  /**
-   * Manually triggers settle on-chain for a deal.
-   * Called when:
-   *  - inspectionDeadline has passed without any dispute, OR
-   *  - buyer explicitly confirms acceptance.
-   * Returns tx result or null if the chain call was skipped/failed.
-   */
+    /** Manually triggers settle on-chain for a deal. */
   async triggerSettle(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
 
@@ -400,9 +369,7 @@ export class DealsService {
     return txResult || { success: true, state: DealState.SETTLED };
   }
 
-  /**
-   * Triggers the oracle relayer to start inspection on-chain explicitly.
-   */
+    /** Triggers the oracle relayer to start inspection on-chain explicitly. */
   async triggerStartInspection(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
     if (!deal) {

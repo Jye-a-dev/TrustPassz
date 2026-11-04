@@ -36,6 +36,7 @@ export const DEAL_DETAIL_INCLUDE = {
   buyer: { select: DEAL_DETAIL_USER_SELECT },
   digitalAsset: true,
   disputeLogs: true,
+  order: { include: { product: true } },
 } as const;
 
 export function buildCountBreakdown(

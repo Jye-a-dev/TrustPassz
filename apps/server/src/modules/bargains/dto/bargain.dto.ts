@@ -14,13 +14,21 @@ import {
 import { BargainStatus } from '@prisma/client';
 
 export class CreateBargainDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '44444444-4444-4444-a444-444444444444',
     description: 'Product UUID',
   })
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
-  productId: string;
+  productId?: string;
+
+  @ApiPropertyOptional({
+    example: '33333333-3333-4333-a333-333333333333',
+    description: 'Deal UUID',
+  })
+  @IsOptional()
+  @IsUUID()
+  dealId?: string;
 
   @ApiProperty({
     example: '22222222-2222-4222-a222-222222222222',
@@ -95,6 +103,11 @@ export class QueryBargainDto {
   @IsOptional()
   @IsUUID()
   productId?: string;
+
+  @ApiPropertyOptional({ example: '33333333-3333-4333-a333-333333333333' })
+  @IsOptional()
+  @IsUUID()
+  dealId?: string;
 
   @ApiPropertyOptional({ example: '22222222-2222-4222-a222-222222222222' })
   @IsOptional()
