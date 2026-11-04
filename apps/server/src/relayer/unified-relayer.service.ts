@@ -20,7 +20,6 @@ import { DealState } from '@prisma/client';
 import { OracleRelayerService } from '../oracle-relayer/oracle-relayer.service';
 import { AsyncMutex } from '../oracle-relayer/async-mutex';
 import {
-  DualChainType,
   DualDisputeAction,
   UnifiedTxResult,
   ANCHOR_DISCRIMINATORS,
@@ -97,7 +96,9 @@ export class UnifiedRelayerService implements OnModuleInit {
    * Converts a 32-byte or hex dealId into a 32-byte Uint8Array.
    */
   public parseDealIdBytes32(dealIdStr: string): Uint8Array {
-    const cleanHex = dealIdStr.startsWith('0x') ? dealIdStr.slice(2) : dealIdStr;
+    const cleanHex = dealIdStr.startsWith('0x')
+      ? dealIdStr.slice(2)
+      : dealIdStr;
     const buf = Buffer.alloc(32);
     if (cleanHex.length === 64) {
       Buffer.from(cleanHex, 'hex').copy(buf);
@@ -137,13 +138,15 @@ export class UnifiedRelayerService implements OnModuleInit {
   async triggerStartInspection(dealId: string): Promise<UnifiedTxResult> {
     const release = await this.acquireDealLock(dealId);
     try {
-      const found = await this.prisma.deal.findUnique({ where: { id: dealId } });
+      const found = await this.prisma.deal.findUnique({
+        where: { id: dealId },
+      });
       if (!found) {
         throw new Error(`Deal ${dealId} not found`);
       }
       const deal = found as DealWithDualChain;
 
-      const chainType = (deal.chainType as DualChainType) || 'BASE_SEPOLIA';
+      const chainType = deal.chainType || 'BASE_SEPOLIA';
       this.logger.log(
         `[triggerStartInspection] dealId=${dealId} chainType=${chainType}`,
       );
@@ -155,11 +158,15 @@ export class UnifiedRelayerService implements OnModuleInit {
           txHash: evmRes?.txHash || '0x_simulated',
           dealId,
           targetState: DealState.IN_INSPECTION,
-          blockOrSlot: evmRes?.receipt?.blockNumber ? Number(evmRes.receipt.blockNumber) : undefined,
+          blockOrSlot: evmRes?.receipt?.blockNumber
+            ? Number(evmRes.receipt.blockNumber)
+            : undefined,
         };
       } else {
         const txSig = await this.executeSolanaStartInspection(deal);
-        const deadline = new Date(Date.now() + (deal.inspectionDuration || 86400) * 1000);
+        const deadline = new Date(
+          Date.now() + (deal.inspectionDuration || 86400) * 1000,
+        );
 
         await this.prisma.deal.update({
           where: { id: dealId },
@@ -188,14 +195,18 @@ export class UnifiedRelayerService implements OnModuleInit {
   async triggerSettle(dealId: string): Promise<UnifiedTxResult> {
     const release = await this.acquireDealLock(dealId);
     try {
-      const found = await this.prisma.deal.findUnique({ where: { id: dealId } });
+      const found = await this.prisma.deal.findUnique({
+        where: { id: dealId },
+      });
       if (!found) {
         throw new Error(`Deal ${dealId} not found`);
       }
       const deal = found as DealWithDualChain;
 
-      const chainType = (deal.chainType as DualChainType) || 'BASE_SEPOLIA';
-      this.logger.log(`[triggerSettle] dealId=${dealId} chainType=${chainType}`);
+      const chainType = deal.chainType || 'BASE_SEPOLIA';
+      this.logger.log(
+        `[triggerSettle] dealId=${dealId} chainType=${chainType}`,
+      );
 
       if (chainType === 'BASE_SEPOLIA') {
         const evmRes = await this.evmRelayer.settle(dealId);
@@ -204,7 +215,9 @@ export class UnifiedRelayerService implements OnModuleInit {
           txHash: evmRes?.txHash || '0x_simulated',
           dealId,
           targetState: DealState.SETTLED,
-          blockOrSlot: evmRes?.receipt?.blockNumber ? Number(evmRes.receipt.blockNumber) : undefined,
+          blockOrSlot: evmRes?.receipt?.blockNumber
+            ? Number(evmRes.receipt.blockNumber)
+            : undefined,
         };
       } else {
         const txSig = await this.executeSolanaSettle(deal);
@@ -238,14 +251,18 @@ export class UnifiedRelayerService implements OnModuleInit {
   ): Promise<UnifiedTxResult> {
     const release = await this.acquireDealLock(dealId);
     try {
-      const found = await this.prisma.deal.findUnique({ where: { id: dealId } });
+      const found = await this.prisma.deal.findUnique({
+        where: { id: dealId },
+      });
       if (!found) {
         throw new Error(`Deal ${dealId} not found`);
       }
       const deal = found as DealWithDualChain;
 
-      const chainType = (deal.chainType as DualChainType) || 'BASE_SEPOLIA';
-      const action: DualDisputeAction = refundBuyer ? 'TRIGGER_REFUND' : 'APPROVE_PAYOUT';
+      const chainType = deal.chainType || 'BASE_SEPOLIA';
+      const action: DualDisputeAction = refundBuyer
+        ? 'TRIGGER_REFUND'
+        : 'APPROVE_PAYOUT';
       const targetState = refundBuyer ? DealState.REFUNDED : DealState.SETTLED;
 
       this.logger.log(
@@ -287,7 +304,9 @@ export class UnifiedRelayerService implements OnModuleInit {
   // Solana Instruction Execution Handlers
   // ---------------------------------------------------------------------------
 
-  private async executeSolanaStartInspection(deal: DealWithDualChain): Promise<string> {
+  private async executeSolanaStartInspection(
+    deal: DealWithDualChain,
+  ): Promise<string> {
     const dealIdRaw = this.parseDealIdBytes32(deal.onchainDealId || deal.id);
     const { escrowPda } = await this.derivePdaAddresses(dealIdRaw);
     const relayerPubkey = this.solanaRelayerPublicKey;
@@ -372,7 +391,8 @@ export class UnifiedRelayerService implements OnModuleInit {
 
     try {
       const tx = new Transaction().add(...instructions);
-      const { blockhash } = await this.solanaConnection.getLatestBlockhash('confirmed');
+      const { blockhash } =
+        await this.solanaConnection.getLatestBlockhash('confirmed');
       tx.recentBlockhash = blockhash;
       tx.feePayer = this.solanaRelayerKeypair.publicKey;
 

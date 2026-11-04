@@ -20,7 +20,9 @@ export const DEFAULT_SOLANA_RELAYER_PUBLIC_KEY =
  *
  * Returns null if secret is empty, missing, or malformed.
  */
-export async function parseSolanaKeypair(secret?: string): Promise<Keypair | null> {
+export async function parseSolanaKeypair(
+  secret?: string,
+): Promise<Keypair | null> {
   if (!secret || secret.trim().length === 0) {
     return null;
   }
@@ -31,7 +33,10 @@ export async function parseSolanaKeypair(secret?: string): Promise<Keypair | nul
   if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
     try {
       const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed) && (parsed.length === 64 || parsed.length === 32)) {
+      if (
+        Array.isArray(parsed) &&
+        (parsed.length === 64 || parsed.length === 32)
+      ) {
         const bytes = Uint8Array.from(parsed);
         if (bytes.length === 64) {
           return await Keypair.fromSecretKey(bytes);
@@ -87,4 +92,3 @@ export function resolveSolanaRelayerPublicKey(
 
   return new PublicKey(DEFAULT_SOLANA_RELAYER_PUBLIC_KEY);
 }
-
