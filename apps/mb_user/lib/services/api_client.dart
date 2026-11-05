@@ -33,19 +33,19 @@ class ApiClient {
     }
 
     if (kIsWeb) {
-      return 'http://localhost:3001';
+      return 'http://localhost:3000';
     }
 
     try {
       if (Platform.isAndroid) {
         // Standard Android emulator loopback to host machine port 3001
-        return 'http://10.0.2.2:3001';
+        return 'http://10.0.2.2:3000';
       }
     } catch (_) {
       // Fallback for non-standard runtimes
     }
 
-    return 'http://localhost:3001';
+    return 'http://localhost:3000';
   }
 
   void setBaseUrl(String url) {
