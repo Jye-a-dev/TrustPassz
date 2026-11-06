@@ -20,50 +20,140 @@ class ApiClient {
 
   static const String tokenKey = 'trustpassz_auth_token';
 
+  // Environment variables injected via --dart-define
+  static const String _envApiUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: String.fromEnvironment('API_BASE_URL'),
+  );
+  static const String _envLanIp = String.fromEnvironment('LAN_IP');
+  static const String _envPort = String.fromEnvironment('BACKEND_PORT', defaultValue: '3000');
+  static const bool _isPhysicalDevice = bool.fromEnvironment('IS_PHYSICAL_DEVICE', defaultValue: false);
+
   String? _customBaseUrl;
 
+  /// Dynamically computes the primary base URL based on platform and environment
   String get baseUrl {
     if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
       return _customBaseUrl!;
     }
 
-    const envUrl = String.fromEnvironment(
-      'API_URL',
-      defaultValue: String.fromEnvironment('API_BASE_URL'),
-    );
-    if (envUrl.isNotEmpty) {
-      return envUrl;
+    // Priority 1: Explicit --dart-define=API_URL=... or API_BASE_URL=...
+    if (_envApiUrl.isNotEmpty) {
+      return _envApiUrl;
     }
 
+    // Priority 2: Web runtime
     if (kIsWeb) {
-      return 'http://localhost:3000';
+      return 'http://localhost:$_envPort';
     }
 
+    // Priority 3 & 4: Mobile and Desktop platforms
     try {
       if (Platform.isAndroid) {
-        // Standard Android emulator loopback to host machine port 3000
-        return 'http://10.0.2.2:3000';
+        if (_isPhysicalDevice) {
+          // Physical device via Wi-Fi if explicitly requested with LAN_IP
+          if (_envLanIp.isNotEmpty && const bool.fromEnvironment('USE_WIFI', defaultValue: false)) {
+            return 'http://$_envLanIp:$_envPort';
+          }
+          // Physical device via USB reverse (adb reverse tcp:3000 tcp:3000)
+          return 'http://localhost:$_envPort';
+        }
+
+        // Standard Android Emulator loopback to host machine
+        return 'http://10.0.2.2:$_envPort';
+      }
+
+      // iOS Simulator or macOS / Windows / Linux desktop
+      if (Platform.isIOS || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+        return 'http://localhost:$_envPort';
       }
     } catch (_) {
       // Fallback for non-standard runtimes
     }
 
-    return 'http://localhost:3000';
+    return 'http://localhost:$_envPort';
   }
 
   void setBaseUrl(String url) {
     _customBaseUrl = url;
   }
 
+  /// List of candidate fallback URLs to probe when resolving connectivity
+  List<String> get candidateUrls {
+    final list = <String>[];
+    if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
+      list.add(_customBaseUrl!);
+    }
+    if (_envApiUrl.isNotEmpty && !list.contains(_envApiUrl)) {
+      list.add(_envApiUrl);
+    }
+
+    if (kIsWeb) {
+      list.add('http://localhost:$_envPort');
+      return list;
+    }
+
+    try {
+      if (Platform.isAndroid) {
+        if (_isPhysicalDevice) {
+          list.add('http://localhost:$_envPort');
+          if (_envLanIp.isNotEmpty) {
+            list.add('http://$_envLanIp:$_envPort');
+          }
+          list.add('http://10.0.2.2:$_envPort');
+        } else {
+          list.add('http://10.0.2.2:$_envPort');
+          list.add('http://localhost:$_envPort');
+          if (_envLanIp.isNotEmpty) {
+            list.add('http://$_envLanIp:$_envPort');
+          }
+        }
+      } else {
+        list.add('http://localhost:$_envPort');
+        if (_envLanIp.isNotEmpty) {
+          list.add('http://$_envLanIp:$_envPort');
+        }
+      }
+    } catch (_) {
+      list.add('http://localhost:$_envPort');
+    }
+
+    return list.toSet().toList();
+  }
+
   /// Pings /api/v1/health or custom endpoint, returning latency in ms.
+  /// If the primary baseUrl fails and no custom URL was manually forced,
+  /// this seamlessly probes candidate fallback URLs and locks in the working one.
   Future<int> checkHealthLatency({
     String endpoint = '/api/v1/health',
     Duration timeout = const Duration(milliseconds: 500),
   }) async {
     final stopwatch = Stopwatch()..start();
-    await get(endpoint, skipAuth: true, timeout: timeout);
-    stopwatch.stop();
-    return stopwatch.elapsedMilliseconds;
+    try {
+      await get(endpoint, skipAuth: true, timeout: timeout);
+      stopwatch.stop();
+      return stopwatch.elapsedMilliseconds;
+    } catch (e) {
+      // If primary failed and baseUrl was not manually pinned, auto-probe fallback candidates
+      if (_customBaseUrl == null) {
+        for (final candidate in candidateUrls) {
+          if (candidate == baseUrl) continue;
+          try {
+            final uri = Uri.parse('$candidate${endpoint.startsWith('/') ? endpoint : '/$endpoint'}');
+            final reqHeaders = await _buildHeaders(skipAuth: true);
+            final res = await http.get(uri, headers: reqHeaders).timeout(timeout);
+            if (res.statusCode >= 200 && res.statusCode < 400) {
+              setBaseUrl(candidate);
+              stopwatch.stop();
+              return stopwatch.elapsedMilliseconds;
+            }
+          } catch (_) {
+            // Continue probing next candidate
+          }
+        }
+      }
+      rethrow;
+    }
   }
 
   Future<Map<String, String>> _buildHeaders({

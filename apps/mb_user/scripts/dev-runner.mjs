@@ -2,6 +2,7 @@
 import { spawn, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,45 +20,102 @@ const colors = {
   bold: '\x1b[1m',
 };
 
-function runSilent(cmd) {
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function resolveAndroidTools() {
+  const isWindows = process.platform === 'win32';
+  const adbBinName = isWindows ? 'adb.exe' : 'adb';
+  const emulatorBinName = isWindows ? 'emulator.exe' : 'emulator';
+
+  const sdkCandidates = [
+    process.env.ANDROID_HOME,
+    process.env.ANDROID_SDK_ROOT,
+    isWindows && process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Android', 'Sdk') : null,
+    isWindows ? 'C:\\Android\\Sdk' : null,
+    isWindows ? 'D:\\Android\\Sdk' : null,
+    !isWindows ? path.join(process.env.HOME || '', 'Library', 'Android', 'sdk') : null,
+    !isWindows ? path.join(process.env.HOME || '', 'Android', 'Sdk') : null,
+  ].filter(Boolean);
+
+  let adbPath = 'adb';
+  let emulatorPath = 'emulator';
+
+  for (const sdk of sdkCandidates) {
+    if (!fs.existsSync(sdk)) continue;
+    const candidateAdb = path.join(sdk, 'platform-tools', adbBinName);
+    const candidateEmulator = path.join(sdk, 'emulator', emulatorBinName);
+
+    if (fs.existsSync(candidateAdb)) {
+      adbPath = candidateAdb;
+      const platformToolsDir = path.dirname(candidateAdb);
+      if (!process.env.PATH.includes(platformToolsDir)) {
+        process.env.PATH = `${platformToolsDir}${path.delimiter}${process.env.PATH}`;
+      }
+    }
+    if (fs.existsSync(candidateEmulator)) {
+      emulatorPath = candidateEmulator;
+      const emulatorDir = path.dirname(candidateEmulator);
+      if (!process.env.PATH.includes(emulatorDir)) {
+        process.env.PATH = `${emulatorDir}${path.delimiter}${process.env.PATH}`;
+      }
+    }
+    if (adbPath !== 'adb' && emulatorPath !== 'emulator') break;
+  }
+
+  return { adbPath, emulatorPath };
+}
+
+function runSilent(cmd, cwd = mbUserDir) {
   try {
-    return execSync(cmd, { cwd: mbUserDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+    return execSync(cmd, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   } catch {
     return null;
   }
 }
 
-function sleepSync(ms) {
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-}
-
-function resolveEmulatorPath() {
-  const candidates = [
-    'emulator',
-    process.env.ANDROID_HOME ? path.join(process.env.ANDROID_HOME, 'emulator', isWin ? 'emulator.exe' : 'emulator') : null,
-    process.env.ANDROID_SDK_ROOT ? path.join(process.env.ANDROID_SDK_ROOT, 'emulator', isWin ? 'emulator.exe' : 'emulator') : null,
-    isWin && process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Android', 'Sdk', 'emulator', 'emulator.exe') : null,
-    !isWin ? path.join(process.env.HOME || '', 'Library', 'Android', 'sdk', 'emulator', 'emulator') : null,
-  ].filter(Boolean);
-
-  for (const candidate of candidates) {
-    if (candidate === 'emulator') {
-      if (runSilent('emulator -version')) return 'emulator';
-    } else if (fs.existsSync(candidate)) {
-      return candidate;
+function getLocalLanIp() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const net of interfaces[name] || []) {
+      if (net.family === 'IPv4' && !net.internal && !net.address.startsWith('127.')) {
+        return net.address;
+      }
     }
   }
-  return 'emulator';
+  return '127.0.0.1';
+}
+
+function getConnectedDevices(adbPath) {
+  const out = runSilent(`"${adbPath}" devices -l`);
+  if (!out) return [];
+  const lines = out.split('\n').slice(1);
+  const devices = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('*')) continue;
+    const parts = trimmed.split(/\s+/);
+    if (parts.length >= 2 && parts[1] === 'device') {
+      const id = parts[0];
+      const isEmulator = id.startsWith('emulator-');
+      devices.push({ id, isEmulator, raw: trimmed });
+    }
+  }
+  return devices;
 }
 
 console.log(`${colors.cyan}${colors.bold}[TrustPassz] Starting Mobile Fast Dev Runner...${colors.reset}`);
 
-const adbOut = runSilent('adb devices') || '';
-const hasConnectedDevice = adbOut.split('\n').slice(1).some((l) => /\s+device$/.test(l.trim()));
+const { adbPath, emulatorPath } = resolveAndroidTools();
+const lanIp = getLocalLanIp();
+console.log(`  Local LAN IP detected: ${colors.bold}${lanIp}${colors.reset}`);
 
-if (!hasConnectedDevice) {
-  const emulatorBin = resolveEmulatorPath();
-  const avdsOutput = runSilent(`"${emulatorBin}" -list-avds`) || runSilent(`${flutterCmd} emulators`);
+let connectedDevices = getConnectedDevices(adbPath);
+
+if (connectedDevices.length === 0) {
+  console.log('  No active device detected. Scanning for available Android AVDs...');
+  const avdsOutput = runSilent(`"${emulatorPath}" -list-avds`) || runSilent(`${flutterCmd} emulators`);
   const avds = (avdsOutput || '')
     .split('\n')
     .map((s) => s.trim())
@@ -65,47 +123,96 @@ if (!hasConnectedDevice) {
 
   if (avds.length > 0) {
     const targetAvd = avds[0];
-    console.log(`[TrustPassz] Booting Android AVD: ${colors.bold}${targetAvd}${colors.reset}...`);
-    spawn(emulatorBin, ['-avd', targetAvd], {
+    console.log(`  Booting dynamic AVD: ${colors.bold}${targetAvd}${colors.reset}...`);
+    spawn(emulatorPath, ['-avd', targetAvd], {
       detached: true,
       stdio: 'ignore',
     }).unref();
 
-    console.log('[TrustPassz] Waiting for emulator to complete boot...');
+    console.log('  Waiting for emulator boot completion...');
+    let isBooted = false;
     const startTime = Date.now();
-    while (Date.now() - startTime < 45000) {
-      if (runSilent('adb shell getprop sys.boot_completed') === '1') {
-        console.log(`${colors.green}[TrustPassz] AVD boot ready.${colors.reset}`);
+    const bootTimeoutMs = 60000;
+
+    while (Date.now() - startTime < bootTimeoutMs) {
+      if (runSilent(`"${adbPath}" shell getprop sys.boot_completed`) === '1') {
+        isBooted = true;
         break;
       }
       sleepSync(2000);
     }
+
+    if (isBooted) {
+      console.log(`${colors.green}  AVD boot verified successfully.${colors.reset}`);
+      sleepSync(1000);
+    } else {
+      console.log(`${colors.yellow}  Boot poll timeout reached. Proceeding with launch...${colors.reset}`);
+    }
+
+    connectedDevices = getConnectedDevices(adbPath);
+  } else {
+    console.log(`${colors.yellow}  No local AVD found. Flutter will search for targets.${colors.reset}`);
+  }
+} else {
+  console.log(`${colors.green}  Active device detected: ${connectedDevices.map((d) => d.id).join(', ')}${colors.reset}`);
+}
+
+// Reverse ports for seamless API communication
+runSilent(`"${adbPath}" reverse tcp:3000 tcp:3000`);
+runSilent(`"${adbPath}" reverse tcp:3001 tcp:3001`);
+console.log('  Reverse port forwarding active (3000 -> 3000, 3001 -> 3001).');
+
+const rawArgs = process.argv.slice(2);
+const hasTargetDevice = rawArgs.some((arg) => arg === '-d' || arg.startsWith('-d=') || arg === '--device');
+const hasCustomApiUrl = rawArgs.some((arg) => arg.includes('API_URL'));
+
+const hasEmulator = connectedDevices.some((d) => d.isEmulator);
+const isPhysicalDevice = connectedDevices.length > 0 && !hasEmulator;
+
+let defaultApiUrl;
+if (isPhysicalDevice) {
+  defaultApiUrl = 'http://localhost:3000';
+} else {
+  defaultApiUrl = 'http://10.0.2.2:3000';
+}
+
+const dynamicDefines = [
+  ...(hasCustomApiUrl ? [] : [`--dart-define=API_URL=${defaultApiUrl}`]),
+  `--dart-define=LAN_IP=${lanIp}`,
+  `--dart-define=BACKEND_PORT=3000`,
+  `--dart-define=IS_PHYSICAL_DEVICE=${isPhysicalDevice}`,
+];
+
+const targetDeviceArgs = [];
+if (!hasTargetDevice) {
+  if (connectedDevices.length > 0) {
+    targetDeviceArgs.push('-d', connectedDevices[0].id);
+  } else {
+    targetDeviceArgs.push('-d', 'android');
   }
 }
 
-runSilent('adb reverse tcp:3000 tcp:3000');
-runSilent('adb reverse tcp:3001 tcp:3001');
-
-const rawArgs = process.argv.slice(2);
-const defaultApiDefine = '--dart-define=API_URL=http://10.0.2.2:3000';
-const hasCustomApiUrl = rawArgs.some((arg) => arg.includes('API_URL'));
-const hasTargetDevice = rawArgs.some((arg) => arg === '-d' || arg.startsWith('-d=') || arg === '--device');
-
 const launchArgs = [
   'run',
-  ...(hasTargetDevice ? [] : ['-d', 'android']),
-  ...(hasCustomApiUrl ? [] : [defaultApiDefine]),
+  ...targetDeviceArgs,
+  ...dynamicDefines,
   ...rawArgs,
 ];
 
 console.log(`${colors.green}${colors.bold}[TrustPassz] Hot Reload [r] & Hot Restart [R] enabled.${colors.reset}`);
 console.log(`Executing: flutter ${launchArgs.join(' ')}\n`);
 
-const child = spawn(flutterCmd, launchArgs, { cwd: mbUserDir, stdio: 'inherit', shell: isWin });
+const child = spawn(flutterCmd, launchArgs, {
+  cwd: mbUserDir,
+  stdio: 'inherit',
+  shell: isWin,
+});
 
 process.on('SIGINT', () => {
   child.kill('SIGINT');
   process.exit(0);
 });
 
-child.on('exit', (c) => process.exit(c ?? 0));
+child.on('exit', (code) => {
+  process.exit(code ?? 0);
+});
