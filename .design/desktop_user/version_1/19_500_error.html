@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>500 - Sự Cố Hệ Thống | TrustPassz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              950: '#0B0F17',
+              900: '#0F172A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #080C14; color: #F1F5F9; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#080C14] text-slate-100 min-h-screen">
+  <div class="w-[1440px] mx-auto min-h-screen flex flex-col justify-between">
+
+    <!-- Top Minimal Navigation -->
+    <header class="border-b border-zinc-800/80 px-8 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-slate-950 font-black text-sm">
+          TP
+        </div>
+        <div>
+          <span class="text-base font-black tracking-tight text-white">TrustPassz</span>
+          <span class="text-[10px] font-mono ml-2 text-rose-400 bg-rose-950/60 border border-rose-800/60 px-2 py-0.5 rounded">
+            SYSTEM EXCEPTION
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs font-mono text-slate-400">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          Cluster Latency: <span class="text-rose-400">Timeout (504ms)</span>
+        </span>
+        <span class="text-zinc-700">|</span>
+        <a href="#" class="text-cyan-400 hover:underline">Trang chủ</a>
+        <a href="#" class="text-slate-400 hover:text-white">Trung tâm hỗ trợ</a>
+      </div>
+    </header>
+
+    <!-- Center Error Content -->
+    <main class="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div class="max-w-xl w-full flex flex-col items-center">
+
+        <!-- Error Icon Badge with Pulse Aura -->
+        <div class="relative mb-6">
+          <div class="absolute inset-0 rounded-full bg-rose-500/20 blur-xl"></div>
+          <div class="relative w-24 h-24 rounded-3xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-500 shadow-2xl shadow-rose-950/80">
+            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Error 500 Code Badge -->
+        <span class="text-xs font-mono font-bold tracking-widest text-rose-400 uppercase px-3 py-1 rounded-full bg-rose-950/60 border border-rose-800/60 mb-3">
+          HTTP 500 &bull; INTERNAL RUNTIME ERROR
+        </span>
+
+        <h1 class="text-3xl font-black text-white tracking-tight mb-3">
+          Đã xảy ra sự cố không mong muốn
+        </h1>
+
+        <p class="text-sm text-slate-400 max-w-md leading-relaxed mb-6">
+          Hệ thống gặp lỗi trong quá trình xử lý yêu cầu hoặc đồng bộ dữ liệu giao dịch. Đội ngũ kỹ thuật đã được thông báo tự động để khắc phục.
+        </p>
+
+        <!-- Technical Digest Callout Box -->
+        <div class="w-full p-4 rounded-2xl bg-slate-900/60 border border-zinc-800 text-left mb-8 space-y-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Error Digest:</span>
+            <span class="text-rose-400 font-bold">ERR_UNCAUGHT_TRANSACTION_PANIC</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-black/50 border border-zinc-800/80 font-mono text-[11px] text-slate-400 break-all select-all">
+            digest: 7f81b94e-28b0-4f98-932d-tpz_escrow_settle_timeout:500
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-1">
+            <span>Server: sgp1-edge-worker-04</span>
+            <span>Timestamp: 2026-11-07T03:07:00Z</span>
+          </div>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="flex items-center justify-center gap-4 w-full">
+          <button type="button" class="h-12 px-6 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm flex items-center gap-2 transition-all shadow-lg shadow-cyan-950/60 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span>Thử lại ngay</span>
+          </button>
+
+          <a href="#" class="h-12 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-zinc-800 font-semibold text-sm flex items-center gap-2 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>Về trang chủ</span>
+          </a>
+
+          <a href="#" class="h-12 px-4 rounded-xl hover:bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-transparent font-medium text-sm flex items-center gap-1.5 transition-colors">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span>Báo cáo kỹ thuật</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Bottom Status Strip -->
+    <footer class="border-t border-zinc-800/80 px-8 py-4 flex items-center justify-between text-xs text-slate-500 font-mono">
+      <div>TrustPassz Protocol v3.4.1 &bull; Base Sepolia Smart Escrow</div>
+      <div class="flex items-center gap-4">
+        <span>Postgres: <strong class="text-emerald-400">UP</strong></span>
+        <span>Redis Cache: <strong class="text-emerald-400">UP</strong></span>
+        <span>VietQR Gateway: <strong class="text-emerald-400">ONLINE</strong></span>
+        <span>RPC Node: <strong class="text-amber-400">HIGH LOAD</strong></span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

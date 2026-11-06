@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Biên lai Ký quỹ Điện tử & Tiến trình Khiếu nại - TrustPassz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              950: '#0B0F17',
+              900: '#0F172A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #080C14; color: #F1F5F9; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#080C14] text-slate-100 min-h-screen">
+  <div class="w-[1440px] mx-auto min-h-screen pb-20">
+
+    <!-- Top Sticky Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-[#080C14]/90 backdrop-blur-md border-b border-zinc-800/80 px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="#" class="h-11 w-11 rounded-xl bg-slate-900 hover:bg-slate-800 border border-zinc-800 flex items-center justify-center text-slate-300 hover:text-white transition-colors" title="Quay lại Két tài sản">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono text-cyan-400 font-semibold tracking-wider">PROTOCOL RECEIPT</span>
+            <span class="text-slate-600">/</span>
+            <span class="text-xs text-slate-400 font-mono">tpz-deal-99482f71-8bc1-4e78-9e32-2d90efba7101</span>
+          </div>
+          <h1 class="text-base font-bold text-white flex items-center gap-2">
+            Biên lai Ký quỹ Điện tử &amp; Dispute Timeline Protocol
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              Verified On-Chain
+            </span>
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button type="button" class="h-11 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-zinc-800 text-xs text-slate-300 hover:text-cyan-400 flex items-center gap-2 transition-colors cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <span>Đồng bộ Realtime</span>
+        </button>
+
+        <button type="button" class="h-11 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs flex items-center gap-2 transition-all shadow-lg shadow-cyan-950/50 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+          </svg>
+          <span>Xuất PDF / In Biên Lai</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto px-6 pt-8 space-y-8">
+
+      <!-- SECTION 1: DISPUTE TIMELINE STEPPER (5-STEP PROTOCOL) -->
+      <section class="w-full rounded-3xl bg-[#0B0F17] border border-zinc-800/90 shadow-2xl p-7">
+        <!-- Title & Subtitle -->
+        <div class="flex items-center justify-between pb-6 border-b border-zinc-800/80">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                Dispute Timeline Stepper
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-800 border border-zinc-700 text-cyan-400 font-bold">
+                  5-Step Protocol
+                </span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Theo dõi tiến trình cọc tiền, mở két, AI thẩm định và kết quả giải ngân theo thời gian thực
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-mono">Protocol ID:</span>
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-2 py-0.5 rounded">
+              ERC-4337 / TRUST-V3
+            </span>
+          </div>
+        </div>
+
+        <!-- 5-Step Horizontal Overview Bar -->
+        <div class="py-6 border-b border-zinc-800/60">
+          <div class="grid grid-cols-5 gap-2 relative">
+            <!-- Continuous Connector Track -->
+            <div class="absolute top-5 left-10 right-10 h-0.5 bg-zinc-800 z-0"></div>
+
+            <!-- Step 1: Deposit (Completed) -->
+            <div class="relative flex flex-col items-center text-center cursor-pointer">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 shadow-lg bg-emerald-950/80 border-emerald-500 text-emerald-400 shadow-emerald-950/50">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold text-slate-200 mt-2.5 truncate max-w-[140px]">1. Cọc tiền Ký quỹ</span>
+              <span class="text-[10px] text-slate-400 font-mono mt-0.5">07/11/2026</span>
+              <div class="mt-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Hoàn tất</span>
+              </div>
+            </div>
+
+            <!-- Step 2: Inspection (Completed) -->
+            <div class="relative flex flex-col items-center text-center cursor-pointer">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 shadow-lg bg-emerald-950/80 border-emerald-500 text-emerald-400 shadow-emerald-950/50">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold text-slate-200 mt-2.5 truncate max-w-[140px]">2. Mở két &amp; Đồng kiểm</span>
+              <span class="text-[10px] text-slate-400 font-mono mt-0.5">07/11/2026</span>
+              <div class="mt-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Hoàn tất</span>
+              </div>
+            </div>
+
+            <!-- Step 3: Dispute Raised (Completed) -->
+            <div class="relative flex flex-col items-center text-center cursor-pointer">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 shadow-lg bg-rose-950/80 border-rose-500 text-rose-400 shadow-rose-950/50">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold text-rose-300 mt-2.5 truncate max-w-[140px]">3. Gửi khiếu nại đối soát</span>
+              <span class="text-[10px] text-slate-400 font-mono mt-0.5">07/11/2026</span>
+              <div class="mt-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">Đã nộp đơn</span>
+              </div>
+            </div>
+
+            <!-- Step 4: AI Arbitration (In Progress - Active) -->
+            <div class="relative flex flex-col items-center text-center cursor-pointer">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 shadow-lg bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-cyan-500/30 ring-4 ring-cyan-500/20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold text-cyan-300 mt-2.5 truncate max-w-[140px]">4. AI Thẩm định</span>
+              <span class="text-[10px] text-slate-400 font-mono mt-0.5">07/11/2026</span>
+              <div class="mt-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Đang thẩm định</span>
+              </div>
+            </div>
+
+            <!-- Step 5: Final Settlement (Pending) -->
+            <div class="relative flex flex-col items-center text-center cursor-pointer">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 shadow-lg bg-slate-900 border-zinc-700 text-slate-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold text-slate-400 mt-2.5 truncate max-w-[140px]">5. Kết quả &amp; Giải ngân</span>
+              <span class="text-[10px] text-slate-500 font-mono mt-0.5">Chờ phán quyết</span>
+              <div class="mt-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800/80 text-slate-400 border border-zinc-700/60">Chờ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Stepper Accordion Cards -->
+        <div class="mt-6 space-y-3">
+
+          <!-- Step 1 Accordion Item -->
+          <div class="rounded-2xl border border-zinc-800/70 bg-slate-900/20 overflow-hidden">
+            <div class="w-full p-4 flex items-center justify-between gap-3 text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-cyan-400 font-bold">BƯỚC 1:</span>
+                    <h3 class="text-sm font-bold text-white">Cọc tiền Ký quỹ (Napas 247 -> Smart Contract)</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Hoàn tất</span>
+                  </div>
+                  <p class="text-xs text-slate-400 font-mono mt-0.5">07/11/2026 14:15:22</p>
+                </div>
+              </div>
+              <div class="text-xs font-mono text-slate-400">Tx: 0x82b1...389a</div>
+            </div>
+          </div>
+
+          <!-- Step 2 Accordion Item -->
+          <div class="rounded-2xl border border-zinc-800/70 bg-slate-900/20 overflow-hidden">
+            <div class="w-full p-4 flex items-center justify-between gap-3 text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-cyan-400 font-bold">BƯỚC 2:</span>
+                    <h3 class="text-sm font-bold text-white">Mở két &amp; Đồng kiểm (Đồng hồ đếm ngược 24h kích hoạt)</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Hoàn tất</span>
+                  </div>
+                  <p class="text-xs text-slate-400 font-mono mt-0.5">07/11/2026 14:18:05</p>
+                </div>
+              </div>
+              <div class="text-xs font-mono text-slate-400">Thời lượng: 24h</div>
+            </div>
+          </div>
+
+          <!-- Step 3 Accordion Item -->
+          <div class="rounded-2xl border border-rose-500/30 bg-rose-950/10 overflow-hidden">
+            <div class="w-full p-4 flex items-center justify-between gap-3 text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-rose-500/30 text-rose-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-rose-400 font-bold">BƯỚC 3:</span>
+                    <h3 class="text-sm font-bold text-white">Bên mua gửi hồ sơ khiếu nại đối soát</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">3 Bằng chứng</span>
+                  </div>
+                  <p class="text-xs text-rose-300 font-mono mt-0.5">Lý do: &ldquo;Mã nguồn bàn giao thiếu module thanh toán Stripe &amp; database schema sai lệch&rdquo;</p>
+                </div>
+              </div>
+              <button type="button" class="h-9 px-3 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-medium flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <span>Xem bằng chứng</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 4 Accordion Item (Expanded with AI Confidence Gauge) -->
+          <div class="rounded-2xl border border-cyan-500/40 bg-slate-900/60 shadow-lg shadow-cyan-950/20 overflow-hidden">
+            <div class="w-full p-5 flex items-center justify-between gap-3 text-left border-b border-zinc-800/60">
+              <div class="flex items-center gap-3.5">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-500/10 border-cyan-500/40 text-cyan-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-cyan-400 font-bold">BƯỚC 4:</span>
+                    <h3 class="text-base font-bold text-white">AI Arbitrator Thẩm định &amp; Phân tích Chứng cứ</h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                      Đang xử lý
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-400 font-mono mt-0.5">07/11/2026 15:02:18</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400 font-medium">Chi tiết phân tích</span>
+                <div class="w-8 h-8 rounded-lg bg-slate-800/60 flex items-center justify-center text-cyan-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 space-y-4 text-xs text-slate-300">
+              <p class="leading-relaxed text-sm text-slate-300">
+                Mô hình AI Arbitrator trích xuất đặc trưng chứng cứ, đối soát băm SHA-256 kho lưu trữ và tính toán điểm tin cậy Confidence Score để tự động đưa ra phán quyết hoặc đề xuất hoàn tiền.
+              </p>
+
+              <!-- AI Arbitrator Confidence Gauge -->
+              <div class="p-4 rounded-xl bg-[#080C14] border border-zinc-800 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-slate-200 flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    Đánh giá AI Arbitrator Confidence Score:
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-base text-cyan-300">88.4%</span>
+                    <span class="text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      VƯỢT NGƯỠNG TỰ ĐỘNG (&gt;= 0.75)
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Score Progress Bar -->
+                <div class="space-y-1">
+                  <div class="h-3 w-full bg-slate-900 rounded-full overflow-hidden border border-zinc-800 relative">
+                    <!-- Threshold Marker 0.75 -->
+                    <div class="absolute top-0 bottom-0 w-0.5 bg-rose-500 z-10" style="left: 75%;" title="Ngưỡng tự động 75%"></div>
+                    <div class="h-full rounded-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400" style="width: 88.4%;"></div>
+                  </div>
+                  <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                    <span>0.0 (Bác bỏ)</span>
+                    <span class="text-rose-400">Ngưỡng tự quyết: 0.75</span>
+                    <span>1.0 (Chấp thuận hoàn tiền)</span>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-900/60 border border-zinc-800/80 text-slate-300 text-xs">
+                  <p class="font-semibold text-white mb-1">Kết luận sơ bộ của mô hình:</p>
+                  <p class="text-slate-400">
+                    &ldquo;Tập tin bàn giao thiếu 14 file controllers và 3 migrations quan trọng so với đặc tả cam kết trong Deal Room. Độ tin cậy sai lệch là 88.4%. Hệ thống đề xuất hoàn trả 100% tiền cọc (TRIGGER_REFUND) cho bên mua.&rdquo;
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5 Accordion Item -->
+          <div class="rounded-2xl border border-zinc-800/70 bg-slate-900/20 overflow-hidden">
+            <div class="w-full p-4 flex items-center justify-between gap-3 text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-slate-800/60 border-zinc-700/60 text-slate-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-slate-400 font-bold">BƯỚC 5:</span>
+                    <h3 class="text-sm font-bold text-slate-300">Kết quả &amp; Giải ngân cuối cùng (Payout hoặc Refund)</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-zinc-700">Chờ hoàn tất bước 4</span>
+                  </div>
+                  <p class="text-xs text-slate-500 font-mono mt-0.5">Dự kiến thực thi: Khi AI Arbitrator chốt phiên hoặc Admin phê duyệt</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: DIGITAL ESCROW RECEIPT TICKET CARD -->
+      <section class="w-full max-w-2xl mx-auto flex flex-col gap-5">
+        <!-- Main Ticket Receipt Card -->
+        <div class="relative rounded-3xl bg-[#0B0F17] border border-zinc-800/90 shadow-2xl overflow-hidden">
+          <!-- Top Gradient Accent Bar -->
+          <div class="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-500"></div>
+
+          <!-- Header Section -->
+          <div class="p-8 border-b border-zinc-800/80 bg-slate-900/40 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-inner">
+                <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono font-bold tracking-widest text-emerald-400 uppercase">TRUSTPASSZ PROTOCOL</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-zinc-700 text-slate-300 font-mono">
+                    BASE SEPOLIA
+                  </span>
+                </div>
+                <h1 class="text-2xl font-black text-white mt-0.5 tracking-tight">Biên lai Ký quỹ Điện tử</h1>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-end gap-1">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                Đang đối soát
+              </span>
+              <span class="text-[11px] font-mono text-slate-400">07/11/2026 14:15:22</span>
+            </div>
+          </div>
+
+          <!-- Amount & Escrow Summary Hero -->
+          <div class="p-8 bg-gradient-to-b from-slate-900/60 to-slate-950/40 border-b border-zinc-800/80 flex items-end justify-between">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wider text-slate-400">
+                Tổng giá trị giao dịch bảo chứng
+              </p>
+              <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 mt-1">
+                45.000.000 ₫
+              </div>
+              <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Đã khóa bảo đảm qua Smart Contract Hợp đồng điện tử
+              </p>
+            </div>
+
+            <div class="text-right bg-slate-900/80 p-3.5 rounded-xl border border-zinc-800 shrink-0">
+              <span class="text-[11px] text-slate-400 block">Phí ký quỹ hệ thống:</span>
+              <span class="text-sm font-semibold text-emerald-400">0 ₫ (Miễn phí ra mắt)</span>
+            </div>
+          </div>
+
+          <!-- Participants Grid -->
+          <div class="p-8 grid grid-cols-2 gap-5 border-b border-zinc-800/80 text-sm">
+            <!-- Buyer Column -->
+            <div class="p-4 rounded-2xl bg-slate-900/30 border border-zinc-800/80 flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Bên mua (Buyer)</span>
+              <p class="font-semibold text-slate-100 truncate">Hoàng Minh Đức</p>
+              <div class="text-xs font-mono text-cyan-400 truncate flex items-center justify-between">
+                <span>0x8a91...4B72</span>
+                <span class="text-slate-500 text-[10px]">Đã ký xác thực</span>
+              </div>
+            </div>
+
+            <!-- Seller Column -->
+            <div class="p-4 rounded-2xl bg-slate-900/30 border border-zinc-800/80 flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Bên bán (Seller)</span>
+              <p class="font-semibold text-slate-100 truncate">Vũ Hải Nam</p>
+              <div class="text-xs font-mono text-cyan-400 truncate flex items-center justify-between">
+                <span>0x3e18...9C20</span>
+                <span class="text-slate-500 text-[10px]">Đã gửi tài sản số</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Perforated Divider Simulation -->
+          <div class="relative py-2 flex items-center justify-center">
+            <div class="absolute -left-3 w-6 h-6 rounded-full bg-[#080C14] border-r border-zinc-800"></div>
+            <div class="w-full border-t-2 border-dashed border-zinc-800/90 mx-6"></div>
+            <div class="absolute -right-3 w-6 h-6 rounded-full bg-[#080C14] border-l border-zinc-800"></div>
+          </div>
+
+          <!-- Cryptographic Hashes & Audit Rows -->
+          <div class="p-8 flex flex-col gap-3 text-xs">
+            <!-- Deal ID Row -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 border border-zinc-800/60">
+              <span class="text-slate-400 font-medium">Mã Kèo (Deal UUID):</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-slate-200">tpz-deal-99482f71-8bc1-4e78-9e32-2d90efba7101</span>
+                <button type="button" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white" title="Sao chép">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Payment Order Code -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 border border-zinc-800/60">
+              <span class="text-slate-400 font-medium">Mã đối soát VietQR:</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-emerald-400">10849204</span>
+                <button type="button" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- On-Chain Transaction Hash -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 border border-zinc-800/60">
+              <span class="text-slate-400 font-medium">Tx Hash On-Chain:</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-cyan-400">0x7a83d91c8...a839ef41</span>
+                <a href="#" class="p-1 rounded hover:bg-slate-800 text-cyan-400 hover:text-cyan-300" title="Mở BaseScan Explorer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Content Hash SHA-256 -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 border border-zinc-800/60">
+              <span class="text-slate-400 font-medium">Băm toàn vẹn SHA-256:</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-slate-300">e3b0c44298...7852b855</span>
+                <button type="button" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vector Barcode Verification Footer -->
+          <div class="p-8 bg-slate-950/80 border-t border-zinc-800/80 flex flex-col items-center justify-center gap-2 text-center">
+            <!-- Simulated Vector Barcode -->
+            <div class="w-full max-w-xs h-12 flex items-stretch justify-between px-3 py-1.5 bg-white rounded-md shadow-inner">
+              <span class="bg-black w-[4px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[6px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[8px]"></span>
+              <span class="bg-black w-[4px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[5px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[4px]"></span>
+              <span class="bg-black w-[8px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[5px]"></span>
+              <span class="bg-black w-[3px]"></span>
+              <span class="bg-black w-[7px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[4px]"></span>
+              <span class="bg-black w-[3px]"></span>
+              <span class="bg-black w-[6px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[5px]"></span>
+              <span class="bg-black w-[3px]"></span>
+              <span class="bg-black w-[7px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[4px]"></span>
+              <span class="bg-black w-[2px]"></span>
+              <span class="bg-black w-[6px]"></span>
+              <span class="bg-black w-[3px]"></span>
+              <span class="bg-black w-[8px]"></span>
+            </div>
+            <span class="text-[11px] font-mono tracking-widest text-slate-400 uppercase mt-1">
+              *TPZ-DEAL-99482F71*
+            </span>
+            <p class="text-[10px] text-slate-500">
+              Biên lai có giá trị pháp lý đối soát điện tử theo tiêu chuẩn bảo chứng TrustPassz
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Button Bar -->
+        <div class="grid grid-cols-3 gap-3">
+          <button type="button" class="h-11 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-zinc-800 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs font-semibold">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span>In / Tải PDF</span>
+          </button>
+
+          <button type="button" class="h-11 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-zinc-800 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs font-semibold">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span>Sao chép link</span>
+          </button>
+
+          <button type="button" class="h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-xs shadow-lg shadow-emerald-950/50 transition-all cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+            </svg>
+            <span>Chia sẻ đối soát</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

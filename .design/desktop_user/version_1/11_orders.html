@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - 11 Quản Lý Đơn Hàng & Biên Lai (Figma Ready)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: '#05080E',
+              surface: '#070A10',
+              card: '#0B0F17',
+              border: '#1E293B',
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #05080E;
+      color: #F1F5F9;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#05080E] text-slate-100 flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- ================= TOP HUD TELEMETRY TICKER BAR ================= -->
+  <div class="relative z-50 flex h-7 items-center justify-between border-b border-slate-800/80 bg-[#070A10]/95 px-8 font-mono text-[10px] tracking-wider text-slate-400 select-none">
+    <div class="flex items-center gap-4">
+      <span class="flex items-center gap-1.5 text-cyan-400 font-bold">
+        <svg class="size-3 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>ESCROW_OS // v2.5</span>
+      </span>
+      <span class="text-slate-700">|</span>
+      <span class="text-slate-400">LEDGER STATE: SYNCED (PAYOS MBBANK)</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-emerald-400 font-semibold">100% VIETQR ON-CHAIN AUDIT TRAIL</span>
+    </div>
+  </div>
+
+  <div class="flex flex-1 relative">
+    <!-- ================= FIXED USER SIDEBAR (w-64) ================= -->
+    <aside class="w-64 fixed top-7 bottom-0 left-0 z-40 border-r border-slate-800/80 bg-[#070A10]/95 backdrop-blur-2xl flex flex-col justify-between">
+      <div>
+        <div class="flex h-16 items-center px-6 border-b border-slate-800/80 justify-between">
+          <a href="#" class="flex items-center gap-2.5">
+            <div class="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/25 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/50 text-emerald-400 shadow-[0_0_18px_rgba(16,185,129,0.25)]">
+              <svg class="size-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-extrabold text-base tracking-tight text-white">TrustPassz</span>
+              <span class="text-[10px] font-medium text-slate-400 leading-none">Bảo vệ giao dịch an toàn</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="p-4 space-y-4">
+          <nav class="space-y-1">
+            <a href="#" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-900/60 hover:text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span>Bàn Điều Hành</span>
+              </div>
+            </a>
+            <a href="#" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-900/60 hover:text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4l-2-2"/><path d="m18 10 1.4-1.4a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0L14 7"/><path d="m2 22 5.5-5.5"/><path d="m17 7-6 6-2-2-4 4"/></svg>
+                <span>Giao Dịch Của Tôi</span>
+              </div>
+            </a>
+            <a href="#" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-900/60 hover:text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/></svg>
+                <span>Báo Lỗi &amp; Khiếu Nại</span>
+              </div>
+            </a>
+            <!-- Active: Lịch Sử Đơn & Biên Lai -->
+            <a href="#" class="relative flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold bg-gradient-to-r from-cyan-500/15 via-slate-900/80 to-transparent border border-cyan-500/30 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.12)]">
+              <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.9)]"></span>
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/><path d="M14 16h-4"/></svg>
+                <span>Lịch Sử Đơn &amp; Biên Lai</span>
+              </div>
+              <span class="rounded-full px-2 py-0.5 text-[10px] font-bold font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">4 ĐƠN</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <div class="rounded-2xl border border-cyan-500/30 bg-cyan-950/30 p-4 space-y-2">
+          <div class="text-[10px] font-mono text-cyan-300 font-bold uppercase">KÉT GIỮ TIỀN AN TOÀN</div>
+          <div class="font-mono text-xl font-black text-white">5.200.000 ₫</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= MAIN OPERATING CANVAS (pl-64) ================= -->
+    <div class="flex-1 pl-64 flex flex-col min-h-[calc(100vh-1.75rem)]">
+      <!-- Sticky User Navbar -->
+      <header class="sticky top-7 z-30 flex h-16 w-full items-center justify-between border-b border-slate-800/80 bg-[#070A10]/90 px-8 backdrop-blur-2xl">
+        <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+          <span class="text-cyan-400">+ [NODE_ORDER_LEDGER_01]</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-1.5">
+            <div class="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950">TQ</div>
+            <span class="text-xs font-bold text-white">Trần Quốc Toản</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Viewport Content Area -->
+      <main class="flex-1 px-8 py-8 space-y-6 max-w-7xl w-full">
+        <!-- Title & Subtitle -->
+        <div class="space-y-1">
+          <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <div class="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+              <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/><path d="M14 16h-4"/></svg>
+            </div>
+            <span>Lịch Sử Đơn Hàng &amp; Biên Lai Thanh Toán</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            Tra cứu mã giao dịch, biên lai chuyển khoản VietQR PayOS và thông tin bảo vệ tự động.
+          </p>
+        </div>
+
+        <!-- Filter Category Tabs -->
+        <div class="flex items-center gap-2">
+          <button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40">Tất Cả (4)</button>
+          <button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-400 border border-slate-800 hover:border-slate-700">Đơn Đã Mua (3)</button>
+          <button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-400 border border-slate-800 hover:border-slate-700">Đơn Đã Bán (1)</button>
+          <button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-400 border border-slate-800 hover:border-slate-700">Đang Kiểm Tra (1)</button>
+          <button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-400 border border-slate-800 hover:border-slate-700">Đã Hoàn Tất (2)</button>
+        </div>
+
+        <!-- Orders Stacked List -->
+        <div class="space-y-4">
+          <!-- Order 1: IN_INSPECTION -->
+          <div class="rounded-3xl border border-cyan-500/40 bg-slate-900/60 p-6 space-y-4 shadow-xl backdrop-blur-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-xs font-bold text-cyan-300">#ORD-2026-84920</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-xs text-slate-400">07/11/2026 20:14</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-xs text-slate-400">Kèo liên kết: <strong class="text-white font-mono">TPZ-84920</strong></span>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-950/60 border border-blue-500/40 text-blue-300 flex items-center gap-1.5">
+                <svg class="size-3 text-blue-400 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Đang Kiểm Tra Hàng (Còn 18h)</span>
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="space-y-1">
+                <h3 class="text-base font-bold text-white">Fullstack Next.js SaaS Boilerplate (Clean Architecture &amp; Supabase)</h3>
+                <div class="flex items-center gap-3 text-xs text-slate-400 font-mono">
+                  <span>Phương thức: <strong class="text-slate-200">VietQR (MBBank PayOS)</strong></span>
+                  <span>•</span>
+                  <span>Mã GD: <strong class="text-cyan-300">88992014</strong></span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-6">
+                <div class="text-right">
+                  <span class="text-[10px] uppercase font-mono text-slate-400 block">TỔNG THANH TOÁN</span>
+                  <span class="font-mono text-xl font-black text-cyan-300">1.500.000 ₫</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a href="#" class="h-9 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-sm">
+                    <span>Vào Két Vault</span>
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                  <button type="button" class="h-9 px-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-xs font-semibold">
+                    Xem Biên Lai
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order 2: PENDING -->
+          <div class="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 space-y-4 shadow-md">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-xs font-bold text-amber-300">#ORD-2026-84921</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-xs text-slate-400">07/11/2026 21:05</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-xs text-slate-400">Kèo liên kết: <strong class="text-white font-mono">TPZ-84921</strong></span>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/60 border border-amber-500/40 text-amber-300 flex items-center gap-1.5">
+                <svg class="size-3 text-amber-400 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Chờ Thanh Toán VietQR</span>
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="space-y-1">
+                <h3 class="text-base font-bold text-white">Bản Quyền JetBrains All Products Pack 1 Năm (Key Chính Hãng)</h3>
+                <div class="flex items-center gap-3 text-xs text-slate-400 font-mono">
+                  <span>Phương thức: <strong class="text-slate-200">VietQR Napas 24/7</strong></span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-6">
+                <div class="text-right">
+                  <span class="text-[10px] uppercase font-mono text-slate-400 block">TỔNG THANH TOÁN</span>
+                  <span class="font-mono text-xl font-black text-white">850.000 ₫</span>
+                </div>
+                <a href="#" class="h-9 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-sm">
+                  <span>Thanh Toán Ngay</span>
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order 3: COMPLETED -->
+          <div class="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 space-y-4 shadow-md">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-xs font-bold text-slate-300">#ORD-2026-84918</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-xs text-slate-400">06/11/2026 14:22</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-xs text-slate-400">Kèo liên kết: <strong class="text-white font-mono">TPZ-84918</strong></span>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5">
+                <svg class="size-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Giao Dịch Đã Hoàn Tất</span>
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="space-y-1">
+                <h3 class="text-base font-bold text-white">Figma Design System UI Kit Mobile Banking Cyber (120+ Screens)</h3>
+                <div class="flex items-center gap-3 text-xs text-slate-400 font-mono">
+                  <span>Phương thức: <strong class="text-slate-200">VietQR PayOS MBBank</strong></span>
+                  <span>•</span>
+                  <span>Mã GD: <strong class="text-emerald-400">77218902</strong></span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-6">
+                <div class="text-right">
+                  <span class="text-[10px] uppercase font-mono text-slate-400 block">TỔNG THANH TOÁN</span>
+                  <span class="font-mono text-xl font-black text-emerald-400">650.000 ₫</span>
+                </div>
+                <button type="button" class="h-9 px-4 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+                  Xem Biên Lai
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

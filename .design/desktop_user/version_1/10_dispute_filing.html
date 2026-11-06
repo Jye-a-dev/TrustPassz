@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - 10 Khiếu Nại & Trọng Tài AI (Figma Ready)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: '#05080E',
+              surface: '#070A10',
+              card: '#0B0F17',
+              border: '#1E293B',
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #05080E;
+      color: #F1F5F9;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#05080E] text-slate-100 flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- ================= TOP HUD TELEMETRY TICKER BAR ================= -->
+  <div class="relative z-50 flex h-7 items-center justify-between border-b border-slate-800/80 bg-[#070A10]/95 px-8 font-mono text-[10px] tracking-wider text-slate-400 select-none">
+    <div class="flex items-center gap-4">
+      <span class="flex items-center gap-1.5 text-amber-400 font-bold">
+        <svg class="size-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/></svg>
+        <span>DISPUTE_ARBITER // v3.8 ACTIVE</span>
+      </span>
+      <span class="text-slate-700">|</span>
+      <span class="text-slate-400">EVIDENCE PROTOCOL: MULTI-SLOT HASHED</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-emerald-400 font-semibold">ENCLAVE TIMELOCK: FROZEN (ESCROW SAFE)</span>
+    </div>
+  </div>
+
+  <div class="flex flex-1 relative">
+    <!-- ================= FIXED USER SIDEBAR (w-64) ================= -->
+    <aside class="w-64 fixed top-7 bottom-0 left-0 z-40 border-r border-slate-800/80 bg-[#070A10]/95 backdrop-blur-2xl flex flex-col justify-between">
+      <div>
+        <div class="flex h-16 items-center px-6 border-b border-slate-800/80 justify-between">
+          <a href="#" class="flex items-center gap-2.5">
+            <div class="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/25 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/50 text-emerald-400 shadow-[0_0_18px_rgba(16,185,129,0.25)]">
+              <svg class="size-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-extrabold text-base tracking-tight text-white">TrustPassz</span>
+              <span class="text-[10px] font-medium text-slate-400 leading-none">Bảo vệ giao dịch an toàn</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="p-4 space-y-4">
+          <nav class="space-y-1">
+            <a href="#" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-900/60 hover:text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span>Bàn Điều Hành</span>
+              </div>
+            </a>
+            <a href="#" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-900/60 hover:text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4l-2-2"/><path d="m18 10 1.4-1.4a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0L14 7"/><path d="m2 22 5.5-5.5"/><path d="m17 7-6 6-2-2-4 4"/></svg>
+                <span>Giao Dịch Của Tôi</span>
+              </div>
+            </a>
+            <!-- Active: Báo Lỗi & Khiếu Nại -->
+            <a href="#" class="relative flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold bg-gradient-to-r from-amber-500/15 via-slate-900/80 to-transparent border border-amber-500/40 text-amber-200 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+              <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.9)]"></span>
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/></svg>
+                <span>Báo Lỗi &amp; Khiếu Nại</span>
+              </div>
+              <span class="rounded-full px-2 py-0.5 text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">1 ACTIVE</span>
+            </a>
+            <a href="#" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-900/60 hover:text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/></svg>
+                <span>Lịch Sử Đơn &amp; Biên Lai</span>
+              </div>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <div class="rounded-xl border border-slate-800 bg-slate-950/80 p-3 text-center text-[10px] text-slate-400">
+          <span class="text-amber-400 font-bold block mb-1">TRỌNG TÀI BẢO CHỨNG</span>
+          <span>100% Hoàn tiền nếu hàng hóa lỗi hoặc sai cam kết.</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= MAIN OPERATING CANVAS (pl-64) ================= -->
+    <div class="flex-1 pl-64 flex flex-col min-h-[calc(100vh-1.75rem)]">
+      <!-- Sticky User Navbar -->
+      <header class="sticky top-7 z-30 flex h-16 w-full items-center justify-between border-b border-slate-800/80 bg-[#070A10]/90 px-8 backdrop-blur-2xl">
+        <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+          <span class="text-amber-400">+ [NODE_DISPUTE_RESOLUTION_01]</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-1.5">
+            <div class="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950">TQ</div>
+            <span class="text-xs font-bold text-white">Trần Quốc Toản</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Viewport Content -->
+      <main class="flex-1 px-8 py-8 space-y-6 max-w-7xl w-full">
+        <!-- Title & Subtitle -->
+        <div class="space-y-1">
+          <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40">
+              <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/></svg>
+            </div>
+            <span>Báo Lỗi &amp; Trợ Lý Phân Xử Tự Động (AI Dispute Arbiter)</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            Hệ thống tạm dừng tất toán két và kích hoạt trợ lý AI đối soát chứng cứ unbox / file lỗi để bảo vệ quyền lợi người mua.
+          </p>
+        </div>
+
+        <!-- 5-Step Protocol Stepper Bar -->
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 text-emerald-400 font-semibold">
+              <span class="size-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[11px] font-mono">1</span>
+              <span>Nạp Tiền Két</span>
+            </div>
+            <div class="h-px bg-emerald-500/40 flex-1 mx-3"></div>
+
+            <div class="flex items-center gap-2 text-emerald-400 font-semibold">
+              <span class="size-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[11px] font-mono">2</span>
+              <span>Kiểm Tra Hàng</span>
+            </div>
+            <div class="h-px bg-amber-500/60 flex-1 mx-3"></div>
+
+            <div class="flex items-center gap-2 text-amber-300 font-bold">
+              <span class="size-6 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-[11px] font-mono animate-pulse">3</span>
+              <span>Khởi Tạo Khiếu Nại</span>
+            </div>
+            <div class="h-px bg-slate-800 flex-1 mx-3"></div>
+
+            <div class="flex items-center gap-2 text-slate-400 font-semibold">
+              <span class="size-6 rounded-full bg-slate-800 flex items-center justify-center text-[11px] font-mono">4</span>
+              <span>AI Thẩm Định</span>
+            </div>
+            <div class="h-px bg-slate-800 flex-1 mx-3"></div>
+
+            <div class="flex items-center gap-2 text-slate-400 font-semibold">
+              <span class="size-6 rounded-full bg-slate-800 flex items-center justify-center text-[11px] font-mono">5</span>
+              <span>Tất Toán / Hoàn Tiền</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Columns: Form & AI Analysis -->
+        <div class="grid grid-cols-12 gap-6 items-start">
+          <!-- Col Left: Filing Form (7 cols) -->
+          <div class="col-span-7 rounded-3xl border border-slate-800 bg-slate-900/50 p-7 space-y-6 shadow-xl backdrop-blur-sm">
+            <div class="space-y-1.5 pb-4 border-b border-slate-800">
+              <span class="text-[10px] font-mono uppercase text-cyan-400 font-bold block">GIAO DỊCH BẢO CHỨNG ĐANG KHIẾU NẠI</span>
+              <h3 class="text-base font-bold text-white">#TPZ-84920 - Fullstack Next.js SaaS Boilerplate</h3>
+              <span class="text-xs font-mono text-emerald-400 font-bold">Số tiền đang đóng băng: 1.500.000 ₫</span>
+            </div>
+
+            <!-- Reason Selector -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono block">
+                LÝ DO KHIẾU NẠI CHÍNH
+              </label>
+              <div class="p-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-white flex items-center justify-between">
+                <span>Mã nguồn bị lỗi nghiêm trọng / Sai mô tả / Không thể build</span>
+                <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+
+            <!-- Detailed Explanation -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono block">
+                MÔ TẢ CHI TIẾT SỰ CỐ GẶP PHẢI
+              </label>
+              <textarea rows="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-200 leading-relaxed">Mã nguồn sau khi kéo về thiếu toàn bộ thư mục lib/auth và database migration bị lỗi cú pháp không thể kết nối. Đã liên hệ người bán nhưng không nhận được phản hồi sau 4 tiếng.</textarea>
+            </div>
+
+            <!-- 3 Evidence Upload Slots -->
+            <div class="space-y-3 pt-2 border-t border-slate-800/80">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono block">
+                BẰNG CHỨNG XÁC THỰC (TỐI THIỂU 1 - TỐI ĐA 3 SLOT)
+              </label>
+
+              <div class="space-y-2.5">
+                <!-- Slot 1 -->
+                <div class="p-3 rounded-xl border border-cyan-500/40 bg-cyan-950/20 flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-300">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/></svg>
+                    </div>
+                    <div>
+                      <span class="font-mono font-bold text-white block">Slot 1: Video unbox / Quay màn hình lỗi</span>
+                      <span class="text-[11px] text-cyan-300 font-mono">terminal_build_error.mp4 (18.4 MB) • SHA-256 Verified</span>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-mono text-emerald-400 font-bold">✓ ĐÃ TẢI LÊN</span>
+                </div>
+
+                <!-- Slot 2 -->
+                <div class="p-3 rounded-xl border border-cyan-500/40 bg-cyan-950/20 flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-300">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                    </div>
+                    <div>
+                      <span class="font-mono font-bold text-white block">Slot 2: Ảnh chụp màn hình lỗi / Biên bản</span>
+                      <span class="text-[11px] text-cyan-300 font-mono">console_trace.png (2.1 MB)</span>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-mono text-emerald-400 font-bold">✓ ĐÃ TẢI LÊN</span>
+                </div>
+
+                <!-- Slot 3 -->
+                <div class="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="p-1.5 rounded-lg bg-slate-800 text-slate-400">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div>
+                      <span class="font-mono font-bold text-slate-300 block">Slot 3: Log đối chiếu / Chứng từ bổ sung</span>
+                      <span class="text-[11px] text-slate-400 font-mono">git_diff_check.log (45 KB)</span>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-mono text-emerald-400 font-bold">✓ ĐÃ TẢI LÊN</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Dispute Button -->
+            <button type="button" class="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 text-slate-950 font-black text-sm shadow-[0_0_25px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2">
+              <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+              <span>Gửi Bằng Chứng &amp; Kích Hoạt Phân Xử AI</span>
+            </button>
+          </div>
+
+          <!-- Col Right: AI Arbitration Preview Panel (5 cols) -->
+          <div class="col-span-5 rounded-3xl border border-amber-500/40 bg-gradient-to-b from-amber-950/20 via-slate-900 to-slate-950 p-6 space-y-5 shadow-2xl backdrop-blur-xl">
+            <div class="flex items-center justify-between pb-3 border-b border-amber-500/30">
+              <div class="flex items-center gap-2">
+                <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                </div>
+                <span class="font-mono text-xs font-bold text-white uppercase">AI ARBITRATOR // v3.8</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                94% ĐỘ TIN CẬY
+              </span>
+            </div>
+
+            <!-- AI Realtime Analysis Mockup -->
+            <div class="space-y-3 text-xs leading-relaxed">
+              <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                <strong class="text-amber-300 font-mono text-[11px] block uppercase">
+                  🔍 KẾT QUẢ THẨM ĐỊNH SƠ BỘ TỪ LOG &amp; HÌNH ẢNH:
+                </strong>
+                <p class="text-slate-300 text-[11px]">
+                  Hệ thống AI đã phân tích file `console_trace.png` và xác nhận lỗi thiếu module `auth-guard.ts` dẫn đến build fail (Exit code 1). Bằng chứng hợp lệ 100%.
+                </p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                <strong class="text-cyan-300 font-mono text-[11px] block uppercase">
+                  ⚖️ ĐỀ XUẤT PHƯƠNG ÁN XỬ LÝ CÔNG MINH:
+                </strong>
+                <ul class="space-y-1 text-slate-300 text-[11px]">
+                  <li>• Tạm đóng băng két thêm 12h để Người bán gửi bản vá.</li>
+                  <li>• Nếu Người bán không cập nhật, kích hoạt hoàn tiền 100% (1.500.000 ₫) về STK VietQR của Người mua.</li>
+                </ul>
+              </div>
+
+              <div class="p-3 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">Auto-Hold Escrow</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">Zero Gas Fee Refund</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-300 border border-amber-500/30">24h SLA Guarantee</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>
