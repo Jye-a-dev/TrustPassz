@@ -31,10 +31,10 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Filter ABIs for target production physical hardware (cuts >60% binary payload)
+        // Support both physical hardware (ARM) and development emulators (x86/x86_64)
         ndk {
             abiFilters.clear()
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64", "x86"))
         }
 
         externalNativeBuild {

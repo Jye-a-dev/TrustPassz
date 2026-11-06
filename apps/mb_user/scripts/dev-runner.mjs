@@ -24,6 +24,32 @@ function sleepSync(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
+function cleanGradleWrapperLocks() {
+  const gradleUserHome = process.env.GRADLE_USER_HOME || path.join(os.homedir(), '.gradle');
+  const distsDir = path.join(gradleUserHome, 'wrapper', 'dists');
+  if (!fs.existsSync(distsDir)) return;
+  try {
+    const distFolders = fs.readdirSync(distsDir, { withFileTypes: true });
+    for (const dist of distFolders) {
+      if (!dist.isDirectory()) continue;
+      const distPath = path.join(distsDir, dist.name);
+      const hashFolders = fs.readdirSync(distPath, { withFileTypes: true });
+      for (const hashDir of hashFolders) {
+        if (!hashDir.isDirectory()) continue;
+        const targetDir = path.join(distPath, hashDir.name);
+        const entries = fs.readdirSync(targetDir);
+        for (const file of entries) {
+          if (file.endsWith('.lck') || file.endsWith('.lock')) {
+            try {
+              fs.unlinkSync(path.join(targetDir, file));
+            } catch {}
+          }
+        }
+      }
+    }
+  } catch {}
+}
+
 function resolveAndroidTools() {
   const isWindows = process.platform === 'win32';
   const adbBinName = isWindows ? 'adb.exe' : 'adb';
@@ -106,6 +132,9 @@ function getConnectedDevices(adbPath) {
 }
 
 console.log(`${colors.cyan}${colors.bold}[TrustPassz] Starting Mobile Fast Dev Runner...${colors.reset}`);
+
+// Clear any orphaned Gradle locks before resolving tools
+cleanGradleWrapperLocks();
 
 const { adbPath, emulatorPath } = resolveAndroidTools();
 const lanIp = getLocalLanIp();
@@ -194,6 +223,7 @@ if (!hasTargetDevice) {
 
 const launchArgs = [
   'run',
+  '--android-skip-build-dependency-validation',
   ...targetDeviceArgs,
   ...dynamicDefines,
   ...rawArgs,

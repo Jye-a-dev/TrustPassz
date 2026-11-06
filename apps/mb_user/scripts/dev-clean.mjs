@@ -55,6 +55,79 @@ function removeDirWithRetry(dirPath, maxRetries = 5, retryDelay = 300) {
   }
 }
 
+function cleanGradleWrapperLocks() {
+  const gradleUserHome = process.env.GRADLE_USER_HOME || path.join(os.homedir(), '.gradle');
+  const distsDir = path.join(gradleUserHome, 'wrapper', 'dists');
+  const targetHashDir = path.join(distsDir, 'gradle-8.14-bin', '38aieal9i53h9rfe7vjup95b9');
+
+  if (!fs.existsSync(distsDir)) return;
+
+  try {
+    const distFolders = fs.readdirSync(distsDir, { withFileTypes: true });
+    for (const dist of distFolders) {
+      if (!dist.isDirectory()) continue;
+      const distPath = path.join(distsDir, dist.name);
+      const hashFolders = fs.readdirSync(distPath, { withFileTypes: true });
+
+      for (const hashDir of hashFolders) {
+        if (!hashDir.isDirectory()) continue;
+        const targetDir = path.join(distPath, hashDir.name);
+        const entries = fs.readdirSync(targetDir);
+
+        const hasOk = entries.some((f) => f.endsWith('.ok'));
+        const lckFiles = entries.filter((f) => f.endsWith('.lck') || f.endsWith('.lock'));
+        const partFiles = entries.filter((f) => f.endsWith('.part'));
+        const zipFiles = entries.filter((f) => f.endsWith('.zip'));
+
+        // Xóa triệt để các file khóa kẹt (.lck / .lock)
+        for (const lck of lckFiles) {
+          try {
+            fs.unlinkSync(path.join(targetDir, lck));
+            console.log(`  Cleared stuck lock: ${dist.name}/${hashDir.name}/${lck}`);
+          } catch {}
+        }
+
+        // Xóa các file tải dở dang (.part)
+        for (const part of partFiles) {
+          try {
+            fs.unlinkSync(path.join(targetDir, part));
+            console.log(`  Purged partial download: ${dist.name}/${hashDir.name}/${part}`);
+          } catch {}
+        }
+
+        // Nếu thư mục tải dở và không có file .ok xác nhận tính toàn vẹn
+        if (!hasOk) {
+          const hasOfflineZip = zipFiles.some((zipName) => {
+            try {
+              return fs.statSync(path.join(targetDir, zipName)).size > 50 * 1024 * 1024;
+            } catch {
+              return false;
+            }
+          });
+
+          if (hasOfflineZip) {
+            console.log(`  Offline archive detected in: ${dist.name}/${hashDir.name} (ready for Gradle extraction)`);
+          } else {
+            console.log(`  Purging incomplete download cache: ${dist.name}/${hashDir.name}`);
+            try {
+              fs.rmSync(targetDir, { recursive: true, force: true });
+            } catch {}
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`  [Notice] Gradle wrapper lock check skipped: ${err.message}`);
+  }
+
+  // Hướng dẫn cơ chế offline dự phòng (Fail-safe mechanism)
+  const isInstalled = fs.existsSync(path.join(targetHashDir, 'gradle-8.14-bin.zip.ok'));
+  if (!isInstalled) {
+    console.log(`  ${colors.yellow}[Offline Fail-safe] If offline or network-blocked, copy gradle-8.14-bin.zip to:`);
+    console.log(`  -> ${targetHashDir}${colors.reset}`);
+  }
+}
+
 function resolveAndroidTools() {
   const isWindows = process.platform === 'win32';
   const adbBinName = isWindows ? 'adb.exe' : 'adb';
@@ -128,9 +201,6 @@ function getConnectedDevices(adbPath) {
   return devices;
 }
 
-const { adbPath, emulatorPath } = resolveAndroidTools();
-const lanIp = getLocalLanIp();
-
 // -----------------------------------------------------------------------------
 // [1/6] Stopping daemons & killing process locks
 // -----------------------------------------------------------------------------
@@ -145,10 +215,16 @@ if (fs.existsSync(gradlewPath)) {
 
 if (isWin) {
   runSilent('taskkill /F /IM java.exe /T 2>nul');
+  runSilent('taskkill /F /IM adb.exe /T 2>nul');
 } else {
   runSilent('pkill -9 -f "org.gradle|kotlin-compiler" 2>/dev/null || true');
 }
+
+cleanGradleWrapperLocks();
 sleepSync(500);
+
+const { adbPath, emulatorPath } = resolveAndroidTools();
+const lanIp = getLocalLanIp();
 
 // -----------------------------------------------------------------------------
 // [2/6] Cleaning artifacts (Direct purge to prevent respawning daemon before delete)
