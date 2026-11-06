@@ -12,7 +12,7 @@ interface AdminAuthState {
   hasRole: (roles: UserRole[]) => boolean;
 }
 
-const ALLOWED_ROLES: UserRole[] = ['ADMIN', 'ARBITRATOR'];
+const ALLOWED_ROLES: UserRole[] = ['ADMIN', 'SUPER_ADMIN', 'ARBITRATOR'];
 
 export const useAdminAuthStore = create<AdminAuthState>()(
   persist(

@@ -19,12 +19,6 @@ export interface BalanceMonitorConfig {
   readonly alertThresholdEth: number;
   /** SOL warning threshold (default: 0.1 SOL) */
   readonly alertThresholdSol: number;
-  /** Telegram Bot API Token */
-  readonly telegramBotToken?: string;
-  /** Telegram target Chat / Channel ID */
-  readonly telegramChatId?: string;
-  /** Discord Incoming Webhook URL */
-  readonly discordWebhookUrl?: string;
   /** Sentry DSN for exception & warning telemetry */
   readonly sentryDsn?: string;
   /** Cron pattern (e.g. every 5 minutes) */
@@ -147,21 +141,14 @@ export function loadBalanceMonitorConfig(
     configService.get<string>('SOLANA_RPC_URL') ??
     'https://api.devnet.solana.com';
 
-  // 5. Alert Integrations
-  const telegramBotToken = configService
-    .get<string>('TELEGRAM_BOT_TOKEN')
-    ?.trim();
-  const telegramChatId = configService.get<string>('TELEGRAM_CHAT_ID')?.trim();
-  const discordWebhookUrl = configService
-    .get<string>('DISCORD_WEBHOOK_URL')
-    ?.trim();
+  // 5. Telemetry & Fallback RPCs
   const sentryDsn = configService.get<string>('SENTRY_DSN')?.trim();
 
   const alchemyApiKey = configService.get<string>('ALCHEMY_API_KEY')?.trim();
   const infuraApiKey = configService.get<string>('INFURA_API_KEY')?.trim();
 
   logger.log(
-    `[BalanceMonitorConfig] Configured — EVM: ${rawEvmAddress} (Threshold: ${alertThresholdEth} ETH) | SVM: ${rawSolanaKey} (Threshold: ${alertThresholdSol} SOL) | Telegram: ${telegramBotToken ? 'enabled' : 'disabled'} | Discord: ${discordWebhookUrl ? 'enabled' : 'disabled'} | Sentry: ${maskDsn(sentryDsn)}`,
+    `[BalanceMonitorConfig] Configured — EVM: ${rawEvmAddress} (Threshold: ${alertThresholdEth} ETH) | SVM: ${rawSolanaKey} (Threshold: ${alertThresholdSol} SOL) | Alerts: Exclusive Gmail | Sentry: ${maskDsn(sentryDsn)}`,
   );
 
   return {
@@ -173,9 +160,6 @@ export function loadBalanceMonitorConfig(
     alertThresholdSol: Number.isNaN(alertThresholdSol)
       ? 0.1
       : alertThresholdSol,
-    telegramBotToken: telegramBotToken || undefined,
-    telegramChatId: telegramChatId || undefined,
-    discordWebhookUrl: discordWebhookUrl || undefined,
     sentryDsn: sentryDsn || undefined,
     cronSchedule,
     cooldownMs: Number.isNaN(cooldownMs) ? 3600000 : cooldownMs,

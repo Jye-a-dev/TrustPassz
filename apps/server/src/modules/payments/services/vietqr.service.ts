@@ -17,16 +17,19 @@ import {
   PayOSWebhookDto,
   VietQrCheckoutResponseDto,
 } from '../dto/payment.dto';
+import { EmergencyAlertService } from '../../emergency-alert/emergency-alert.service';
 
 @Injectable()
 export class VietQrService {
   private readonly logger = new Logger(VietQrService.name);
   private readonly payOS: PayOS;
   private readonly checksumKey: string;
+  private consecutiveWebhookFailures = 0;
 
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly supabaseService?: SupabaseService,
+    @Optional() private readonly emergencyAlertService?: EmergencyAlertService,
   ) {
     const clientId = process.env.PAYOS_CLIENT_ID || 'mock-payos-client-id';
     const apiKey = process.env.PAYOS_API_KEY || 'mock-payos-api-key';
@@ -71,22 +74,13 @@ export class VietQrService {
     const product = deal.order?.product;
     if (product && Number(deal.amount) < Number(product.basePrice)) {
       if (!deal.buyerId) {
-        throw new ForbiddenException(
-          'Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.',
-        );
+        throw new ForbiddenException('Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.');
       }
       const acceptedOffer = await this.prisma.bargainOffer.findFirst({
-        where: {
-          productId: product.id,
-          buyerId: deal.buyerId,
-          offeredPrice: deal.amount,
-          status: 'ACCEPTED',
-        },
+        where: { productId: product.id, buyerId: deal.buyerId, offeredPrice: deal.amount, status: 'ACCEPTED' },
       });
       if (!acceptedOffer) {
-        throw new ForbiddenException(
-          'Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.',
-        );
+        throw new ForbiddenException('Mức giá chưa được người bán chấp thuận. Không thể tạo link thanh toán.');
       }
     }
 
@@ -148,17 +142,10 @@ export class VietQrService {
     });
 
     const bin = gatewayResponse?.bin || process.env.ESCROW_BANK_BIN || '970422';
-    const accountNumber =
-      gatewayResponse?.accountNumber ||
-      process.env.ESCROW_BANK_ACCOUNT_NO ||
-      process.env.PAYOS_ACCOUNT_NUMBER ||
-      '998877';
+    const accountNumber = gatewayResponse?.accountNumber || process.env.ESCROW_BANK_ACCOUNT_NO || process.env.PAYOS_ACCOUNT_NUMBER || '998877';
     const accountName = gatewayResponse?.accountName || 'TRUSTPASSZ ESCROW';
-    const paymentUrl =
-      gatewayResponse?.checkoutUrl || `https://pay.payos.vn/web/${orderCode}`;
-    const qrCodeUrl =
-      gatewayResponse?.qrCode ||
-      `https://img.vietqr.io/image/${bin}-${accountNumber}-compact2.png?amount=${amountNumber}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountName)}`;
+    const paymentUrl = gatewayResponse?.checkoutUrl || `https://pay.payos.vn/web/${orderCode}`;
+    const qrCodeUrl = gatewayResponse?.qrCode || `https://img.vietqr.io/image/${bin}-${accountNumber}-compact2.png?amount=${amountNumber}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountName)}`;
 
     return {
       qrCodeUrl,
@@ -173,11 +160,30 @@ export class VietQrService {
     };
   }
 
+  private async onWebhookFailure(reason: string, payload?: PayOSWebhookDto): Promise<void> {
+    this.consecutiveWebhookFailures++;
+    this.logger.warn(`VietQR/PayOS webhook failure #${this.consecutiveWebhookFailures}: ${reason}`);
+    if (this.consecutiveWebhookFailures >= 3 && this.emergencyAlertService) {
+      await this.emergencyAlertService.triggerCriticalAlert({
+        service: 'VietQrService (PayOS/VietQR Webhook)',
+        errorCode: 'PAYOS_WEBHOOK_CONSECUTIVE_FAILURES',
+        summary: 'Webhook VietQR (PayOS) Thất Bại Liên Tiếp >= 3 Lần',
+        message: `Hệ thống ghi nhận ${this.consecutiveWebhookFailures} lần parse/verify webhook thất bại liên tiếp: ${reason}. Cần kiểm tra ngay kết nối hoặc checksum key.`,
+        metadata: {
+          consecutiveFailures: this.consecutiveWebhookFailures,
+          orderCode: payload?.data?.orderCode,
+          reason,
+        },
+      });
+    }
+  }
+
   /**
    * Processes PayOS webhook with HMAC-SHA256 verification and atomic state transition.
    */
   async handleWebhook(payload: PayOSWebhookDto) {
     if (!payload || !payload.data || !payload.signature) {
+      await this.onWebhookFailure('Missing data or cryptographic signature', payload);
       throw new BadRequestException(
         'Webhook payload không hợp lệ: Thiếu data hoặc chữ ký mã hóa',
       );
@@ -186,6 +192,7 @@ export class VietQrService {
     // 1. Verify HMAC-SHA256 signature
     const isSignatureValid = await this.verifySignature(payload);
     if (!isSignatureValid) {
+      await this.onWebhookFailure(`Invalid HMAC signature for orderCode ${payload.data.orderCode}`, payload);
       this.logger.error(
         `Chữ ký HMAC-SHA256 không hợp lệ cho orderCode ${payload.data.orderCode}`,
       );
@@ -193,6 +200,8 @@ export class VietQrService {
         'HMAC-SHA256 signature verification failed. Untrusted webhook origin.',
       );
     }
+
+    this.consecutiveWebhookFailures = 0;
 
     const { data } = payload;
     const orderCode = data.orderCode;

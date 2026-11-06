@@ -226,6 +226,29 @@ CREATE TABLE IF NOT EXISTS "dispute_logs" (
     CONSTRAINT chk_confidence_score_range CHECK ("ai_confidence_score" >= 0 AND "ai_confidence_score" <= 1)
 );
 
+CREATE TABLE IF NOT EXISTS "emergency_mailing_lists" (
+    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "email" VARCHAR(255) NOT NULL UNIQUE,
+    "label" VARCHAR(100) NOT NULL,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "added_by" VARCHAR(255),
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "emergency_dispatch_logs" (
+    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "alert_type" VARCHAR(50) NOT NULL,
+    "severity" VARCHAR(20) NOT NULL DEFAULT 'CRITICAL',
+    "recipients" JSONB NOT NULL,
+    "subject" VARCHAR(255) NOT NULL,
+    "status" VARCHAR(20) NOT NULL,
+    "error_message" TEXT,
+    "latency_ms" INT NOT NULL,
+    "triggered_by" VARCHAR(255) NOT NULL DEFAULT 'SYSTEM',
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ============================================================================
 -- 4. ATTACH AUTOMATIC UPDATED_AT TRIGGERS
 -- ============================================================================
@@ -250,6 +273,9 @@ CREATE TRIGGER trg_digital_assets_updated_at BEFORE UPDATE ON "digital_assets" F
 DROP TRIGGER IF EXISTS trg_dispute_logs_updated_at ON "dispute_logs";
 CREATE TRIGGER trg_dispute_logs_updated_at BEFORE UPDATE ON "dispute_logs" FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trg_emergency_mailing_lists_updated_at ON "emergency_mailing_lists";
+CREATE TRIGGER trg_emergency_mailing_lists_updated_at BEFORE UPDATE ON "emergency_mailing_lists" FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- ============================================================================
 -- 5. B-TREE & GIN INDEXES
 -- ============================================================================
@@ -273,3 +299,8 @@ CREATE INDEX IF NOT EXISTS idx_bargain_offers_product ON "bargain_offers"("produ
 CREATE INDEX IF NOT EXISTS idx_products_spec_gin ON "products" USING GIN ("spec_attributes");
 CREATE INDEX IF NOT EXISTS idx_orders_shipping_gin ON "orders" USING GIN ("shipping_info");
 CREATE INDEX IF NOT EXISTS idx_dispute_logs_evidence_gin ON "dispute_logs" USING GIN ("evidence_urls");
+
+CREATE INDEX IF NOT EXISTS idx_emergency_mailing_lists_is_active ON "emergency_mailing_lists"("is_active");
+CREATE INDEX IF NOT EXISTS idx_emergency_dispatch_logs_status ON "emergency_dispatch_logs"("status");
+CREATE INDEX IF NOT EXISTS idx_emergency_dispatch_logs_alert_type ON "emergency_dispatch_logs"("alert_type");
+CREATE INDEX IF NOT EXISTS idx_emergency_dispatch_logs_created_at ON "emergency_dispatch_logs"("created_at");

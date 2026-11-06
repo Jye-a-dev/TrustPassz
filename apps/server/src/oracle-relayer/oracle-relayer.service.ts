@@ -4,7 +4,7 @@
  * Nonce-safe, mutex-serialised write operations with on-chain state validation.
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import {
   createPublicClient,
   createWalletClient,
@@ -22,6 +22,7 @@ import { loadOracleRelayerConfig, type OracleRelayerConfig } from './oracle-rela
 import { createViemFallbackTransport } from '../lib/viem-client';
 import { AsyncMutex } from './async-mutex';
 import type { DisputeAction, TxResult, ViemPublicClient, ViemWalletClient } from './oracle-relayer.types';
+import { EmergencyAlertService } from '../modules/emergency-alert/emergency-alert.service';
 
 export type { DisputeAction, TxResult };
 
@@ -44,7 +45,10 @@ export class OracleRelayerService implements OnModuleInit {
   private publicClient!: ViemPublicClient;
   private readonly mutex = new AsyncMutex();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly emergencyAlertService?: EmergencyAlertService,
+  ) {}
 
   onModuleInit(): void {
     this.config = loadOracleRelayerConfig();
@@ -223,6 +227,16 @@ export class OracleRelayerService implements OnModuleInit {
       } catch (simError: unknown) {
         const reason = this._decodeRevertReason(simError);
         this.logger.error(`[${functionName}] Simulation reverted — reason: ${reason}`);
+        if (this.emergencyAlertService) {
+          await this.emergencyAlertService.triggerCriticalAlert({
+            service: 'OracleRelayerService',
+            errorCode: 'ORACLE_RELAYER_SIMULATION_REVERT',
+            summary: `Lỗi Simulation Revert Khi Gửi Tx On-Chain (${functionName})`,
+            message: `Pre-flight simulation của hàm ${functionName} bị revert: ${reason}. Giao dịch đã bị hủy để tránh mất gas on-chain.`,
+            stackTrace: simError instanceof Error ? simError.stack : undefined,
+            metadata: { functionName, reason, contractAddress: this.config.contractAddress },
+          });
+        }
         return null;
       }
 
@@ -254,6 +268,21 @@ export class OracleRelayerService implements OnModuleInit {
 
       if (receipt.status === 'reverted') {
         this.logger.error(`[${functionName}] On-chain REVERT | txHash=${txHash} | block=${receipt.blockNumber}`);
+        if (this.emergencyAlertService) {
+          await this.emergencyAlertService.triggerCriticalAlert({
+            service: 'OracleRelayerService',
+            errorCode: 'ORACLE_RELAYER_ONCHAIN_REVERT',
+            summary: `Giao Dịch On-Chain Bị REVERT (${functionName})`,
+            message: `Giao dịch on-chain ${functionName} (txHash: ${txHash}) đã được khai thác ở block ${receipt.blockNumber} nhưng bị REVERT bởi DigitalEscrow smart contract trên Base Sepolia. Gas used: ${receipt.gasUsed?.toString()}.`,
+            metadata: {
+              functionName,
+              txHash,
+              blockNumber: receipt.blockNumber ? Number(receipt.blockNumber) : undefined,
+              gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : undefined,
+              contractAddress: this.config.contractAddress,
+            },
+          });
+        }
         return null;
       }
 
@@ -264,6 +293,16 @@ export class OracleRelayerService implements OnModuleInit {
       const msg = error instanceof Error ? error.message : String(error);
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`[${functionName}] Unexpected error: ${msg}`, stack);
+      if (this.emergencyAlertService) {
+        await this.emergencyAlertService.triggerCriticalAlert({
+          service: 'OracleRelayerService',
+          errorCode: 'ORACLE_RELAYER_TX_SUBMIT_FAILED',
+          summary: `Lỗi Ký Hoặc Submit Transaction On-Chain (${functionName})`,
+          message: `Lỗi ngoại lệ khi ký, broadcast hoặc chờ receipt giao dịch ${functionName}: ${msg}`,
+          stackTrace: stack,
+          metadata: { functionName, error: msg, contractAddress: this.config?.contractAddress },
+        });
+      }
       return null;
     } finally {
       release();

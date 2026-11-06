@@ -17,6 +17,7 @@ import {
   Fuel,
   LogOut,
   UserCog,
+  BellRing,
 } from "lucide-react";
 import {
   Sheet,
@@ -74,6 +75,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Hồ sơ & Bảo mật",
     href: "/admin/profile",
     icon: UserCog,
+  },
+  {
+    label: "Cảnh báo Khẩn cấp",
+    href: "/admin/settings/emergency-alerts",
+    icon: BellRing,
+    badge: "2FA",
   },
   {
     label: "Super API Explorer",

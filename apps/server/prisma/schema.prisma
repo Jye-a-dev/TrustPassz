@@ -425,3 +425,38 @@ model FiatCryptoFundingOrder {
   @@index([orderCode])
   @@map("fiat_crypto_funding_orders")
 }
+
+// ==============================================================================
+// 7. EMERGENCY ALERTS & MAILING LIST (TASK-c-4)
+// ==============================================================================
+
+model EmergencyMailingList {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email     String   @unique @db.VarChar(255)
+  label     String   @db.VarChar(100)
+  isActive  Boolean  @default(true) @map("is_active")
+  addedBy   String?  @map("added_by") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive])
+  @@map("emergency_mailing_lists")
+}
+
+model EmergencyDispatchLog {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  alertType    String   @map("alert_type") @db.VarChar(50)
+  severity     String   @default("CRITICAL") @db.VarChar(20)
+  recipients   Json     @map("recipients")
+  subject      String   @db.VarChar(255)
+  status       String   @db.VarChar(20)
+  errorMessage String?  @map("error_message") @db.Text
+  latencyMs    Int      @map("latency_ms")
+  triggeredBy  String   @default("SYSTEM") @map("triggered_by") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@index([alertType])
+  @@index([createdAt])
+  @@map("emergency_dispatch_logs")
+}

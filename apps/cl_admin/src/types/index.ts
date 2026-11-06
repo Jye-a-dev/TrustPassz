@@ -194,3 +194,5 @@ export interface ConfirmFundingResult {
   recordedAt: string;
 }
 
+export * from './emergency-alert';
+
