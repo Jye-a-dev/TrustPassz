@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -81,7 +82,7 @@ coverage/
 artifacts/
 
 # Temporary backup directories
-.backup_task_a11/
+.backup_task_*
 
 # IDEs & System files
 .DS_Store

@@ -1,11 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "apps/cl_admin",
-    "apps/cl_user",
-    "apps/server",
-    "apps/ai_pipeline",
-    "apps/mb_user",
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
