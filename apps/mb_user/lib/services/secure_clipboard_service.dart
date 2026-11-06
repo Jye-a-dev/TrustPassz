@@ -33,6 +33,14 @@ class SecureClipboardService {
     }
   }
 
+  /// Explicit 30-second memory sanitization trigger matching specification
+  Future<void> clearClipboardAfter30s([Duration duration = clearDuration]) async {
+    _clearTimer?.cancel();
+    _clearTimer = Timer(duration, () async {
+      await clearIfMatching();
+    });
+  }
+
   /// Clears clipboard only if the content still matches the sensitive text originally written.
   Future<void> clearIfMatching() async {
     try {

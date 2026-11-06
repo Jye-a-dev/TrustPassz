@@ -8,22 +8,33 @@ class AuthService {
   static final AuthService instance = AuthService._internal();
 
   static const String tokenKey = 'trustpassz_auth_token';
+  static const String refreshTokenKey = 'trustpassz_refresh_token';
   static const String userKey = 'trustpassz_user_profile';
 
   Future<AuthResponse> verifyAndAuthenticate({
     required String provider,
     required String token,
+    String? email,
     String? walletAddress,
     String? signature,
     String? nonce,
   }) async {
     final payload = <String, dynamic>{
-      'provider': provider,
-      'token': token,
+      'provider': provider.toLowerCase().trim(),
+      'token': token.trim(),
     };
-    if (walletAddress != null) payload['walletAddress'] = walletAddress;
-    if (signature != null) payload['signature'] = signature;
-    if (nonce != null) payload['nonce'] = nonce;
+    if (email != null && email.isNotEmpty) {
+      payload['email'] = email.trim();
+    }
+    if (walletAddress != null && walletAddress.isNotEmpty) {
+      payload['walletAddress'] = walletAddress.trim();
+    }
+    if (signature != null && signature.isNotEmpty) {
+      payload['signature'] = signature.trim();
+    }
+    if (nonce != null && nonce.isNotEmpty) {
+      payload['nonce'] = nonce.trim();
+    }
 
     final response = await ApiClient.instance.post(
       '/api/v1/auth/verify',
@@ -39,6 +50,9 @@ class AuthService {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(tokenKey, authRes.accessToken);
+    if (authRes.refreshToken != null && authRes.refreshToken!.isNotEmpty) {
+      await prefs.setString(refreshTokenKey, authRes.refreshToken!);
+    }
     await prefs.setString(userKey, jsonEncode(authRes.user.toJson()));
 
     return authRes;
@@ -47,6 +61,11 @@ class AuthService {
   Future<String?> getStoredToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(tokenKey);
+  }
+
+  Future<String?> getStoredRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(refreshTokenKey);
   }
 
   Future<UserModel?> getStoredUser() async {
@@ -65,6 +84,7 @@ class AuthService {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(tokenKey);
+    await prefs.remove(refreshTokenKey);
     await prefs.remove(userKey);
 
     try {
@@ -74,4 +94,3 @@ class AuthService {
     }
   }
 }
-

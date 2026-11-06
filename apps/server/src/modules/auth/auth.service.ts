@@ -34,7 +34,7 @@ export class AuthService {
   ) {}
 
   /**
-   * Verifies an incoming auth credential (Password, Google, Privy, or Solana),
+   * Verifies an incoming auth credential (Password, Google, Privy, Solana, or Dev),
    * extracts identity claims, and upserts the user into Neon PostgreSQL.
    */
   async verifyAuth(dto: VerifyAuthDto) {
@@ -43,13 +43,24 @@ export class AuthService {
       return this.handleEmailPasswordAuth(dto);
     }
 
-    const rawToken = dto.idToken || dto.token;
+    const rawToken = (dto.idToken || dto.token)?.trim();
     const { provider, solanaPublicKey, solanaSignature, solanaMessage } = dto;
-    const normalizedProvider = provider?.toLowerCase() || '';
+    const normalizedProvider = provider?.toLowerCase().trim() || '';
+    const isProd = process.env.NODE_ENV === 'production';
+
+    // 1. Dev Sandbox Mode (Cấp phiên thử nghiệm cho mobile/local khi NODE_ENV !== 'production')
+    if (normalizedProvider === 'dev' || rawToken === 'dev_test_session_token') {
+      if (isProd) {
+        throw new BadRequestException(
+          'Chế độ Dev Sandbox không khả dụng trên môi trường Production',
+        );
+      }
+      return this.handleDevSandboxAuth(dto);
+    }
 
     let decodedClaims: DecodedAuthPayload = {};
 
-    // 1. Solana Authentication (Ed25519 Detached Verify with Nonce Anti-Replay)
+    // 2. Solana Authentication (Ed25519 Detached Verify with Nonce Anti-Replay)
     if (
       normalizedProvider === 'solana' ||
       Boolean(solanaPublicKey && solanaSignature)
@@ -96,30 +107,31 @@ export class AuthService {
         email: dto.email,
       };
     }
-    // 2. Google OAuth Authentication (Official verifyIdToken)
-    else if (normalizedProvider === 'google') {
+    // 3. Pre-validation cho các Provider dựa trên JWT (Google, Privy, generic)
+    else {
       if (!rawToken || rawToken.split('.').length !== 3) {
         throw new BadRequestException(
-          'Token không đúng định dạng JWT (yêu cầu 3 segments phân tách bởi dấu chấm)',
+          'Định dạng Token không hợp lệ (yêu cầu chuỗi JWT 3 đoạn)',
         );
       }
-      const googleClaims =
-        await this.verifierService.verifyGoogleIdToken(rawToken);
-      decodedClaims = {
-        sub: googleClaims.sub,
-        email: googleClaims.email || dto.email,
-        displayName: googleClaims.displayName || dto.displayName,
-        avatarUrl: googleClaims.avatarUrl || dto.avatarUrl,
-        walletAddress: dto.walletAddress,
-      };
-    }
-    // 3. Privy JWT Token parsing
-    else {
-      decodedClaims = await this.verifierService.parsePrivyClaims(
-        rawToken,
-        normalizedProvider,
-        dto,
-      );
+
+      if (normalizedProvider === 'google') {
+        const googleClaims =
+          await this.verifierService.verifyGoogleIdToken(rawToken);
+        decodedClaims = {
+          sub: googleClaims.sub,
+          email: googleClaims.email || dto.email,
+          displayName: googleClaims.displayName || dto.displayName,
+          avatarUrl: googleClaims.avatarUrl || dto.avatarUrl,
+          walletAddress: dto.walletAddress,
+        };
+      } else {
+        decodedClaims = await this.verifierService.parsePrivyClaims(
+          rawToken,
+          normalizedProvider,
+          dto,
+        );
+      }
     }
 
     return this.upsertUserAndCreateSession(
@@ -127,6 +139,34 @@ export class AuthService {
       dto,
       normalizedProvider,
     );
+  }
+
+  /**
+   * Cấp phiên thử nghiệm Dev Sandbox cho mobile / testing client (non-production).
+   */
+  private async handleDevSandboxAuth(dto: VerifyAuthDto) {
+    const testEmail =
+      dto.email?.trim().toLowerCase() || 'dev-tester@trustpassz.io';
+    const testDisplayName = dto.displayName?.trim() || 'Dev Tester';
+
+    let user = await this.prisma.user.findFirst({
+      where: {
+        email: { equals: testEmail, mode: 'insensitive' },
+      },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email: testEmail,
+          displayName: testDisplayName,
+          role: UserRole.USER,
+        },
+      });
+      this.logger.log(`Created Dev Sandbox user: ${testEmail} (${user.id})`);
+    }
+
+    return this.issueSession(user);
   }
 
   /**
@@ -154,28 +194,7 @@ export class AuthService {
           },
         });
 
-        const sessionPayload = {
-          sub: newUser.id,
-          email: newUser.email,
-          walletAddress: newUser.walletAddress,
-          role: newUser.role,
-        };
-
-        const accessToken = await this.jwtService.signAsync(sessionPayload);
-
-        return {
-          accessToken,
-          tokenType: 'Bearer',
-          expiresIn: 604800,
-          user: {
-            id: newUser.id,
-            email: newUser.email,
-            walletAddress: newUser.walletAddress,
-            displayName: newUser.displayName,
-            avatarUrl: newUser.avatarUrl,
-            role: newUser.role,
-          },
-        };
+        return this.issueSession(newUser);
       }
 
       throw new UnauthorizedException(
@@ -203,28 +222,7 @@ export class AuthService {
       throw new UnauthorizedException('Mật khẩu không chính xác');
     }
 
-    const sessionPayload = {
-      sub: existingUser.id,
-      email: existingUser.email,
-      walletAddress: existingUser.walletAddress,
-      role: existingUser.role,
-    };
-
-    const accessToken = await this.jwtService.signAsync(sessionPayload);
-
-    return {
-      accessToken,
-      tokenType: 'Bearer',
-      expiresIn: 604800,
-      user: {
-        id: existingUser.id,
-        email: existingUser.email,
-        walletAddress: existingUser.walletAddress,
-        displayName: existingUser.displayName,
-        avatarUrl: existingUser.avatarUrl,
-        role: existingUser.role,
-      },
-    };
+    return this.issueSession(existingUser);
   }
 
   /**
@@ -295,28 +293,7 @@ export class AuthService {
         });
       }
 
-      const sessionPayload = {
-        sub: user.id,
-        email: user.email,
-        walletAddress: user.walletAddress,
-        role: user.role,
-      };
-
-      const accessToken = await this.jwtService.signAsync(sessionPayload);
-
-      return {
-        accessToken,
-        tokenType: 'Bearer',
-        expiresIn: 604800,
-        user: {
-          id: user.id,
-          email: user.email,
-          walletAddress: user.walletAddress,
-          displayName: user.displayName,
-          avatarUrl: user.avatarUrl,
-          role: user.role,
-        },
-      };
+      return this.issueSession(user);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       const stack = error instanceof Error ? error.stack : undefined;
@@ -325,6 +302,48 @@ export class AuthService {
         'Failed to synchronize user profile',
       );
     }
+  }
+
+  /**
+   * Helper tập trung cấp accessToken và refreshToken chuẩn cho mọi luồng xác thực.
+   */
+  private async issueSession(user: {
+    id: string;
+    email?: string | null;
+    walletAddress?: string | null;
+    role: UserRole;
+    displayName?: string | null;
+    avatarUrl?: string | null;
+  }) {
+    const sessionPayload = {
+      sub: user.id,
+      email: user.email,
+      walletAddress: user.walletAddress,
+      role: user.role,
+    };
+
+    const accessToken = await this.jwtService.signAsync(sessionPayload, {
+      expiresIn: '7d',
+    });
+    const refreshToken = await this.jwtService.signAsync(
+      { sub: user.id, type: 'refresh' },
+      { expiresIn: '30d' },
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
+      expiresIn: 604800,
+      user: {
+        id: user.id,
+        email: user.email,
+        walletAddress: user.walletAddress,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+      },
+    };
   }
 
   async validateUserById(userId: string) {

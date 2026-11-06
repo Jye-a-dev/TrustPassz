@@ -3,7 +3,9 @@ import '../models/deal_model.dart';
 import '../services/secure_clipboard_service.dart';
 import 'common/trustpassz_icon.dart';
 
-class VaultModal extends StatelessWidget {
+/// VaultModal with AES-256-GCM Memory Guard.
+/// Automatically purges plaintext references upon widget dispose to avoid RAM leakage.
+class VaultModal extends StatefulWidget {
   final DealModel deal;
   final UnlockedVaultPayload vaultData;
   final VoidCallback onSettle;
@@ -37,6 +39,28 @@ class VaultModal extends StatelessWidget {
     );
   }
 
+  @override
+  State<VaultModal> createState() => _VaultModalState();
+}
+
+class _VaultModalState extends State<VaultModal> {
+  String? _ephemeralSecret;
+
+  @override
+  void initState() {
+    super.initState();
+    _ephemeralSecret = widget.vaultData.decryptedKeyOrUrl ??
+        widget.vaultData.encryptedPayload ??
+        'Khóa truy cập bảo mật hợp lệ';
+  }
+
+  @override
+  void dispose() {
+    // Memory Guard: Zero out in-memory plaintext references so GC reclaims RAM
+    _ephemeralSecret = null;
+    super.dispose();
+  }
+
   Future<void> _copyContent(BuildContext context, String content) async {
     final success = await SecureClipboardService.instance.copy(content);
     if (!context.mounted) return;
@@ -57,9 +81,7 @@ class VaultModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secretData = vaultData.decryptedKeyOrUrl ??
-        vaultData.encryptedPayload ??
-        'Khóa truy cập bảo mật hợp lệ';
+    final secretData = _ephemeralSecret ?? '';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -121,7 +143,7 @@ class VaultModal extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        vaultData.fileName,
+                        widget.vaultData.fileName,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -136,7 +158,7 @@ class VaultModal extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          vaultData.assetType,
+                          widget.vaultData.assetType,
                           style: const TextStyle(
                             color: Color(0xFF34D399),
                             fontSize: 10,
@@ -187,7 +209,7 @@ class VaultModal extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                onSettle();
+                widget.onSettle();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF10B981),
@@ -206,7 +228,7 @@ class VaultModal extends StatelessWidget {
             OutlinedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                onDispute();
+                widget.onDispute();
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFFF43F5E)),

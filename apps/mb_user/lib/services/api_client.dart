@@ -27,7 +27,10 @@ class ApiClient {
       return _customBaseUrl!;
     }
 
-    const envUrl = String.fromEnvironment('API_BASE_URL');
+    const envUrl = String.fromEnvironment(
+      'API_URL',
+      defaultValue: String.fromEnvironment('API_BASE_URL'),
+    );
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
@@ -38,7 +41,7 @@ class ApiClient {
 
     try {
       if (Platform.isAndroid) {
-        // Standard Android emulator loopback to host machine port 3001
+        // Standard Android emulator loopback to host machine port 3000
         return 'http://10.0.2.2:3000';
       }
     } catch (_) {
@@ -50,6 +53,17 @@ class ApiClient {
 
   void setBaseUrl(String url) {
     _customBaseUrl = url;
+  }
+
+  /// Pings /api/v1/health or custom endpoint, returning latency in ms.
+  Future<int> checkHealthLatency({
+    String endpoint = '/api/v1/health',
+    Duration timeout = const Duration(milliseconds: 500),
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    await get(endpoint, skipAuth: true, timeout: timeout);
+    stopwatch.stop();
+    return stopwatch.elapsedMilliseconds;
   }
 
   Future<Map<String, String>> _buildHeaders({

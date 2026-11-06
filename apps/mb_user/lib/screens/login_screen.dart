@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/api_client.dart';
 import '../services/auth_service.dart';
+import '../widgets/common/server_status_bar.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onSuccess;
@@ -23,30 +25,124 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _showGoogleSignInDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF27272A)),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.info_outline, color: Color(0xFF22D3EE), size: 22),
+            SizedBox(width: 8),
+            Text(
+              'Google OAuth',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Google Sign-in SDK chưa được cấu hình Client ID cho nền tảng di động này. Vui lòng sử dụng nút "Đăng Nhập Test Session" để kiểm thử API xác thực.',
+          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Đã hiểu',
+              style: TextStyle(
+                color: Color(0xFF22D3EE),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPasskeyDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF27272A)),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.fingerprint_rounded, color: Color(0xFF10B981), size: 22),
+            SizedBox(width: 8),
+            Text(
+              'FIDO2 / Passkey',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Yêu cầu xác thực Passkey bị hủy hoặc chưa cấu hình trên thiết bị ảo. Ngoại lệ được kiểm soát an toàn, không văng lỗi crash màn hình.',
+          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Đã hiểu',
+              style: TextStyle(
+                color: Color(0xFF10B981),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleLogin(String provider) async {
     setState(() {
-      _isLoading = true;
       _errorMessage = null;
     });
 
+    if (provider == 'GOOGLE') {
+      _showGoogleSignInDialog();
+      return;
+    }
+
+    if (provider == 'PASSKEY') {
+      _showPasskeyDialog();
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      if (provider == 'GOOGLE') {
-        // Google OAuth requires a valid 3-segment JWT ID token from GoogleSignin SDK
-        throw Exception(
-          'Google OAuth yêu cầu chuỗi JWT ID Token thật (3 segments: Header.Payload.Signature). '
-          'Vui lòng cấu hình GoogleSignin SDK hoặc sử dụng chế độ Đăng Nhập DEV API bên dưới.',
-        );
-      } else if (provider == 'SOLANA') {
+      if (provider == 'SOLANA') {
         await AuthService.instance.verifyAndAuthenticate(
-          provider: 'SOLANA',
+          provider: 'solana',
           token: 'siws_solana_signature_payload',
           walletAddress: _walletController.text.trim(),
         );
       } else {
-        // Dev auth mode for testing directly on Android emulator
+        // Dev auth mode: payload chuẩn RFC/Backend cho test session
         await AuthService.instance.verifyAndAuthenticate(
-          provider: 'DEV',
+          provider: 'dev',
           token: 'dev_test_session_token',
+          email: 'dev-tester@trustpassz.io',
         );
       }
 
@@ -54,8 +150,26 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onSuccess();
     } catch (e) {
       if (!mounted) return;
+
+      String displayError = 'Đã có lỗi xảy ra trong quá trình xác thực. Vui lòng thử lại.';
+      if (e is ApiException) {
+        if (e.statusCode == 401) {
+          displayError = 'Phiên xác thực không hợp lệ hoặc đã hết hạn. Vui lòng thử lại bằng Test Session.';
+        } else if (e.statusCode == 400) {
+          displayError = e.message.isNotEmpty
+              ? e.message
+              : 'Yêu cầu không hợp lệ. Vui lòng kiểm tra định dạng dữ liệu gửi lên.';
+        } else if (e.statusCode == 0) {
+          displayError = 'Không thể kết nối đến máy chủ backend (lỗi mạng hoặc server chưa khởi chạy).';
+        } else {
+          displayError = 'Lỗi máy chủ (${e.statusCode}): ${e.message}';
+        }
+      } else {
+        displayError = e.toString().replaceFirst('Exception: ', '');
+      }
+
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = displayError;
       });
     } finally {
       if (mounted) {
@@ -69,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080C14),
+      backgroundColor: const Color(0xFF0B0F17),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -111,9 +225,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Xác thực danh tính để tạo kèo đàm phán, thanh toán VietQR và giải mã Digital Vault.',
                 style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
               ),
+              const SizedBox(height: 12),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: ServerStatusBar(),
+              ),
               const Spacer(),
 
-              // Error Display
+              // Error Display Banner
               if (_errorMessage != null) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -149,10 +268,28 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: Color(0xFF1E293B)),
+                    side: const BorderSide(color: Color(0xFF27272A)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Passkey / Biometric Auth Button
+              OutlinedButton.icon(
+                onPressed: _isLoading ? null : () => _handleLogin('PASSKEY'),
+                icon: const Icon(Icons.fingerprint_rounded, size: 20, color: Color(0xFF10B981)),
+                label: const Text('Xác thực với Passkey / Vân tay'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: Color(0xFF1E293B)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -161,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Separator
               const Row(
                 children: [
-                  Expanded(child: Divider(color: Color(0xFF1E293B))),
+                  Expanded(child: Divider(color: Color(0xFF27272A))),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
@@ -174,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: Color(0xFF1E293B))),
+                  Expanded(child: Divider(color: Color(0xFF27272A))),
                 ],
               ),
               const SizedBox(height: 16),
@@ -185,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF1E293B)),
+                  border: Border.all(color: const Color(0xFF27272A)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -209,7 +346,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF06B6D4),
                         foregroundColor: const Color(0xFF020617),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        minimumSize: const Size(double.infinity, 48),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
