@@ -196,7 +196,7 @@
   </header>
 
   <!-- ================= MAIN LAYOUT WITH FILTER SIDEBAR ================= -->
-  <main class="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-12 sm:pb-16 space-y-8">
 
     <!-- Breadcrumb & Page Banner -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-3">
@@ -245,10 +245,10 @@
     </div>
 
     <!-- 2-Column Responsive Layout: Left Filter Sidebar + Right Product Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
       
       <!-- ================= LEFT FILTER SIDEBAR (lg:col-span-3) ================= -->
-      <aside class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 space-y-6 shadow-sm">
+      <aside class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-6 shadow-sm">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
           <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
             <svg class="size-4 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
@@ -260,7 +260,7 @@
         <!-- Filter 1: Khoảng Giá (VNĐ) -->
         <div class="space-y-3">
           <label class="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono block">KHOẢNG GIÁ (VNĐ)</label>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-3">
             <input type="text" placeholder="Tối thiểu" class="min-h-[44px] px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50 focus:bg-white focus:outline-none focus:border-rose-500">
             <input type="text" placeholder="Tối đa" class="min-h-[44px] px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50 focus:bg-white focus:outline-none focus:border-rose-500">
           </div>
@@ -319,10 +319,10 @@
       </aside>
 
       <!-- ================= RIGHT MAIN AREA (lg:col-span-9) ================= -->
-      <section class="lg:col-span-9 space-y-4">
+      <section class="lg:col-span-9 space-y-6">
         
         <!-- Sorting & Display Bar -->
-        <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs shadow-2xs">
           <div class="flex items-center gap-2 text-slate-500">
             <span>Sắp xếp theo:</span>
             <div class="flex flex-wrap items-center gap-1.5">
@@ -341,7 +341,7 @@
         </div>
 
         <!-- Marketplace Responsive Grid: 4 columns on large desktop, 3 on md, 2 on mobile -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           
           <!-- Item 1 -->
           <a href="07_deal_room.html" class="group flex flex-col bg-white rounded-xl sm:rounded-2xl border border-slate-200 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-lg hover:border-rose-300 transition-all">
@@ -352,7 +352,7 @@
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-600 text-white shadow-xs">Code / Git</span>
               <span class="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-600 text-white shadow-xs">-30%</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Fullstack Next.js 15 SaaS Boilerplate (Supabase, Clean Arch, CI/CD)
@@ -384,7 +384,7 @@
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-violet-600 text-white shadow-xs">Bản Quyền</span>
               <span class="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-xs">⚡ Giao ngay</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Bản Quyền JetBrains All Products Pack 1 Năm (Key Chính Hãng)
@@ -415,7 +415,7 @@
               </div>
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 text-white shadow-xs">Thiết Kế</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Figma UI Kit Mobile Banking &amp; Fintech Cyber Escrow (120+ Screens)
@@ -446,7 +446,7 @@
               </div>
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-600 text-white shadow-xs">Tài Liệu PDF</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Trọn Bộ Ebook Kiến Trúc Clean Architecture &amp; Domain Driven Design
@@ -478,7 +478,7 @@
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-600 text-white shadow-xs">Pass Đồ</span>
               <span class="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-600 text-white shadow-xs">Hot Deal</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Bàn Phím Cơ Custom Rainy75 Pro (Anode Bạc, Switch HMX Violet)
@@ -509,7 +509,7 @@
               </div>
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-xs">Code Web</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Bộ Bot Telegram Tự Động Đối Soát Biến Động Số Dư VietQR MBBank
@@ -540,7 +540,7 @@
               </div>
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-pink-600 text-white shadow-xs">Tài Khoản</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Tài Khoản Claude Pro / ChatGPT Plus 1 Tháng (Chính Hãng Kèm Mail)
@@ -571,7 +571,7 @@
               </div>
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-white shadow-xs">Template</span>
             </div>
-            <div class="p-3.5 flex flex-col flex-1 justify-between space-y-2">
+            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                   Hệ Thống Quản Lý Dự Án Notion Second Brain Siêu Cấp Cho Solo Developer
@@ -610,7 +610,7 @@
   </main>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="border-t border-slate-200 bg-white text-slate-500 py-8 mt-12">
+  <footer class="mt-12 sm:mt-16 lg:mt-20 border-t border-slate-200/80 bg-white text-slate-500 py-10 sm:py-12">
     <div class="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
       <div class="flex items-center gap-2">
         <div class="flex size-7 items-center justify-center rounded-lg bg-rose-600 text-white font-bold text-xs">TP</div>

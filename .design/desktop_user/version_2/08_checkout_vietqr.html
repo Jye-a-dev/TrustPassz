@@ -190,7 +190,7 @@
   </header>
 
   <!-- ================= CHECKOUT 2-COLUMN MAIN CONTENT ================= -->
-  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6">
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-12 sm:pb-16 space-y-8">
     
     <!-- Top Status Indicator -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200 gap-2">
@@ -210,7 +210,7 @@
     </div>
 
     <!-- 2-Column Checkout Grid: Left (7 cols: QR Code & Bank Info) + Right (5 cols: Order Summary & Fast Copy) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
       
       <!-- ================= LEFT COLUMN: QR CODE & PAYMENT GATEWAY (lg:col-span-7) ================= -->
       <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
@@ -233,7 +233,7 @@
         <div class="flex flex-col sm:flex-row items-center gap-6 justify-center">
           
           <!-- VietQR Box Frame -->
-          <div class="p-4 bg-white rounded-2xl border-2 border-slate-300 shadow-md flex flex-col items-center shrink-0">
+          <div class="p-5 sm:p-6 my-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-center shrink-0">
             <!-- Simulated QR SVG Graphic -->
             <svg class="size-48 sm:size-56 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
               <rect x="5" y="5" width="25" height="25" rx="3" fill="#0F172A"/>
@@ -310,7 +310,7 @@
       <div class="lg:col-span-5 space-y-6">
         
         <!-- Order Summary Card -->
-        <div class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 space-y-4 shadow-sm">
+        <div class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-5 shadow-sm">
           <h3 class="font-bold text-sm text-slate-900 uppercase font-mono tracking-wider pb-3 border-b border-slate-100">
             TÓM TẮT ĐƠN HÀNG
           </h3>
@@ -329,7 +329,7 @@
           </div>
 
           <!-- Price Calculation -->
-          <div class="space-y-2 text-xs">
+          <div class="p-4 sm:p-5 my-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3 text-xs">
             <div class="flex items-center justify-between text-slate-600">
               <span>Giá sản phẩm:</span>
               <span class="font-mono font-bold text-slate-900">1.500.000 ₫</span>
@@ -351,13 +351,13 @@
         </div>
 
         <!-- 1-Click Copy Transfer Info Box -->
-        <div class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 space-y-4 shadow-sm">
+        <div class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-5 shadow-sm">
           <h3 class="font-bold text-xs uppercase font-mono tracking-wider text-slate-800">
             THÔNG TIN CHUYỂN KHOẢN THỦ CÔNG
           </h3>
           <p class="text-[11px] text-slate-500">Nếu không thể quét QR, vui lòng chuyển khoản chính xác thông tin sau:</p>
 
-          <div class="space-y-2.5 text-xs font-mono">
+          <div class="space-y-3 text-xs font-mono">
             <!-- Bank Name -->
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
               <div>
@@ -408,7 +408,7 @@
   </main>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="border-t border-slate-200 bg-white text-slate-400 py-6 text-center text-xs">
+  <footer class="mt-12 sm:mt-16 lg:mt-20 border-t border-slate-200/80 bg-white text-slate-400 py-10 sm:py-12 text-center text-xs">
     © 2026 TrustPassz • Cổng thanh toán bảo chứng tự động qua PayOS.
   </footer>
 

@@ -190,7 +190,7 @@
   </header>
 
   <!-- ================= SETTINGS MAIN CONTAINER ================= -->
-  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6">
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-12 sm:pb-16 space-y-8">
     
     <!-- Title & Subtitle -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200 gap-3">
@@ -213,7 +213,7 @@
     </div>
 
     <!-- 2 Columns Grid: VietQR Payout Linking & Passkey Security -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
       
       <!-- ================= COL 1: VIETQR BANK ACCOUNT (lg:col-span-6) ================= -->
       <div class="lg:col-span-6 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
@@ -228,7 +228,7 @@
           </div>
         </div>
 
-        <form class="space-y-4 text-xs">
+        <form class="space-y-5 text-xs">
           <div class="space-y-1.5">
             <label class="text-slate-800 font-bold block font-mono text-xs uppercase">
               Ngân Hàng Thụ Hưởng <span class="text-rose-600">*</span>
@@ -258,7 +258,7 @@
           </div>
 
           <!-- Auto-Payout Toggle -->
-          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+          <div class="p-4 sm:p-5 my-4 rounded-xl border border-slate-200/80 bg-slate-50 flex items-center justify-between gap-3">
             <div>
               <span class="font-bold text-slate-900 block text-xs">Tự động tất toán về tài khoản</span>
               <span class="text-[11px] text-slate-500">Tiền chuyển thẳng về STK, không cần thao tác rút tiền thủ công</span>
@@ -268,7 +268,7 @@
             </div>
           </div>
 
-          <button type="button" class="w-full min-h-[48px] rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/20 mt-2 flex items-center justify-center gap-2 transition-all border border-rose-700">
+          <button type="button" class="w-full min-h-[48px] rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/20 mt-6 sm:mt-8 flex items-center justify-center gap-2 transition-all border border-rose-700">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             <span>Lưu STK Nhận Tiền</span>
           </button>
@@ -290,7 +290,7 @@
 
         <div class="space-y-3.5 text-xs">
           
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="p-4 sm:p-5 my-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
             <div>
               <span class="text-[10px] text-slate-400 font-mono uppercase block font-semibold">KHÓA SINH TRẮC HỌC HIỆN TẠI</span>
               <span class="font-bold text-slate-900 text-xs sm:text-sm">TouchID / Windows Hello</span>
@@ -300,7 +300,7 @@
             </span>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="p-4 sm:p-5 my-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
             <div>
               <span class="text-[10px] text-slate-400 font-mono uppercase block font-semibold">MÃ ĐỊNH DANH AN TOÀN TRÊN SÀN</span>
               <span class="font-mono text-slate-900 font-bold">0x8B4f...3a29</span>
@@ -308,7 +308,7 @@
             <svg class="size-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="p-4 sm:p-5 my-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
             <div>
               <span class="text-[10px] text-slate-400 font-mono uppercase block font-semibold">VÍ BẢO MẬT LIÊN KẾT (BASE SEPOLIA)</span>
               <span class="font-mono text-purple-700 font-bold">8xG2...k7N9 (Phantom / Coinbase)</span>
@@ -317,7 +317,7 @@
           </div>
 
           <!-- Telegram Notification Toggle -->
-          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+          <div class="p-4 sm:p-5 my-4 rounded-xl border border-slate-200/80 bg-slate-50 flex items-center justify-between gap-3">
             <div>
               <span class="font-bold text-slate-900 block text-xs">Thông báo biến động két qua Telegram</span>
               <span class="text-[11px] text-slate-500">Nhận tin nhắn tự động khi người mua nạp cọc hoặc khiếu nại</span>
@@ -339,7 +339,7 @@
   </main>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="border-t border-slate-200 bg-white text-slate-400 py-6 text-center text-xs">
+  <footer class="mt-12 sm:mt-16 lg:mt-20 border-t border-slate-200/80 bg-white text-slate-400 py-10 sm:py-12 text-center text-xs">
     © 2026 TrustPassz • Bảo vệ giao dịch an toàn 100%.
   </footer>
 
