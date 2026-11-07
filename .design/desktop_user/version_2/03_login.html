@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - 03 Đăng Nhập An Toàn (Version 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.01em;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col antialiased">
+
+  <!-- ================= PRE-RELEASE BANNER ================= -->
+  <div role="banner" class="w-full bg-amber-50 border-b border-amber-200 px-6 py-2 text-xs text-amber-900">
+    <div class="w-[1440px] mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 font-bold text-amber-800">
+          <svg class="size-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Chế Độ Thử Nghiệm Sandbox
+        </span>
+        <span>Môi trường thử nghiệm bảo chứng tự động. Giao dịch giữ tiền an toàn qua mã VietQR mô phỏng.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MINIMAL HEADER ================= -->
+  <header class="w-full bg-white border-b border-slate-200">
+    <div class="w-[1440px] mx-auto flex h-18 items-center justify-between px-8 py-3.5">
+      <a href="#" class="flex items-center gap-3">
+        <div class="flex size-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/20">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-black text-xl tracking-tight text-slate-900">TrustPassz</span>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 leading-none">Bảo Vệ Giao Dịch An Toàn</span>
+        </div>
+      </a>
+      <a href="#" class="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1.5">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        <span>Quay lại trang chủ</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ================= LOGIN CARD CONTAINER ================= -->
+  <main class="flex-1 w-[1440px] mx-auto flex items-center justify-center px-8 py-16">
+    <!-- Login Card -->
+    <div class="relative w-full max-w-lg bg-white border border-slate-200 shadow-xl rounded-3xl p-8 space-y-6">
+      <!-- Header -->
+      <div class="space-y-2 text-center">
+        <div class="inline-flex items-center justify-center size-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto mb-1">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/></svg>
+        </div>
+        <h1 class="text-2xl font-black tracking-tight text-slate-900">
+          Đăng Nhập Tài Khoản An Toàn
+        </h1>
+        <p class="text-xs text-slate-500 max-w-xs mx-auto">
+          Truy cập an toàn với Google, Sinh trắc học hoặc Ví bảo mật
+        </p>
+      </div>
+
+      <!-- Method Tabs -->
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+        <button type="button" class="min-h-[40px] flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-lg bg-white text-slate-900 shadow-sm border border-slate-200">
+          <svg class="size-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          <span>Google &amp; Ví An Toàn</span>
+        </button>
+        <button type="button" class="min-h-[40px] flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition-colors">
+          <svg class="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>Email &amp; Mật Khẩu</span>
+        </button>
+      </div>
+
+      <!-- Options Content -->
+      <div class="space-y-4">
+        <!-- 1. GOOGLE LOGIN (Primary Fast CTA) -->
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="flex size-9 items-center justify-center rounded-xl bg-white border border-slate-200 shadow-xs">
+              <svg class="size-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.67v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.16Z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.33 24 12 24Z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15Z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/></svg>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-900">Google Identity Services</div>
+              <div class="text-[11px] text-slate-500">Đăng nhập nhanh 1 chạm, tự động liên kết</div>
+            </div>
+          </div>
+
+          <button type="button" class="w-full min-h-[44px] rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-center gap-2.5 shadow-sm transition-all">
+            <svg class="size-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.67v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.16Z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.33 24 12 24Z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15Z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/></svg>
+            <span>Tiếp tục với tài khoản Google</span>
+          </button>
+        </div>
+
+        <!-- 2. SOLANA SIGN-IN (SIWS) -->
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="flex size-9 items-center justify-center rounded-xl bg-purple-50 border border-purple-200 text-purple-700">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-slate-900">Solana SIWS Authentication</div>
+                <div class="text-[11px] text-slate-500 font-mono">Đã liên kết ví: 8xG2...k7N9</div>
+              </div>
+            </div>
+            <a href="#" class="text-[11px] text-slate-500 hover:text-rose-600 underline">Đổi ví</a>
+          </div>
+
+          <button type="button" class="w-full min-h-[44px] rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-between px-4 shadow-sm transition-all">
+            <div class="flex items-center gap-2">
+              <svg class="size-4 text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+              <span>Ký xác thực ví Solana (SIWS Ed25519)</span>
+            </div>
+            <svg class="size-4 text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- 3. PASSKEY / BIOMETRICS -->
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+          <button type="button" class="w-full min-h-[44px] border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-xl flex items-center justify-center gap-2 text-xs shadow-sm transition-all">
+            <svg class="size-4 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>
+            <span>Đăng nhập qua Passkey / FaceID / TouchID</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Security Notice -->
+      <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 text-xs text-slate-500 flex items-start gap-2.5">
+        <svg class="size-4 text-emerald-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <p>Toàn bộ phiên đăng nhập được bảo vệ an toàn. Dữ liệu tài khoản của bạn luôn được bảo mật tuyệt đối trên thiết bị.</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+        Chưa có tài khoản TrustPassz?
+        <a href="#" class="font-bold text-emerald-700 hover:text-emerald-800 underline underline-offset-4 ml-1">Đăng ký tài khoản ngay</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-200 bg-white text-slate-500 py-6">
+    <div class="w-[1440px] mx-auto text-center text-xs">
+      © 2026 TrustPassz • Nền tảng giao dịch bảo vệ tự động số 1 Việt Nam.
+    </div>
+  </footer>
+
+</body>
+</html>

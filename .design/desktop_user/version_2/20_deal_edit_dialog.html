@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - Chỉnh Sửa Thông Tin Giao Dịch (Modal Dialog)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen relative overflow-hidden flex items-center justify-center antialiased">
+  <div class="w-[1440px] mx-auto min-h-screen relative flex items-center justify-center">
+
+    <!-- Blurred Background Mockup of Deal Room -->
+    <div class="absolute inset-0 p-8 filter blur-sm opacity-40 pointer-events-none select-none">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <div class="h-16 bg-white rounded-2xl border border-slate-200 shadow-sm"></div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 h-96 bg-white rounded-2xl border border-slate-200 shadow-sm"></div>
+          <div class="h-96 bg-white rounded-2xl border border-slate-200 shadow-sm"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backdrop Dimmer Overlay -->
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md z-10"></div>
+
+    <!-- Modal Dialog Container (Centered) -->
+    <div class="relative z-20 w-full max-w-lg p-6 rounded-3xl bg-white border border-slate-200 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+
+      <!-- Dialog Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="size-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              Chỉnh Sửa Thông Tin Giao Dịch
+            </h2>
+            <p class="text-xs text-slate-500">Cập nhật các điều khoản trước khi bên mua thực hiện nạp tiền vào két an toàn</p>
+          </div>
+        </div>
+        <button type="button" class="size-9 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer min-h-[36px]">
+          <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Dialog Form -->
+      <form class="space-y-4 pt-1">
+        <!-- Title Field -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-700">Tiêu đề giao dịch</label>
+          <input
+            type="text"
+            value="Bàn giao Mã nguồn SaaS AI WebApp + Quyền sở hữu tên miền (Domain Transfer)"
+            class="w-full h-11 rounded-xl bg-white border border-slate-200 px-3.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm min-h-[44px]"
+          />
+        </div>
+
+        <!-- Amount and Inspection Duration Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-700">Giá bán (VNĐ)</label>
+            <input
+              type="text"
+              value="45.000.000"
+              class="w-full h-11 rounded-xl bg-white border border-slate-200 px-3.5 text-slate-900 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm min-h-[44px]"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-700">Thời gian kiểm tra</label>
+            <div class="relative">
+              <select class="w-full h-11 rounded-xl bg-white border border-slate-200 px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm appearance-none min-h-[44px]">
+                <option value="21600">6 Giờ (Nhanh)</option>
+                <option value="43200">12 Giờ (Tiêu chuẩn)</option>
+                <option value="86400" selected>24 Giờ (Khuyên dùng)</option>
+                <option value="172800">48 Giờ (Hàng vật lý)</option>
+              </select>
+              <div class="absolute right-3.5 top-3.5 pointer-events-none text-slate-400">
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description Field -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-700">Mô tả phạm vi bàn giao</label>
+          <textarea
+            rows="3"
+            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm resize-none"
+          >Toàn bộ source code Fullstack Next.js 15, Prisma ORM, Docker Compose setup, kèm thủ tục ủy quyền chuyển nhượng tên miền DNS Cloudflare.</textarea>
+        </div>
+
+        <!-- Warning Note -->
+        <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-800">
+          <svg class="size-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="leading-relaxed">Sau khi bên mua quét VietQR nạp tiền vào két, mọi điều khoản về giá bán và thời gian kiểm tra sẽ được hệ thống khóa cố định để bảo vệ an toàn cho cả hai bên.</span>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+          <button
+            type="button"
+            class="h-11 px-5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer min-h-[44px]"
+          >
+            Hủy bỏ
+          </button>
+          <button
+            type="button"
+            class="h-11 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer min-h-[44px]"
+          >
+            Lưu Thay Đổi
+          </button>
+        </div>
+      </form>
+
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - Nền Tảng Giao Dịch Giữ Tiền An Toàn (Version 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#F0FDF4',
+              100: '#DCFCE7',
+              500: '#10B981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.01em;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col antialiased">
+
+  <!-- ================= PRE-RELEASE BANNER ================= -->
+  <div role="banner" class="w-full bg-amber-50 border-b border-amber-200 px-6 py-2 text-xs text-amber-900">
+    <div class="w-[1440px] mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 font-bold text-amber-800">
+          <svg class="w-3.5 h-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Chế Độ Thử Nghiệm Sandbox
+        </span>
+        <span class="text-amber-800">
+          Môi trường thử nghiệm bảo chứng tự động. Giao dịch giữ tiền an toàn qua mã VietQR mô phỏng.
+        </span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="#" class="font-semibold text-blue-700 hover:text-blue-800 underline decoration-blue-300">
+          Tìm hiểu quy chế bảo vệ
+        </a>
+        <button type="button" class="text-amber-700 hover:text-amber-900 p-1" aria-label="Đóng thông báo">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PUBLIC NAVBAR ================= -->
+  <header class="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="w-[1440px] mx-auto flex h-18 items-center justify-between px-8 py-3.5">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-8">
+        <a href="#" class="flex items-center gap-3 group">
+          <div class="flex size-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/20">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-black text-xl tracking-tight text-slate-900 group-hover:text-emerald-700 transition-colors">
+              TrustPassz
+            </span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 leading-none">
+              Két Giữ Tiền An Toàn Trực Tuyến
+            </span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="flex items-center gap-1 text-sm font-medium">
+          <a href="#" class="h-11 px-4 rounded-xl text-slate-900 font-semibold bg-slate-100 flex items-center">
+            Khám phá giao dịch
+          </a>
+          <a href="#" class="h-11 px-4 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors flex items-center">
+            Quy trình giữ tiền an toàn
+          </a>
+          <a href="#" class="h-11 px-4 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors flex items-center">
+            Phòng thương lượng mẫu
+          </a>
+          <a href="#" class="h-11 px-4 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors flex items-center">
+            Bảo mật kho lưu trữ
+          </a>
+        </nav>
+      </div>
+
+      <!-- Right User Actions -->
+      <div class="flex items-center gap-3">
+        <a href="#" class="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm inline-flex items-center gap-2 shadow-sm">
+          <svg class="size-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+          <span>Đăng nhập</span>
+        </a>
+        <a href="#" class="min-h-[44px] px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm inline-flex items-center gap-2 shadow-sm transition-all">
+          <span>Đăng ký miễn phí</span>
+        </a>
+        <a href="#" class="min-h-[44px] px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm inline-flex items-center gap-2 shadow-sm transition-all">
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>+ Tạo Giao Dịch An Toàn</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO & ESCROW SIMULATION ================= -->
+  <main class="flex-1 w-[1440px] mx-auto px-8 py-16 space-y-20">
+    
+    <!-- Hero Main Headline Section -->
+    <section class="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6">
+      <!-- Shield Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-xs">
+        <span class="flex size-2 rounded-full bg-emerald-600"></span>
+        <span>Hệ Thống Bảo Vệ Giữ Tiền Tự Động • VietQR Napas 24/7</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-[1.2]">
+        Mua Bán Online An Toàn Tuyệt Đối Cho <br>
+        <span class="text-emerald-700">Sản Phẩm Số &amp; Hàng Hóa Có Giá Trị</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-lg text-slate-600 leading-relaxed max-w-2xl">
+        Người mua quét mã VietQR nạp tiền vào két an toàn. Tiền chỉ được chuyển cho người bán khi người mua đã kiểm tra và hài lòng. Loại bỏ 100% rủi ro lừa đảo hoặc bùng hàng.
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex items-center justify-center gap-4 pt-2">
+        <a href="#" class="min-h-[48px] px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base inline-flex items-center gap-2.5 shadow-md shadow-emerald-600/20 transition-all">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Tạo Giao Dịch An Toàn Ngay</span>
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+
+        <a href="#" class="min-h-[48px] px-6 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm inline-flex items-center gap-2 shadow-sm">
+          <span>Xem Phòng Thương Lượng Mẫu</span>
+          <svg class="size-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+
+        <a href="#" class="min-h-[48px] px-5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold text-sm inline-flex items-center gap-1.5">
+          <span>Khám phá sàn giao dịch</span>
+          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+
+      <!-- 4 Metric Cards -->
+      <div class="grid grid-cols-4 gap-4 pt-6 w-full max-w-4xl">
+        <div class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span class="text-3xl font-black text-emerald-600 font-mono">0%</span>
+          <span class="text-sm font-bold text-slate-800 mt-1">Rủi ro bùng hàng</span>
+          <span class="text-xs text-slate-500">Tiền khóa an toàn trong két</span>
+        </div>
+        <div class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span class="text-3xl font-black text-blue-600 font-mono">6h - 24h</span>
+          <span class="text-sm font-bold text-slate-800 mt-1">Thời gian kiểm tra</span>
+          <span class="text-xs text-slate-500">Được dùng thử trước khi trả tiền</span>
+        </div>
+        <div class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span class="text-3xl font-black text-indigo-600 font-mono">100%</span>
+          <span class="text-sm font-bold text-slate-800 mt-1">Bảo vệ tự động</span>
+          <span class="text-xs text-slate-500">Phân xử công minh nếu có lỗi</span>
+        </div>
+        <div class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span class="text-3xl font-black text-slate-800 font-mono">0 ₫</span>
+          <span class="text-sm font-bold text-slate-800 mt-1">Phí mở giao dịch</span>
+          <span class="text-xs text-slate-500">Miễn phí tạo thỏa thuận</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Escrow Interactive Simulation Card -->
+    <section class="max-w-5xl mx-auto rounded-3xl bg-white border border-slate-200 p-8 shadow-md">
+      <!-- Header with Context Explanation -->
+      <div class="flex items-center justify-between pb-6 border-b border-slate-100">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-xs font-bold">
+              GIAO DỊCH #TPZ-84920
+            </span>
+            <span class="text-xs text-slate-400">• Mô phỏng luồng giữ tiền thực tế</span>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 mt-1">Cơ Chế Két Giữ Tiền Bảo Chứng Hoạt Động Như Thế Nào?</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Tiền được hệ thống trung gian giữ an toàn cho đến khi bạn xác nhận đã nhận đúng sản phẩm.</p>
+        </div>
+        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Két Giữ Tiền An Toàn (Đã Khóa)
+        </span>
+      </div>
+
+      <!-- 3-Column Interactive Flow -->
+      <div class="pt-8 grid grid-cols-3 gap-6 items-stretch">
+        <!-- Col 1: Bên Mua -->
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="text-xs uppercase font-bold text-slate-500 font-mono tracking-wider">BÊN MUA (QUÉT VIETQR)</div>
+            <div class="font-bold text-slate-900 text-base">Khách Hàng #8492</div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+              <svg class="size-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Đã nạp vào két 1.500.000 ₫</span>
+            </div>
+            <p class="text-xs text-slate-500">Tiền đã rời khỏi tài khoản ngân hàng của người mua nhưng CHƯA chuyển cho người bán.</p>
+          </div>
+          <div class="mt-6 pt-3 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between font-mono">
+            <span>MBBank Napas 24/7</span>
+            <span>20:14</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Két Trung Gian (Center Highlight) -->
+        <div class="rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 p-6 flex flex-col justify-between shadow-sm relative">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs uppercase font-bold text-emerald-800 font-mono tracking-wider">KÉT BẢO CHỨNG TRUNG GIAN</span>
+              <svg class="size-4 text-emerald-600 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="font-mono text-3xl font-black text-slate-900">1.500.000 ₫</div>
+            <div class="p-3 bg-white rounded-xl border border-emerald-200 space-y-1">
+              <span class="text-xs text-slate-600 block">Thời gian kiểm tra còn lại:</span>
+              <span class="font-mono text-base font-bold text-amber-700">18 giờ 42 phút 10 giây</span>
+            </div>
+          </div>
+          <div class="mt-6 pt-3 border-t border-emerald-200">
+            <button type="button" class="w-full min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Xác Nhận Hàng Đúng &amp; Giải Ngân</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Col 3: Bên Bán -->
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="text-xs uppercase font-bold text-slate-500 font-mono tracking-wider">BÊN BÁN (BÀN GIAO SẢN PHẨM)</div>
+            <div class="font-bold text-slate-900 text-base">Kỹ Sư Phần Mềm (Pro Seller)</div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-50 p-2.5 rounded-xl border border-blue-200">
+              <svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Kho số: Đã khóa &amp; cấp quyền người mua</span>
+            </div>
+            <p class="text-xs text-slate-500">Người bán an tâm bàn giao hàng vì tiền đã được bảo đảm 100% trong két.</p>
+          </div>
+          <div class="mt-6 pt-3 border-t border-slate-200 text-xs text-slate-600 flex items-center justify-between">
+            <span>Tiền thực nhận khi xong:</span>
+            <span class="text-emerald-700 font-mono font-bold text-sm">+1.470.000 ₫</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Standards & Infrastructure Showcase -->
+    <section class="py-6 border-y border-slate-200 text-center space-y-4">
+      <div class="text-xs uppercase tracking-widest text-slate-500 font-mono font-bold">HẠ TẦNG CÔNG NGHỆ VÀ TIÊU CHUẨN AN TOÀN ĐÃ KIỂM ĐỊNH</div>
+      <div class="flex items-center justify-center gap-8 text-slate-700 font-semibold text-sm">
+        <span class="flex items-center gap-2"><svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> VietQR Napas 24/7</span>
+        <span class="flex items-center gap-2"><svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Cổng Thanh Toán PayOS (MBBank)</span>
+        <span class="flex items-center gap-2"><svg class="size-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Kho Mã Hóa Phần Cứng AES-256</span>
+        <span class="flex items-center gap-2"><svg class="size-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Két Thông Minh Tự Động Giải Ngân</span>
+        <span class="flex items-center gap-2"><svg class="size-4 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Trợ Lý AI Phân Xử Sự Cố 24/7</span>
+      </div>
+    </section>
+
+    <!-- 3 Core Pillars Protection Grid -->
+    <section class="space-y-8">
+      <div class="text-center space-y-2">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          Trụ Cột An Toàn
+        </span>
+        <h2 class="text-3xl font-extrabold text-slate-900">Ba Lớp Bảo Vệ Giao Dịch Toàn Diện</h2>
+        <p class="text-sm text-slate-500 max-w-xl mx-auto">Thiết kế triệt tiêu gian lận mua bán trực tuyến tại Việt Nam.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6">
+        <!-- Pillar 1 -->
+        <div class="rounded-3xl bg-white border border-slate-200 p-8 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="size-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
+          </div>
+          <span class="inline-block px-3 py-0.5 rounded-full text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200">Thanh Toán Tiện Lợi</span>
+          <h3 class="text-xl font-bold text-slate-900">Thanh toán VietQR tiện lợi</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">Quét mã ngân hàng bất kỳ, tiền được khóa an toàn tức thì trong két bảo vệ trung gian.</p>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-3 border-t border-slate-100">
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Quét mã QR bằng ứng dụng mọi ngân hàng nội địa quen thuộc</li>
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Tiền được khóa an toàn tự động sau 3 giây</li>
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Người bán không thể rút tiền trước khi người mua kiểm tra xong</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="rounded-3xl bg-white border border-slate-200 p-8 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="size-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span class="inline-block px-3 py-0.5 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200">Bảo Vệ Người Mua</span>
+          <h3 class="text-xl font-bold text-slate-900">Thời gian kiểm tra từ 6h - 24h</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">Người mua có từ 6 đến 24 tiếng kiểm tra và dùng thử sản phẩm trước khi tất toán.</p>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-3 border-t border-slate-100">
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Thông tin bàn giao được mã hóa, chỉ người mua giải mã mở khóa</li>
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Có thời gian kiểm tra chất lượng thực tế không lo bị ép nhận hàng</li>
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Chỉ thanh toán cho người bán khi người mua hoàn toàn hài lòng</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="rounded-3xl bg-white border border-slate-200 p-8 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="size-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          </div>
+          <span class="inline-block px-3 py-0.5 rounded-full text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200">Hỗ Trợ Công Minh</span>
+          <h3 class="text-xl font-bold text-slate-900">AI phân xử sự cố công bằng</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">Trợ lý AI tự động thẩm định bằng chứng, giải quyết sự cố và hoàn tiền minh bạch.</p>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-3 border-t border-slate-100">
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Thẩm định hình ảnh, log lỗi và lịch sử giao hàng tự động</li>
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Đề xuất phương án hoàn tiền công bằng, minh bạch không thiên vị</li>
+            <li class="flex items-center gap-2"><svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Bảo vệ 100% quyền lợi nếu sản phẩm sai mô tả hoặc lỗi hỏng</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Standardized 3-Step Workflow -->
+    <section class="space-y-8">
+      <div class="text-center space-y-2">
+        <h2 class="text-3xl font-extrabold text-slate-900">Quy Trình 3 Bước Tự Động</h2>
+        <p class="text-sm text-slate-500">Đơn giản, minh bạch và hoàn toàn không rủi ro cho cả 2 bên.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6">
+        <div class="rounded-2xl bg-white border border-slate-200 p-6 space-y-3 shadow-sm">
+          <span class="text-3xl font-black text-slate-300 font-mono">01</span>
+          <h3 class="text-base font-bold text-slate-900">Tạo Thỏa Thuận &amp; Khóa Sản Phẩm</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">Người bán thiết lập mức giá, thời gian kiểm tra và khóa nội dung bàn giao (mã nguồn, tài khoản hoặc liên kết) vào kho bảo mật.</p>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-6 space-y-3 shadow-sm">
+          <span class="text-3xl font-black text-blue-500 font-mono">02</span>
+          <h3 class="text-base font-bold text-slate-900">Người Mua Quét Mã VietQR Giữ Tiền</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">Người mua quét mã QR bằng ứng dụng ngân hàng. Tiền được giữ an toàn trong két trung gian, người bán chưa thể rút tiền ngay.</p>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-6 space-y-3 shadow-sm">
+          <span class="text-3xl font-black text-emerald-500 font-mono">03</span>
+          <h3 class="text-base font-bold text-slate-900">Kiểm Tra Dùng Thử &amp; Giải Ngân</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">Người mua mở khóa sản phẩm, kiểm tra kỹ lưỡng trong 6h - 24h. Xác nhận hài lòng để hệ thống tự động giải ngân cho người bán.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported Use Cases Grid -->
+    <section class="space-y-6">
+      <div class="text-center space-y-2">
+        <h2 class="text-2xl font-extrabold text-slate-900">Hỗ Trợ Đa Dạng Danh Mục Giao Dịch</h2>
+        <p class="text-xs text-slate-500">Phù hợp cho cả sản phẩm số lẫn mua bán chuyển phát thực tế.</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-sm">
+          <div class="size-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">Mã Nguồn &amp; Template</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Source code dự án, plugin WordPress, component Next.js, script automation.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-sm">
+          <div class="size-10 rounded-xl bg-violet-50 border border-violet-200 text-violet-600 flex items-center justify-center">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">Tài Khoản &amp; Bản Quyền</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Tài khoản dịch vụ SaaS, key bản quyền phần mềm chính hãng, tài khoản đám mây.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-sm">
+          <div class="size-10 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600 flex items-center justify-center">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">Tài Liệu Số &amp; Khóa Học</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Ebook chuyên sâu, dataset nghiên cứu, bài giảng video, template thiết kế.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-sm">
+          <div class="size-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">Thiết Bị &amp; Đồ Công Nghệ</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Điện thoại, bàn phím cơ, đồ công nghệ thanh lý qua hình thức đồng kiểm an toàn.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="space-y-6">
+      <div class="text-center space-y-2">
+        <h2 class="text-2xl font-extrabold text-slate-900">So Sánh Giao Dịch Trực Tiếp vs TrustPassz</h2>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono uppercase text-[11px]">
+            <tr>
+              <th class="p-4 w-1/4">Tiêu chí so sánh</th>
+              <th class="p-4 w-3/8 text-rose-700">Chuyển khoản thường (Mạo hiểm)</th>
+              <th class="p-4 w-3/8 text-emerald-800 bg-emerald-50/60">TrustPassz (Két giữ tiền tự động)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="p-4 font-semibold text-slate-900">Bảo vệ người mua</td>
+              <td class="p-4 text-slate-500">Không có (Chuyển khoản xong hoàn toàn phụ thuộc vào người bán)</td>
+              <td class="p-4 text-emerald-800 font-semibold bg-emerald-50/30">100% An toàn (Tiền giữ trong két trung gian)</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-slate-900">Thời gian kiểm tra hàng</td>
+              <td class="p-4 text-slate-500">0 phút (Người bán nhận tiền là xong giao dịch)</td>
+              <td class="p-4 text-emerald-800 font-semibold bg-emerald-50/30">6h đến 24h tùy chỉnh theo thỏa thuận 2 bên</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-slate-900">Phương thức thanh toán</td>
+              <td class="p-4 text-slate-500">Chuyển khoản mạo hiểm qua STK cá nhân người lạ</td>
+              <td class="p-4 text-emerald-800 font-semibold bg-emerald-50/30">Mã VietQR tự động định danh bảo chứng từng đơn hàng</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-slate-900">Xử lý khi hàng lỗi / không đúng</td>
+              <td class="p-4 text-slate-500">Khó đòi lại tiền, nguy cơ cao bị chặn liên lạc</td>
+              <td class="p-4 text-emerald-800 font-semibold bg-emerald-50/30">Hệ thống AI đối soát chứng cứ &amp; hoàn tiền minh bạch</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Bottom Conversion CTA -->
+    <section class="rounded-3xl bg-slate-900 text-white p-12 text-center space-y-6 shadow-xl">
+      <div class="space-y-2">
+        <h2 class="text-3xl font-black text-white">Sẵn Sàng Bảo Vệ Giao Dịch Của Bạn?</h2>
+        <p class="text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+          Tham gia ngay nền tảng giao dịch giữ tiền an toàn số 1 dành cho cộng đồng mua bán trực tuyến tại Việt Nam.
+        </p>
+      </div>
+      <div class="flex items-center justify-center gap-4">
+        <a href="#" class="min-h-[48px] px-8 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-sm shadow-lg inline-flex items-center gap-2 transition-all">
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Tạo Giao Dịch An Toàn Ngay</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-200 bg-white text-slate-500 py-8">
+    <div class="w-[1440px] mx-auto flex items-center justify-between px-8 text-xs">
+      <div class="flex items-center gap-3">
+        <div class="flex size-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <p class="text-slate-800 font-semibold">© 2026 TrustPassz. Bảo chứng giao dịch tự động.</p>
+          <p class="text-[11px] text-slate-500">Nền tảng giao dịch an toàn cho sản phẩm số &amp; đồ mua bán online.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-6 font-medium">
+        <a href="#" class="hover:text-emerald-700 transition-colors">Điều khoản giữ tiền an toàn</a>
+        <span class="text-slate-300">•</span>
+        <a href="#" class="hover:text-emerald-700 transition-colors">Bảo mật kho lưu trữ</a>
+        <span class="text-slate-300">•</span>
+        <a href="#" class="hover:text-emerald-700 transition-colors">Tài liệu API/Webhook</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

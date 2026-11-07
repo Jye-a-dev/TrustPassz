@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - 500 Sự Cố Hệ Thống</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-between antialiased">
+  <div class="w-[1440px] mx-auto min-h-screen flex flex-col justify-between">
+
+    <!-- Top Minimal Navigation -->
+    <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="size-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
+          TP
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-base font-black tracking-tight text-slate-900">TrustPassz</span>
+          <span class="text-[11px] font-mono text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full font-bold">
+            SỰ CỐ MÁY CHỦ (500)
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs font-mono text-slate-500">
+        <span class="flex items-center gap-2">
+          <span class="size-2 rounded-full bg-rose-500 animate-ping"></span>
+          Độ trễ cụm máy chủ: <span class="text-rose-600 font-bold">Phản hồi chậm (&gt; 500ms)</span>
+        </span>
+        <span class="text-slate-300">|</span>
+        <a href="#" class="text-slate-700 hover:text-slate-900 font-sans font-medium">Trang chủ</a>
+        <a href="#" class="text-slate-500 hover:text-slate-900 font-sans font-medium">Trung tâm hỗ trợ</a>
+      </div>
+    </header>
+
+    <!-- Center Error Content -->
+    <main class="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div class="max-w-xl w-full bg-white rounded-3xl border border-slate-200 p-10 shadow-sm flex flex-col items-center">
+
+        <!-- Error Icon Badge -->
+        <div class="mb-5 flex size-20 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 shadow-sm">
+          <svg class="size-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+
+        <!-- Error 500 Code Badge -->
+        <span class="text-xs font-mono font-bold tracking-wider text-rose-800 uppercase px-3.5 py-1 rounded-full bg-rose-50 border border-rose-200 mb-3">
+          MÃ LỖI 500 &bull; SỰ CỐ MÁY CHỦ XỬ LÝ
+        </span>
+
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight mb-2.5">
+          Đã Xảy Ra Sự Cố Không Mong Muốn
+        </h1>
+
+        <p class="text-xs text-slate-500 max-w-md leading-relaxed mb-6">
+          Hệ thống gặp trục trặc tạm thời trong quá trình xử lý yêu cầu hoặc đồng bộ dữ liệu giao dịch. Đội ngũ kỹ thuật đã nhận thông báo tự động và đang tiến hành xử lý.
+        </p>
+
+        <!-- Technical Digest Callout Box -->
+        <div class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left mb-6 space-y-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-500 font-sans font-medium">Mã phân tích lỗi:</span>
+            <span class="text-rose-700 font-bold">ERR_UNCAUGHT_TRANSACTION_PANIC</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-white border border-slate-200 font-mono text-[11px] text-slate-700 break-all select-all shadow-inner">
+            digest: 7f81b94e-28b0-4f98-932d-tpz_escrow_settle_timeout:500
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-1">
+            <span>Máy chủ: sgp1-edge-worker-04</span>
+            <span>Thời gian: 2026-11-07T03:07:00Z</span>
+          </div>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="flex items-center justify-center gap-3 w-full">
+          <button type="button" class="flex-1 h-11 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer min-h-[44px]">
+            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span>Thử lại ngay</span>
+          </button>
+
+          <a href="#" class="flex-1 h-11 px-5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition-colors min-h-[44px]">
+            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>Về trang chủ</span>
+          </a>
+
+          <a href="#" class="h-11 px-4 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors min-h-[44px]">
+            <svg class="size-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span>Báo cáo kỹ thuật</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Bottom Status Strip -->
+    <footer class="bg-white border-t border-slate-200 px-8 py-3.5 flex items-center justify-between text-xs text-slate-500 font-mono shadow-sm">
+      <div>TrustPassz Protocol v3.4.1 &bull; Két Giữ Tiền Bảo Chứng Tự Động</div>
+      <div class="flex items-center gap-4">
+        <span>Cơ sở dữ liệu: <strong class="text-emerald-700">HOẠT ĐỘNG</strong></span>
+        <span>Bộ nhớ đệm: <strong class="text-emerald-700">HOẠT ĐỘNG</strong></span>
+        <span>Cổng VietQR: <strong class="text-emerald-700">KẾT NỐI TỐT</strong></span>
+        <span>Máy chủ xử lý: <strong class="text-amber-700">TẢI CAO</strong></span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

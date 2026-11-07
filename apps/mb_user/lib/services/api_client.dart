@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,8 +27,14 @@ class ApiClient {
     defaultValue: String.fromEnvironment('API_BASE_URL'),
   );
   static const String _envLanIp = String.fromEnvironment('LAN_IP');
-  static const String _envPort = String.fromEnvironment('BACKEND_PORT', defaultValue: '3000');
-  static const bool _isPhysicalDevice = bool.fromEnvironment('IS_PHYSICAL_DEVICE', defaultValue: false);
+  static const String _envPort = String.fromEnvironment(
+    'BACKEND_PORT',
+    defaultValue: '3000',
+  );
+  static const bool _isPhysicalDevice = bool.fromEnvironment(
+    'IS_PHYSICAL_DEVICE',
+    defaultValue: false,
+  );
 
   String? _customBaseUrl;
 
@@ -52,7 +59,8 @@ class ApiClient {
       if (Platform.isAndroid) {
         if (_isPhysicalDevice) {
           // Physical device via Wi-Fi if explicitly requested with LAN_IP
-          if (_envLanIp.isNotEmpty && const bool.fromEnvironment('USE_WIFI', defaultValue: false)) {
+          if (_envLanIp.isNotEmpty &&
+              const bool.fromEnvironment('USE_WIFI', defaultValue: false)) {
             return 'http://$_envLanIp:$_envPort';
           }
           // Physical device via USB reverse (adb reverse tcp:3000 tcp:3000)
@@ -64,7 +72,10 @@ class ApiClient {
       }
 
       // iOS Simulator or macOS / Windows / Linux desktop
-      if (Platform.isIOS || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+      if (Platform.isIOS ||
+          Platform.isMacOS ||
+          Platform.isWindows ||
+          Platform.isLinux) {
         return 'http://localhost:$_envPort';
       }
     } catch (_) {
@@ -139,9 +150,12 @@ class ApiClient {
         for (final candidate in candidateUrls) {
           if (candidate == baseUrl) continue;
           try {
-            final uri = Uri.parse('$candidate${endpoint.startsWith('/') ? endpoint : '/$endpoint'}');
+            final uri = Uri.parse(
+              '$candidate${endpoint.startsWith('/') ? endpoint : '/$endpoint'}',
+            );
             final reqHeaders = await _buildHeaders(skipAuth: true);
-            final res = await http.get(uri, headers: reqHeaders).timeout(timeout);
+            final res =
+                await http.get(uri, headers: reqHeaders).timeout(timeout);
             if (res.statusCode >= 200 && res.statusCode < 400) {
               setBaseUrl(candidate);
               stopwatch.stop();
@@ -196,8 +210,10 @@ class ApiClient {
     Duration timeout = const Duration(seconds: 15),
   }) async {
     final uri = _resolveUri(endpoint);
-    final reqHeaders =
-        await _buildHeaders(skipAuth: skipAuth, extraHeaders: headers);
+    final reqHeaders = await _buildHeaders(
+      skipAuth: skipAuth,
+      extraHeaders: headers,
+    );
 
     try {
       final response =
@@ -217,8 +233,10 @@ class ApiClient {
     Duration timeout = const Duration(seconds: 15),
   }) async {
     final uri = _resolveUri(endpoint);
-    final reqHeaders =
-        await _buildHeaders(skipAuth: skipAuth, extraHeaders: headers);
+    final reqHeaders = await _buildHeaders(
+      skipAuth: skipAuth,
+      extraHeaders: headers,
+    );
     final encodedBody = body != null ? jsonEncode(body) : null;
 
     try {
