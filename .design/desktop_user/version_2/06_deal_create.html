@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1440, initial-scale=1.0">
-  <title>TrustPassz - 06 Tạo Giao Dịch Mới (Version 2)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz - 06 Đăng Bán Sản Phẩm & Tạo Kèo Giao Dịch (Version 2)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,6 +15,22 @@
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            rose: {
+              50: '#FFF1F2',
+              100: '#FFE4E6',
+              500: '#F43F5E',
+              600: '#E11D48',
+              700: '#BE123C',
+            },
+            emerald: {
+              50: '#ECFDF5',
+              100: '#D1FAE5',
+              500: '#10B981',
+              600: '#059669',
+              700: '#047857',
+            }
           }
         }
       }
@@ -24,313 +40,377 @@
     body {
       font-family: 'Inter', sans-serif;
       letter-spacing: -0.01em;
-      background-color: #F8FAFC;
-      color: #0F172A;
-      min-width: 1440px;
     }
   </style>
 </head>
-<body class="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col antialiased">
+<body class="bg-[#F6F7F9] text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-  <!-- ================= TOP HUD TELEMETRY TICKER BAR ================= -->
-  <div class="w-full bg-slate-900 border-b border-slate-800 px-8 py-1.5 font-mono text-[11px] text-slate-300">
-    <div class="w-full flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
-          <svg class="size-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          <span>ESCROW_OS // v2.5</span>
+  <!-- ================= TOP NOTICE BAR ================= -->
+  <div role="banner" class="w-full bg-amber-50 border-b border-amber-200 px-3 sm:px-6 py-2 text-xs text-amber-900">
+    <div class="w-full max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 font-bold text-amber-800 shrink-0">
+          <svg class="size-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Chế Độ Sandbox
         </span>
-        <span class="text-slate-600">|</span>
-        <span class="flex items-center gap-1.5 text-slate-300">
-          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>ORACLE RELAYER HOẠT ĐỘNG (24ms)</span>
-        </span>
+        <span class="truncate">Khởi tạo thỏa thuận bán hàng &amp; bàn giao két số bảo chứng qua mã VietQR Napas 24/7.</span>
       </div>
-      <div class="flex items-center gap-4">
-        <span class="text-slate-300 flex items-center gap-1">
-          <svg class="size-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span>KHO BẢO MẬT: MÃ HÓA PHẦN CỨNG AES-256</span>
-        </span>
-      </div>
+      <a href="01_landing_page.html" class="text-xs font-semibold text-rose-600 hover:underline shrink-0">
+        Về trang chủ
+      </a>
     </div>
   </div>
 
-  <div class="flex flex-1 relative">
-    <!-- ================= FIXED USER SIDEBAR (w-64) ================= -->
-    <aside class="w-64 fixed top-8 bottom-0 left-0 z-40 border-r border-slate-200 bg-white flex flex-col justify-between">
-      <div>
-        <div class="flex h-18 items-center px-6 border-b border-slate-100">
-          <a href="#" class="flex items-center gap-3">
-            <div class="flex size-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm">
-              <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+  <!-- ================= HEADER ================= -->
+    <!-- ================= E-COMMERCE STICKY HEADER ================= -->
+  <header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-3 lg:gap-6">
+        
+        <!-- Khối Trái: Logo TrustPassz + Nút "Danh mục" -->
+        <div class="flex items-center gap-3 lg:gap-4 shrink-0">
+          <a href="01_landing_page.html" class="flex items-center gap-2.5 group shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
             </div>
             <div class="flex flex-col">
-              <span class="font-extrabold text-base tracking-tight text-slate-900">TrustPassz</span>
-              <span class="text-[10px] font-semibold uppercase text-emerald-700 leading-none">Bảo Vệ Giao Dịch</span>
+              <span class="text-lg font-bold text-slate-900 tracking-tight leading-none">TrustPassz</span>
+              <span class="text-[10px] text-slate-400 font-medium tracking-wide mt-0.5">SÀN KÝ QUỸ AN TOÀN</span>
             </div>
           </a>
+
+          <!-- Nút "Danh mục" (có icon menu, có border) -->
+          <a href="02_explore.html" class="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 shadow-sm active:translate-y-0.5 transition-all shrink-0">
+            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <span>Danh mục</span>
+          </a>
         </div>
 
-        <div class="p-4 space-y-4">
-          <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-            // DANH MỤC QUẢN LÝ
-          </div>
-
-          <nav class="space-y-1.5">
-            <a href="#" class="min-h-[44px] flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-              <div class="flex items-center gap-3">
-                <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                <span>Bàn Điều Hành</span>
-              </div>
-            </a>
-
-            <a href="#" class="min-h-[44px] flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-              <div class="flex items-center gap-3">
-                <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4l-2-2"/><path d="m18 10 1.4-1.4a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0L14 7"/><path d="m2 22 5.5-5.5"/><path d="m17 7-6 6-2-2-4 4"/></svg>
-                <span>Giao Dịch Của Tôi</span>
-              </div>
-              <span class="rounded-full px-2 py-0.5 text-[10px] font-bold font-mono bg-slate-100 text-slate-700 border border-slate-200">4</span>
-            </a>
-
-            <!-- Active: Tạo Giao Dịch Mới -->
-            <a href="#" class="min-h-[44px] flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold my-2 bg-emerald-50 text-emerald-900 border border-emerald-200 shadow-xs">
-              <div class="flex items-center gap-2.5">
-                <svg class="size-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                <span>Tạo Giao Dịch Mới</span>
-              </div>
-              <span class="rounded px-1.5 py-0.5 text-[9px] font-mono font-bold bg-emerald-200 text-emerald-800">ACTIVE</span>
-            </a>
-
-            <a href="#" class="min-h-[44px] flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-              <div class="flex items-center gap-3">
-                <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/><path d="M14 16h-4"/></svg>
-                <span>Lịch Sử Đơn &amp; Biên Lai</span>
-              </div>
-            </a>
-          </nav>
+        <!-- Khối Giữa: Thanh tìm kiếm lớn Marketplace (Chiếm toàn bộ không gian còn lại) -->
+        <div class="hidden sm:flex flex-1 max-w-2xl mx-2 lg:mx-4">
+          <form action="02_explore.html" method="get" class="w-full relative flex items-center rounded-xl border border-slate-300 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-100 bg-white transition-all shadow-sm">
+            <div class="pl-3.5 text-slate-400 flex items-center pointer-events-none">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input type="text" name="q" placeholder="Tìm tài khoản, tài liệu số, mã nguồn, đồ công nghệ..." class="w-full py-2.5 pl-2.5 pr-24 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none" />
+            <button type="submit" class="absolute right-1 px-3.5 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs border border-rose-600 shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <span>Tìm kiếm</span>
+            </button>
+          </form>
         </div>
-      </div>
 
-      <div class="p-4 border-t border-slate-100">
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 space-y-1">
-          <div class="text-[11px] font-mono text-emerald-800 font-bold uppercase">KÉT GIỮ TIỀN AN TOÀN</div>
-          <div class="font-mono text-2xl font-black text-slate-900">5.200.000 ₫</div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- ================= MAIN OPERATING CANVAS (pl-64) ================= -->
-    <div class="flex-1 pl-64 flex flex-col min-h-screen">
-      <!-- Sticky User Navbar -->
-      <header class="sticky top-0 z-30 flex h-18 w-full items-center justify-between border-b border-slate-200 bg-white/95 px-8 backdrop-blur-md">
-        <div class="flex items-center gap-2 text-xs text-slate-500 font-mono">
-          <span class="text-emerald-700 font-bold">+ [NODE_DEAL_CREATE_01]</span>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-xs">
-            <div class="flex size-8 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white font-mono">TQ</div>
-            <span class="text-xs font-bold text-slate-900">Trần Quốc Toản</span>
-          </div>
-        </div>
-      </header>
-
-      <!-- Viewport Form Content -->
-      <main class="flex-1 px-8 py-8 space-y-6 max-w-4xl mx-auto w-full">
-        <!-- Breadcrumb -->
-        <div class="flex items-center justify-between">
-          <a href="#" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors py-1">
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-            <span>Quay lại Giao dịch của tôi</span>
+        <!-- Khối Phải (Cụm hành động người dùng) -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <!-- Nút "Đơn hàng" (icon túi hàng/biên lai, text, viền mỏng) -->
+          <a href="11_orders.html" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm active:translate-y-0.5 transition-all shrink-0" title="Quản lý đơn hàng">
+            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <span>Đơn hàng</span>
           </a>
 
-          <span class="border border-emerald-200 text-emerald-800 bg-emerald-50 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 font-semibold">
-            <svg class="size-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>Kho Lưu Trữ Bảo Mật (AES-256)</span>
+          <!-- Nút "Két số / Đang giữ" (Badge số dư ký quỹ có viền) -->
+          <a href="09_digital_vault.html" class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-semibold shadow-sm active:translate-y-0.5 transition-all shrink-0" title="Két số bảo chứng an toàn">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Két số:</span>
+            <span class="font-mono font-bold text-emerald-700">25.450.000đ</span>
+          </a>
+
+          <!-- Nút "Đăng bán / Tạo kèo" (Nút CTA chính, màu Rose-500 có viền tone-sur-tone đậm hơn) -->
+          <a href="06_deal_create.html" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs sm:text-sm border border-rose-600 shadow-sm active:translate-y-0.5 transition-all shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Đăng bán / Tạo kèo</span>
+          </a>
+
+          <!-- Nút "Đăng nhập" hoặc Avatar cá nhân -->
+          <a href="05_user_dashboard.html" class="inline-flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-sm transition-all" title="Tài khoản cá nhân">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 text-white font-bold text-xs flex items-center justify-center border border-rose-600">
+              A
+            </div>
+            <span class="hidden xl:inline text-xs font-semibold text-slate-800">Admin</span>
+          </a>
+
+          <!-- Mobile Hamburger Button (có border) -->
+          <button type="button" class="md:hidden border border-slate-200 rounded-lg p-2 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-sm" aria-label="Menu" onclick="const d=document.getElementById('mobile-nav-drawer'); if(d) d.classList.toggle('hidden');">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Search Bar (Collapsible/compact below header on small mobile screens) -->
+      <div class="sm:hidden pb-2.5 pt-1">
+        <form action="02_explore.html" method="get" class="relative flex items-center rounded-xl border border-slate-300 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-100 bg-white shadow-sm">
+          <div class="pl-3 text-slate-400 flex items-center pointer-events-none">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input type="text" name="q" placeholder="Tìm tài khoản, tài liệu số..." class="w-full py-1.5 pl-2 pr-20 text-xs text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none" />
+          <button type="submit" class="absolute right-1 px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold text-[11px] border border-rose-600 shadow-sm">
+            Tìm
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Drawer Menu -->
+    <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2 text-xs font-medium shadow-lg">
+      <a href="02_explore.html" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700">
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span>Danh mục sản phẩm</span>
+      </a>
+      <a href="11_orders.html" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700">
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <span>Quản lý Đơn hàng</span>
+      </a>
+      <a href="09_digital_vault.html" class="flex items-center justify-between px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Két số / Đang giữ</span>
+        </span>
+        <span class="font-mono font-bold text-emerald-700">25.450.000đ</span>
+      </a>
+      <div class="pt-2 flex items-center gap-2">
+        <a href="03_login.html" class="flex-1 text-center py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium shadow-sm">Đăng nhập</a>
+        <a href="04_register.html" class="flex-1 text-center py-2 rounded-xl border border-rose-600 bg-rose-500 hover:bg-rose-600 text-white font-semibold shadow-sm">Đăng ký</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= FORM CONTAINER ================= -->
+  <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+    
+    <!-- Breadcrumb & Header Title -->
+    <div class="space-y-1">
+      <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+        <a href="05_user_dashboard.html" class="hover:text-rose-600">Bàn điều hành</a>
+        <span>/</span>
+        <span class="text-slate-900 font-medium">Đăng bán sản phẩm mới</span>
+      </div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+          <span class="flex size-8 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-sm">
+            +
           </span>
+          <span>Đăng Bán / Khởi Tạo Thỏa Thuận Ký Quỹ</span>
+        </h1>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 self-start sm:self-auto">
+          <svg class="size-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Kho AES-256 Bảo Mật</span>
+        </span>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-500">
+        Khóa thông tin bàn giao vào két, thiết lập giá bán và chọn thời hạn để người mua dùng thử / nghiệm thu.
+      </p>
+    </div>
+
+    <!-- Main Form Card -->
+    <form class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 md:p-10 shadow-sm space-y-8" action="07_deal_room.html" method="get">
+      
+      <!-- 1. Grid of 6 Asset Categories -->
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono block">
+            1. CHỌN LOẠI SẢN PHẨM / TÀI SẢN BÀN GIAO <span class="text-rose-600">*</span>
+          </label>
+          <p class="text-xs text-slate-500 mt-0.5">Chọn danh mục chuẩn sàn để áp dụng cơ chế bàn giao và đồng kiểm phù hợp.</p>
         </div>
 
-        <!-- Header Title Section with Context Subheader -->
-        <div class="space-y-1.5 border-b border-slate-200 pb-4">
-          <div class="flex items-center gap-3">
-            <span class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700">
-              <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </span>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          
+          <!-- Option 1: Mã Nguồn (Selected) -->
+          <label class="rounded-xl sm:rounded-2xl border-2 border-rose-500 bg-rose-50/40 p-4 space-y-2 cursor-pointer shadow-2xs relative flex flex-col justify-between">
+            <input type="radio" name="asset_type" checked class="sr-only">
             <div>
-              <h1 class="text-2xl font-black tracking-tight text-slate-900">Tạo Giao Dịch Mới</h1>
-              <p class="text-xs text-slate-500">Lưu trữ thông tin bàn giao an toàn, định giá và thiết lập thời gian cho người mua kiểm tra hàng.</p>
+              <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-700 border border-rose-300">Code / Git</span>
+              <div class="flex size-9 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mt-2">Mã Nguồn / Source Code</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Kho Git, file nén dự án, script bot</p>
             </div>
-          </div>
+          </label>
+
+          <!-- Option 2: License Key -->
+          <label class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-2xs flex flex-col justify-between">
+            <input type="radio" name="asset_type" class="sr-only">
+            <div>
+              <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Bản Quyền</span>
+              <div class="flex size-9 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mt-2">License Key / Bản Quyền</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Khóa phần mềm, token SaaS</p>
+            </div>
+          </label>
+
+          <!-- Option 3: Design -->
+          <label class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-2xs flex flex-col justify-between">
+            <input type="radio" name="asset_type" class="sr-only">
+            <div>
+              <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Media 3D</span>
+              <div class="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mt-2">File Thiết Kế / UI Kit</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Figma UI Kit, file 3D, preset</p>
+            </div>
+          </label>
+
+          <!-- Option 4: Document -->
+          <label class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-2xs flex flex-col justify-between">
+            <input type="radio" name="asset_type" class="sr-only">
+            <div>
+              <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Tài Liệu</span>
+              <div class="flex size-9 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mt-2">Tài Liệu / File Số PDF</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Ebook, dataset, Notion, Excel</p>
+            </div>
+          </label>
+
+          <!-- Option 5: Pass Đồ Thực Tế -->
+          <label class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-2xs flex flex-col justify-between">
+            <input type="radio" name="asset_type" class="sr-only">
+            <div>
+              <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Pass Đồ</span>
+              <div class="flex size-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="12" x="3" y="4" rx="2"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mt-2">Hàng Thực Tế (Pass Đồ)</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Bàn phím cơ, đồ công nghệ đồng kiểm</p>
+            </div>
+          </label>
+
+          <!-- Option 6: Khác -->
+          <label class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-2xs flex flex-col justify-between">
+            <input type="radio" name="asset_type" class="sr-only">
+            <div>
+              <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Tùy Chọn</span>
+              <div class="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mt-2">Tài Sản Khác</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Bàn giao theo thỏa thuận riêng</p>
+            </div>
+          </label>
+
         </div>
+      </div>
 
-        <!-- Form Component Card -->
-        <div class="rounded-3xl bg-white border border-slate-200 p-8 shadow-sm space-y-8">
-          <!-- 1. Grid of 6 Asset Category Selector Cards -->
-          <div class="space-y-3">
-            <div>
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono block">
-                1. CHỌN LOẠI SẢN PHẨM / TÀI SẢN BÀN GIAO
-              </label>
-              <p class="text-xs text-slate-500 mt-0.5">Chọn danh mục phù hợp để hệ thống áp dụng cơ chế bàn giao tương ứng.</p>
-            </div>
-
-            <div class="grid grid-cols-3 gap-3.5">
-              <!-- Option 1: Mã Nguồn (Active) -->
-              <div class="rounded-2xl border-2 border-emerald-600 bg-emerald-50/50 p-4 space-y-2 cursor-pointer shadow-xs relative">
-                <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Code / Git</span>
-                <div class="flex size-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                </div>
-                <h4 class="text-xs font-bold text-slate-900">Mã Nguồn / Source Code</h4>
-                <p class="text-xs text-slate-500">Kho Git, file nén dự án, script automation</p>
-              </div>
-
-              <!-- Option 2: License Key -->
-              <div class="rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-xs">
-                <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Bản Quyền</span>
-                <div class="flex size-9 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/></svg>
-                </div>
-                <h4 class="text-xs font-bold text-slate-900">License Key / Bản Quyền</h4>
-                <p class="text-xs text-slate-500">Khóa kích hoạt phần mềm, SaaS token</p>
-              </div>
-
-              <!-- Option 3: Design -->
-              <div class="rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-xs">
-                <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Media / 3D</span>
-                <div class="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-                </div>
-                <h4 class="text-xs font-bold text-slate-900">File Thiết Kế / Đồ Họa</h4>
-                <p class="text-xs text-slate-500">Figma UI Kit, file 3D, Vector, preset</p>
-              </div>
-
-              <!-- Option 4: Document -->
-              <div class="rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-xs">
-                <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">PDF / Sheet</span>
-                <div class="flex size-9 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg>
-                </div>
-                <h4 class="text-xs font-bold text-slate-900">Tài Liệu / File Số</h4>
-                <p class="text-xs text-slate-500">Ebook, template Notion, Excel, checklist</p>
-              </div>
-
-              <!-- Option 5: Physical -->
-              <div class="rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-xs">
-                <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Pass Đồ</span>
-                <div class="flex size-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="12" x="3" y="4" rx="2"/></svg>
-                </div>
-                <h4 class="text-xs font-bold text-slate-900">Hàng Thực Tế (Pass Đồ)</h4>
-                <p class="text-xs text-slate-500">Quần áo, phụ kiện, đồ công nghệ đồng kiểm</p>
-              </div>
-
-              <!-- Option 6: Other -->
-              <div class="rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 p-4 space-y-2 cursor-pointer transition-colors shadow-xs">
-                <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">Thỏa Thuận</span>
-                <div class="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                </div>
-                <h4 class="text-xs font-bold text-slate-900">Tài Sản Khác</h4>
-                <p class="text-xs text-slate-500">Mở khóa theo thỏa thuận riêng 2 bên</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. Deal Title & Description -->
-          <div class="space-y-4 pt-4 border-t border-slate-100">
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between">
-                <div>
-                  <label class="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono">
-                    2. TÊN SẢN PHẨM / TIÊU ĐỀ GIAO DỊCH
-                  </label>
-                  <p class="text-xs text-slate-500">Tiêu đề rõ ràng giúp người mua an tâm chốt đơn.</p>
-                </div>
-                <button type="button" class="min-h-[36px] inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg hover:bg-emerald-100 transition-colors">
-                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                  <span>AI Gợi Ý Tiêu Đề</span>
-                </button>
-              </div>
-              <input type="text" value="Fullstack Next.js SaaS Boilerplate (Clean Architecture &amp; Supabase)" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 shadow-xs">
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono">
-                MÔ TẢ CHI TIẾT ĐIỀU KHOẢN BÀN GIAO
-              </label>
-              <textarea rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 shadow-xs">Gói mã nguồn đầy đủ kèm tài liệu hướng dẫn triển khai, tích hợp Supabase Auth, Prisma ORM, và cấu hình CI/CD hoàn chỉnh. Hỗ trợ đối soát mã trong 24h.</textarea>
-            </div>
-          </div>
-
-          <!-- 3. Price & Inspection Duration -->
-          <div class="grid grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-            <div class="space-y-1.5">
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono">
-                3. GIÁ GIAO DỊCH BẢO CHỨNG (VNĐ)
-              </label>
-              <div class="relative">
-                <input type="text" value="1.500.000" class="w-full min-h-[44px] pl-4 pr-12 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 shadow-xs">
-                <span class="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-xs text-slate-400 font-bold">VNĐ</span>
-              </div>
-              <p class="text-xs text-slate-500">Mức tiền người mua cần quét nạp vào két.</p>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono">
-                THỜI GIAN KIỂM TRA HÀNG (DÙNG THỬ)
-              </label>
-              <div class="grid grid-cols-4 gap-2">
-                <button type="button" class="min-h-[44px] rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">6 Giờ</button>
-                <button type="button" class="min-h-[44px] rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">12 Giờ</button>
-                <button type="button" class="min-h-[44px] rounded-xl text-xs font-bold border-2 border-emerald-600 bg-emerald-50 text-emerald-800 shadow-xs">24 Giờ</button>
-                <button type="button" class="min-h-[44px] rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">48 Giờ</button>
-              </div>
-              <p class="text-xs text-slate-500">Khoảng thời gian người mua được kiểm tra hàng trước khi tiền chuyển cho bạn.</p>
-            </div>
-          </div>
-
-          <!-- 4. Digital Vault Frame (Kho Lưu Trữ Bảo Mật) -->
-          <div class="rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/30 p-6 space-y-4">
-            <div class="flex items-center gap-3 text-emerald-900">
-              <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              </div>
-              <div>
-                <h3 class="text-xs font-bold uppercase tracking-wider font-mono">KHO LƯU TRỮ BẢO MẬT (MÃ HÓA RIÊNG BIỆT)</h3>
-                <p class="text-xs text-slate-600">Dữ liệu được mã hóa kín bằng chuẩn AES-256-GCM. Chỉ người mua sau khi quét VietQR nạp tiền mới được cấp quyền mở khóa.</p>
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-slate-700 block">Nội dung bàn giao bí mật (Link Git, Token, File hoặc Mật khẩu)</label>
-              <textarea rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600">https://github.com/trandev/nextjs-saas-clean-template/invitations?token=ghp_984102948294</textarea>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-[11px] font-semibold text-slate-600 block font-mono">MẬT KHẨU GIẢI MÃ KHO (PASSPHRASE)</label>
-                <input type="text" value="trustpassz-vault-key-2026-xyz" class="w-full min-h-[38px] px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-mono text-xs text-slate-800">
-              </div>
-              <div class="space-y-1">
-                <label class="text-[11px] font-semibold text-slate-600 block font-mono">MÃ KIỂM ĐỊNH NỘI DUNG (SHA-256)</label>
-                <div class="min-h-[38px] px-3 py-2 rounded-lg border border-slate-300 bg-slate-100 font-mono text-xs text-slate-600 truncate">
-                  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. Submit CTA Button -->
-          <div class="pt-2">
-            <button type="button" class="w-full min-h-[50px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all">
-              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-              <span>Khóa Vào Két &amp; Khởi Tạo Giao Dịch An Toàn</span>
+      <!-- 2. Deal Title & Description -->
+      <div class="space-y-4 pt-4 border-t border-slate-100">
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+              2. TÊN SẢN PHẨM / TIÊU ĐỀ GIAO DỊCH <span class="text-rose-600">*</span>
+            </label>
+            <button type="button" class="min-h-[36px] inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1 rounded-lg hover:bg-rose-100 transition-colors">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              <span>AI Gợi Ý Tiêu Đề Chuẩn Sàn</span>
             </button>
           </div>
+          <input type="text" value="Fullstack Next.js SaaS Boilerplate (Clean Architecture &amp; Supabase)" 
+            class="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 shadow-2xs">
         </div>
-      </main>
-    </div>
-  </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+            MÔ TẢ CHI TIẾT &amp; CAM KẾT BẢO HÀNH
+          </label>
+          <textarea rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 shadow-2xs">Gói mã nguồn đầy đủ kèm tài liệu hướng dẫn triển khai, tích hợp Supabase Auth, Prisma ORM, và cấu hình CI/CD hoàn chỉnh. Hỗ trợ đối soát và hướng dẫn qua Google Meet trong thời hạn đồng kiểm 24h.</textarea>
+        </div>
+      </div>
+
+      <!-- 3. Price & Inspection Duration -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+        
+        <!-- Price Input -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+            3. GIÁ GIAO DỊCH BẢO CHỨNG (VNĐ) <span class="text-rose-600">*</span>
+          </label>
+          <div class="relative">
+            <input type="text" value="1.500.000" class="w-full min-h-[44px] pl-4 pr-14 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-base font-bold text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 shadow-2xs">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-xs text-slate-400 font-bold">VNĐ</span>
+          </div>
+          <p class="text-xs text-slate-500">Mức tiền người mua sẽ quét nạp vào két giữ tiền an toàn.</p>
+        </div>
+
+        <!-- Inspection Duration -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+            THỜI GIAN ĐỒNG KIỂM &amp; DÙNG THỬ <span class="text-rose-600">*</span>
+          </label>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" class="min-h-[44px] rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">6 Giờ</button>
+            <button type="button" class="min-h-[44px] rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">12 Giờ</button>
+            <button type="button" class="min-h-[44px] rounded-xl text-xs font-bold border-2 border-rose-500 bg-rose-50 text-rose-700 shadow-2xs">24 Giờ</button>
+            <button type="button" class="min-h-[44px] rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">48 Giờ</button>
+          </div>
+          <p class="text-xs text-slate-500">Thời gian người mua kiểm tra sản phẩm trước khi tiền tự động giải ngân.</p>
+        </div>
+      </div>
+
+      <!-- 4. Digital Vault Frame (Kho Lưu Trữ Bảo Mật AES-256) -->
+      <div class="rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-5 sm:p-6 space-y-4">
+        <div class="flex items-center gap-3 text-emerald-900">
+          <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-700">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider font-mono">4. KHO LƯU TRỮ BẢO MẬT (MÃ HÓA AES-256-GCM)</h3>
+            <p class="text-xs text-slate-600">Dữ liệu được mã hóa kín. Chỉ người mua sau khi quét mã VietQR nạp cọc thành công mới được cấp quyền mở khóa.</p>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-700 block">Nội dung bàn giao bảo mật (Link Git, Token, Key hoặc Mật khẩu)</label>
+          <textarea rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600">https://github.com/trandev/nextjs-saas-clean-template/invitations?token=ghp_984102948294</textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-[11px] font-semibold text-slate-600 block font-mono">MẬT KHẨU GIẢI MÃ KHO (PASSPHRASE)</label>
+            <input type="text" value="trustpassz-vault-key-2026-xyz" class="w-full min-h-[44px] px-3 py-1.5 rounded-xl border border-slate-300 bg-white font-mono text-xs text-slate-800">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] font-semibold text-slate-600 block font-mono">MÃ KIỂM ĐỊNH NỘI DUNG (SHA-256)</label>
+            <div class="min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 font-mono text-xs text-slate-600 truncate flex items-center">
+              e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Submit CTA Button -->
+      <div class="pt-2">
+        <button type="submit" class="w-full min-h-[50px] rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-black text-sm sm:text-base shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 transition-all border border-rose-700">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Khóa Vào Két &amp; Khởi Tạo Giao Dịch An Toàn</span>
+        </button>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-200 bg-white text-slate-400 py-6 text-center text-xs">
+    © 2026 TrustPassz • Bảo vệ giao dịch an toàn 100%.
+  </footer>
 
 </body>
 </html>
