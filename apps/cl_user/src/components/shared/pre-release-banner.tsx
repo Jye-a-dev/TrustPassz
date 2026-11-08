@@ -16,34 +16,39 @@ export function PreReleaseBanner() {
   return (
     <div
       role="banner"
-      className="relative z-50 flex min-h-11 w-full items-center justify-between border-b border-amber-500/30 bg-slate-950/95 px-4 py-1.5 text-xs backdrop-blur-md transition-colors"
+      className="relative z-50 w-full bg-amber-50 border-b border-amber-200 px-3 sm:px-6 py-2 text-xs text-amber-900 transition-colors"
     >
-      <div className="mx-auto flex flex-wrap items-center justify-center gap-2 text-slate-300">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 font-bold tracking-wide text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-          <AlertTriangle className="size-3.5 animate-pulse text-amber-400" />
-          [PRE-RELEASE TESTNET]
-        </span>
-        <span className="text-slate-400">
-          Chế độ Sandbox: Smart Contract Base Sepolia (84532) & Solana Devnet. Tuyệt đối không dùng tiền thật.
-        </span>
-        <a
-          href="https://faucet.quicknode.com/base/sepolia"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-11 items-center gap-1 font-semibold text-cyan-400 underline decoration-cyan-400/40 underline-offset-4 hover:text-cyan-300"
-        >
-          Faucet Gas Testnet
-          <ExternalLink className="size-3" />
-        </a>
+      <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 font-bold text-amber-800 shrink-0">
+            <AlertTriangle className="size-3.5 text-amber-600" />
+            Chế Độ Sandbox
+          </span>
+          <span className="text-amber-800 truncate">
+            Môi trường bảo chứng mua bán tự động. Giữ tiền an toàn qua mã VietQR Napas 24/7.
+          </span>
+        </div>
+        <div className="flex items-center gap-4 shrink-0 text-[11px] sm:text-xs">
+          <a
+            href="https://sepolia.basescan.org/address/0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-rose-600 hover:text-rose-700 underline decoration-rose-300 inline-flex items-center gap-1"
+          >
+            <span>Quy chế bảo vệ (Base Sepolia)</span>
+            <ExternalLink className="size-3" />
+          </a>
+          <span className="text-amber-300">|</span>
+          <button
+            type="button"
+            onClick={() => setVisible(false)}
+            aria-label="Đóng banner"
+            className="font-medium text-slate-700 hover:text-slate-900 cursor-pointer"
+          >
+            Đóng ✕
+          </button>
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={() => setVisible(false)}
-        aria-label="Đóng banner testnet"
-        className="inline-flex size-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-      >
-        ✕
-      </button>
     </div>
   );
 }

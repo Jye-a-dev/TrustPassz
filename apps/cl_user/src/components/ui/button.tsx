@@ -5,22 +5,30 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer active:translate-y-0.5 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default:
+          "bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold border border-brand-pink shadow-sm",
+        destructive:
+          "bg-surface hover:bg-brand-pink-tint text-brand-pink font-medium border border-brand-pink/30 hover:border-brand-pink/50 shadow-sm",
+        outline:
+          "bg-surface hover:bg-input-bg text-primary font-medium border border-strong hover:border-brand-pink/40 shadow-sm",
+        secondary:
+          "bg-input-bg hover:bg-surface text-primary font-medium border border-subtle shadow-sm",
+        ghost:
+          "bg-transparent hover:bg-input-bg text-secondary hover:text-primary border border-transparent hover:border-subtle",
+        link:
+          "text-brand-pink underline-offset-4 hover:underline border-0",
+        safe:
+          "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold border border-emerald-700 shadow-sm",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8 text-base",
-        icon: "h-9 w-9",
+        default: "min-h-[44px] px-4 py-2",
+        sm: "min-h-[38px] px-3 text-xs",
+        lg: "min-h-[48px] px-6 text-base",
+        icon: "min-h-[44px] min-w-[44px] p-2",
       },
     },
     defaultVariants: {

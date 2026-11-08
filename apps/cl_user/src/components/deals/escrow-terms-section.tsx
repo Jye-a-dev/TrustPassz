@@ -34,15 +34,15 @@ export function EscrowTermsSection({
   disabled = false,
 }: EscrowTermsSectionProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4 border-t border-slate-100">
       {/* Escrow Valuation & Inspection Time */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="space-y-1.5">
           <label
             htmlFor="deal-amount"
-            className="text-sm font-semibold text-slate-200"
+            className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono block"
           >
-            Giá giao dịch (VNĐ) <span className="text-cyan-400">*</span>
+            3. GIÁ GIAO DỊCH BẢO CHỨNG (VNĐ) <span className="text-rose-600">*</span>
           </label>
           <div className="relative">
             <Input
@@ -56,28 +56,27 @@ export function EscrowTermsSection({
               onChange={(e) =>
                 onAmountChange(e.target.value === "" ? "" : Number(e.target.value))
               }
-              className="bg-slate-950/80 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 min-h-11 pr-12 font-mono text-sm"
+              className="bg-white border-slate-300 text-rose-600 placeholder:text-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-100 min-h-[44px] pr-14 font-mono text-base font-bold shadow-2xs"
               required
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-xs text-slate-400 font-bold">
               VNĐ
             </span>
           </div>
-          {typeof amount === "number" && amount > 0 && (
-            <p className="text-[11px] text-cyan-400 font-mono">
-              Quy đổi: {amount.toLocaleString("vi-VN")} ₫
-            </p>
-          )}
+          <p className="text-xs text-slate-500">
+            {typeof amount === "number" && amount > 0
+              ? `Số tiền quy đổi: ${amount.toLocaleString("vi-VN")} ₫`
+              : "Mức tiền người mua sẽ quét nạp vào két giữ tiền an toàn."}
+          </p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-slate-200 flex items-center gap-1.5">
-              <Clock className="size-4 text-cyan-400" />
-              <span>Thời gian kiểm tra hàng</span>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono block">
+              THỜI GIAN ĐỒNG KIỂM &amp; DÙNG THỬ <span className="text-rose-600">*</span>
             </label>
             {isPhysical && (
-              <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-mono text-amber-300">
+              <span className="rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-mono text-amber-700 font-bold">
                 Khuyên dùng: 24h - 48h
               </span>
             )}
@@ -93,38 +92,36 @@ export function EscrowTermsSection({
                   disabled={disabled}
                   onClick={() => onInspectionDurationChange(option.value)}
                   className={cn(
-                    "min-h-11 rounded-lg border text-xs font-semibold transition-all cursor-pointer flex flex-col items-center justify-center p-1.5",
+                    "min-h-[44px] rounded-xl text-xs font-semibold transition-all cursor-pointer flex flex-col items-center justify-center p-1.5 shadow-2xs",
                     isSelected
-                      ? isPhysical
-                        ? "border-amber-500 bg-amber-950/40 text-amber-300 ring-1 ring-amber-500/50"
-                        : "border-cyan-500 bg-cyan-950/40 text-cyan-300 ring-1 ring-cyan-500/50"
-                      : "border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700"
+                      ? "border-2 border-rose-500 bg-rose-50 text-rose-700 font-bold"
+                      : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
                   )}
                 >
                   <span className="font-bold">{option.label}</span>
-                  <span className="text-[9px] opacity-70 font-normal">{option.hint}</span>
+                  <span className="text-[9px] opacity-75 font-normal">{option.hint}</span>
                 </button>
               );
             })}
           </div>
-          <span className="text-[11px] text-slate-400 block leading-tight">
-            Cho người mua kiểm tra trong bao lâu? Hết thời gian này, tiền sẽ tự động chuyển cho bạn.
-          </span>
+          <p className="text-xs text-slate-500">
+            Thời gian người mua kiểm tra sản phẩm trước khi tiền tự động giải ngân.
+          </p>
         </div>
       </div>
 
       {/* Designated Buyer ID (Optional) */}
-      <div className="space-y-1.5">
-        <label htmlFor="buyer-id" className="text-xs font-medium text-slate-300">
-          Chỉ định Người mua (Tùy chọn - để trống nếu muốn đăng công khai cho mọi người)
+      <div className="space-y-1.5 pt-2">
+        <label htmlFor="buyer-id" className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono block">
+          CHỈ ĐỊNH NGƯỜI MUA (TÙY CHỌN)
         </label>
         <Input
           id="buyer-id"
           disabled={disabled}
-          placeholder="Nhập mã định danh người mua nếu giao dịch riêng, hoặc để trống để đăng công khai"
+          placeholder="Nhập ID người mua nếu giao dịch riêng, hoặc để trống để đăng công khai lên sàn"
           value={buyerId}
           onChange={(e) => onBuyerIdChange(e.target.value)}
-          className="bg-slate-950/80 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 min-h-11 text-xs font-mono"
+          className="bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-100 min-h-[44px] text-xs font-mono shadow-2xs"
         />
       </div>
     </div>

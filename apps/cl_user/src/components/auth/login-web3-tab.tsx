@@ -41,76 +41,18 @@ export function LoginWeb3Tab({
 }: LoginWeb3TabProps) {
   return (
     <div className="space-y-3.5">
-      {/* 1. SOLANA SIGN-IN (SIWS) */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-tr from-purple-500/20 to-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-              <Wallet className="size-4" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-white">
-                Solana SIWS Authentication
-              </div>
-              <div className="text-[11px] text-slate-400">
-                {connected && publicKey
-                  ? `Đã liên kết ví: ${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
-                  : "Hỗ trợ ví Phantom, Solflare (Ed25519 Detached)"}
-              </div>
-            </div>
-          </div>
-          {connected && (
-            <button
-              type="button"
-              onClick={onDisconnect}
-              className="text-[10px] text-slate-400 hover:text-rose-400 underline cursor-pointer"
-            >
-              Đổi ví
-            </button>
-          )}
-        </div>
-
-        <Button
-          type="button"
-          onClick={onSolanaSignIn}
-          disabled={isSolanaLoading}
-          className="w-full bg-linear-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold h-11 rounded-lg border border-purple-400/30 shadow-[0_0_20px_rgba(99,102,241,0.25)] gap-2 text-xs sm:text-sm cursor-pointer"
-        >
-          {isSolanaLoading ? (
-            <>
-              <Loader2 className="size-4 animate-spin text-cyan-300" />
-              <span>
-                {solanaStep === "requesting_sign"
-                  ? "Đang chờ ký trong ví..."
-                  : "Đang đối soát chữ ký Ed25519..."}
-              </span>
-            </>
-          ) : (
-            <>
-              <Wallet className="size-4 text-cyan-200" />
-              <span>
-                {connected
-                  ? "Ký xác thực ví Solana (SIWS)"
-                  : "Kết nối Ví Solana (Phantom / Solflare)"}
-              </span>
-              <ArrowRight className="size-3.5 ml-auto text-cyan-200" />
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* 2. GOOGLE LOGIN */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+      {/* 1. GOOGLE LOGIN */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600 border border-rose-200">
             <CheckCircle2 className="size-4" />
           </div>
           <div>
-            <div className="text-xs font-bold text-white">
-              Google Identity Services
+            <div className="text-xs font-bold text-slate-900">
+              Google 1-Chạm
             </div>
-            <div className="text-[11px] text-slate-400">
-              Đăng nhập nhanh 1 chạm, trích xuất hồ sơ tự động
+            <div className="text-[11px] text-slate-500">
+              Đăng nhập tức thì, xác thực tài khoản an toàn
             </div>
           </div>
         </div>
@@ -121,8 +63,8 @@ export function LoginWeb3Tab({
             onError={() => {
               toast.error("Không thể kết nối dịch vụ Google OAuth");
             }}
-            theme="filled_black"
-            shape="pill"
+            theme="outline"
+            shape="rectangular"
             size="large"
             text="continue_with"
             width={360}
@@ -130,24 +72,82 @@ export function LoginWeb3Tab({
         </div>
       </div>
 
-      {/* 3. PASSKEY / BIOMETRICS */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
+      {/* 2. PASSKEY / BIOMETRICS */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
         <Button
           type="button"
           variant="outline"
           onClick={onPasskeySignIn}
           disabled={isPasskeyLoading}
-          className="w-full h-11 border-slate-700/80 bg-slate-900/90 hover:bg-slate-800 hover:border-cyan-500/50 text-slate-200 hover:text-white font-semibold rounded-lg gap-2 text-xs sm:text-sm cursor-pointer"
+          className="w-full min-h-[44px] border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-xl gap-2 text-xs sm:text-sm cursor-pointer shadow-xs"
         >
           {isPasskeyLoading ? (
             <>
-              <Loader2 className="size-4 animate-spin text-cyan-400" />
+              <Loader2 className="size-4 animate-spin text-rose-500" />
               <span>Đang kiểm tra sinh trắc học thiết bị...</span>
             </>
           ) : (
             <>
-              <Fingerprint className="size-4 text-cyan-400" />
+              <Fingerprint className="size-4 text-emerald-600" />
               <span>Đăng nhập qua Passkey / FaceID / TouchID</span>
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* 3. SOLANA SIGN-IN (SIWS) */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200">
+              <Wallet className="size-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900">
+                Ví Solana (SIWS)
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {connected && publicKey
+                  ? `Đã liên kết ví: ${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
+                  : "Hỗ trợ ví Phantom, Solflare"}
+              </div>
+            </div>
+          </div>
+          {connected && (
+            <button
+              type="button"
+              onClick={onDisconnect}
+              className="text-[10px] text-slate-500 hover:text-rose-600 underline cursor-pointer"
+            >
+              Đổi ví
+            </button>
+          )}
+        </div>
+
+        <Button
+          type="button"
+          onClick={onSolanaSignIn}
+          disabled={isSolanaLoading}
+          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold min-h-[44px] rounded-xl border border-slate-950 shadow-sm gap-2 text-xs sm:text-sm cursor-pointer"
+        >
+          {isSolanaLoading ? (
+            <>
+              <Loader2 className="size-4 animate-spin text-white" />
+              <span>
+                {solanaStep === "requesting_sign"
+                  ? "Đang chờ ký trong ví..."
+                  : "Đang đối soát chữ ký Ed25519..."}
+              </span>
+            </>
+          ) : (
+            <>
+              <Wallet className="size-4 text-slate-300" />
+              <span>
+                {connected
+                  ? "Ký xác thực ví Solana (SIWS)"
+                  : "Kết nối Ví Solana (Phantom / Solflare)"}
+              </span>
+              <ArrowRight className="size-3.5 ml-auto text-slate-300" />
             </>
           )}
         </Button>

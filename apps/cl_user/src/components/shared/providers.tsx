@@ -25,7 +25,7 @@ export function Providers({ children }: ProvidersProps) {
     "831991823901-trustpassz-dev.apps.googleusercontent.com";
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={queryClient}>
         <NuqsAdapter>
           <GoogleOAuthProvider clientId={googleClientId}>

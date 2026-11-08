@@ -87,14 +87,14 @@ export function CheckoutPaymentDetails({
   };
 
   return (
-    <div className="md:col-span-7 space-y-4">
+    <div className="space-y-4">
       {/* Amount Box */}
-      <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 flex items-center justify-between">
+      <div className="p-4 sm:p-5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
         <div>
-          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
             Số tiền cần thanh toán
           </span>
-          <span className="font-mono text-2xl sm:text-3xl font-black text-cyan-400">
+          <span className="font-mono text-2xl sm:text-3xl font-black text-rose-600">
             {bankConfig.amount.toLocaleString("vi-VN")} ₫
           </span>
         </div>
@@ -104,10 +104,10 @@ export function CheckoutPaymentDetails({
           variant="outline"
           size="sm"
           onClick={() => onCopy(String(bankConfig.amount), "amount", "số tiền")}
-          className="min-h-11 border-cyan-500/40 bg-cyan-950/60 text-cyan-300 hover:bg-cyan-900/60 text-xs font-bold gap-1.5 cursor-pointer"
+          className="min-h-11 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold gap-1.5 rounded-xl shadow-xs cursor-pointer"
         >
           {copiedField === "amount" ? (
-            <Check className="size-4 text-emerald-400" />
+            <Check className="size-4 text-emerald-600" />
           ) : (
             <Copy className="size-4" />
           )}
@@ -117,15 +117,15 @@ export function CheckoutPaymentDetails({
 
       {/* Fallback UI: Rendered when 500ms timeout occurs or scheme fails on Android */}
       {deepLinkFailed && (
-        <div className="rounded-xl border border-amber-500/50 bg-amber-950/30 p-4 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 space-y-3 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="size-5 text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h5 className="text-sm font-bold text-amber-200">
+              <h5 className="text-sm font-bold text-amber-900">
                 Không thể mở trực tiếp App Ngân Hàng
               </h5>
-              <p className="text-xs text-amber-300/80 leading-relaxed">
-                Thiết bị không phản hồi URL Scheme <code className="font-mono bg-amber-950 px-1 py-0.5 rounded text-[11px]">vietqr://</code> trong 500ms. Vui lòng chuyển khoản thủ công bằng thông tin dưới đây:
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Thiết bị không phản hồi URL Scheme <code className="font-mono bg-amber-100 px-1 py-0.5 rounded text-[11px]">vietqr://</code> trong 500ms. Vui lòng chuyển khoản thủ công bằng thông tin dưới đây:
               </p>
             </div>
           </div>
@@ -134,12 +134,12 @@ export function CheckoutPaymentDetails({
             <Button
               type="button"
               onClick={handleCopyStkSecure}
-              className="flex-1 min-h-11 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md gap-2 cursor-pointer"
+              className="flex-1 min-h-11 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs border border-amber-700 rounded-xl gap-2 cursor-pointer"
             >
               {copiedStkSecure ? (
-                <Check className="size-4 text-slate-950" />
+                <Check className="size-4 text-white" />
               ) : (
-                <Copy className="size-4 text-slate-950" />
+                <Copy className="size-4 text-white" />
               )}
               <span>Sao chép thông tin STK (Tự xóa sau 30s)</span>
             </Button>
@@ -149,7 +149,7 @@ export function CheckoutPaymentDetails({
               variant="outline"
               size="sm"
               onClick={handleOpenBankApp}
-              className="min-h-11 border-amber-500/40 text-amber-300 hover:bg-amber-900/40 text-xs font-bold gap-1.5 cursor-pointer"
+              className="min-h-11 border-amber-300 bg-white text-amber-900 hover:bg-amber-50 text-xs font-bold gap-1.5 rounded-xl cursor-pointer"
             >
               <RefreshCw className="size-3.5" />
               <span>Thử lại</span>
@@ -161,43 +161,43 @@ export function CheckoutPaymentDetails({
       {/* Account Information Rows */}
       <div className="space-y-2 text-xs">
         {/* Row 1: Bank Name */}
-        <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
           <div>
             <span className="text-[10px] text-slate-400 block font-semibold">
               Ngân hàng thụ hưởng
             </span>
-            <span className="font-medium text-slate-200">
+            <span className="font-bold text-slate-900">
               {bankConfig.bankName}
             </span>
           </div>
           <Badge
             variant="outline"
-            className="font-mono text-[10px] border-slate-700 text-slate-400"
+            className="font-mono text-[10px] border-slate-200 bg-white text-slate-600"
           >
             BIN: {bankConfig.bin}
           </Badge>
         </div>
 
         {/* Row 2: Account Number */}
-        <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
           <div>
             <span className="text-[10px] text-slate-400 block font-semibold">
               Số tài khoản
             </span>
-            <span className="font-mono font-bold text-base text-white">
+            <span className="font-mono font-bold text-base text-slate-900">
               {bankConfig.accountNo}
             </span>
           </div>
 
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleCopyStkSecure}
-            className="min-h-11 text-slate-300 hover:text-white text-xs gap-1.5 cursor-pointer"
+            className="min-h-11 border border-slate-200 bg-white hover:border-rose-400 text-rose-600 text-xs font-bold gap-1.5 rounded-xl cursor-pointer shadow-xs"
           >
             {copiedStkSecure || copiedField === "account" ? (
-              <Check className="size-4 text-emerald-400" />
+              <Check className="size-4 text-emerald-600" />
             ) : (
               <Copy className="size-4" />
             )}
@@ -206,25 +206,28 @@ export function CheckoutPaymentDetails({
         </div>
 
         {/* Row 3: Account Name */}
-        <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
           <div>
             <span className="text-[10px] text-slate-400 block font-semibold">
               Chủ tài khoản
             </span>
-            <span className="font-bold text-slate-200 uppercase">
+            <span className="font-bold text-slate-900 uppercase">
               {bankConfig.accountName}
             </span>
           </div>
-          <ShieldCheck className="size-4 text-emerald-400" />
+          <span className="text-emerald-700 text-[10px] font-sans font-bold flex items-center gap-1">
+            <ShieldCheck className="size-4 text-emerald-600" />
+            Xác thực
+          </span>
         </div>
 
         {/* Row 4: Memo Transfer Syntax */}
-        <div className="p-3 rounded-xl bg-linear-to-r from-amber-950/30 to-slate-950 border border-amber-500/40 flex items-center justify-between">
+        <div className="p-3 rounded-xl bg-rose-50/60 border border-rose-200 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-amber-300 font-bold uppercase block tracking-wider">
+            <span className="text-[10px] text-rose-700 font-bold uppercase block tracking-wider">
               Nội dung chuyển khoản (Bắt buộc chính xác)
             </span>
-            <span className="font-mono font-black text-base text-amber-400">
+            <span className="font-mono font-black text-base text-rose-600">
               {bankConfig.memo}
             </span>
           </div>
@@ -233,7 +236,7 @@ export function CheckoutPaymentDetails({
             type="button"
             size="sm"
             onClick={() => onCopy(bankConfig.memo, "memo", "nội dung chuyển khoản")}
-            className="min-h-11 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs gap-1.5 shadow-md cursor-pointer"
+            className="min-h-11 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs gap-1.5 shadow-xs border border-rose-700 rounded-xl cursor-pointer"
           >
             {copiedField === "memo" ? (
               <Check className="size-4" />
@@ -247,7 +250,7 @@ export function CheckoutPaymentDetails({
 
       {/* Security notice for clipboard */}
       <div className="flex items-center gap-2 text-[11px] text-slate-500 px-1">
-        <Info className="size-3.5 text-cyan-400 shrink-0" />
+        <Info className="size-3.5 text-rose-500 shrink-0" />
         <span>Dữ liệu STK và cú pháp chuyển khoản được bảo mật tự xóa sau 30 giây khỏi clipboard.</span>
       </div>
 
@@ -257,7 +260,7 @@ export function CheckoutPaymentDetails({
           type="button"
           onClick={handleOpenBankApp}
           disabled={isAttemptingDeepLink}
-          className="flex-1 min-h-12 bg-linear-to-r from-emerald-500 via-cyan-500 to-emerald-400 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-sm shadow-lg shadow-cyan-950/50 cursor-pointer disabled:opacity-70"
+          className="w-full min-h-12 rounded-xl bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 border border-emerald-700 cursor-pointer disabled:opacity-70"
         >
           {isAttemptingDeepLink ? (
             <RefreshCw className="size-4 mr-2 animate-spin" />

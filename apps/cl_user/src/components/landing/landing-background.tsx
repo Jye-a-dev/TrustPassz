@@ -44,7 +44,7 @@ export function LandingBackground() {
       {/* Subtle Tech Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[32px_32px] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
-      {/* Floating Ambient Aura Orb 1 - Cyan Top Left */}
+      {/* Floating Ambient Aura Orb 1 - Rose Top Left */}
       <motion.div
         animate={{
           x: [0, 45, -35, 0],
@@ -56,10 +56,10 @@ export function LandingBackground() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -top-24 left-[15%] w-120 h-120 rounded-full bg-linear-to-br from-cyan-500/15 via-teal-500/10 to-transparent blur-[120px]"
+        className="absolute -top-24 left-[15%] w-120 h-120 rounded-full bg-linear-to-br from-rose-500/10 via-rose-300/5 to-transparent blur-[120px]"
       />
 
-      {/* Floating Ambient Aura Orb 2 - Emerald Top Right */}
+      {/* Floating Ambient Aura Orb 2 - Amber/Peach Top Right */}
       <motion.div
         animate={{
           x: [0, -40, 30, 0],
@@ -71,10 +71,10 @@ export function LandingBackground() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-[12%] right-[10%] w-130 h-130 rounded-full bg-linear-to-bl from-emerald-500/15 via-teal-500/10 to-transparent blur-[130px]"
+        className="absolute top-[12%] right-[10%] w-130 h-130 rounded-full bg-linear-to-bl from-amber-500/10 via-rose-400/5 to-transparent blur-[130px]"
       />
 
-      {/* Floating Ambient Aura Orb 3 - Cyan Mid Page */}
+      {/* Floating Ambient Aura Orb 3 - Rose Mid Page */}
       <motion.div
         animate={{
           x: [0, 35, -25, 0],
@@ -86,7 +86,7 @@ export function LandingBackground() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-[48%] left-[5%] w-105 h-105 rounded-full bg-linear-to-tr from-cyan-500/10 via-emerald-500/8 to-transparent blur-[125px]"
+        className="absolute top-[48%] left-[5%] w-105 h-105 rounded-full bg-linear-to-tr from-rose-500/8 via-amber-500/5 to-transparent blur-[125px]"
       />
 
       {/* Floating Micro Particle Badge 1 - Left Drift */}
@@ -100,10 +100,10 @@ export function LandingBackground() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="hidden lg:flex absolute top-36 left-[8%] items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-cyan-500/20 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md text-[10px] font-mono text-cyan-600 dark:text-cyan-400 shadow-sm"
+        className="hidden lg:flex absolute top-36 left-[8%] items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-rose-200 bg-white/80 backdrop-blur-md text-[10px] font-mono text-rose-600 shadow-sm"
       >
-        <span className="size-1.5 rounded-full bg-cyan-400 animate-ping" />
-        <span>Escrow_Lock::Active</span>
+        <span className="size-1.5 rounded-full bg-rose-500 animate-ping" />
+        <span>Két_Giữ_Tiền::Khóa_Tự_Động</span>
       </motion.div>
 
       {/* Floating Micro Particle Badge 2 - Right Drift */}
@@ -117,10 +117,10 @@ export function LandingBackground() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="hidden lg:flex absolute top-72 right-[7%] items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-emerald-500/20 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md text-[10px] font-mono text-emerald-600 dark:text-emerald-400 shadow-sm"
+        className="hidden lg:flex absolute top-72 right-[7%] items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-emerald-200 bg-white/80 backdrop-blur-md text-[10px] font-mono text-emerald-700 shadow-sm"
       >
-        <span className="size-1.5 rounded-full bg-emerald-400" />
-        <span>VietQR::24h_Verified</span>
+        <span className="size-1.5 rounded-full bg-emerald-500" />
+        <span>VietQR_Napas::24/7_Bảo_Chứng</span>
       </motion.div>
 
       {/* Ambient Twinkling Random Sparkles */}

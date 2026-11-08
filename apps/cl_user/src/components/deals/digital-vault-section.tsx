@@ -128,40 +128,19 @@ export function DigitalVaultSection({
   const NoticeIcon = config.noticeIcon;
 
   return (
-    <div
-      className={cn(
-        "rounded-xl border p-4 space-y-3.5 relative overflow-hidden backdrop-blur-sm transition-colors",
-        isPhysical
-          ? "border-amber-500/30 bg-linear-to-b from-amber-950/20 via-slate-900/50 to-slate-900/40"
-          : "border-cyan-500/30 bg-slate-900/50"
-      )}
-    >
-      <div
-        className={cn(
-          "absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none",
-          isPhysical ? "bg-amber-500/10" : "bg-cyan-500/5"
-        )}
-      />
-
-      <div className="flex items-center gap-2.5">
-        <div
-          className={cn(
-            "p-2 rounded-lg border",
-            isPhysical
-              ? "bg-amber-950/70 border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
-              : "bg-cyan-950/60 border-cyan-500/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-          )}
-        >
-          <Lock className="w-5 h-5" />
+    <div className="rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-5 sm:p-6 my-4 space-y-4">
+      <div className="flex items-center gap-3 text-emerald-950">
+        <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200">
+          <Lock className="size-5" />
         </div>
         <div>
-          <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-            <span>{config.title}</span>
-            <Badge className={cn("text-[10px]", config.badgeClass)}>
+          <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-emerald-900 flex items-center gap-2">
+            <span>4. {config.title}</span>
+            <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px]">
               {config.badgeText}
             </Badge>
           </h4>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-600 mt-0.5">
             {config.subtitle}
           </p>
         </div>
@@ -170,9 +149,9 @@ export function DigitalVaultSection({
       <div className="space-y-1.5">
         <label
           htmlFor="secret-payload"
-          className="text-xs font-semibold text-slate-200"
+          className="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono block"
         >
-          {config.label} <span className="text-cyan-400">*</span>
+          {config.label} <span className="text-rose-600">*</span>
         </label>
         <textarea
           id="secret-payload"
@@ -181,16 +160,11 @@ export function DigitalVaultSection({
           placeholder={config.placeholder}
           value={rawSecret}
           onChange={(e) => onRawSecretChange(e.target.value)}
-          className={cn(
-            "w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:ring-2",
-            isPhysical
-              ? "text-amber-200 focus:ring-amber-500"
-              : "text-cyan-300 focus:ring-cyan-500"
-          )}
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 shadow-2xs"
           required
         />
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-          <NoticeIcon className={cn("w-3.5 h-3.5 shrink-0", config.noticeColor)} />
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <NoticeIcon className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
           <span>{config.noticeText}</span>
         </div>
       </div>
@@ -198,9 +172,9 @@ export function DigitalVaultSection({
       <div className="space-y-1.5">
         <label
           htmlFor="vault-passphrase"
-          className="text-xs font-medium text-slate-300"
+          className="text-xs font-semibold text-slate-700 block font-mono uppercase"
         >
-          Mật khẩu mở khóa (Tùy chọn - nếu để trống hệ thống sẽ tự tạo mật khẩu bảo mật)
+          Mật khẩu mở khóa (Tùy chọn - nếu để trống hệ thống sẽ tự sinh khóa)
         </label>
         <Input
           id="vault-passphrase"
@@ -209,28 +183,28 @@ export function DigitalVaultSection({
           placeholder="Nhập mật khẩu mở khóa hoặc để trống để tạo tự động"
           value={passphrase}
           onChange={(e) => onPassphraseChange(e.target.value)}
-          className="bg-slate-950/80 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 min-h-11 text-xs font-mono"
+          className="bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 min-h-[44px] text-xs font-mono shadow-2xs"
         />
       </div>
 
       {/* Audit preview when generated */}
       {vaultAudit && (
-        <div className="rounded-md border border-emerald-500/40 bg-slate-950/90 p-3 space-y-1.5 text-xs text-slate-300 font-mono animate-in fade-in duration-200">
-          <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+        <div className="rounded-xl border border-emerald-300 bg-white p-3.5 space-y-1.5 text-xs text-slate-700 font-mono shadow-xs">
+          <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
             <CheckCircle2 className="w-4 h-4" />
-            <span>Đã khóa an toàn vào Kho bảo mật:</span>
+            <span>Đã bảo chứng vào Két bảo mật:</span>
           </div>
           <div className="truncate">
-            <span className="text-slate-400">SHA-256 Hash: </span>
-            <span className="text-cyan-300">{vaultAudit.contentHash}</span>
+            <span className="text-slate-500">SHA-256 Hash: </span>
+            <span className="text-emerald-800 font-bold">{vaultAudit.contentHash}</span>
           </div>
-          <div className="truncate">
-            <span className="text-slate-400">IV (12B): </span>
-            <span className="text-slate-200">{vaultAudit.encryptionIv}</span>
+          <div className="truncate text-slate-500">
+            <span>IV (12B): </span>
+            <span className="text-slate-700">{vaultAudit.encryptionIv}</span>
           </div>
-          <div className="truncate">
-            <span className="text-slate-400">Auth Tag (16B): </span>
-            <span className="text-slate-200">{vaultAudit.authTag}</span>
+          <div className="truncate text-slate-500">
+            <span>Auth Tag (16B): </span>
+            <span className="text-slate-700">{vaultAudit.authTag}</span>
           </div>
         </div>
       )}

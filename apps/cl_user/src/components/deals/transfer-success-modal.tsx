@@ -198,85 +198,90 @@ export function TransferSuccessModal({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
         />
         <DialogPrimitive.Content
           aria-describedby="transfer-modal-description"
           className={cn(
             "fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2",
-            "rounded-2xl border border-slate-800 bg-[#0B0F17]/95 p-6 sm:p-8 text-slate-100",
-            "shadow-[0_0_60px_rgba(16,185,129,0.18)] ring-1 ring-emerald-500/25",
-            "backdrop-blur-xl duration-200 focus:outline-none",
+            "rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 text-slate-800",
+            "shadow-2xl duration-200 focus:outline-none",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
           )}
         >
-          {/* Top Dismiss Button (Touch target >= 44px) */}
+          {/* Top Dismiss Button */}
           <DialogPrimitive.Close
             onClick={handleClose}
-            className="absolute right-3 top-3 min-h-11 min-w-11 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 size-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors min-h-[36px] cursor-pointer"
             aria-label="Đóng cửa sổ"
           >
-            <X className="size-5" />
+            <X className="size-4" />
           </DialogPrimitive.Close>
 
-          {/* Glowing Status Animation */}
-          <div className="relative mx-auto flex items-center justify-center size-20">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400/20 opacity-75" />
-            <div className="relative flex size-16 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/40 shadow-[0_0_35px_rgba(16,185,129,0.35)]">
-              <ShieldCheck className="size-8 text-emerald-400" />
+          {/* Success Icon */}
+          <div className="flex flex-col items-center text-center space-y-3 pt-2">
+            <div className="relative">
+              <div className="flex size-16 sm:size-20 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm">
+                <ShieldCheck className="size-8 sm:size-10" />
+              </div>
+              <span className="absolute -bottom-1 -right-1 size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white">
+                <Check className="size-3 stroke-[3]" />
+              </span>
             </div>
-          </div>
 
-          {/* Dynamic Title and Subtitle */}
-          <div className="text-center mt-4 space-y-1">
-            <DialogPrimitive.Title className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
-              <span>{modalTitle}</span>
-              <Sparkles className="size-5 text-emerald-400 animate-pulse" />
-            </DialogPrimitive.Title>
-            <p
-              id="transfer-modal-description"
-              className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto"
-            >
-              {modalDesc}
-            </p>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {isSettlement ? "GIẢI NGÂN THÀNH CÔNG" : "GIAO DỊCH ĐÃ XÁC THỰC KÝ QUỸ"}
+              </div>
+              <DialogPrimitive.Title className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
+                {modalTitle}
+              </DialogPrimitive.Title>
+              <p
+                id="transfer-modal-description"
+                className="text-xs text-slate-500 max-w-sm mx-auto"
+              >
+                {modalDesc}
+              </p>
+            </div>
           </div>
 
           {/* Amount Showcase Card */}
-          <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-center shadow-inner">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-400/80">
-              {isSettlement ? "Số tiền giải ngân" : "Số tiền ký quỹ bảo chứng"}
-            </p>
-            <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-emerald-400 mt-1">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 sm:p-5 my-4 text-center space-y-1">
+            <span className="text-[10px] sm:text-[11px] uppercase font-mono font-bold text-emerald-800 tracking-wider">
+              {isSettlement ? "SỐ TIỀN GIẢI NGÂN ĐẾN NGƯỜI BÁN" : "SỐ TIỀN ĐÃ KHÓA AN TOÀN TRONG KÉT ESCROW"}
+            </span>
+            <div className="font-mono text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               {formatCurrencyAmount(amount, currency)}
             </div>
             {dealTitle && (
-              <p className="text-xs text-slate-400 truncate max-w-xs mx-auto mt-1 font-medium">
+              <p className="text-xs text-slate-700 font-medium truncate pt-1">
                 {dealTitle}
               </p>
             )}
           </div>
 
-          {/* On-Chain & Transaction Metadata Grid */}
-          <div className="mt-5 space-y-2.5 rounded-xl border border-slate-800/80 bg-slate-900/60 p-4 text-xs font-mono">
+          {/* Audit Metadata Strip */}
+          <div className="space-y-2.5 text-xs font-mono my-4">
             {/* Deal ID */}
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-slate-400 flex items-center gap-1.5 font-sans">
-                <Hash className="size-3.5 text-cyan-400" />
-                Mã Kèo (Deal ID)
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500 text-[11px] font-sans font-medium flex items-center gap-1.5">
+                <Hash className="size-3.5 text-rose-500" />
+                MÃ GIAO DỊCH:
               </span>
-              <div className="flex items-center gap-1.5 font-semibold text-slate-200">
-                <span>#{dealId ? dealId.slice(0, 8).toUpperCase() : "N/A"}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-900 font-bold">#{dealId ? dealId.slice(0, 8).toUpperCase() : "N/A"}</span>
                 {dealId && (
                   <button
                     type="button"
                     onClick={handleCopyDealId}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                    className="p-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                     title="Sao chép Deal ID"
                   >
                     {copiedDealId ? (
-                      <Check className="size-3 text-emerald-400" />
+                      <Check className="size-3 text-emerald-600" />
                     ) : (
                       <Copy className="size-3" />
                     )}
@@ -286,25 +291,25 @@ export function TransferSuccessModal({
             </div>
 
             {/* TxHash / On-Chain Transaction */}
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-slate-400 flex items-center gap-1.5 font-sans">
-                <ShieldCheck className="size-3.5 text-emerald-400" />
-                Mã đối soát (TxHash)
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500 text-[11px] font-sans font-medium flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5 text-emerald-600" />
+                MÃ ĐỐI SOÁT (TXHASH):
               </span>
               <div className="flex items-center gap-1.5">
                 {txHash ? (
                   <>
-                    <span className="text-emerald-400 font-semibold">
+                    <span className="text-emerald-700 font-bold">
                       {formatTruncatedHash(txHash)}
                     </span>
                     <button
                       type="button"
                       onClick={handleCopyTxHash}
-                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer"
                       title="Sao chép TxHash"
+                      className="p-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                     >
                       {copiedHash ? (
-                        <Check className="size-3 text-emerald-400" />
+                        <Check className="size-3 text-emerald-600" />
                       ) : (
                         <Copy className="size-3" />
                       )}
@@ -314,7 +319,7 @@ export function TransferSuccessModal({
                         href={explorer.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 transition-colors inline-flex items-center cursor-pointer"
+                        className="p-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors inline-flex items-center cursor-pointer"
                         title={`Xem trên ${explorer.label}`}
                       >
                         <ExternalLink className="size-3" />
@@ -322,54 +327,67 @@ export function TransferSuccessModal({
                     )}
                   </>
                 ) : (
-                  <span className="text-slate-400 italic font-sans flex items-center gap-1">
-                    <span className="size-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                  <span className="text-slate-500 italic font-sans flex items-center gap-1">
+                    <span className="size-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
                     Đã xác nhận hệ thống
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Confirmation Timestamp */}
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-slate-400 flex items-center gap-1.5 font-sans">
-                <Clock className="size-3.5 text-amber-400" />
-                Thời gian xác nhận
+            {/* Gateway */}
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500 text-[11px] font-sans font-medium">CỔNG THANH TOÁN:</span>
+              <span className="text-emerald-700 font-bold font-sans">
+                {chainType === "VIETQR" || !chainType || chainType === "FIAT" ? "VietQR Napas 24/7" : chainType}
               </span>
-              <span className="text-slate-300">{formattedTime}</span>
             </div>
 
-            {/* Escrow Status Pill */}
-            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-800">
-              <span className="text-slate-400 font-sans">Trạng thái Két</span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-sans font-bold text-[11px]">
-                <span className="size-1.5 rounded-full bg-emerald-400" />
-                {isSettlement ? "ĐÃ GIẢI NGÂN HOÀN TẤT" : "ĐÃ GIỮ TRONG KÉT AN TOÀN"}
+            {/* Confirmation Timestamp */}
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500 text-[11px] font-sans font-medium flex items-center gap-1.5">
+                <Clock className="size-3.5 text-amber-500" />
+                THỜI GIAN KHÓA KÉT:
               </span>
+              <span className="text-slate-700 font-medium">{formattedTime}</span>
             </div>
           </div>
 
-          {/* Action Buttons (Touch target >= 44px) */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          {/* Action Cluster */}
+          <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
             <button
               type="button"
               onClick={handlePrimaryClick}
-              className="min-h-11 h-11 flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full h-12 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all min-h-[44px] border border-rose-700 cursor-pointer"
             >
               <span>
                 {primaryActionText ||
-                  (isSettlement ? "Xem chi tiết giao dịch" : "Vào két Digital Vault")}
+                  (isSettlement ? "Về trang chi tiết giao dịch" : "Vào Két bảo mật để nhận hàng")}
               </span>
               <ArrowRight className="size-4" />
             </button>
 
-            <button
-              type="button"
-              onClick={handleSecondaryClick}
-              className="min-h-11 h-11 sm:w-auto px-5 inline-flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-white font-semibold text-sm transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-600"
-            >
-              {secondaryActionText || "Xem lịch sử giao dịch"}
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(`/user/deals/${dealId}/receipt`);
+                  if (onOpenChange) onOpenChange(false);
+                  if (onClose) onClose();
+                }}
+                className="h-11 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors min-h-[44px] cursor-pointer"
+              >
+                <span>Xem Biên Lai</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSecondaryClick}
+                className="h-11 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors min-h-[44px] cursor-pointer"
+              >
+                <span>{secondaryActionText || "Quản Lý Đơn"}</span>
+              </button>
+            </div>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

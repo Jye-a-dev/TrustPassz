@@ -114,38 +114,37 @@ export default function UserDashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Welcome Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-linear-to-r from-slate-900/90 via-[#0B0F17] to-cyan-950/30 p-6 shadow-xl">
+      <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-3 py-0.5 text-xs font-bold text-rose-600">
             <Sparkles className="size-3.5" />
-            <span>Quản Lý Giao Dịch An Toàn</span>
+            <span>Sàn Giao Dịch Bảo Chứng Tự Động</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Xin chào, {user?.displayName || "Nhà Giao Dịch"}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-            Chào mừng bạn đến với trung tâm quản lý giao dịch TrustPassz. Mọi đơn
-            hàng được bảo vệ tự động, tiền giữ an toàn qua VietQR và bàn giao chính xác.
+          <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
+            Mọi thỏa thuận mua bán của bạn được bảo vệ tự động: Tiền giữ an toàn qua VietQR, người mua có thời gian đồng kiểm và chỉ giải ngân khi xác nhận hài lòng.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Button
             asChild
-            className="min-h-11 bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold px-4 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:from-emerald-400 hover:to-cyan-400"
+            className="min-h-[44px] px-5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 shadow-sm transition-all border border-rose-600 cursor-pointer active:translate-y-0.5"
           >
             <Link href="/user/deals/create">
-              <PlusCircle className="size-4 mr-1.5" />
-              Tạo Giao Dịch Mới
+              <PlusCircle className="size-4 mr-0.5" />
+              <span>+ Tạo Giao Dịch Mới</span>
             </Link>
           </Button>
 
           <Button
             asChild
             variant="outline"
-            className="min-h-11 border-slate-700 bg-slate-900/80 text-slate-200 hover:bg-slate-800 text-xs font-semibold"
+            className="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm inline-flex items-center cursor-pointer shadow-xs active:translate-y-0.5"
           >
-            <Link href="/explore">Khám Phá Giao Dịch</Link>
+            <Link href="/explore">Khám Phá Sàn</Link>
           </Button>
         </div>
       </div>
@@ -163,18 +162,17 @@ export default function UserDashboardPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Handshake className="size-5 text-cyan-400" />
-              Giao Dịch Đang Hoạt Động
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Handshake className="size-5 text-rose-500" />
+              <span>Giao Dịch Gần Đây</span>
             </h2>
-           
           </div>
 
           <Button
             asChild
             variant="ghost"
             size="sm"
-            className="text-xs text-cyan-400 hover:text-cyan-300 gap-1"
+            className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-1 border border-transparent hover:border-rose-200 rounded-lg cursor-pointer font-semibold"
           >
             <Link href="/user/deals">
               Xem tất cả <ArrowRight className="size-3.5" />
@@ -183,8 +181,8 @@ export default function UserDashboardPage() {
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-950/30 flex items-center gap-2 text-rose-300 text-xs">
-            <AlertCircle className="size-4 shrink-0" />
+          <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50 flex items-center gap-2 text-rose-700 text-xs">
+            <AlertCircle className="size-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
@@ -194,13 +192,13 @@ export default function UserDashboardPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-28 rounded-xl border border-slate-800 bg-slate-900/40 p-4 animate-pulse flex items-center justify-between"
+                className="h-28 rounded-2xl border border-slate-200 bg-white p-5 animate-pulse flex items-center justify-between"
               >
                 <div className="space-y-2 w-1/2">
-                  <div className="h-4 bg-slate-800 rounded w-1/3" />
-                  <div className="h-5 bg-slate-800 rounded w-3/4" />
+                  <div className="h-4 bg-slate-100 rounded w-1/3" />
+                  <div className="h-5 bg-slate-100 rounded w-3/4" />
                 </div>
-                <div className="h-8 bg-slate-800 rounded w-24" />
+                <div className="h-9 bg-slate-100 rounded-xl w-28" />
               </div>
             ))}
           </div>

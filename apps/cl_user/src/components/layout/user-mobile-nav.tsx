@@ -54,7 +54,7 @@ export function UserMobileNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800/80 bg-[#070A10]/95 px-3 py-1.5 backdrop-blur-2xl md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-3 py-1.5 backdrop-blur-md md:hidden shadow-lg"
       aria-label="Điều hướng mobile đáy trang"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
@@ -70,10 +70,10 @@ export function UserMobileNav() {
                 className="flex flex-col items-center justify-center min-w-12 min-h-12 -mt-4 group"
                 aria-label={tab.label}
               >
-                <div className="flex size-11 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-cyan-500 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.45)] transition-transform group-active:scale-95">
-                  <Icon className="size-6 text-slate-950 font-bold" />
+                <div className="flex size-11 items-center justify-center rounded-full bg-rose-500 text-white border border-rose-600 shadow-md transition-transform group-active:scale-95">
+                  <Icon className="size-6 text-white font-bold" />
                 </div>
-                <span className="text-[10px] font-bold text-emerald-400 mt-0.5">
+                <span className="text-[10px] font-bold text-rose-600 mt-0.5">
                   {tab.label}
                 </span>
               </Link>
@@ -87,21 +87,21 @@ export function UserMobileNav() {
               className={cn(
                 "flex flex-col items-center justify-center min-w-11 min-h-11 py-1 rounded-xl transition-all",
                 isActive
-                  ? "text-cyan-400"
-                  : "text-slate-400 hover:text-slate-200 active:bg-slate-900/50"
+                  ? "text-rose-600 font-bold"
+                  : "text-slate-500 hover:text-slate-800 active:bg-slate-50"
               )}
               aria-label={tab.label}
             >
               <Icon
                 className={cn(
                   "size-5 transition-transform",
-                  isActive && "scale-110 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+                  isActive && "scale-110 text-rose-600"
                 )}
               />
               <span
                 className={cn(
                   "text-[10px] font-medium leading-tight mt-1",
-                  isActive ? "text-cyan-300 font-bold" : "text-slate-400"
+                  isActive ? "text-rose-600 font-bold" : "text-slate-500"
                 )}
               >
                 {tab.label}

@@ -39,23 +39,23 @@ export function LoginEmailForm({ onSubmit, isLoading }: LoginEmailFormProps) {
       <div className="space-y-1.5">
         <label
           htmlFor="email"
-          className="text-xs font-semibold text-slate-300 flex items-center justify-between"
+          className="text-xs font-semibold text-slate-700 flex items-center justify-between"
         >
           <span>Địa chỉ Email</span>
-          <span className="text-[10px] text-slate-500">Bắt buộc</span>
+          <span className="text-[10px] text-slate-400">Bắt buộc</span>
         </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
           <Input
             id="email"
             type="email"
             placeholder="user@example.com"
-            className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
+            className="pl-10 bg-white border-slate-300 text-slate-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
             {...register("email")}
           />
         </div>
         {errors.email && (
-          <p className="text-xs text-rose-400 flex items-center gap-1">
+          <p className="text-xs text-rose-600 flex items-center gap-1">
             <AlertCircle className="size-3" />
             <span>{errors.email.message}</span>
           </p>
@@ -66,29 +66,29 @@ export function LoginEmailForm({ onSubmit, isLoading }: LoginEmailFormProps) {
         <div className="flex items-center justify-between">
           <label
             htmlFor="password"
-            className="text-xs font-semibold text-slate-300"
+            className="text-xs font-semibold text-slate-700"
           >
             Mật khẩu truy cập
           </label>
           <Link
             href="#"
-            className="text-xs text-cyan-400/80 hover:text-cyan-300 underline underline-offset-4"
+            className="text-xs text-rose-600 hover:text-rose-700 underline underline-offset-4"
           >
             Quên mật khẩu?
           </Link>
         </div>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
           <Input
             id="password"
             type="password"
             placeholder="••••••••"
-            className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
+            className="pl-10 bg-white border-slate-300 text-slate-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
             {...register("password")}
           />
         </div>
         {errors.password && (
-          <p className="text-xs text-rose-400 flex items-center gap-1">
+          <p className="text-xs text-rose-600 flex items-center gap-1">
             <AlertCircle className="size-3" />
             <span>{errors.password.message}</span>
           </p>
@@ -98,16 +98,16 @@ export function LoginEmailForm({ onSubmit, isLoading }: LoginEmailFormProps) {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold h-11 rounded-lg gap-2 mt-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] cursor-pointer"
+        className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold h-11 rounded-xl border border-rose-600 shadow-sm gap-2 mt-2 cursor-pointer transition-all active:translate-y-0.5"
       >
         {isLoading ? (
           <>
-            <Loader2 className="size-4 animate-spin text-slate-950" />
+            <Loader2 className="size-4 animate-spin text-white" />
             <span>Đang xác thực...</span>
           </>
         ) : (
           <>
-            <span>Đăng nhập bằng Email</span>
+            <span>Đăng nhập an toàn</span>
             <ArrowRight className="size-4" />
           </>
         )}

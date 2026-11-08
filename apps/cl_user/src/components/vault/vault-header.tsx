@@ -14,59 +14,59 @@ interface VaultHeaderProps {
 
 export function VaultHeader({ dealId, deal, isSettled }: VaultHeaderProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Breadcrumb Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          href="/user"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
+          href="/user/deals"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-rose-600 transition-colors py-2"
         >
           <ArrowLeft className="size-4" />
-          <span>Quay lại bảng điều khiển</span>
+          <span>Quay lại danh sách đơn hàng</span>
         </Link>
 
         <div className="flex items-center gap-2">
           {isSettled ? (
-            <Badge className="bg-emerald-950/80 border-emerald-500/40 text-emerald-300 text-xs px-2.5 py-1">
-              <CheckCircle2 className="size-3 mr-1" />
+            <Badge className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs px-3 py-1 font-bold">
+              <CheckCircle2 className="size-3.5 mr-1 text-emerald-600" />
               Đã Hoàn Tất Giao Dịch
             </Badge>
           ) : (
-            <Badge className="bg-cyan-950/80 border-cyan-500/40 text-cyan-300 text-xs px-2.5 py-1">
-              <Lock className="size-3 mr-1" />
-              Kho Lưu Trữ Nhận Hàng (Đã Khóa Bảo Mật)
+            <Badge className="bg-amber-50 border-amber-300 text-amber-800 text-xs px-3 py-1 font-bold">
+              <Lock className="size-3.5 mr-1 text-amber-600" />
+              Đang Trong Hạn Dùng Thử
             </Badge>
           )}
         </div>
       </div>
 
       {/* Main Vault Header Card */}
-      <div className="rounded-2xl border border-slate-800 bg-linear-to-r from-slate-900/90 via-[#0B0F17] to-cyan-950/30 p-6 space-y-3 shadow-xl">
+      <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 space-y-3 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="font-mono text-[10px] text-cyan-400 uppercase tracking-wider">
-              Mã giao dịch: {dealId}
+            <span className="font-mono text-[11px] text-rose-600 font-bold uppercase tracking-wider">
+              Mã giao dịch: #{dealId.slice(0, 8).toUpperCase()}
             </span>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {deal?.title || "Kho Lưu Trữ Nhận Hàng"}
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Người bán:{" "}
-              <strong className="text-slate-200">
+              <strong className="text-slate-800 font-semibold">
                 {deal?.seller?.displayName || "Người bán uy tín"}
               </strong>{" "}
               • Giá trị:{" "}
-              <strong className="text-cyan-400 font-mono">
-                {deal?.amount ? deal.amount.toLocaleString("vi-VN") : "0"} ₫
+              <strong className="text-rose-600 font-mono font-bold">
+                {deal?.amount ? `${deal.amount.toLocaleString("vi-VN")} ₫` : "0 ₫"}
               </strong>
             </p>
           </div>
 
-          <div className="shrink-0 p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-right">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">
+          <div className="shrink-0 p-3 sm:px-4 rounded-xl bg-slate-50 border border-slate-200 text-right">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">
               Trạng thái giao dịch
             </span>
-            <span className="font-mono font-black text-sm text-emerald-400">
+            <span className="font-mono font-black text-sm text-emerald-700">
               {deal?.state || "IN_INSPECTION"}
             </span>
           </div>

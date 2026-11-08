@@ -46,13 +46,13 @@ export function DealRoomCta({
         <div className="pt-2">
           <Button
             asChild
-            className="w-full min-h-12t-base font-extrabold bg-linear-to-r from-emerald-500 via-cyan-500 to-emerald-400 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-xl shadow-cyan-950/60 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+            className="w-full min-h-[48px] text-sm sm:text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-emerald-700 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
           >
             <Link href={`/user/deals/${deal.id}/vault`}>
               <KeyRound className="w-5 h-5" />
               {isSeller
-                ? "Quản Lý Kho Bàn Giao & Nghiệm Thu"
-                : "Truy Cập Kho Lưu Trữ Nhận Hàng"}
+                ? "Quản Lý Bàn Giao & Nghiệm Thu"
+                : "Mở Két Nhận Hàng"}
             </Link>
           </Button>
         </div>
@@ -64,7 +64,7 @@ export function DealRoomCta({
         <Button
           asChild
           variant="outline"
-          className="w-full min-h-11 text-sm border-slate-700 bg-slate-900 text-slate-200"
+          className="w-full min-h-[44px] text-xs sm:text-sm font-semibold border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-xl shadow-xs"
         >
           <Link href={`/user/deals/${deal.id}/vault`}>Xem Nhật Ký Bàn Giao</Link>
         </Button>
@@ -79,22 +79,23 @@ export function DealRoomCta({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button
             type="button"
+            variant="outline"
             onClick={onEditClick}
-            className="min-h-12 text-sm font-bold bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 flex items-center justify-center gap-2 cursor-pointer transition-all"
+            className="min-h-[44px] text-xs sm:text-sm font-semibold border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
-            <Edit3 className="w-4 h-4 text-cyan-400" />
-            Chỉnh Sửa Thông Tin Kèo
+            <Edit3 className="w-4 h-4 text-slate-500" />
+            Chỉnh Sửa Giao Dịch
           </Button>
           <Button
             type="button"
             onClick={onCopyLink}
-            className="min-h-12 text-sm font-bold bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-950/40 transition-all"
+            className="min-h-[44px] text-xs sm:text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white border border-rose-600 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm active:translate-y-0.5"
           >
             <Share2 className="w-4 h-4" />
             Sao Chép Link Mời Người Mua
           </Button>
         </div>
-        <p className="text-center text-[11px] text-slate-400">
+        <p className="text-center text-[11px] text-slate-500">
           🛡️ Bạn là người bán của sản phẩm này. Hãy duyệt các đề xuất trả giá hoặc chia sẻ link cho người mua đặt cọc.
         </p>
       </div>
@@ -106,44 +107,44 @@ export function DealRoomCta({
     <div className="pt-2 space-y-4">
       {/* 1. Status Banners based on Buyer Bargain Flow */}
       {bargainStatus === "PENDING_SELLER_CONFIRMATION" && (
-        <div className="rounded-xl border border-amber-500/40 bg-amber-950/30 p-3.5 flex items-start gap-3 animate-in fade-in">
-          <div className="size-2 rounded-full bg-amber-400 mt-1.5 animate-ping" />
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 flex items-start gap-3 animate-in fade-in">
+          <div className="size-2 rounded-full bg-amber-500 mt-1.5 animate-ping" />
           <div className="space-y-0.5 text-xs">
-            <p className="font-bold text-amber-300">
+            <p className="font-bold text-amber-900">
               Đang chờ Người bán duyệt mức giá{" "}
               {proposedPrice?.toLocaleString("vi-VN")} ₫...
             </p>
-            <p className="text-slate-400 text-[11px]">
-              Thanh thương lượng đã tạm khóa. Bạn có thể chờ người bán duyệt hoặc bấm Mua Ngay giá gốc bên dưới để nhận hàng ngay.
+            <p className="text-amber-700 text-[11px]">
+              Thanh thương lượng đã tạm khóa. Bạn có thể chờ người bán duyệt hoặc bấm Chốt Mua Ngay giá gốc bên dưới.
             </p>
           </div>
         </div>
       )}
 
       {bargainStatus === "BARGAIN_ACCEPTED" && (
-        <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/30 p-3.5 flex items-start gap-3 animate-in fade-in">
-          <CheckCircle className="size-5 text-emerald-400 shrink-0 mt-0.5" />
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 flex items-start gap-3 animate-in fade-in">
+          <CheckCircle className="size-5 text-emerald-600 shrink-0 mt-0.5" />
           <div className="space-y-0.5 text-xs">
-            <p className="font-bold text-emerald-300">
-              Tuyệt vời! Người bán đã chấp thuận mức giá{" "}
-              {proposedPrice?.toLocaleString("vi-VN")} ₫.
+            <p className="font-bold text-emerald-900">
+              Người bán đã chấp thuận mức giá{" "}
+              {proposedPrice?.toLocaleString("vi-VN")} ₫!
             </p>
-            <p className="text-slate-400 text-[11px]">
-              Vui lòng tiến hành thanh toán để ký quỹ vào Két số an toàn.
+            <p className="text-emerald-700 text-[11px]">
+              Vui lòng tiến hành quét mã VietQR để nạp tiền vào két giữ tiền an toàn.
             </p>
           </div>
         </div>
       )}
 
       {bargainStatus === "BARGAIN_REJECTED" && (
-        <div className="rounded-xl border border-rose-500/40 bg-rose-950/30 p-3.5 flex items-start gap-3 animate-in fade-in">
-          <AlertTriangle className="size-5 text-rose-400 shrink-0 mt-0.5" />
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 flex items-start gap-3 animate-in fade-in">
+          <AlertTriangle className="size-5 text-rose-600 shrink-0 mt-0.5" />
           <div className="space-y-0.5 text-xs">
-            <p className="font-bold text-rose-300">
+            <p className="font-bold text-rose-900">
               Người bán đã từ chối mức giá đề xuất{" "}
               {proposedPrice?.toLocaleString("vi-VN")} ₫.
             </p>
-            <p className="text-slate-400 text-[11px]">
+            <p className="text-rose-700 text-[11px]">
               Bạn có thể kéo thanh trượt để gửi mức giá mới hợp lý hơn hoặc Mua Ngay với giá gốc niêm yết.
             </p>
           </div>
@@ -152,13 +153,12 @@ export function DealRoomCta({
 
       {/* 2. Action Buttons */}
       <div className="space-y-2.5">
-        {/* If Bargain was ACCEPTED: Prominently show Checkout with Approved Price */}
         {bargainStatus === "BARGAIN_ACCEPTED" ? (
           <>
             <Button
               type="button"
               onClick={onProceedToBargainPayment}
-              className="w-full min-h-12 text-base font-extrabold bg-linear-to-r from-emerald-500 via-cyan-500 to-emerald-400 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-xl shadow-cyan-950/60 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full min-h-[48px] text-sm sm:text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-emerald-700 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
             >
               <QrCode className="w-5 h-5" />
               Thanh Toán Mức Giá Đã Duyệt [{proposedPrice?.toLocaleString("vi-VN")} ₫]
@@ -167,9 +167,9 @@ export function DealRoomCta({
               type="button"
               variant="outline"
               onClick={onInstantBuy}
-              className="w-full min-h-11 text-xs font-semibold border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-300 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full min-h-[44px] text-xs font-semibold border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
-              <Zap className="w-4 h-4 text-amber-400" />
+              <Zap className="w-4 h-4 text-amber-500" />
               Hoặc Mua Ngay [Giá gốc {basePrice.toLocaleString("vi-VN")} ₫]
             </Button>
           </>
@@ -178,18 +178,18 @@ export function DealRoomCta({
             <Button
               type="button"
               disabled
-              className="w-full min-h-12 text-sm font-bold bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center gap-2 cursor-not-allowed opacity-60"
+              className="w-full min-h-[48px] text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed"
             >
               <QrCode className="w-4 h-4" />
-              Thanh Toán Mức Giá Đang Chờ Duyệt (Đang Khóa)
+              Đang Chờ Duyệt Mức Giá Đề Xuất
             </Button>
             <Button
               type="button"
               onClick={onInstantBuy}
-              className="w-full min-h-12 text-base font-extrabold bg-linear-to-r from-emerald-500 via-cyan-500 to-emerald-400 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-xl shadow-cyan-950/60 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full min-h-[48px] text-sm sm:text-base font-black bg-rose-500 hover:bg-rose-600 text-white shadow-sm border border-rose-600 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
             >
-              <Zap className="w-5 h-5 text-slate-950 fill-current" />
-              Mua Ngay Không Cần Chờ [Giá gốc {basePrice.toLocaleString("vi-VN")} ₫]
+              <Zap className="w-4 h-4" />
+              Mua Ngay Không Cần Chờ [{basePrice.toLocaleString("vi-VN")} ₫]
             </Button>
           </>
         ) : bargainStatus === "BARGAIN_REJECTED" ? (
@@ -197,9 +197,9 @@ export function DealRoomCta({
             <Button
               type="button"
               onClick={onInstantBuy}
-              className="w-full min-h-12 text-base font-extrabold bg-linear-to-r from-emerald-500 via-cyan-500 to-emerald-400 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-xl shadow-cyan-950/60 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full min-h-[48px] text-sm sm:text-base font-black bg-rose-500 hover:bg-rose-600 text-white shadow-sm border border-rose-600 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
             >
-              <Zap className="w-5 h-5" />
+              <Zap className="w-4 h-4" />
               Mua Ngay [Giá gốc {basePrice.toLocaleString("vi-VN")} ₫]
             </Button>
             {onResetBargain && (
@@ -207,9 +207,9 @@ export function DealRoomCta({
                 type="button"
                 variant="outline"
                 onClick={onResetBargain}
-                className="w-full min-h-11 text-xs font-semibold border-cyan-500/40 bg-slate-900 hover:bg-slate-800 text-cyan-300 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full min-h-[44px] text-xs font-semibold border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4 text-slate-500" />
                 Thử Gửi Đề Xuất Mức Giá Khác
               </Button>
             )}
@@ -220,20 +220,20 @@ export function DealRoomCta({
             <Button
               type="button"
               onClick={onInstantBuy}
-              className="w-full min-h-12 text-base font-extrabold bg-linear-to-r from-emerald-500 via-cyan-500 to-emerald-400 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-xl shadow-cyan-950/60 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full min-h-[50px] text-sm sm:text-base font-black bg-rose-500 hover:bg-rose-600 text-white shadow-sm border border-rose-600 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-0.5"
             >
-              <Zap className="w-5 h-5 text-slate-950 fill-current" />
-              Mua Ngay [Giá gốc {basePrice.toLocaleString("vi-VN")} ₫]
+              <Zap className="w-4 h-4" />
+              Chốt Mua Ngay ({basePrice.toLocaleString("vi-VN")} ₫)
             </Button>
-            <p className="text-center text-[11px] text-slate-400">
-              💡 Hoặc kéo thanh thương lượng phía trên và nhấn &ldquo;Xác nhận đề xuất&rdquo; để trả giá với Người bán.
+            <p className="text-center text-[11px] text-slate-500">
+              💡 Hoặc kéo thanh thương lượng phía trên để đề xuất giảm giá với Người bán.
             </p>
           </>
         )}
       </div>
 
       <p className="text-center text-[11px] text-slate-500">
-        🛡️ Tiền ký quỹ được bảo vệ 100% trong két bảo chứng. Tiền chỉ chuyển cho người bán sau khi bạn kiểm tra hàng hài lòng.
+        🛡️ Tiền ký quỹ được bảo vệ 100% trong két bảo chứng. Chỉ giải ngân khi bạn đã nhận hàng và xác nhận nghiệm thu.
       </p>
     </div>
   );

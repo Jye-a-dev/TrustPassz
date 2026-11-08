@@ -16,7 +16,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { verifyAuthApi, type AuthResponse } from "@/lib/auth-api";
 import { useAuthStore, generateClientSessionJwt } from "@/lib/auth-store";
 import { RegisterFastTab } from "@/components/auth/register-fast-tab";
@@ -184,58 +183,46 @@ function RegisterContent() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-[#0B0F17] overflow-hidden">
-      {/* Background Ambient Glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 size-96 rounded-full bg-emerald-500/10 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/4 size-72 rounded-full bg-cyan-500/10 blur-[110px] pointer-events-none" />
-
-      <Card className="relative w-full max-w-lg border border-slate-800 bg-slate-950/90 shadow-[0_0_35px_rgba(15,23,42,0.8)] backdrop-blur-xl">
-        {/* Top Header Badge */}
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <Badge
-            variant="outline"
-            className="flex items-center gap-1.5 border-cyan-500/40 bg-slate-900/95 px-3 py-1 text-[11px] font-semibold text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)]"
-          >
-            <ShieldCheck className="size-3.5 text-cyan-400" />
-            <span>Đăng Ký Tài Khoản Giao Dịch An Toàn</span>
-          </Badge>
-        </div>
-
-        <CardHeader className="space-y-2 text-center pt-8">
-          <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            Tham Gia TrustPassz
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-canvas overflow-hidden">
+      <Card className="relative w-full max-w-lg border border-subtle bg-surface shadow-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 space-y-6">
+        <CardHeader className="space-y-2 text-center p-0">
+          <div className="inline-flex items-center justify-center size-12 rounded-2xl bg-brand-pink-tint text-brand-pink border border-brand-pink/30 mx-auto mb-1">
+            <ShieldCheck className="size-6" />
+          </div>
+          <CardTitle className="text-2xl sm:text-3xl font-black tracking-tight text-primary">
+            Tạo Tài Khoản TrustPassz
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto">
-            Nền tảng bảo vệ an toàn cho mọi giao dịch mua bán trực tuyến
+          <CardDescription className="text-xs sm:text-sm text-secondary max-w-xs mx-auto">
+            Bảo chứng an toàn cho mọi giao dịch mua bán trực tuyến
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-5 p-0">
           {/* Method Tabs */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-800">
+          <div className="grid grid-cols-2 gap-1.5 p-1 bg-input-bg rounded-xl border border-subtle">
             <button
               type="button"
               onClick={() => setActiveTab("fast")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 activeTab === "fast"
-                  ? "bg-slate-800 text-cyan-300 shadow-sm border border-cyan-500/30"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-surface text-primary shadow-xs border border-subtle font-bold"
+                  : "text-muted hover:text-primary"
               }`}
             >
-              <Sparkles className="size-3.5 text-cyan-400" />
+              <Sparkles className="size-3.5 text-brand-pink" />
               <span>Đăng ký 1 Chạm</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("custom")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 activeTab === "custom"
-                  ? "bg-slate-800 text-emerald-300 shadow-sm border border-emerald-500/30"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-surface text-primary shadow-xs border border-subtle font-bold"
+                  : "text-muted hover:text-primary"
               }`}
             >
-              <User className="size-3.5 text-emerald-400" />
-              <span>Form Tùy Chỉnh</span>
+              <User className="size-3.5 text-brand-pink" />
+              <span>Email &amp; Mật khẩu</span>
             </button>
           </div>
 
@@ -259,12 +246,12 @@ function RegisterContent() {
           )}
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-3 border-t border-slate-800/80 pt-4">
-          <p className="text-center text-xs text-slate-400">
+        <CardFooter className="flex flex-col space-y-3 border-t border-slate-100 pt-4 p-0">
+          <p className="text-center text-xs text-slate-500">
             Đã có tài khoản TrustPassz?{" "}
             <Link
               href="/login"
-              className="font-bold text-cyan-400 hover:text-cyan-300 underline underline-offset-4"
+              className="font-bold text-rose-600 hover:text-rose-700 underline underline-offset-4"
             >
               Đăng nhập ngay
             </Link>
@@ -279,8 +266,8 @@ export default function RegisterPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#0B0F17] flex items-center justify-center text-slate-400">
-          <div className="size-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+        <div className="min-h-screen bg-canvas flex items-center justify-center text-muted">
+          <div className="size-8 rounded-full border-2 border-rose-500 border-t-transparent animate-spin" />
         </div>
       }
     >

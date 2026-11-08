@@ -292,10 +292,10 @@ export default function EscrowReceiptPage() {
 
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen bg-[#080C14] text-slate-100 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-canvas text-primary flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="size-10 text-cyan-400 animate-spin" />
-          <p className="text-sm font-mono text-slate-400">Đang khởi tạo biên lai bảo chứng & dòng thời gian...</p>
+          <Loader2 className="size-10 text-brand-pink animate-spin" />
+          <p className="text-sm font-mono text-muted">Đang khởi tạo biên lai bảo chứng &amp; dòng thời gian...</p>
         </div>
       </div>
     );
@@ -303,22 +303,22 @@ export default function EscrowReceiptPage() {
 
   if (error || !deal || !receiptData) {
     return (
-      <div className="min-h-screen bg-[#080C14] text-slate-100 p-6 flex flex-col items-center justify-center">
-        <div className="max-w-md w-full p-6 rounded-2xl bg-slate-900/60 border border-zinc-800 text-center space-y-4">
-          <AlertCircle className="size-12 text-rose-500 mx-auto" />
-          <h2 className="text-lg font-bold text-white">Không thể tải thông tin biên lai</h2>
-          <p className="text-xs text-slate-400">{error || "Kèo giao dịch không tồn tại"}</p>
+      <div className="min-h-screen bg-canvas text-primary p-6 flex flex-col items-center justify-center">
+        <div className="max-w-md w-full p-6 rounded-2xl bg-surface border border-brand-pink/30 text-center space-y-4 shadow-sm">
+          <AlertCircle className="size-12 text-brand-pink mx-auto" />
+          <h2 className="text-lg font-bold text-primary">Không thể tải thông tin biên lai</h2>
+          <p className="text-xs text-muted">{error || "Giao dịch không tồn tại"}</p>
           <div className="flex items-center justify-center gap-3 pt-2">
             <Link
               href={`/user/deals`}
-              className="min-h-11 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-zinc-700 inline-flex items-center"
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-surface hover:bg-input-bg text-xs font-semibold text-primary border border-strong inline-flex items-center shadow-xs"
             >
               Quay lại danh sách
             </Link>
             <Button
               type="button"
               onClick={() => loadData()}
-              className="min-h-11 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs text-white inline-flex items-center gap-1.5"
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-xs font-semibold text-white inline-flex items-center gap-1.5 border border-brand-pink shadow-sm"
             >
               <RefreshCw className="size-3.5" />
               Thử lại
@@ -330,29 +330,29 @@ export default function EscrowReceiptPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080C14] text-slate-100 pb-16">
+    <div className="min-h-screen bg-canvas text-primary pb-16">
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-30 bg-[#080C14]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 sm:px-8 py-3.5 flex items-center justify-between print:hidden">
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-8 py-3.5 flex items-center justify-between print:hidden shadow-xs">
         <div className="flex items-center gap-3">
           <Link
             href={`/user/deals/${dealId}/vault`}
-            className="min-h-11 min-w-11 rounded-xl bg-slate-900 hover:bg-slate-800 border border-zinc-800 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+            className="min-h-11 min-w-11 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors shadow-xs"
             title="Quay lại Két tài sản"
           >
             <ArrowLeft className="size-5" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
-                TASK-B-14
+              <span className="text-xs font-mono text-rose-600 font-bold uppercase tracking-wider">
+                BIÊN LAI ĐIỆN TỬ
               </span>
-              <span className="text-slate-600">/</span>
-              <span className="text-xs text-slate-400 truncate max-w-50 sm:max-w-xs">
+              <span className="text-slate-300">/</span>
+              <span className="text-xs text-slate-500 truncate max-w-50 sm:max-w-xs">
                 {receiptData.title}
               </span>
             </div>
-            <h1 className="text-sm sm:text-base font-bold text-white truncate">
-              Biên lai Giao dịch & Dispute Timeline
+            <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+              Biên lai Ký quỹ Điện tử &amp; Tiến trình Phân xử
             </h1>
           </div>
         </div>
@@ -360,7 +360,7 @@ export default function EscrowReceiptPage() {
         <button
           type="button"
           onClick={() => loadData()}
-          className="min-h-11 min-w-11 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-zinc-800 text-xs text-slate-300 hover:text-cyan-400 flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="min-h-11 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
           title="Làm mới trạng thái"
         >
           <RefreshCw className="size-4" />

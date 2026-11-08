@@ -75,22 +75,22 @@ export function RegisterForm({
       <div className="space-y-1.5">
         <label
           htmlFor="name"
-          className="text-xs font-semibold text-slate-300"
+          className="text-xs font-semibold text-slate-700"
         >
           Họ và tên / Tên hiển thị
         </label>
         <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
           <Input
             id="name"
             type="text"
             placeholder="Nguyễn Văn A"
-            className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
+            className="pl-10 bg-white border-slate-300 text-slate-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
             {...register("name")}
           />
         </div>
         {errors.name && (
-          <p className="text-xs text-rose-400 flex items-center gap-1">
+          <p className="text-xs text-rose-600 flex items-center gap-1">
             <AlertCircle className="size-3" />
             <span>{errors.name.message}</span>
           </p>
@@ -100,22 +100,22 @@ export function RegisterForm({
       <div className="space-y-1.5">
         <label
           htmlFor="email"
-          className="text-xs font-semibold text-slate-300"
+          className="text-xs font-semibold text-slate-700"
         >
           Địa chỉ Email
         </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
           <Input
             id="email"
             type="email"
             placeholder="email@vidu.com"
-            className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
+            className="pl-10 bg-white border-slate-300 text-slate-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
             {...register("email")}
           />
         </div>
         {errors.email && (
-          <p className="text-xs text-rose-400 flex items-center gap-1">
+          <p className="text-xs text-rose-600 flex items-center gap-1">
             <AlertCircle className="size-3" />
             <span>{errors.email.message}</span>
           </p>
@@ -126,22 +126,22 @@ export function RegisterForm({
         <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="text-xs font-semibold text-slate-300"
+            className="text-xs font-semibold text-slate-700"
           >
             Mật khẩu
           </label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
-              className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
+              className="pl-10 bg-white border-slate-300 text-slate-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
               {...register("password")}
             />
           </div>
           {errors.password && (
-            <p className="text-xs text-rose-400">
+            <p className="text-xs text-rose-600">
               {errors.password.message}
             </p>
           )}
@@ -150,22 +150,22 @@ export function RegisterForm({
         <div className="space-y-1.5">
           <label
             htmlFor="confirmPassword"
-            className="text-xs font-semibold text-slate-300"
+            className="text-xs font-semibold text-slate-700"
           >
-            Xác nhận
+            Xác nhận mật khẩu
           </label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
             <Input
               id="confirmPassword"
               type="password"
               placeholder="••••••••"
-              className="pl-9 bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-cyan-500/20"
+              className="pl-10 bg-white border-slate-300 text-slate-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
               {...register("confirmPassword")}
             />
           </div>
           {errors.confirmPassword && (
-            <p className="text-xs text-rose-400">
+            <p className="text-xs text-rose-600">
               {errors.confirmPassword.message}
             </p>
           )}
@@ -173,16 +173,16 @@ export function RegisterForm({
       </div>
 
       {/* Optional Solana Wallet Association */}
-      <div className="rounded-lg bg-slate-900/60 border border-slate-800 p-3 space-y-2">
+      <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <Wallet className="size-3.5 text-cyan-400" />
-            <span>Liên kết ví Solana ngay bây giờ</span>
+          <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+            <Wallet className="size-3.5 text-indigo-600" />
+            <span>Liên kết ví Solana (tùy chọn)</span>
           </span>
           {connected && publicKey ? (
             <Badge
               variant="outline"
-              className="border-emerald-500/40 text-emerald-400 text-[10px]"
+              className="border-emerald-300 bg-emerald-50 text-emerald-800 text-[10px]"
             >
               {publicKey.toBase58().slice(0, 4)}...
               {publicKey.toBase58().slice(-4)}
@@ -190,10 +190,10 @@ export function RegisterForm({
           ) : (
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={onConnectWallet}
-              className="text-xs text-cyan-400 hover:text-cyan-300 h-7 px-2 cursor-pointer"
+              className="text-xs text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 h-7 px-2.5 rounded-lg cursor-pointer"
             >
               Kết nối ví
             </Button>
@@ -203,14 +203,14 @@ export function RegisterForm({
           <input
             id="bindSolanaWallet"
             type="checkbox"
-            className="size-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500/20"
+            className="size-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500/20"
             {...register("bindSolanaWallet")}
           />
           <label
             htmlFor="bindSolanaWallet"
-            className="text-[11px] text-slate-400 select-none cursor-pointer"
+            className="text-[11px] text-slate-500 select-none cursor-pointer"
           >
-            Tự động gán ví này vào tài khoản để nhận tiền thanh toán
+            Tự động gán ví này vào tài khoản để nhận tiền ký quỹ
           </label>
         </div>
       </div>
@@ -221,22 +221,22 @@ export function RegisterForm({
           <input
             id="agreeTerms"
             type="checkbox"
-            className="mt-1 size-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500/20"
+            className="mt-0.5 size-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500/20"
             {...register("agreeTerms")}
           />
           <label
             htmlFor="agreeTerms"
-            className="text-xs text-slate-400 select-none cursor-pointer leading-tight"
+            className="text-xs text-slate-600 select-none cursor-pointer leading-tight"
           >
             Tôi đồng ý với{" "}
-            <span className="text-cyan-400 underline underline-offset-2">
-              Quy chế Giữ Tiền An Toàn &amp; Bảo Mật Giao Dịch của TrustPassz
+            <span className="text-rose-600 underline underline-offset-2 font-medium">
+              Quy chế Giữ Tiền An Toàn &amp; Bảo Mật Giao Dịch TrustPassz
             </span>
             .
           </label>
         </div>
         {errors.agreeTerms && (
-          <p className="text-xs text-rose-400 flex items-center gap-1 pl-6">
+          <p className="text-xs text-rose-600 flex items-center gap-1 pl-6">
             <AlertCircle className="size-3" />
             <span>{errors.agreeTerms.message}</span>
           </p>
@@ -246,11 +246,11 @@ export function RegisterForm({
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold h-11 rounded-lg gap-2 mt-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] cursor-pointer"
+        className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold h-11 rounded-xl border border-rose-600 shadow-sm gap-2 mt-2 cursor-pointer transition-all active:translate-y-0.5"
       >
         {isLoading ? (
           <>
-            <Loader2 className="size-4 animate-spin text-slate-950" />
+            <Loader2 className="size-4 animate-spin text-white" />
             <span>Đang khởi tạo tài khoản...</span>
           </>
         ) : (

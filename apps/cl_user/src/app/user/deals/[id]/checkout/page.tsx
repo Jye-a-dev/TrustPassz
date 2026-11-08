@@ -214,7 +214,7 @@ export default function DealCheckoutPage() {
   }
 
   return (
-    <div className="relative max-w-4xl mx-auto space-y-6">
+    <div className="relative max-w-7xl mx-auto space-y-6 sm:space-y-8">
       {/* Transfer Success Custom Modal */}
       <TransferSuccessModal
         open={isModalOpen}
@@ -227,64 +227,168 @@ export default function DealCheckoutPage() {
         chainType={modalData?.chainType || "VIETQR"}
         timestamp={modalData?.timestamp}
         type="DEPOSIT"
-        primaryActionText="Vào két Digital Vault"
+        primaryActionText="Vào Két bảo mật để nhận hàng"
         onPrimaryAction={() => router.push(`/user/deals/${dealId}/vault`)}
         secondaryActionText="Xem lịch sử giao dịch"
         onSecondaryAction={() => router.push("/user/deals")}
       />
 
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/deals/${dealId}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
-        >
-          <ArrowLeft className="size-4" />
-          <span>Quay lại chi tiết giao dịch</span>
-        </Link>
-
-        <Badge
-          variant="outline"
-          className="bg-amber-950/40 border-amber-500/40 text-amber-300 text-xs px-2.5 py-1"
-        >
-          <Clock className="size-3 mr-1 animate-pulse" />
-          Chờ Thanh Toán Giữ Tiền An Toàn
-        </Badge>
-      </div>
-
-      <div className="rounded-2xl border border-slate-800 shadow-2xl bg-linear-to-b from-slate-900/90 to-[#0F172A] p-6 sm:p-8 space-y-6">
-        <div className="text-center space-y-2 max-w-lg mx-auto">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-300">
-            <QrCode className="size-3.5" />
-            <span>Quét Mã VietQR Chuyển Khoản Nhanh</span>
+      {/* Top Status Indicator */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200 gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Link
+              href={`/deals/${dealId}`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-600 transition-colors"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Quay lại giao dịch</span>
+            </Link>
           </div>
-
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Quét Mã VietQR Để Giữ Tiền An Toàn
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span>Quét Mã VietQR Nạp Két Bảo Chứng</span>
           </h1>
-
-          <p className="text-xs sm:text-sm text-slate-400">
-            Tiền chuyển sẽ được giữ an toàn trong két bảo vệ. Tiền chỉ chuyển cho người bán sau khi bạn kiểm tra đúng hàng và xác nhận.
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Tiền chuyển khoản sẽ được khóa tự động vào két an toàn. Tiền chỉ chuyển cho người bán khi bạn kiểm tra và hài lòng.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          <CheckoutQrCard
-            vietQrUrl={bankConfig.vietQrUrl}
-            isSuccessGlow={isModalOpen}
-          />
+        <span className="bg-amber-50 border border-amber-300 text-amber-800 text-xs px-3.5 py-1.5 rounded-full flex items-center gap-2 font-bold self-start sm:self-auto shrink-0 shadow-xs">
+          <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
+          <span>Chờ Quét Mã VietQR</span>
+        </span>
+      </div>
 
-          <CheckoutPaymentDetails
-            bankConfig={bankConfig}
-            copiedField={copiedField}
-            onCopy={copyToClipboard}
-          />
+      {/* 2-Column Checkout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* Left Column (7 cols): QR Code Card */}
+        <div className="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200">
+                <QrCode className="size-5" />
+              </span>
+              <div>
+                <h2 className="font-bold text-sm sm:text-base text-slate-900">Mã VietQR Động Chuẩn Napas 24/7</h2>
+                <span className="text-xs text-slate-500">Mở app mọi ngân hàng nội địa để quét tự động</span>
+              </div>
+            </div>
+            <span className="text-[11px] font-mono text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+              TỰ ĐỘNG KHÓA KÉT
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6 justify-center">
+            <CheckoutQrCard
+              vietQrUrl={bankConfig.vietQrUrl}
+              isSuccessGlow={isModalOpen}
+            />
+
+            {/* Instruction Details */}
+            <div className="space-y-4 text-center sm:text-left flex-1">
+              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                <span className="text-xs text-amber-900 font-semibold block">Mã QR có hiệu lực trong:</span>
+                <div className="font-mono text-2xl font-black text-amber-700">14 phút 59 giây</div>
+                <p className="text-[11px] text-amber-800">Sau 15 phút, mã sẽ tự động gia hạn nếu chưa nhận được giao dịch.</p>
+              </div>
+
+              <div className="space-y-2 text-xs text-slate-600">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-5 rounded-full bg-rose-100 text-rose-600 font-bold items-center justify-center text-[10px]">1</span>
+                  <span>Mở app ngân hàng (VCB, MB, Techcom, BIDV...)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex size-5 rounded-full bg-rose-100 text-rose-600 font-bold items-center justify-center text-[10px]">2</span>
+                  <span>Chọn Quét QR &amp; quét mã thanh toán</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex size-5 rounded-full bg-rose-100 text-rose-600 font-bold items-center justify-center text-[10px]">3</span>
+                  <span>Giữ nguyên nội dung chuyển khoản để két khóa tự động</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={handleSimulateWebhook}
+              className="w-full min-h-[50px] rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-sm sm:text-base shadow-sm flex items-center justify-center gap-2 transition-all border border-emerald-700 cursor-pointer"
+            >
+              <Clock className="size-5" />
+              <span>Tôi Đã Chuyển Tiền - Kiểm Tra Trạng Thái Két</span>
+            </button>
+          </div>
         </div>
 
-        <CheckoutSandboxBar
-          memo={bankConfig.memo}
-          onSimulateWebhook={handleSimulateWebhook}
-        />
+        {/* Right Column (5 cols): Order Summary & Fast Copy */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Order Summary Card */}
+          <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-4 shadow-sm">
+            <h3 className="font-bold text-xs text-slate-900 uppercase font-mono tracking-wider pb-3 border-b border-slate-100">
+              TÓM TẮT ĐƠN HÀNG
+            </h3>
+
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-slate-900 leading-tight">
+                {deal?.title || "Sản phẩm kỹ thuật số TrustPassz"}
+              </h4>
+              <div className="text-[11px] text-slate-500 font-mono">
+                Người bán: {deal?.seller?.displayName || "Đối tác xác thực"}
+              </div>
+            </div>
+
+            {/* Price Calculation */}
+            <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2.5 text-xs">
+              <div className="flex items-center justify-between text-slate-600">
+                <span>Giá sản phẩm:</span>
+                <span className="font-mono font-bold text-slate-900">
+                  {bankConfig.amount.toLocaleString("vi-VN")} ₫
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-slate-600">
+                <span>Phí dịch vụ bảo chứng (Escrow):</span>
+                <span className="font-mono text-emerald-700 font-bold">0 ₫ (Miễn phí)</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-600">
+                <span>Thời hạn dùng thử &amp; nghiệm thu:</span>
+                <span className="font-mono font-bold text-slate-900">
+                  {deal?.inspectionDuration ? `${Math.round(deal.inspectionDuration / 3600)} Giờ` : "24 Giờ"}
+                </span>
+              </div>
+
+              <div className="pt-2.5 border-t border-slate-200 flex items-baseline justify-between">
+                <span className="font-bold text-slate-900 text-sm">TỔNG THANH TOÁN:</span>
+                <span className="font-mono text-2xl font-black text-rose-600">
+                  {bankConfig.amount.toLocaleString("vi-VN")} ₫
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 1-Click Copy Transfer Info Box */}
+          <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-4 shadow-sm">
+            <h3 className="font-bold text-xs uppercase font-mono tracking-wider text-slate-800">
+              THÔNG TIN CHUYỂN KHOẢN THỦ CÔNG
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Nếu không thể quét QR, vui lòng chuyển khoản chính xác thông tin sau:
+            </p>
+
+            <CheckoutPaymentDetails
+              bankConfig={bankConfig}
+              copiedField={copiedField}
+              onCopy={copyToClipboard}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* Developer Sandbox Simulation Bar */}
+      <CheckoutSandboxBar
+        memo={bankConfig.memo}
+        onSimulateWebhook={handleSimulateWebhook}
+      />
     </div>
   );
 }
