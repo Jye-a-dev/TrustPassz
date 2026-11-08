@@ -30,7 +30,7 @@ export type { DealState, DealDetail, BuyerBargainStatus } from "@/components/dea
 export default function DealRoomPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const dealId = (params?.id as string) || "";
 
   const [deal, setDeal] = React.useState<DealDetail | null>(null);
@@ -64,11 +64,7 @@ export default function DealRoomPage() {
       : null,
     onDealStateChange: (newState) => {
       setDeal((prev) => (prev ? { ...prev, state: newState as DealState } : prev));
-      toast.success(
-        newState === "SETTLED"
-          ? "Giao dịch đã được giải ngân thành công!"
-          : "Két bảo chứng đã xác nhận nạp tiền an toàn!"
-      );
+      toast.success(newState === "SETTLED" ? "Giao dịch đã được giải ngân thành công!" : "Két bảo chứng đã xác nhận nạp tiền an toàn!");
     },
   });
 
@@ -188,6 +184,11 @@ export default function DealRoomPage() {
   // Instant Buy Flow: Navigates straight to Checkout without seller approval
   const handleInstantBuy = () => {
     if (!deal) return;
+    if (!isAuthenticated) {
+      toast.info("Vui lòng đăng nhập để tiến hành mua hàng.");
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/deals/${deal.id}`)}`);
+      return;
+    }
     if (isSeller) {
       toast.error("Bạn không thể tự mua sản phẩm của chính mình.");
       return;
@@ -203,8 +204,9 @@ export default function DealRoomPage() {
       toast.error("Bạn không thể tự mua hoặc thương lượng sản phẩm của chính mình.");
       return;
     }
-    if (!currentUserId) {
+    if (!isAuthenticated || !currentUserId) {
       toast.error("Vui lòng đăng nhập để gửi đề xuất trả giá.");
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/deals/${deal.id}`)}`);
       return;
     }
 
@@ -216,17 +218,13 @@ export default function DealRoomPage() {
           productId: deal.order?.productId,
           buyerId: currentUserId,
           offeredPrice: newOffer,
-          negotiationData: {
-            dealId: deal.id,
-          },
+          negotiationData: { dealId: deal.id },
         }),
       });
 
       setProposedPrice(newOffer);
       setBargainStatus("PENDING_SELLER_CONFIRMATION");
-      toast.info(
-        `Đã gửi đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫ đến Người bán. Vui lòng chờ duyệt.`
-      );
+      toast.info(`Đã gửi đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫ đến Người bán. Vui lòng chờ duyệt.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gửi đề xuất trả giá thất bại";
       toast.error(`Lỗi: ${msg}`);
@@ -262,7 +260,7 @@ export default function DealRoomPage() {
           <p className="text-xs text-secondary">
             {error || `Mã giao dịch ${dealId} không tồn tại hoặc bạn không có quyền truy cập.`}
           </p>
-          <Button asChild variant="outline" className="border-strong bg-surface hover:bg-input-bg text-primary min-h-[44px] rounded-xl text-xs font-medium">
+          <Button asChild variant="outline" className="border-strong bg-surface hover:bg-input-bg text-primary min-h-11 rounded-xl text-xs font-medium">
             <Link href="/user/deals">Quay lại danh sách giao dịch</Link>
           </Button>
         </div>
@@ -293,7 +291,7 @@ export default function DealRoomPage() {
         chainType={modalData?.chainType}
         timestamp={modalData?.timestamp}
         type={modalData?.type || (deal.state === "SETTLED" ? "SETTLEMENT" : "DEPOSIT")}
-        primaryActionText={modalData?.type === "SETTLEMENT" || deal.state === "SETTLED" ? "Xem chi tiết giao dịch" : "Vào két Digital Vault"}
+        primaryActionText={modalData?.type === "SETTLEMENT" || deal.state === "SETTLED" ? "Xem chi tiết" : "Vào két Digital Vault"}
         onPrimaryAction={() => {
           if (modalData?.type === "SETTLEMENT" || deal.state === "SETTLED") {
             setIsSuccessModalOpen(false);

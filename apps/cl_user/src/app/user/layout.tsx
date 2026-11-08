@@ -9,12 +9,15 @@ import { UserFooter } from "@/components/layout/user-footer";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { Terminal, Cpu, Radio, Lock } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
+import { useUIStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { sidebarCollapsed } = useUIStore();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [lockedBalanceVND, setLockedBalanceVND] = React.useState<number>(0);
   const [activeDealsCount, setActiveDealsCount] = React.useState<number>(0);
@@ -127,7 +130,12 @@ export default function UserLayout({
         {/* ============================================================ */}
         {/* MAIN OPERATING CANVAS                                        */}
         {/* ============================================================ */}
-        <div className="relative z-10 flex flex-col flex-1 md:pl-64">
+        <div
+          className={cn(
+            "relative z-10 flex flex-col flex-1 transition-all duration-300",
+            sidebarCollapsed ? "md:pl-20" : "md:pl-64"
+          )}
+        >
           {/* Top Sticky 2-Tier Header */}
           <header className="sticky top-0 z-30 w-full flex flex-col">
             <UserNavbar

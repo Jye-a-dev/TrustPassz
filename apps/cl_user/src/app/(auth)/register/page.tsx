@@ -26,6 +26,8 @@ import {
 
 function RegisterContent() {
   const searchParams = useSearchParams();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const { publicKey, signMessage, connected } = useWallet();
@@ -43,6 +45,13 @@ function RegisterContent() {
     }
     return "/user";
   }, [searchParams]);
+
+  React.useEffect(() => {
+    const isForce = searchParams?.get("force") === "1";
+    if (!isForce && isAuthenticated && user) {
+      window.location.href = getRedirectTarget();
+    }
+  }, [searchParams, isAuthenticated, user, getRedirectTarget]);
 
   const handleRegisterSuccess = React.useCallback(
     (result: AuthResponse, methodDesc: string) => {

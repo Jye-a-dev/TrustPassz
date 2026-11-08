@@ -27,6 +27,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/lib/auth-store";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { getSmartAvatarUrl } from "@/lib/avatar-helper";
 
 interface UserNavbarProps {
   onOpenMobileMenu?: () => void;
@@ -50,6 +52,7 @@ export function UserNavbar({
 
   const displayName =
     user?.displayName || user?.email?.split("@")[0] || "Trần Quốc Toản";
+  const smartAvatarUrl = getSmartAvatarUrl(user);
   const userInitials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -132,10 +135,13 @@ export function UserNavbar({
           </div>
         </Link>
 
+        {/* Theme Toggle (Light / Dark / System) */}
+        <ThemeToggle />
+
         {/* Realtime Notification Bell */}
         <button
           type="button"
-          className="relative flex size-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-sm transition-all cursor-pointer"
+          className="relative flex size-9 items-center justify-center rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all cursor-pointer"
           title="Thông báo biến động giao dịch"
           aria-label="Thông báo"
         >
@@ -152,18 +158,27 @@ export function UserNavbar({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white p-1 sm:px-2.5 sm:py-1 hover:bg-slate-50 shadow-sm transition-all cursor-pointer outline-none focus:ring-2 focus:ring-rose-200"
+                className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 sm:px-2.5 sm:py-1 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all cursor-pointer outline-none focus:ring-2 focus:ring-rose-200"
               >
                 <div className="relative">
-                  <div className="flex size-7 items-center justify-center rounded-lg F from-rose-500 to-amber-500 text-xs font-black text-white border border-rose-600 shadow-xs">
-                    {userInitials || "U"}
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 size-2 bg-emerald-500 border border-white rounded-full" />
+                  {smartAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={smartAvatarUrl}
+                      alt={displayName}
+                      className="size-7 rounded-lg object-cover border border-rose-600/40 bg-slate-100 dark:bg-slate-800"
+                    />
+                  ) : (
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-r from-rose-500 to-amber-500 text-xs font-black text-white border border-rose-600 shadow-xs">
+                      {userInitials || "U"}
+                    </div>
+                  )}
+                  <span className="absolute -bottom-0.5 -right-0.5 size-2 bg-emerald-500 border border-white dark:border-slate-950 rounded-full" />
                 </div>
 
                 <div className="hidden sm:flex flex-col text-left">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold text-slate-900 max-w-28 truncate leading-tight">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 max-w-28 truncate leading-tight">
                       {displayName}
                     </span>
                     <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { KeyRound, Mail, Sparkles, AlertTriangle } from "lucide-react";
 import {
@@ -16,9 +16,13 @@ import {
 import { LoginWeb3Tab } from "@/components/auth/login-web3-tab";
 import { LoginEmailForm } from "@/components/auth/login-email-form";
 import { useAuthHandlers } from "@/components/auth/use-auth-handlers";
+import { useAuthStore } from "@/lib/auth-store";
 
 function LoginContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeMethod, setActiveMethod] = React.useState<"web3" | "email">("web3");
   const isSessionExpired = searchParams?.get("expired") === "1";
 
@@ -37,7 +41,8 @@ function LoginContent() {
   } = useAuthHandlers();
 
   React.useEffect(() => {
-    if (searchParams?.get("force") === "1" || isSessionExpired) {
+    const isForce = searchParams?.get("force") === "1";
+    if (isForce || isSessionExpired) {
       if (typeof document !== "undefined") {
         document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
         document.cookie = "access_token=; path=/; Max-Age=0;";
@@ -48,8 +53,18 @@ function LoginContent() {
         id: "session-expired-toast",
         duration: 5000,
       });
+      return;
     }
-  }, [searchParams, isSessionExpired]);
+
+    if (!isForce && isAuthenticated && user) {
+      const cb = searchParams?.get("callbackUrl");
+      const target =
+        cb && cb.startsWith("/") && !cb.startsWith("/login") && !cb.startsWith("/register")
+          ? cb
+          : "/user";
+      router.replace(target);
+    }
+  }, [searchParams, isSessionExpired, isAuthenticated, user, router]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-canvas overflow-hidden">

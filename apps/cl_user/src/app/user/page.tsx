@@ -18,6 +18,7 @@ import {
 } from "@/components/user/recent-deal-item";
 import { useAuthStore } from "@/lib/auth-store";
 import { apiClient } from "@/lib/api-client";
+import { useSettlementBankStore } from "@/lib/settlement-bank-store";
 
 interface DealCountResponse {
   total: number;
@@ -33,6 +34,7 @@ interface DealCountResponse {
 
 export default function UserDashboardPage() {
   const { user } = useAuthStore();
+  const { bankInfo } = useSettlementBankStore();
   const [deals, setDeals] = React.useState<DealEntity[]>([]);
   const [counts, setCounts] = React.useState<DealCountResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -111,8 +113,36 @@ export default function UserDashboardPage() {
   const settledCount =
     counts?.breakdown?.SETTLED ?? deals.filter((d) => d.state === "SETTLED").length;
 
+  const isDefaultBank = bankInfo.isDefault || bankInfo.bankAccount === "0123456789";
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      {/* Default Bank Warning Banner */}
+      {isDefaultBank && (
+        <div className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-400 shrink-0">
+              <AlertCircle className="size-5" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-200">
+                Thông tin nhận tiền giải ngân chưa được cập nhật chính chủ
+              </h4>
+              <p className="text-xs text-amber-700 dark:text-amber-300/90 mt-0.5">
+                Vui lòng cập nhật STK ngân hàng chính chủ tại Cài đặt để nhận tiền giải ngân ký quỹ tự động.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            size="sm"
+            className="min-h-11 sm:min-h-9 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 cursor-pointer"
+          >
+            <Link href="/user/settings">Cập Nhật Ngay</Link>
+          </Button>
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-1.5">
@@ -131,7 +161,7 @@ export default function UserDashboardPage() {
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Button
             asChild
-            className="min-h-[44px] px-5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 shadow-sm transition-all border border-rose-600 cursor-pointer active:translate-y-0.5"
+            className="min-h-11 px-5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 shadow-sm transition-all border border-rose-600 cursor-pointer active:translate-y-0.5"
           >
             <Link href="/user/deals/create">
               <PlusCircle className="size-4 mr-0.5" />
@@ -142,7 +172,7 @@ export default function UserDashboardPage() {
           <Button
             asChild
             variant="outline"
-            className="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm inline-flex items-center cursor-pointer shadow-xs active:translate-y-0.5"
+            className="min-h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm inline-flex items-center cursor-pointer shadow-xs active:translate-y-0.5"
           >
             <Link href="/explore">Khám Phá Sàn</Link>
           </Button>

@@ -21,6 +21,7 @@ import { AssetTypeSelector } from "./asset-type-selector";
 import { AiSuggestionPanel } from "./ai-suggestion-panel";
 import { EscrowTermsSection } from "./escrow-terms-section";
 import { DigitalVaultSection } from "./digital-vault-section";
+import { DealImageGalleryUploader } from "./deal-image-gallery-uploader";
 
 // Re-export types for backward compatibility across cl_user
 export type { AssetCategory, DealRuleSuggestion, VaultAuditData };
@@ -39,6 +40,8 @@ export function CreateDealForm() {
   const [rawSecret, setRawSecret] = React.useState("");
   const [passphrase, setPassphrase] = React.useState("");
   const [buyerId, setBuyerId] = React.useState("");
+  const [mediaGallery, setMediaGallery] = React.useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = React.useState<number>(0);
 
   // AI Magic Fill states
   const [isAiLoading, setIsAiLoading] = React.useState(false);
@@ -187,6 +190,7 @@ export function CreateDealForm() {
           buyerId,
           sellerId: user?.id,
           idempotencyKey,
+          mediaGallery,
         });
 
       setVaultAudit(audit);
@@ -298,6 +302,17 @@ export function CreateDealForm() {
             onApplyRules={applySelectedRulesToDescription}
           />
         )}
+
+        {/* Media Gallery Uploader */}
+        <DealImageGalleryUploader
+          mediaGallery={mediaGallery}
+          coverIndex={coverIndex}
+          onChange={(images, cover) => {
+            setMediaGallery(images);
+            setCoverIndex(cover);
+          }}
+          disabled={isSubmitting || isRedirecting}
+        />
       </div>
 
       {/* 3. Escrow Terms: Amount, Duration & Buyer */}

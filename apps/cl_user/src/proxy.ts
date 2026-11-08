@@ -3,13 +3,15 @@ import type { NextRequest } from 'next/server';
 import { isTokenExpired } from '@/lib/jwt-edge';
 
 /**
- * Next.js 16 Edge Proxy Convention (formerly Middleware).
+ * Next.js Edge Middleware & Proxy handler.
  * Enforces session lifecycle verification, legacy aliases 307 routing, and route gating.
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const rawToken = request.cookies.get('access_token')?.value;
+  const hasToken = Boolean(rawToken);
   const isExpired = !rawToken || isTokenExpired(rawToken, 15);
+  const isAuthenticated = hasToken && !isExpired;
 
   // 1. Alias redirects (307 Temporary Redirect)
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
@@ -27,13 +29,18 @@ export function proxy(request: NextRequest) {
 
   // 2. Protected Routes (/user and /user/*)
   if (pathname === '/user' || pathname.startsWith('/user/')) {
-    if (isExpired) {
+    if (!isAuthenticated) {
       const loginUrl = new URL('/login', request.url);
       const callbackTarget = pathname + (request.nextUrl.search || '');
       loginUrl.searchParams.set('callbackUrl', callbackTarget);
 
+      // Nếu có token nhưng đã hết hạn -> kích hoạt thông báo phiên hết hạn
+      if (hasToken && isExpired) {
+        loginUrl.searchParams.set('expired', '1');
+      }
+
       const response = NextResponse.redirect(loginUrl, 307);
-      if (rawToken) {
+      if (hasToken) {
         response.cookies.delete('access_token');
       }
       return response;
@@ -54,13 +61,27 @@ export function proxy(request: NextRequest) {
       return response;
     }
 
-    // Do NOT forcefully redirect /login to /user at the edge proxy level
-    // to prevent orphaned/httpOnly cookie bounce-back loops when client state is unauthenticated.
+    // Người dùng đã có token hợp lệ -> tự động chuyển hướng vào /user (hoặc callbackUrl nếu có)
+    if (isAuthenticated) {
+      const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
+      const targetUrl =
+        callbackUrl &&
+        callbackUrl.startsWith('/') &&
+        !callbackUrl.startsWith('/login') &&
+        !callbackUrl.startsWith('/register')
+          ? callbackUrl
+          : '/user';
+
+      return NextResponse.redirect(new URL(targetUrl, request.url), 307);
+    }
+
     return NextResponse.next();
   }
 
   return NextResponse.next();
 }
+
+export const middleware = proxy;
 
 export const config = {
   matcher: [

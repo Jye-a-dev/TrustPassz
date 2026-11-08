@@ -41,12 +41,50 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: [
-
       "@solana/web3.js",
       "@solana/wallet-adapter-react",
       "@solana/wallet-adapter-wallets",
       "motion",
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard",
+        destination: "/user",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/:path*",
+        destination: "/user/:path*",
+        permanent: false,
+      },
+      {
+        source: "/deals/create",
+        destination: "/user/deals/create",
+        permanent: false,
+      },
+      {
+        source: "/orders",
+        destination: "/user/orders",
+        permanent: false,
+      },
+      {
+        source: "/orders/:path*",
+        destination: "/user/orders/:path*",
+        permanent: false,
+      },
+      {
+        source: "/settings",
+        destination: "/user/settings",
+        permanent: false,
+      },
+      {
+        source: "/settings/:path*",
+        destination: "/user/settings/:path*",
+        permanent: false,
+      },
+    ];
   },
   async headers() {
     return [
