@@ -169,7 +169,7 @@ export function UserNavbar({
                       className="size-7 rounded-lg object-cover border border-rose-600/40 bg-slate-100 dark:bg-slate-800"
                     />
                   ) : (
-                    <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-r from-rose-500 to-amber-500 text-xs font-black text-white border border-rose-600 shadow-xs">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-r from-rose-500 to-amber-500 text-xs font-black text-white border border-rose-600 shadow-xs">
                       {userInitials || "U"}
                     </div>
                   )}

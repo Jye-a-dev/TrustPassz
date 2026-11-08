@@ -58,7 +58,7 @@ function SubNavbarContent() {
           <form
             onSubmit={handleSubmit}
             role="search"
-            className="relative w-full min-h-[44px] flex items-center bg-input-bg border border-subtle rounded-full p-1 pl-4 transition-all duration-200 focus-within:border-brand-pink focus-within:ring-2 focus-within:ring-brand-pink/20 focus-within:bg-surface shadow-inner"
+            className="relative w-full min-h-11 flex items-center bg-input-bg border border-subtle rounded-full p-1 pl-4 transition-all duration-200 focus-within:border-brand-pink focus-within:ring-2 focus-within:ring-brand-pink/20 focus-within:bg-surface shadow-inner"
           >
             <Search className="w-4 h-4 text-muted shrink-0 mr-2" aria-hidden="true" />
             <input
@@ -82,7 +82,7 @@ function SubNavbarContent() {
             )}
             <button
               type="submit"
-              className="shrink-0 bg-brand-pink hover:bg-brand-pink-hover active:scale-95 text-white text-sm font-semibold px-6 py-2 rounded-full transition-all duration-150 flex items-center gap-1.5 shadow-sm cursor-pointer min-h-[38px]"
+              className="shrink-0 bg-brand-pink hover:bg-brand-pink-hover active:scale-95 text-white text-sm font-semibold px-6 py-2 rounded-full transition-all duration-150 flex items-center gap-1.5 shadow-sm cursor-pointer min-h-9.5"
             >
               <Search className="size-4" aria-hidden="true" />
               <span>Tìm kiếm</span>
@@ -119,12 +119,12 @@ export function SubNavbar() {
         <div className="w-full bg-surface/95 backdrop-blur-md border-b border-subtle transition-colors duration-200 py-2.5 px-4 sm:px-6 lg:px-8 shadow-2xs">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
             <div className="w-full md:max-w-3xl lg:max-w-4xl flex items-center">
-              <div className="relative w-full min-h-[44px] flex items-center bg-input-bg border border-subtle rounded-full p-1 pl-4">
+              <div className="relative w-full min-h-11 flex items-center bg-input-bg border border-subtle rounded-full p-1 pl-4">
                 <Search className="w-4 h-4 text-muted shrink-0 mr-2" />
                 <div className="flex-1 text-sm text-muted">
                   Tìm tài khoản, tài liệu số, mã nguồn, đồ công nghệ...
                 </div>
-                <div className="shrink-0 bg-brand-pink text-white text-sm font-semibold px-6 py-2 rounded-full flex items-center gap-1.5 min-h-[38px]">
+                <div className="shrink-0 bg-brand-pink text-white text-sm font-semibold px-6 py-2 rounded-full flex items-center gap-1.5 min-h-9.5">
                   <Search className="size-4" />
                   <span>Tìm kiếm</span>
                 </div>
