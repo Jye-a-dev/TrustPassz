@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Xác Thực Quản Trị & Trọng Tài | TrustPassz Governance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              bg: '#080C14',
+              surface: '#0B0F17',
+              card: '#0F172A',
+              border: '#1E293B',
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #080C14;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #080C14; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; border: 1px solid rgba(15, 23, 42, 0.6); }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="bg-[#080C14] text-slate-100 min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+  <div class="relative flex min-h-screen flex-col items-center justify-center bg-[#070A12] px-4 py-12 overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div class="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 size-150 rounded-full bg-cyan-500/10 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-40 right-1/4 size-100 rounded-full bg-blue-600/10 blur-3xl"></div>
+
+    <div class="relative mb-6 flex flex-col items-center text-center">
+      <div class="mb-3 flex items-center gap-3">
+        <div class="flex size-11 items-center justify-center rounded-2xl border border-cyan-500/40 bg-gradient-to-br from-cyan-500/20 via-cyan-950/60 to-emerald-500/10 text-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)]">
+          <svg class="size-6 text-cyan-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="text-left">
+          <div class="flex items-center gap-2">
+            <h1 class="font-mono text-xl font-extrabold tracking-tight text-white">TrustPassz</h1>
+            <span class="rounded-md border border-cyan-500/50 bg-cyan-950/80 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-300 uppercase tracking-widest shadow-[0_0_10px_rgba(6,182,212,0.2)]">GOVERNANCE</span>
+          </div>
+          <p class="text-[11px] font-medium text-slate-400">Autonomous Escrow & Arbitrator Command Center</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-[11px] font-mono text-slate-400">
+        <span class="relative flex size-2">
+          <span class="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+        </span>
+        <span class="text-slate-300 font-semibold">Node Status: Online</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-cyan-400/90 font-mono text-[10px]">Base Sepolia Escrow v2.4</span>
+      </div>
+    </div>
+
+    <div class="relative w-full max-w-lg">
+      
+    <div class="rounded-2xl border border-slate-800/80 bg-slate-900/60 shadow-[0_0_50px_rgba(6,182,212,0.08)] backdrop-blur-xl p-6 space-y-5">
+      <div class="space-y-2 pb-2 border-b border-slate-800">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            <span>Cổng Xác Thực Quản Trị</span>
+          </h2>
+          <div class="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-2.5 py-0.5 text-[11px] font-mono text-cyan-300">
+            <svg class="size-3 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <span>Chuyển tiếp: /dashboard</span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400">
+          Chỉ dành riêng cho Quản trị viên (ADMIN) và Hội đồng Trọng tài (ARBITRATOR).
+        </p>
+
+        <!-- Tab Controller -->
+        <div class="pt-2">
+          <div class="grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-[#070A12]/90 p-1 font-medium">
+            <button type="button" class="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-semibold min-h-10">
+              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+              <span>Google & Ví Web3</span>
+            </button>
+            <button type="button" class="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs text-slate-400 hover:text-slate-200 min-h-10">
+              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+              <span>Mật Khẩu</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Banner Sample -->
+      <div class="relative flex items-start gap-3 rounded-xl border border-rose-500/40 bg-rose-950/30 p-4 text-xs text-rose-200 shadow-[0_0_20px_rgba(244,63,94,0.12)]">
+        <div class="mt-0.5 shrink-0 rounded-lg bg-rose-500/20 p-1 text-rose-400 border border-rose-500/30">
+          <svg class="size-4 text-rose-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        </div>
+        <div class="flex-1 space-y-1 pr-6">
+          <div class="font-semibold text-rose-300">Từ chối quyền truy cập (403 Forbidden)</div>
+          <p class="text-[11px] leading-relaxed text-rose-200/90">Ví 0x892a...4b12 chưa được cấp quyền trong RBAC Governance Smart Contract.</p>
+          <div class="mt-1 flex items-center gap-1.5 text-[10px] text-rose-400 font-mono">
+            <span>Yêu cầu quyền hạn ADMIN hoặc ARBITRATOR để mở khóa Governance Portal.</span>
+          </div>
+        </div>
+        <button type="button" class="absolute right-2 top-2 p-1 text-rose-400 hover:text-rose-200">
+          <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Tab Content: Web3 / Passkey -->
+      <div class="space-y-3.5">
+        <div class="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-3 text-[11px] text-cyan-300">
+          <div class="flex items-center gap-2 font-semibold">
+            <svg class="size-4 text-cyan-400 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Xác Thực Phần Cứng & Mật Mã Phi Tập Trung</span>
+          </div>
+          <p class="mt-1 text-slate-400 leading-relaxed">
+            Đăng nhập an toàn qua Chữ ký điện tử Solana (SIWS), Google Workspace SSO hoặc Khóa bảo mật FIDO2 / Passkey được cấp quyền trên hệ thống.
+          </p>
+        </div>
+
+        <!-- 1. Solana SIWS Card -->
+        <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 hover:border-slate-700 transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="flex size-7 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-500/20 to-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">Chữ Ký Ví Web3 (Solana SIWS)</div>
+                <div class="text-[11px] text-slate-400 font-mono">Hỗ trợ Phantom, Solflare (Ed25519 Detached)</div>
+              </div>
+            </div>
+            <span class="rounded bg-emerald-950 text-emerald-400 text-[10px] px-2 py-0.5 border border-emerald-800/60 font-mono">Ready</span>
+          </div>
+          <button type="button" class="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold h-11 rounded-lg border border-purple-400/30 shadow-[0_0_20px_rgba(99,102,241,0.25)] flex items-center justify-center gap-2 text-xs sm:text-sm">
+            <svg class="size-4 text-cyan-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+            <span>Kết Nối Ví Quản Trị (Phantom / Solflare)</span>
+            <svg class="size-3.5 ml-auto text-cyan-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- 2. Google Workspace Login -->
+        <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 hover:border-slate-700 transition-all">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <svg class="size-4 text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-white">Google Workspace Whitelist</div>
+              <div class="text-[11px] text-slate-400">Định danh quản trị viên qua tài khoản Google chính thức</div>
+            </div>
+          </div>
+          <div class="w-full flex justify-center py-1">
+            <button type="button" class="w-full max-w-[360px] h-11 bg-white hover:bg-slate-100 text-slate-900 font-medium text-xs rounded-full flex items-center justify-center gap-3 px-4 shadow-sm border border-slate-300">
+              <svg class="size-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+              <span>Tiếp tục với Google Workspace</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Passkey / FIDO2 -->
+        <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 hover:border-slate-700 transition-all">
+          <button type="button" class="w-full h-11 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-semibold rounded-lg flex items-center justify-center gap-2 text-xs sm:text-sm">
+            <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>
+            <span>Xác thực Passkey / FIDO2 Hardware Key</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-800 pt-4 text-xs text-slate-400">
+        <span>Chưa có chứng thư Arbitrator?</span>
+        <a href="#" class="text-cyan-400 hover:underline">Kích hoạt Onboarding &rarr;</a>
+      </div>
+    </div>
+  
+    </div>
+
+    <div class="relative mt-8 flex items-center gap-2 text-center text-xs text-slate-500 font-mono">
+      <svg class="size-3 text-cyan-500/70" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Base Sepolia Multi-Sig: 0x165B...f783</span>
+      <span>•</span>
+      <span>Secured by Ed25519 & Keccak-256 RBAC Gate</span>
+    </div>
+  </div>
+</body>
+</html>
