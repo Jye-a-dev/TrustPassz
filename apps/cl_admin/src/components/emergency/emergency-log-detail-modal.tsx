@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DispatchAuditLog } from "@/types/emergency-alert";
+import type { DispatchAuditLog } from "@/types/emergency-alert";
 
 interface EmergencyLogDetailModalProps {
   log: DispatchAuditLog | null;
@@ -30,69 +30,71 @@ export function EmergencyLogDetailModal({
 }: EmergencyLogDetailModalProps) {
   return (
     <Dialog open={Boolean(log)} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-137.5 bg-cyber-card border-cyber-border text-slate-100 p-6">
-        <DialogHeader>
-          <DialogTitle className="text-base font-semibold text-slate-100 font-mono flex items-center gap-2">
-            <FileText className="size-4 text-cyan-400" />
-            Chi tiết Dispatch Alert #{log?.id.slice(0, 8)}
-          </DialogTitle>
-          <DialogDescription className="text-xs text-slate-400">
+      <DialogContent className="sm:max-w-xl bg-white border border-slate-200 text-slate-900 rounded-2xl shadow-xl p-6 text-xs">
+        <DialogHeader className="border-b border-slate-100 pb-3">
+          <div className="flex items-center space-x-2">
+            <FileText className="size-4 text-slate-700" />
+            <DialogTitle className="text-sm font-bold text-slate-900 font-mono">
+              Chi Tiết Dispatch Alert #{log?.id.slice(0, 8)}
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs text-slate-500 pt-1">
             Toàn văn thông số kỹ thuật sự cố được lưu trữ trong bảng audit_logs
           </DialogDescription>
         </DialogHeader>
 
         {log && (
           <div className="space-y-3 my-2 text-xs font-mono">
-            <div className="grid grid-cols-2 gap-2 bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+            <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase">Alert Type:</span>
-                <span className="text-cyan-400 font-bold">{log.alertType}</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-sans font-medium">Alert Type:</span>
+                <span className="text-indigo-600 font-bold">{log.alertType}</span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase">Trạng thái:</span>
-                <span>{renderStatusBadge(log.status)}</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-sans font-medium">Trạng thái:</span>
+                <div className="mt-0.5">{renderStatusBadge(log.status)}</div>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase">Độ trễ dispatch:</span>
-                <span>{renderLatencyBadge(log.latencyMs)}</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-sans font-medium">Độ trễ dispatch:</span>
+                <div className="mt-0.5">{renderLatencyBadge(log.latencyMs)}</div>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase">Triggered By:</span>
-                <span className="text-slate-200">{log.triggeredBy}</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-sans font-medium">Triggered By:</span>
+                <span className="text-slate-800 font-medium">{log.triggeredBy}</span>
               </div>
             </div>
 
             <div>
-              <span className="text-slate-400 block mb-1">Tiêu đề (Subject):</span>
-              <div className="p-2 rounded bg-slate-900 border border-slate-800 text-slate-200">
+              <span className="text-slate-600 font-sans font-medium block mb-1">Tiêu đề (Subject):</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-[11px]">
                 {log.subject}
               </div>
             </div>
 
             <div>
-              <span className="text-slate-400 block mb-1">Danh sách người nhận:</span>
-              <div className="p-2 rounded bg-slate-900 border border-slate-800 text-slate-300 max-h-24 overflow-y-auto">
+              <span className="text-slate-600 font-sans font-medium block mb-1">Danh sách người nhận:</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 max-h-24 overflow-y-auto text-[11px]">
                 {parseRecipients(log.recipients).join(", ")}
               </div>
             </div>
 
             {log.errorMessage && (
               <div>
-                <span className="text-rose-400 block mb-1 font-bold">Lỗi / Stack trace ghi nhận:</span>
-                <div className="p-2.5 rounded bg-rose-950/30 border border-rose-800/50 text-rose-300 whitespace-pre-wrap max-h-36 overflow-y-auto">
+                <span className="text-rose-700 font-sans font-bold block mb-1">Lỗi / Stack trace ghi nhận:</span>
+                <pre className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] whitespace-pre-wrap max-h-36 overflow-y-auto font-mono">
                   {log.errorMessage}
-                </div>
+                </pre>
               </div>
             )}
           </div>
         )}
 
-        <DialogFooter className="border-t border-slate-800 pt-3">
+        <DialogFooter className="border-t border-slate-100 pt-3">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="min-h-11 min-w-11 border-slate-700 text-slate-300 hover:text-white"
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium"
           >
             Đóng
           </Button>
@@ -101,4 +103,3 @@ export function EmergencyLogDetailModal({
     </Dialog>
   );
 }
-

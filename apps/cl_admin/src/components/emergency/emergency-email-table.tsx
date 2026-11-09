@@ -160,16 +160,16 @@ export function EmergencyEmailTable({ onListChanged }: EmergencyEmailTableProps)
   return (
     <div className="space-y-4">
       {/* Header action bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] p-4 rounded-xl border border-[#1E293B]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-400">
-            <Mail className="size-5" />
+          <div className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <Mail className="size-4.5" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100 font-mono tracking-wide">
+            <h3 className="text-xs font-bold text-slate-900">
               Danh sách Email Cứu hộ Khẩn cấp
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] text-slate-400">
               Các quản trị viên nhận email Cyber-Alert tức thì khi xảy ra lỗi nghiêm trọng
             </p>
           </div>
@@ -182,9 +182,9 @@ export function EmergencyEmailTable({ onListChanged }: EmergencyEmailTableProps)
             size="sm"
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="min-h-[44px] min-w-[44px] border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white"
+            className="h-8.5 px-3 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs shadow-2xs font-medium"
           >
-            <RefreshCw className={`size-4 mr-1.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`size-3.5 mr-1.5 ${isRefreshing ? "animate-spin text-slate-900" : "text-slate-500"}`} />
             Làm mới
           </Button>
 
@@ -192,68 +192,68 @@ export function EmergencyEmailTable({ onListChanged }: EmergencyEmailTableProps)
             type="button"
             size="sm"
             onClick={() => setIsAddOpen(true)}
-            className="min-h-[44px] min-w-[44px] bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-semibold font-mono tracking-tight cursor-pointer"
+            className="h-8.5 px-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs cursor-pointer"
           >
-            <Plus className="size-4 mr-1.5" />
+            <Plus className="size-3.5 mr-1.5" />
             Thêm Email Nhận Tin
           </Button>
         </div>
       </div>
 
       {/* Emails Table */}
-      <div className="rounded-xl border border-[#1E293B] bg-[#0F172A] overflow-hidden overflow-x-auto">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs overflow-x-auto">
         <Table>
-          <TableHeader className="bg-slate-900/80 border-b border-[#1E293B]">
-            <TableRow className="border-b border-slate-800 hover:bg-transparent">
-              <TableHead className="font-mono text-xs uppercase text-slate-400 py-3.5">
+          <TableHeader className="bg-slate-50 border-b border-slate-200">
+            <TableRow className="border-b border-slate-200 hover:bg-transparent">
+              <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider py-2.5 px-4">
                 Email Đích
               </TableHead>
-              <TableHead className="font-mono text-xs uppercase text-slate-400">
+              <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider py-2.5 px-4">
                 Vai trò / Nhãn
               </TableHead>
-              <TableHead className="font-mono text-xs uppercase text-slate-400">
+              <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider py-2.5 px-4">
                 Trạng thái
               </TableHead>
-              <TableHead className="font-mono text-xs uppercase text-slate-400 hidden md:table-cell">
+              <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider py-2.5 px-4 hidden md:table-cell">
                 Người thêm
               </TableHead>
-              <TableHead className="font-mono text-xs uppercase text-slate-400 text-right pr-4">
+              <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider py-2.5 px-4 text-right pr-4">
                 Hành động
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="divide-y divide-slate-100 text-xs">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, idx) => (
-                <TableRow key={idx} className="border-b border-slate-800/60">
-                  <TableCell><Skeleton className="h-4 w-44 bg-slate-800" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-28 bg-slate-800" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20 bg-slate-800" /></TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24 bg-slate-800" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto bg-slate-800" /></TableCell>
+                <TableRow key={idx} className="border-b border-slate-100">
+                  <TableCell className="px-4"><Skeleton className="h-4 w-44 bg-slate-100" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-28 bg-slate-100" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-20 bg-slate-100" /></TableCell>
+                  <TableCell className="hidden md:table-cell px-4"><Skeleton className="h-4 w-24 bg-slate-100" /></TableCell>
+                  <TableCell className="text-right px-4"><Skeleton className="h-8 w-20 ml-auto bg-slate-100" /></TableCell>
                 </TableRow>
               ))
             ) : emails.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-10 text-center text-slate-500">
-                  <AlertCircle className="size-8 mx-auto mb-2 text-slate-600" />
-                  <p className="text-sm font-mono">Chưa có email nào trong danh sách cứu hộ.</p>
-                  <p className="text-xs text-slate-600 mt-1">Bấm "Thêm Email Nhận Tin" để thiết lập.</p>
+                  <AlertCircle className="size-8 mx-auto mb-2 text-slate-400" />
+                  <p className="text-xs font-mono font-semibold text-slate-700">Chưa có email nào trong danh sách cứu hộ.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Bấm &quot;Thêm Email Nhận Tin&quot; để thiết lập.</p>
                 </TableCell>
               </TableRow>
             ) : (
               emails.map((item) => (
                 <TableRow
                   key={item.id}
-                  className="border-b border-slate-800/60 hover:bg-slate-900/40 transition-colors"
+                  className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors"
                 >
-                  <TableCell className="py-3 font-mono text-xs text-slate-200">
+                  <TableCell className="py-3 px-4 font-mono text-xs text-slate-800">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-100">{item.email}</span>
+                      <span className="font-semibold text-slate-900">{item.email}</span>
                       <button
                         type="button"
                         onClick={() => handleCopy(item.email, item.id)}
-                        className="p-1 text-slate-500 hover:text-cyan-400 transition-colors"
+                        className="p-1 text-slate-400 hover:text-slate-800 transition-colors"
                         title="Sao chép email"
                       >
                         <Copy className="size-3.5" />
@@ -261,29 +261,31 @@ export function EmergencyEmailTable({ onListChanged }: EmergencyEmailTableProps)
                     </div>
                   </TableCell>
 
-                  <TableCell className="text-xs text-slate-300 font-mono">
-                    <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/60 text-slate-300">
+                  <TableCell className="text-xs text-slate-600 font-mono px-4">
+                    <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[11px]">
                       {item.label}
                     </span>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="px-4">
                     {item.isActive ? (
-                      <Badge variant="emerald" dot pulse>
-                        ACTIVE
-                      </Badge>
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700 text-xs font-medium font-mono">
+                        <span className="size-1.5 rounded-full bg-emerald-500" />
+                        Active
+                      </span>
                     ) : (
-                      <Badge variant="secondary">
-                        DISABLED
-                      </Badge>
+                      <span className="inline-flex items-center gap-1.5 text-slate-400 text-xs font-mono">
+                        <span className="size-1.5 rounded-full bg-slate-400" />
+                        Disabled
+                      </span>
                     )}
                   </TableCell>
 
-                  <TableCell className="text-xs text-slate-400 font-mono hidden md:table-cell">
+                  <TableCell className="text-xs text-slate-500 font-mono hidden md:table-cell px-4">
                     {item.addedBy || "SUPER_ADMIN"}
                   </TableCell>
 
-                  <TableCell className="text-right pr-4">
+                  <TableCell className="text-right pr-4 py-2">
                     <div className="flex items-center justify-end gap-1.5">
                       <Button
                         type="button"
@@ -291,13 +293,13 @@ export function EmergencyEmailTable({ onListChanged }: EmergencyEmailTableProps)
                         size="sm"
                         onClick={() => handleOpenToggle(item)}
                         title={item.isActive ? "Tạm ngưng nhận tin" : "Bật nhận tin"}
-                        className={`min-h-[44px] min-w-[44px] p-2 ${
+                        className={`h-8 w-8 p-0 ${
                           item.isActive
-                            ? "text-amber-400 hover:bg-amber-950/40 hover:text-amber-300"
-                            : "text-emerald-400 hover:bg-emerald-950/40 hover:text-emerald-300"
+                            ? "text-amber-600 hover:bg-amber-50"
+                            : "text-emerald-600 hover:bg-emerald-50"
                         }`}
                       >
-                        {item.isActive ? <PowerOff className="size-4" /> : <Power className="size-4" />}
+                        {item.isActive ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
                       </Button>
 
                       <Button
@@ -306,9 +308,9 @@ export function EmergencyEmailTable({ onListChanged }: EmergencyEmailTableProps)
                         size="sm"
                         onClick={() => handleOpenDelete(item)}
                         title="Xóa khỏi danh sách"
-                        className="min-h-[44px] min-w-[44px] p-2 text-rose-400 hover:bg-rose-950/40 hover:text-rose-300"
+                        className="h-8 w-8 p-0 text-rose-600 hover:bg-rose-50"
                       >
-                        <Trash2 className="size-4" />
+                        <Trash2 className="size-3.5" />
                       </Button>
                     </div>
                   </TableCell>

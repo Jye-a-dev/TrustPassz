@@ -53,14 +53,14 @@ function OverrideActionDialogInner({
       case 'SETTLE_SELLER':
         return {
           title: 'Duyệt Giải Ngân Cho Seller (Settle Escrow)',
-          desc: 'Kích hoạt Oracle Relayer gọi resolveDispute(dealId, false) trên hợp đồng Base Sepolia. Toàn bộ tiền ký quỹ sẽ chuyển về ví của Người Bán.',
+          desc: 'Kích hoạt Oracle Relayer gọi resolveDispute(dealId, false) trên hợp đồng. Toàn bộ tiền ký quỹ sẽ chuyển về ví của Người Bán.',
           onchainAction: 'resolveDispute(dealId, false)',
           impact: 'Deal State → SETTLED',
         };
       case 'REFUND_BUYER':
         return {
           title: 'Duyệt Hoàn Tiền Cho Buyer (Refund Escrow)',
-          desc: 'Kích hoạt Oracle Relayer gọi resolveDispute(dealId, true) trên hợp đồng Base Sepolia. Toàn bộ tiền ký quỹ sẽ hoàn trả về ví của Người Mua.',
+          desc: 'Kích hoạt Oracle Relayer gọi resolveDispute(dealId, true) trên hợp đồng. Toàn bộ tiền ký quỹ sẽ hoàn trả về ví của Người Mua.',
           onchainAction: 'resolveDispute(dealId, true)',
           impact: 'Deal State → REFUNDED',
         };
@@ -123,7 +123,7 @@ function OverrideActionDialogInner({
       toast.success(
         decisionType === 'REQUEST_EVIDENCE'
           ? 'Đã chuyển trạng thái và gửi yêu cầu bổ sung chứng cứ.'
-          : 'Phán quyết đã được ghi nhận vào Neon DB và giải ngân thành công.'
+          : 'Phán quyết đã được ghi nhận vào hệ thống và giải ngân thành công.'
       );
 
       onSuccess(decisionType, resolutionNote);
@@ -137,31 +137,40 @@ function OverrideActionDialogInner({
   };
 
   return (
-    <DialogContent className="border-slate-800 bg-[#0F172A] text-slate-100 sm:max-w-lg">
-      <DialogHeader>
-        <div className="flex items-center space-x-2">
-          <ShieldAlert className="h-5 w-5 text-amber-400" />
-          <DialogTitle className="text-base font-bold text-white">
-            {step === 1 ? 'Xác Nhận Quyết Định Phán Xử' : 'Bước 2/2: Ký Giao Dịch On-Chain'}
-          </DialogTitle>
+    <DialogContent className="border-slate-200 bg-white text-slate-900 sm:max-w-lg rounded-2xl shadow-xl p-6 text-xs">
+      <DialogHeader className="border-b border-slate-100 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <ShieldAlert className="h-5 w-5 text-amber-600" />
+            <DialogTitle className="text-base font-bold text-slate-900">
+              {step === 1 ? 'Xác Nhận Quyết Định Phán Xử' : 'Bước 2/2: Ký Giao Dịch On-Chain'}
+            </DialogTitle>
+          </div>
+          <span className="text-xs font-semibold text-slate-500">Bước {step}/2</span>
         </div>
-        <DialogDescription className="text-xs text-slate-400">
+        <DialogDescription className="text-xs text-slate-500 pt-0.5">
           {config.title}
         </DialogDescription>
       </DialogHeader>
 
+      {/* Stepper bar */}
+      <div className="flex items-center gap-2 my-1">
+        <div className="flex-1 h-1 rounded bg-slate-900"></div>
+        <div className={`flex-1 h-1 rounded ${step === 2 ? 'bg-slate-900' : 'bg-slate-200'}`}></div>
+      </div>
+
       {step === 1 ? (
         <div className="space-y-4 py-2 text-xs">
-          <div className="rounded-lg border border-slate-800 bg-[#080C14] p-3 text-slate-300 space-y-1">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 space-y-2">
             <p className="leading-relaxed">{config.desc}</p>
-            <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between font-mono text-[11px]">
-              <span className="text-slate-400">On-chain Call:</span>
-              <span className="text-cyan-400 font-semibold">{config.onchainAction}</span>
+            <div className="pt-2 border-t border-slate-200/60 flex justify-between font-mono text-[11px]">
+              <span className="text-slate-500 font-sans">On-chain Call:</span>
+              <span className="text-indigo-600 font-bold">{config.onchainAction}</span>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-semibold text-slate-300">
+            <label className="font-semibold text-slate-700 block">
               Văn bản giải trình phán quyết (Resolution Note) *
             </label>
             <textarea
@@ -169,64 +178,64 @@ function OverrideActionDialogInner({
               value={resolutionNote}
               onChange={(e) => setResolutionNote(e.target.value)}
               placeholder="Nhập căn cứ pháp lý / kết quả đối chiếu dữ liệu để lưu vào hồ sơ trọng tài..."
-              className="w-full rounded-md border border-slate-800 bg-[#080C14] p-2.5 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 leading-relaxed"
             />
           </div>
         </div>
       ) : (
         <div className="space-y-4 py-2 text-xs">
-          <div className="rounded-lg border border-amber-500/40 bg-amber-950/20 p-3 space-y-2">
-            <div className="flex items-center space-x-2 text-amber-400 font-semibold">
-              <AlertTriangle className="h-4 w-4" />
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 space-y-1.5">
+            <div className="flex items-center space-x-2 text-amber-800 font-semibold">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
               <span>Cảnh báo: Hành động ghi nhận trực tiếp vào Smart Contract!</span>
             </div>
-            <p className="text-slate-300 text-[11px] leading-relaxed">
-              Sau khi Oracle Relayer broadcast transaction, quyết định không thể đảo ngược trên mạng Base Sepolia.
+            <p className="text-amber-800 text-[11px] leading-relaxed">
+              Sau khi Oracle Relayer broadcast transaction, quyết định không thể đảo ngược trên mạng blockchain.
             </p>
           </div>
 
-          <div className="rounded-lg border border-slate-800 bg-[#080C14] p-3 space-y-2 font-mono text-[11px]">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2 font-mono text-[11px]">
             <div className="flex justify-between">
-              <span className="text-slate-500">Kèo (Deal ID):</span>
-              <span className="text-white truncate max-w-60">{deal.id}</span>
+              <span className="text-slate-500 font-sans">Kèo (Deal ID):</span>
+              <span className="text-slate-800 truncate max-w-60 font-semibold">{deal.id}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Số tiền Escrow:</span>
-              <span className="text-cyan-400 font-bold">
+              <span className="text-slate-500 font-sans">Số tiền Escrow:</span>
+              <span className="text-slate-900 font-bold tabular-nums">
                 {Number(deal.amount).toLocaleString('vi-VN')} {deal.currency}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Oracle Relayer:</span>
-              <span className="text-emerald-400">0x70997...79C8 (Authorized)</span>
+              <span className="text-slate-500 font-sans">Oracle Relayer:</span>
+              <span className="text-emerald-700 font-semibold">0x70997...79C8 (Authorized)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Hệ quả:</span>
-              <span className="text-white font-semibold">{config.impact}</span>
+              <span className="text-slate-500 font-sans">Hệ quả:</span>
+              <span className="text-slate-800 font-semibold">{config.impact}</span>
             </div>
           </div>
         </div>
       )}
 
-      <DialogFooter className="flex gap-2 sm:justify-between border-t border-slate-800 pt-3">
+      <DialogFooter className="flex gap-2 sm:justify-between border-t border-slate-100 pt-3">
         {step === 2 ? (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => setStep(1)}
             disabled={isBroadcasting}
-            className="text-xs text-slate-400"
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
           >
             Quay lại
           </Button>
         ) : (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={onClose}
-            className="text-xs text-slate-400"
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
           >
-            Hủy
+            Hủy Bỏ
           </Button>
         )}
 
@@ -234,7 +243,7 @@ function OverrideActionDialogInner({
           <Button
             size="sm"
             onClick={handleProceedToConfirm}
-            className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs h-8 gap-1.5"
+            className="h-10 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium gap-1.5"
           >
             Tiếp tục bước 2
             <ArrowRight className="h-3.5 w-3.5" />
@@ -244,16 +253,16 @@ function OverrideActionDialogInner({
             size="sm"
             onClick={handleExecuteOnChain}
             disabled={isBroadcasting}
-            className={`text-white text-xs h-8 gap-1.5 font-semibold ${
+            className={`h-10 px-4 rounded-lg text-white text-xs font-medium gap-1.5 shadow-xs ${
               decisionType === 'REFUND_BUYER'
                 ? 'bg-rose-600 hover:bg-rose-500'
-                : 'bg-emerald-600 hover:bg-emerald-500'
+                : 'bg-slate-900 hover:bg-slate-800'
             }`}
           >
             {isBroadcasting ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Đang ký & Broadcast lên Base Sepolia...
+                Đang ký &amp; Broadcast...
               </>
             ) : (
               'Xác nhận ký & Phán quyết On-chain'

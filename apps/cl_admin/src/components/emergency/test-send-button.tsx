@@ -65,19 +65,19 @@ export function TestSendButton({ onSuccess, className }: TestSendButtonProps) {
   return (
     <div className="flex items-center gap-3">
       {latency !== null && (
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-[11px] font-mono">
-          <Zap className="size-3 text-cyan-400" />
-          <span className="text-slate-400">Latency:</span>
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono">
+          <Zap className="size-3 text-emerald-600" />
+          <span className="text-slate-500">Latency:</span>
           <span
             className={
               latency < 2000
-                ? "text-emerald-400 font-bold"
-                : "text-amber-400 font-bold"
+                ? "text-emerald-700 font-bold"
+                : "text-amber-700 font-bold"
             }
           >
             {latency}ms
           </span>
-          <span className="text-slate-500 text-[10px]">(&lt;2s SLA)</span>
+          <span className="text-slate-400 text-[10px]">(&lt;2s SLA)</span>
         </div>
       )}
 
@@ -86,19 +86,19 @@ export function TestSendButton({ onSuccess, className }: TestSendButtonProps) {
         variant="default"
         onClick={handleTestSend}
         disabled={isLoading}
-        className={`relative min-h-11 min-w-11 px-4 bg-linear-to-r from-cyan-600 via-teal-600 to-emerald-600 text-slate-950 font-semibold font-mono tracking-tight hover:from-cyan-500 hover:to-emerald-500 transition-all duration-200 shadow-[0_0_15px_rgba(6,182,212,0.25)] border border-cyan-400/40 cursor-pointer ${
+        className={`h-8.5 px-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs cursor-pointer ${
           className || ""
         }`}
       >
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 size-4 animate-spin text-slate-950" />
+            <Loader2 className="mr-2 size-4 animate-spin text-white" />
             <span>Đang Probe SMTP...</span>
           </>
         ) : (
           <>
-            <Send className="mr-2 size-4 text-slate-950" />
-            <span>Test Send Emergency Alert</span>
+            <Send className="mr-2 size-4 text-white" />
+            <span>Gửi Alert Thử Nghiệm</span>
           </>
         )}
       </Button>

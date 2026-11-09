@@ -159,74 +159,64 @@ export default function DisputesPage() {
   const columns: ColumnDef<DisputeLog>[] = [
     {
       key: 'deal',
-      header: 'Kèo Bị Khiếu Nại',
+      header: 'Hồ Sơ Kèo / Dispute ID',
       className: 'w-72',
       cell: (dispute) => {
         const conf = dispute.aiConfidenceScore ?? 0.5;
         const isUnder = conf < 0.75 || dispute.aiVerdict === 'ESCALATE_TO_ADMIN';
         return (
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
-              <p className="font-medium text-slate-200 line-clamp-1">{dispute.deal?.title || 'Escrow Deal'}</p>
+              <p className="font-semibold text-slate-900 text-xs line-clamp-1">{dispute.deal?.title || 'Escrow Deal'}</p>
               {isUnder && (
                 <span title="Ca AI phân vân">
-                  <AlertOctagon className="h-3.5 w-3.5 text-amber-400 shrink-0 animate-pulse" />
+                  <AlertOctagon className="h-3.5 w-3.5 text-amber-500 shrink-0 animate-pulse" />
                 </span>
               )}
             </div>
-            <p className="font-mono text-[10px] text-slate-500">ID: {dispute.id}</p>
+            <p className="font-mono text-[11px] text-slate-400">
+              ID: {dispute.id} • Deal: {dispute.dealId?.slice(0, 8)}... • {dispute.deal?.amount ? `${Number(dispute.deal.amount).toLocaleString('vi-VN')} ₫` : 'Tranh chấp'}
+            </p>
           </div>
         );
       },
     },
     {
       key: 'reason',
-      header: 'Lý do khiếu nại',
+      header: 'Lý Do Khiếu Nại Của Buyer',
       className: 'max-w-[260px]',
-      cell: (dispute) => <p className="text-xs text-slate-300 line-clamp-2">{dispute.reason}</p>,
-    },
-    {
-      key: 'status',
-      header: 'Trạng thái',
-      cell: (dispute) => (
-        <Badge
-          variant={dispute.status === 'ADMIN_ESCALATED' ? 'amber' : 'cyan'}
-          dot
-          pulse={dispute.status === 'ADMIN_ESCALATED'}
-          className="font-mono text-[10px]"
-        >
-          {dispute.status}
-        </Badge>
-      ),
+      cell: (dispute) => <p className="text-xs text-slate-600 line-clamp-2">{dispute.reason}</p>,
     },
     {
       key: 'confidence',
-      header: 'AI Confidence',
+      header: 'Độ Tin Cậy AI',
       cell: (dispute) => {
         const conf = dispute.aiConfidenceScore ?? 0.5;
         const isUnderThreshold = conf < 0.75;
+        const pct = (conf * 100).toFixed(1);
         return (
-          <div className="flex items-center space-x-1.5">
-            <span
-              className={`font-mono font-bold text-xs ${
-                isUnderThreshold ? 'text-amber-400' : 'text-emerald-400'
-              }`}
-            >
-              {(conf * 100).toFixed(0)}%
-            </span>
-            <Badge
-              variant={isUnderThreshold ? 'amber' : 'emerald'}
-              className="text-[10px] py-0 px-1.5 font-mono"
-            >
-              {isUnderThreshold ? 'Cần Thẩm Định' : 'Tin cậy'}
-            </Badge>
+          <div className="space-y-1 w-24">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className={isUnderThreshold ? 'text-amber-700 font-bold' : 'text-emerald-700 font-bold'}>
+                {pct}%
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {isUnderThreshold ? '<0.75' : '≥0.75'}
+              </span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${isUnderThreshold ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
           </div>
         );
       },
     },
     {
       key: 'verdict',
-      header: 'Đề xuất AI',
+      header: 'Đề Xuất AI sVLM',
       cell: (dispute) => {
         const verdictVariant =
           dispute.aiVerdict === 'APPROVE_PAYOUT'
@@ -242,14 +232,28 @@ export default function DisputesPage() {
       },
     },
     {
+      key: 'sla',
+      header: 'Hạn SLA',
+      cell: (dispute) => {
+        const hoursPassed = (Date.now() - new Date(dispute.createdAt).getTime()) / (1000 * 60 * 60);
+        const hoursRemaining = Math.max(0, 24 - hoursPassed);
+        const isUrgent = hoursRemaining < 4;
+        return (
+          <span className={`font-mono text-xs font-semibold tabular-nums ${isUrgent ? 'text-rose-600' : 'text-slate-600'}`}>
+            Còn {hoursRemaining.toFixed(1)}h
+          </span>
+        );
+      },
+    },
+    {
       key: 'actions',
-      header: <span className="block text-right">Phân xử</span>,
+      header: <span className="block text-right">Hành Động</span>,
       className: 'text-right',
       cell: (dispute) => (
         <Link href={`/disputes/${dispute.dealId}`}>
           <Button
             size="sm"
-            className="min-h-[44px] px-3.5 text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-medium gap-1"
+            className="min-h-[36px] sm:min-h-[40px] px-3.5 text-xs bg-slate-900 hover:bg-slate-800 text-white font-medium gap-1 shadow-2xs cursor-pointer border border-slate-900"
           >
             <span>Thẩm định</span>
             <ChevronRight className="size-3.5" />
@@ -262,18 +266,19 @@ export default function DisputesPage() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
-            <ShieldAlert className="size-6 text-amber-400" />
-            Dispute Workbench: Hàng Đợi Tranh Chấp &amp; Đối Soát
-          </h2>
-          <p className="text-xs text-slate-400">
-            Bàn làm việc trọng tài: Ưu tiên ca AI phân vân và kích hoạt bàn đối soát chứng cứ song song.
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span className="text-slate-500">Trọng Tài &amp; AI</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-900 font-semibold">Hàng Đợi Tranh Chấp</span>
+          </div>
+          <p className="mt-1 text-xs text-slate-500">
+            Bàn làm việc trọng tài: Ưu tiên ca AI phân vân (&lt; 75%) và các ca trễ hạn cam kết SLA (&gt; 20h).
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant="amber" className="text-xs font-mono">
+          <Badge variant="outline" className="text-xs font-mono border-slate-200 bg-white text-slate-700">
             {filteredDisputes.length}/{counts.total} Vụ việc phù hợp
           </Badge>
         </div>
@@ -319,13 +324,13 @@ export default function DisputesPage() {
           onPageChange: setPage,
         }}
         renderMobileCard={(dispute) => (
-          <div className="rounded-xl border border-slate-800 bg-[#0B0F17] p-3.5 space-y-2.5">
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-2.5 shadow-2xs">
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
-                <p className="font-medium text-slate-200 text-xs line-clamp-1">
+                <p className="font-semibold text-slate-900 text-xs line-clamp-1">
                   {dispute.deal?.title || 'Escrow Deal'}
                 </p>
-                <p className="font-mono text-[10px] text-slate-500">ID: {dispute.id.slice(0, 8)}...</p>
+                <p className="font-mono text-[10px] text-slate-400">ID: {dispute.id.slice(0, 8)}...</p>
               </div>
               <Badge
                 variant={dispute.status === 'ADMIN_ESCALATED' ? 'amber' : 'cyan'}
@@ -335,16 +340,16 @@ export default function DisputesPage() {
                 {dispute.status}
               </Badge>
             </div>
-            <p className="text-xs text-slate-300 line-clamp-2">{dispute.reason}</p>
-            <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-xs">
-              <span className="font-mono text-[11px] text-slate-400">
+            <p className="text-xs text-slate-600 line-clamp-2">{dispute.reason}</p>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+              <span className="font-mono text-[11px] text-slate-500">
                 AI Conf:{' '}
-                <strong className="text-emerald-400">
+                <strong className="text-emerald-700">
                   {((dispute.aiConfidenceScore ?? 0.5) * 100).toFixed(0)}%
                 </strong>
               </span>
               <Link href={`/disputes/${dispute.dealId}`}>
-                <Button size="sm" className="min-h-[44px] px-3.5 text-xs bg-cyan-600 hover:bg-cyan-500 text-white gap-1">
+                <Button size="sm" className="min-h-[36px] px-3.5 text-xs bg-slate-900 hover:bg-slate-800 text-white gap-1">
                   <span>Thẩm định</span>
                   <ChevronRight className="size-3.5" />
                 </Button>

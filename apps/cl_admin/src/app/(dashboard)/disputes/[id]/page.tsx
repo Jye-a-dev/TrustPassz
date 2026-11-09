@@ -128,8 +128,8 @@ export default function DisputeDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center text-xs text-slate-400 font-mono">
-        <RotateCcw className="mr-2 h-4 w-4 animate-spin text-cyan-400" />
+      <div className="flex h-64 items-center justify-center text-xs text-slate-500 font-mono">
+        <RotateCcw className="mr-2 h-4 w-4 animate-spin text-slate-700" />
         Đang tải hồ sơ phân xử từ Neon PostgreSQL...
       </div>
     );
@@ -137,10 +137,10 @@ export default function DisputeDetailPage() {
 
   if (!currentDispute || !deal) {
     return (
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-8 text-center text-xs text-slate-400 space-y-3">
+      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 space-y-3 shadow-xs">
         <p>Không tìm thấy hồ sơ tranh chấp hợp lệ.</p>
         <Link href="/disputes">
-          <Button variant="outline" size="sm" className="border-slate-800 text-cyan-400 min-h-[44px]">
+          <Button variant="outline" size="sm" className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 min-h-[44px]">
             Trở về Hàng đợi Tranh chấp
           </Button>
         </Link>
@@ -149,62 +149,54 @@ export default function DisputeDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Top Header & Breadcrumb */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3">
+        <div className="flex items-center gap-2 text-xs font-medium">
+          <span className="text-slate-500 hover:text-slate-800 transition-colors">Trọng Tài &amp; AI</span>
+          <span className="text-slate-400">/</span>
+          <Link href="/disputes" className="text-slate-500 hover:text-slate-800 transition-colors">
+            Hàng đợi tranh chấp
+          </Link>
+          <span className="text-slate-400">/</span>
+          <span className="text-slate-900 font-semibold font-mono">{currentDispute.id}</span>
+        </div>
+
+        <div className="flex items-center gap-2">
           <Link href="/disputes">
             <Button
               variant="outline"
               size="sm"
-              className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-300 text-xs min-h-[44px]"
+              className="h-8.5 px-3 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium flex items-center gap-1.5 shadow-2xs"
             >
-              <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
-              Trở về Hàng đợi
+              <ArrowLeft className="h-4 w-4 text-slate-500" />
+              <span>Trở về Hàng đợi</span>
             </Button>
           </Link>
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
-              <span>Hồ Sơ Phân Xử:</span>
-              <span className="text-cyan-400 font-mono text-sm">{currentDispute.id}</span>
-            </h2>
-            <p className="text-xs text-slate-400">
-              Kèo Escrow: <strong className="text-slate-200">{deal.title}</strong>
-            </p>
-          </div>
-        </div>
-
-        {/* Status Badges */}
-        <div className="flex items-center space-x-2">
-          <Badge
-            variant="outline"
-            className="border-cyan-800 bg-cyan-950/40 text-cyan-400 font-mono text-xs"
-          >
-            Trạng thái Deal: {deal.state}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="border-amber-800 bg-amber-950/40 text-amber-400 font-mono text-xs"
-          >
-            Dispute: {currentDispute.status}
-          </Badge>
         </div>
       </div>
 
-      {/* Escrow Dispute Overview Banner */}
-      <div className="flex flex-col sm:flex-row items-center justify-between rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-md gap-3">
-        <div className="flex items-center space-x-2 text-xs text-slate-300">
-          <Scale className="h-4 w-4 text-cyan-400" />
-          <span className="font-semibold text-white">Quyền Phán Quyết Trọng Tài (Arbitrator Override):</span>
-          <span className="text-slate-400">
-            Số tiền ký quỹ:{' '}
-            <strong className="text-cyan-400 font-mono">
+      {/* Deal Overview Strip */}
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold px-2.5 py-0.5">
+              DISPUTE: {currentDispute.status}
+            </span>
+            <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 font-mono text-[10px]">
+              DEAL STATE: {deal.state}
+            </Badge>
+            <h2 className="text-sm font-bold text-slate-900">{deal.title}</h2>
+          </div>
+          <p className="text-xs text-slate-500 font-mono">
+            Hồ sơ: <strong className="text-slate-900 font-semibold">{currentDispute.id}</strong> • Deal ID: {deal.id} • Số tiền ký quỹ:{' '}
+            <strong className="text-slate-900 font-bold tabular-nums">
               {Number(deal.amount).toLocaleString('vi-VN')} {deal.currency}
             </strong>
-          </span>
+          </p>
         </div>
-        <div className="text-[11px] font-mono text-slate-400">
-          Người khiếu nại: <strong className="text-slate-200">{currentDispute.initiatorId?.slice(0, 8)}...</strong>
+        <div className="text-xs font-mono text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5">
+          Buyer/Initiator: {currentDispute.initiatorId ? `${currentDispute.initiatorId.slice(0, 10)}...` : 'Unknown'}
         </div>
       </div>
 
@@ -223,18 +215,20 @@ export default function DisputeDetailPage() {
       />
 
       {/* Module 4: Oracle Relayer Protocol Info */}
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 text-xs space-y-2">
-        <div className="flex items-center justify-between text-slate-300">
-          <span className="font-semibold text-white flex items-center gap-1.5 font-mono">
-            <Fuel className="h-4 w-4 text-cyan-400" />
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs space-y-2 shadow-xs">
+        <div className="flex items-center justify-between text-slate-700">
+          <span className="font-semibold text-slate-900 flex items-center gap-1.5 font-mono">
+            <Fuel className="h-4 w-4 text-slate-700" />
             Oracle Relayer Signing Protocol (Base Sepolia)
           </span>
-          <span className="font-mono text-emerald-400 text-[11px]">Ready to Broadcast</span>
+          <span className="font-mono text-emerald-700 text-[11px] font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            Ready to Broadcast
+          </span>
         </div>
-        <p className="text-slate-400 text-[11px] leading-relaxed">
+        <p className="text-slate-500 text-[11px] leading-relaxed">
           Mọi quyết định phán quyết giải ngân hoặc hoàn tiền sẽ được ký trực tiếp bởi tài khoản Relayer ủy quyền
-          (<code className="text-cyan-300 font-mono">0x70997970C51812dc3A010C7d01b50e0d17dc79C8</code>) gọi hàm{' '}
-          <code className="text-cyan-300 font-mono">DigitalEscrow.resolveDispute(dealId, isRefund)</code>.
+          (<code className="text-slate-800 font-mono bg-slate-100 px-1 py-0.5 rounded border border-slate-200">0x70997970C51812dc3A010C7d01b50e0d17dc79C8</code>) gọi hàm{' '}
+          <code className="text-slate-800 font-mono bg-slate-100 px-1 py-0.5 rounded border border-slate-200">DigitalEscrow.resolveDispute(dealId, isRefund)</code>.
         </p>
       </div>
     </div>

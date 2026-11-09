@@ -128,46 +128,44 @@ export function DisputeAuditNotes({
 
   return (
     <TooltipProvider>
-      <Card className={cn('border-slate-800 bg-[#0F172A] shadow-xl', className)}>
-        <CardHeader className="border-b border-slate-800 pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex items-center space-x-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
-                <FileText className="h-4 w-4" />
-              </div>
-              <div>
-                <CardTitle className="text-sm font-semibold text-white">
-                  Biên Bản Đối Soát &amp; Phán Quyết Trọng Tài (Arbitration Audit)
-                </CardTitle>
-                <p className="text-[11px] text-slate-400">
-                  Bắt buộc tối thiểu {MIN_NOTE_LENGTH} ký tự để mở khóa quyền can thiệp On-Chain.
-                </p>
-              </div>
+      <Card className={cn('rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-3', className)}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-2.5 gap-2">
+          <div className="flex items-center space-x-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+              <FileText className="h-4 w-4" />
             </div>
-
-            {lastSavedTime && (
-              <span className="flex items-center gap-1 font-mono text-[10px] text-slate-400">
-                <Save className="h-3 w-3 text-cyan-400" />
-                Đã tự động lưu nháp: {lastSavedTime}
-              </span>
-            )}
+            <div>
+              <CardTitle className="text-xs font-bold text-slate-900">
+                Biên Bản Thẩm Định &amp; Quyết Định Phán Quyết Trọng Tài
+              </CardTitle>
+              <p className="text-[11px] text-slate-400">
+                Bắt buộc tối thiểu {MIN_NOTE_LENGTH} ký tự để mở khóa quyền can thiệp On-Chain.
+              </p>
+            </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="space-y-4 pt-4">
+          {lastSavedTime && (
+            <span className="flex items-center gap-1 font-mono text-[10px] text-slate-500">
+              <Save className="h-3 w-3 text-slate-600" />
+              Đã tự động lưu nháp: {lastSavedTime}
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-4 pt-1">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Left 2 Cols: Textarea & Char Counter */}
             <div className="lg:col-span-2 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <label htmlFor="audit-resolution-note" className="font-semibold text-slate-200 flex items-center gap-1.5">
-                  <span>Ghi chú phán quyết (Resolution Audit Note):</span>
-                  <span className="text-rose-400 font-mono">*</span>
+                <label htmlFor="audit-resolution-note" className="font-semibold text-slate-700 flex items-center gap-1.5">
+                  <span>Biên bản giải trình kiểm toán (Bắt buộc):</span>
+                  <span className="text-rose-500 font-mono">*</span>
                 </label>
                 <div className="flex items-center space-x-2">
                   <span
                     className={cn(
                       'font-mono text-[11px] font-semibold',
-                      isSatisfied ? 'text-emerald-400' : 'text-amber-400'
+                      isSatisfied ? 'text-emerald-700' : 'text-amber-700'
                     )}
                   >
                     {trimmedLength}/{MIN_NOTE_LENGTH} ký tự
@@ -177,7 +175,7 @@ export function DisputeAuditNotes({
                     <button
                       type="button"
                       onClick={handleClearDraft}
-                      className="text-slate-500 hover:text-rose-400 transition-colors p-1"
+                      className="text-slate-400 hover:text-rose-600 transition-colors p-1"
                       title="Xóa nháp"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -188,15 +186,15 @@ export function DisputeAuditNotes({
 
               <textarea
                 id="audit-resolution-note"
-                rows={5}
+                rows={4}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Nhập chi tiết nhận định đối soát giữa cam kết ban đầu và bằng chứng khiếu nại (Tối thiểu 20 ký tự)..."
-                className="w-full rounded-lg border border-slate-800 bg-[#080C14] p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-sans leading-relaxed resize-none"
+                className="w-full rounded-lg border border-slate-300 bg-white p-3 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 font-sans leading-relaxed resize-none"
               />
 
               {/* Progress track */}
-              <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
                 <div
                   style={{ width: `${Math.min(100, (trimmedLength / MIN_NOTE_LENGTH) * 100)}%` }}
                   className={cn(
@@ -208,11 +206,11 @@ export function DisputeAuditNotes({
             </div>
 
             {/* Right 1 Col: AI Explanation Summary Box */}
-            <div className="rounded-lg border border-slate-800 bg-[#080C14] p-3 space-y-2 flex flex-col justify-between">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2 flex flex-col justify-between">
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1">
-                    <Bot className="h-3.5 w-3.5 text-cyan-400" />
+                  <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1">
+                    <Bot className="h-3.5 w-3.5 text-slate-600" />
                     Lập luận của AI Arbitrator:
                   </span>
                   <Badge
@@ -222,7 +220,7 @@ export function DisputeAuditNotes({
                     Conf {(aiConfidence * 100).toFixed(0)}%
                   </Badge>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed font-sans line-clamp-4">
+                <p className="text-[11px] text-slate-600 leading-relaxed font-sans line-clamp-4">
                   {dispute.aiExplanation ||
                     'AI sVLM kiểm định mã nguồn và ảnh crash, phát hiện vi phạm quy tắc cam kết không crash tại runtime.'}
                 </p>
@@ -233,7 +231,7 @@ export function DisputeAuditNotes({
                 variant="outline"
                 size="sm"
                 onClick={handleQuoteAi}
-                className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 text-[10px] font-mono h-8 w-full gap-1"
+                className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[10px] font-mono h-8 w-full gap-1 shadow-2xs"
               >
                 <Quote className="h-3 w-3" />
                 <span>Trích dẫn góc nhìn AI</span>
@@ -242,16 +240,16 @@ export function DisputeAuditNotes({
           </div>
 
           {/* Action Decision Buttons with Tooltip Guard */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-3 border-t border-slate-800/80 gap-3">
-            <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
-              <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-3 border-t border-slate-100 gap-3">
+            <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
               <span>
                 Thao tác phán quyết sẽ broadcast giao dịch On-Chain thông qua Oracle Relayer.
               </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {/* Button 1: Payout to Seller */}
+              {/* Button 1: Refund to Buyer */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div>
@@ -259,20 +257,20 @@ export function DisputeAuditNotes({
                       type="button"
                       size="sm"
                       disabled={!isSatisfied || isResolving}
-                      onClick={() => handleTriggerAction('APPROVE_PAYOUT')}
+                      onClick={() => handleTriggerAction('TRIGGER_REFUND')}
                       className={cn(
-                        'min-h-[44px] text-xs font-semibold gap-1.5 px-4 transition-all',
+                        'min-h-[40px] text-xs font-semibold gap-1.5 px-4 transition-all shadow-xs',
                         isSatisfied && !isResolving
-                          ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/50'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                          ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
                       )}
                     >
                       {isResolving ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4" />
+                        <RotateCcw className="h-4 w-4" />
                       )}
-                      <span>Duyệt giải ngân cho Seller</span>
+                      <span>Duyệt Hoàn Tiền Cho Buyer (Refund)</span>
                     </Button>
                   </div>
                 </TooltipTrigger>
@@ -283,7 +281,7 @@ export function DisputeAuditNotes({
                 )}
               </Tooltip>
 
-              {/* Button 2: Refund to Buyer */}
+              {/* Button 2: Payout to Seller */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div>
@@ -291,20 +289,20 @@ export function DisputeAuditNotes({
                       type="button"
                       size="sm"
                       disabled={!isSatisfied || isResolving}
-                      onClick={() => handleTriggerAction('TRIGGER_REFUND')}
+                      onClick={() => handleTriggerAction('APPROVE_PAYOUT')}
                       className={cn(
-                        'min-h-[44px] text-xs font-semibold gap-1.5 px-4 transition-all',
+                        'min-h-[40px] text-xs font-semibold gap-1.5 px-4 transition-all shadow-xs',
                         isSatisfied && !isResolving
-                          ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/50'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                          ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
                       )}
                     >
                       {isResolving ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <RotateCcw className="h-4 w-4" />
+                        <CheckCircle2 className="h-4 w-4" />
                       )}
-                      <span>Duyệt hoàn tiền cho Buyer</span>
+                      <span>Duyệt Giải Ngân Cho Seller (Settle)</span>
                     </Button>
                   </div>
                 </TooltipTrigger>
@@ -322,14 +320,14 @@ export function DisputeAuditNotes({
                 size="sm"
                 disabled={isResolving}
                 onClick={() => handleTriggerAction('REQUEST_EVIDENCE')}
-                className="min-h-[44px] border-slate-800 bg-[#0B0F17] hover:bg-slate-800 text-slate-200 text-xs font-medium gap-1.5 px-3"
+                className="min-h-[40px] border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium gap-1.5 px-3 shadow-2xs"
               >
-                <MessageSquarePlus className="h-4 w-4 text-cyan-400" />
-                <span>Yêu cầu bổ sung</span>
+                <MessageSquarePlus className="h-4 w-4 text-slate-500" />
+                <span>Yêu Cầu Bổ Sung Chứng Cứ (24h)</span>
               </Button>
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </TooltipProvider>
   );

@@ -146,6 +146,20 @@ export class EmergencyAlertService implements OnModuleInit, OnModuleDestroy {
       event.summary,
     );
 
+    // 0. Guard: Check if emergency alert system is enabled
+    if (!this.config?.enabled) {
+      this.logger.debug(
+        `[EmergencyAlertService] Alert [${event.errorCode}] suppressed: EMERGENCY_ALERT_ENABLED is false.`,
+      );
+      return {
+        success: false,
+        fingerprint,
+        suppressed: true,
+        durationMs: Date.now() - startTime,
+        recipientsCount: 0,
+      };
+    }
+
     // 1. In-Memory Debounce Check (Default: 300s / 5 mins)
     const now = Date.now();
     const lastSentAt = this.debounceCache.get(fingerprint);
@@ -180,8 +194,12 @@ export class EmergencyAlertService implements OnModuleInit, OnModuleDestroy {
             new Set([...recipients, ...activeRows.map((r) => r.email)]),
           );
         }
-      } catch {
-        // Safe fallback to configured admin emails
+      } catch (dbErr: unknown) {
+        // Safe fallback to configured admin emails if table has not been migrated yet
+        const msg = dbErr instanceof Error ? dbErr.message : String(dbErr);
+        this.logger.warn(
+          `[EmergencyAlertService] Failed to fetch dynamic emergency mailing list, falling back to static config: ${msg}`,
+        );
       }
     }
     if (recipients.length === 0) {
@@ -200,7 +218,7 @@ export class EmergencyAlertService implements OnModuleInit, OnModuleDestroy {
 
     if (!this.transporter) {
       this.logger.error(
-        `[EmergencyAlertService] Alert [${event.errorCode}] failed: Transporter is uninitialized.`,
+        `[EmergencyAlertService] Alert [${event.errorCode}] failed: Transporter is uninitialized. Verify SMTP configuration.`,
       );
       return {
         success: false,

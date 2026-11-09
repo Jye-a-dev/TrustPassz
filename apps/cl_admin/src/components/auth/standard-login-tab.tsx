@@ -41,7 +41,7 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {formError && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-xs text-amber-300">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
           {formError}
         </div>
       )}
@@ -50,12 +50,12 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
       <div className="space-y-1.5">
         <label
           htmlFor="admin-email"
-          className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
+          className="block text-xs font-semibold text-slate-700"
         >
           Email Quản Trị Viên
         </label>
         <div className="relative flex items-center">
-          <div className="pointer-events-none absolute left-3.5 flex items-center text-slate-500">
+          <div className="pointer-events-none absolute left-3 flex items-center text-slate-400">
             <Mail className="size-4" aria-hidden="true" />
           </div>
           <Input
@@ -70,7 +70,7 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
               if (formError) setFormError(null);
             }}
             placeholder="admin@example.com"
-            className="h-11 min-h-[44px] rounded-xl border-slate-800 bg-[#070A12]/90 pl-10 pr-4 text-xs text-white placeholder:text-slate-600 focus-visible:border-cyan-500/60 focus-visible:ring-2 focus-visible:ring-cyan-500/30 transition-all"
+            className="h-10 min-h-[40px] rounded-lg border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus-visible:ring-slate-400 transition-colors"
           />
         </div>
       </div>
@@ -80,14 +80,14 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
         <div className="flex items-center justify-between">
           <label
             htmlFor="admin-password"
-            className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
+            className="block text-xs font-semibold text-slate-700"
           >
             Mật Khẩu Xác Thực
           </label>
-          <span className="text-[10px] text-slate-500 font-mono">Bảo mật cấp 2FA</span>
+          <span className="text-[10px] text-slate-400 font-mono">Bảo mật cấp 2FA</span>
         </div>
         <div className="relative flex items-center">
-          <div className="pointer-events-none absolute left-3.5 flex items-center text-slate-500">
+          <div className="pointer-events-none absolute left-3 flex items-center text-slate-400">
             <LockKeyhole className="size-4" aria-hidden="true" />
           </div>
           <Input
@@ -101,13 +101,13 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
               if (formError) setFormError(null);
             }}
             placeholder="••••••••••••"
-            className="h-11 min-h-[44px] rounded-xl border-slate-800 bg-[#070A12]/90 pl-10 pr-11 text-xs text-white placeholder:text-slate-600 focus-visible:border-cyan-500/60 focus-visible:ring-2 focus-visible:ring-cyan-500/30 transition-all"
+            className="h-10 min-h-[40px] rounded-lg border-slate-200 bg-white pl-9 pr-10 text-xs text-slate-800 placeholder:text-slate-400 focus-visible:ring-slate-400 transition-colors"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             disabled={isLoading}
-            className="absolute right-1.5 flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500"
+            className="absolute right-1.5 flex h-7 w-7 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
             aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
           >
             {showPassword ? (
@@ -123,11 +123,11 @@ export function StandardLoginTab({ onLogin, isLoading }: StandardLoginTabProps) 
       <Button
         type="submit"
         disabled={isLoading}
-        className="h-11 min-h-[44px] w-full rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(6,182,212,0.25)] border-0 cursor-pointer disabled:opacity-50"
+        className="h-10 min-h-[40px] w-full rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors shadow-xs border border-slate-900 cursor-pointer disabled:opacity-50 text-xs"
       >
         {isLoading ? (
           <span className="flex items-center gap-2">
-            <Loader2 className="size-4 animate-spin text-slate-950" />
+            <Loader2 className="size-4 animate-spin text-white" />
             <span>Đang xác thực thông tin...</span>
           </span>
         ) : (

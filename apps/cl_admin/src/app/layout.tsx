@@ -4,7 +4,7 @@ import "@/app/globals.css";
 import { Providers } from "@/components/shared/providers";
 
 export const viewport: Viewport = {
-  themeColor: "#080C14",
+  themeColor: "#F8FAFC",
   width: "device-width",
   initialScale: 1,
 };
@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen bg-cyber-bg font-sans text-slate-100 antialiased overflow-x-hidden">
+    <html lang="vi" className="light" suppressHydrationWarning>
+      <body className="min-h-screen bg-cyber-bg font-sans text-slate-900 antialiased overflow-x-hidden selection:bg-slate-200 selection:text-slate-900">
         <Providers>{children}</Providers>
       </body>
     </html>

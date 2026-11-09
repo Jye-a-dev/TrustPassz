@@ -45,28 +45,28 @@ export function Web3PasskeyTab({
   return (
     <div className="space-y-3.5">
       {/* Security Context Banner */}
-      <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-3 text-[11px] text-cyan-300">
-        <div className="flex items-center gap-2 font-semibold">
-          <ShieldCheck className="size-4 text-cyan-400 shrink-0" />
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-600">
+        <div className="flex items-center gap-2 font-semibold text-slate-800">
+          <ShieldCheck className="size-4 text-emerald-600 shrink-0" />
           <span>Xác Thực Phần Cứng &amp; Mật Mã Phi Tập Trung</span>
         </div>
-        <p className="mt-1 text-slate-400 leading-relaxed">
+        <p className="mt-1 text-slate-500 leading-relaxed">
           Đăng nhập an toàn qua Chữ ký điện tử Solana (SIWS), Google Workspace SSO hoặc Khóa bảo mật FIDO2 / Passkey được cấp quyền trên hệ thống.
         </p>
       </div>
 
       {/* 1. SOLANA SIGN-IN (SIWS) */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
+      <div className="rounded-xl border border-slate-200 bg-white p-3.5 transition-all hover:border-slate-300 shadow-2xs">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-500/20 to-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
               <Wallet className="size-4" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">
+              <div className="text-xs font-bold text-slate-900">
                 Chữ Ký Ví Web3 (Solana SIWS)
               </div>
-              <div className="text-[11px] text-slate-400 font-mono">
+              <div className="text-[11px] text-slate-500 font-mono">
                 {connected && publicKey
                   ? `Đã liên kết ví: ${publicKey.toBase58().slice(0, 6)}...${publicKey.toBase58().slice(-6)}`
                   : "Hỗ trợ Phantom, Solflare (Ed25519 Detached)"}
@@ -77,7 +77,7 @@ export function Web3PasskeyTab({
             <button
               type="button"
               onClick={onDisconnect}
-              className="text-[10px] text-slate-400 hover:text-rose-400 underline cursor-pointer"
+              className="text-[10px] text-slate-500 hover:text-rose-600 underline cursor-pointer"
             >
               Đổi ví
             </button>
@@ -88,11 +88,11 @@ export function Web3PasskeyTab({
           type="button"
           onClick={onSolanaSignIn}
           disabled={isSolanaLoading}
-          className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold h-11 rounded-lg border border-purple-400/30 shadow-[0_0_20px_rgba(99,102,241,0.25)] gap-2 text-xs sm:text-sm cursor-pointer"
+          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium h-10 rounded-lg border border-slate-900 shadow-xs gap-2 text-xs sm:text-sm cursor-pointer"
         >
           {isSolanaLoading ? (
             <>
-              <Loader2 className="size-4 animate-spin text-cyan-300" />
+              <Loader2 className="size-4 animate-spin text-white" />
               <span>
                 {solanaStep === "requesting_sign"
                   ? "Đang chờ ký trong ví..."
@@ -101,29 +101,29 @@ export function Web3PasskeyTab({
             </>
           ) : (
             <>
-              <Wallet className="size-4 text-cyan-200" />
+              <Wallet className="size-4 text-slate-300" />
               <span>
                 {connected
                   ? "Ký xác thực ví quản trị (SIWS)"
                   : "Kết nối Ví Quản Trị (Phantom / Solflare)"}
               </span>
-              <ArrowRight className="size-3.5 ml-auto text-cyan-200" />
+              <ArrowRight className="size-3.5 ml-auto text-slate-300" />
             </>
           )}
         </Button>
       </div>
 
       {/* 2. GOOGLE LOGIN */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
+      <div className="rounded-xl border border-slate-200 bg-white p-3.5 transition-all hover:border-slate-300 shadow-2xs">
         <div className="flex items-center gap-2 mb-2">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200">
             <CheckCircle2 className="size-4" />
           </div>
           <div>
-            <div className="text-xs font-bold text-white">
+            <div className="text-xs font-bold text-slate-900">
               Google Workspace Whitelist
             </div>
-            <div className="text-[11px] text-slate-400">
+            <div className="text-[11px] text-slate-500">
               Định danh quản trị viên qua tài khoản Google chính thức
             </div>
           </div>
@@ -131,8 +131,8 @@ export function Web3PasskeyTab({
 
         <div className="w-full flex justify-center py-1">
           {isGoogleLoading ? (
-            <div className="flex items-center gap-2 py-2 text-xs text-cyan-400">
-              <Loader2 className="size-4 animate-spin" />
+            <div className="flex items-center gap-2 py-2 text-xs text-slate-600">
+              <Loader2 className="size-4 animate-spin text-slate-800" />
               <span>Đang xác thực thông tin tài khoản Google...</span>
             </div>
           ) : (
@@ -141,7 +141,6 @@ export function Web3PasskeyTab({
               onError={() => {
                 toast.error("Không thể kết nối dịch vụ Google OAuth");
               }}
-              theme="filled_black"
               shape="pill"
               size="large"
               text="continue_with"
@@ -152,22 +151,22 @@ export function Web3PasskeyTab({
       </div>
 
       {/* 3. PASSKEY / BIOMETRICS */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition-all hover:border-slate-700">
+      <div className="rounded-xl border border-slate-200 bg-white p-3.5 transition-all hover:border-slate-300 shadow-2xs">
         <Button
           type="button"
           variant="outline"
           onClick={onPasskeySignIn}
           disabled={isPasskeyLoading}
-          className="w-full h-11 border-slate-700/80 bg-slate-900/90 hover:bg-slate-800 hover:border-cyan-500/50 text-slate-200 hover:text-white font-semibold rounded-lg gap-2 text-xs sm:text-sm cursor-pointer"
+          className="w-full h-10 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 font-medium rounded-lg gap-2 text-xs sm:text-sm cursor-pointer shadow-xs"
         >
           {isPasskeyLoading ? (
             <>
-              <Loader2 className="size-4 animate-spin text-cyan-400" />
+              <Loader2 className="size-4 animate-spin text-slate-600" />
               <span>Đang kiểm tra chứng thư WebAuthn thiết bị...</span>
             </>
           ) : (
             <>
-              <Fingerprint className="size-4 text-cyan-400" />
+              <Fingerprint className="size-4 text-slate-600" />
               <span>Xác thực Passkey / FIDO2 Hardware Key</span>
             </>
           )}

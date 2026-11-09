@@ -15,7 +15,7 @@ const Web3PasskeyTab = dynamic(
   {
     loading: () => (
       <div className="flex h-36 items-center justify-center">
-        <div className="size-5 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        <div className="size-5 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
       </div>
     ),
   }
@@ -24,7 +24,7 @@ const Web3PasskeyTab = dynamic(
 type AuthTab = 'standard' | 'web3';
 
 function LoginFormContent() {
-  const [activeTab, setActiveTab] = React.useState<AuthTab>('web3');
+  const [activeTab, setActiveTab] = React.useState<AuthTab>('standard');
 
   const {
     connected,
@@ -45,55 +45,64 @@ function LoginFormContent() {
   } = useAdminAuthHandlers();
 
   return (
-    <Card className="rounded-2xl border-slate-800/80 bg-slate-900/60 shadow-[0_0_50px_rgba(6,182,212,0.08)] backdrop-blur-xl">
-      <CardHeader className="space-y-2 pb-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5">
+      <div className="space-y-1 pb-1 border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            <span>Cổng Xác Thực Quản Trị</span>
-          </CardTitle>
-          <div className="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-2.5 py-0.5 text-[11px] font-mono text-cyan-300">
-            <Compass className="size-3 text-cyan-400" />
-            <span>Chuyển tiếp: {safeCallbackUrl}</span>
-          </div>
+          <h2 className="text-base font-bold tracking-tight text-slate-900">
+            Cổng Xác Thực Quản Trị
+          </h2>
+          {safeCallbackUrl && safeCallbackUrl !== '/dashboard' && (
+            <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-mono text-slate-600">
+              <Compass className="size-3 text-slate-500" />
+              <span>Chuyển tiếp: {safeCallbackUrl}</span>
+            </div>
+          )}
         </div>
-        <CardDescription className="text-xs text-slate-400">
-          Chỉ dành riêng cho Quản trị viên (ADMIN) và Hội đồng Trọng tài (ARBITRATOR).
-        </CardDescription>
+        <p className="text-xs text-slate-500">
+          Dành cho Quản trị viên (ADMIN) và Hội đồng Trọng tài viên (ARBITRATOR).
+        </p>
 
         {/* Tab Navigation Segmented Controller */}
-        <div className="pt-2">
-          <div className="grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-[#070A12]/90 p-1 font-medium sm:flex">
-            <button
-              type="button"
-              onClick={() => setActiveTab('web3')}
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs transition-all cursor-pointer min-h-10 ${
-                activeTab === 'web3'
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-semibold'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Cpu className="size-3.5" />
-              <span>Google &amp; Ví Web3</span>
-            </button>
-
+        <div className="pt-3">
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 text-xs font-medium">
             <button
               type="button"
               onClick={() => setActiveTab('standard')}
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs transition-all cursor-pointer min-h-10 ${
+              className={`rounded-lg py-2 font-semibold transition-all cursor-pointer min-h-10 flex items-center justify-center gap-1.5 ${
                 activeTab === 'standard'
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-semibold'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <KeyRound className="size-3.5" />
-              <span>Mật Khẩu</span>
+              <span>Mật Khẩu Chuẩn</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('web3')}
+              className={`rounded-lg py-2 transition-all cursor-pointer min-h-10 flex items-center justify-center gap-1.5 ${
+                activeTab === 'web3'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Cpu className="size-3.5" />
+              <span>Web3 & Passkey</span>
             </button>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4 pt-1">
+      <div className="space-y-4 pt-1">
         <AuthErrorBanner errorMessage={errorMessage} onClear={() => setErrorMessage(null)} />
+
+        {activeTab === 'standard' && (
+          <StandardLoginTab
+            onLogin={onEmailSubmit}
+            isLoading={isLoadingEmail}
+          />
+        )}
 
         {activeTab === 'web3' && (
           <Web3PasskeyTab
@@ -109,24 +118,17 @@ function LoginFormContent() {
             onPasskeySignIn={handlePasskeySignIn}
           />
         )}
+      </div>
 
-        {activeTab === 'standard' && (
-          <StandardLoginTab
-            onLogin={onEmailSubmit}
-            isLoading={isLoadingEmail}
-          />
-        )}
-      </CardContent>
-
-      <CardFooter className="flex flex-col space-y-2 border-t border-slate-800/80 pt-4">
-        <div className="flex w-full items-center justify-between text-xs text-slate-400">
+      <div className="flex flex-col space-y-2 border-t border-slate-100 pt-4">
+        <div className="flex w-full items-center justify-between text-xs text-slate-500">
           <span>Chưa có chứng thư Arbitrator?</span>
-          <Link href="/register" className="text-cyan-400 hover:underline">
+          <Link href="/register" className="font-semibold text-slate-900 hover:underline">
             Kích hoạt Onboarding &rarr;
           </Link>
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -134,7 +136,7 @@ export default function LoginPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="h-115 w-full animate-pulse rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 backdrop-blur-xl" />
+        <div className="h-105 w-full animate-pulse rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" />
       }
     >
       <LoginFormContent />

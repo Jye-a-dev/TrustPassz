@@ -31,7 +31,7 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
   const [total, setTotal] = React.useState(0);
   const [totalPages, setTotalPages] = React.useState(1);
   const [statusFilter, setStatusFilter] = React.useState<string>("ALL");
-  const [typeFilter, setTypeFilter] = React.useState<string>("");
+  const [typeFilter] = React.useState<string>("");
 
   // Error inspection dialog
   const [selectedLog, setSelectedLog] = React.useState<DispatchAuditLog | null>(null);
@@ -69,7 +69,11 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
   }, [page, limit, statusFilter, typeFilter]);
 
   React.useEffect(() => {
-    fetchLogs();
+    const timeoutId = window.setTimeout(() => {
+      void fetchLogs();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [fetchLogs, refreshTrigger]);
 
   const handleRefresh = () => {
@@ -163,16 +167,16 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
   return (
     <div className="space-y-4">
       {/* Filter and control bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#0F172A] p-4 rounded-xl border border-[#1E293B]">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-cyan-950/60 border border-cyan-800/60 text-cyan-400">
-            <Activity className="size-5" />
+          <div className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <Activity className="size-4.5" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100 font-mono tracking-wide">
+            <h3 className="text-xs font-bold text-slate-900">
               Nhật ký Dispatch Mail Cảnh báo (Audit Log)
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] text-slate-400">
               Lịch sử toàn bộ các lần phát tín hiệu khẩn cấp, benchmark độ trễ và mã lỗi
             </p>
           </div>
@@ -180,17 +184,17 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status filter tabs */}
-          <div className="flex items-center rounded-lg bg-slate-900 border border-slate-800 p-1">
+          <div className="flex items-center rounded-lg bg-slate-100 border border-slate-200 p-1">
             <button
               type="button"
               onClick={() => {
                 setStatusFilter("ALL");
                 setPage(1);
               }}
-              className={`px-3 py-1 text-xs font-mono rounded-md transition-all min-h-[36px] ${
+              className={`px-3 py-1 text-xs font-mono rounded-md transition-all ${
                 statusFilter === "ALL"
-                  ? "bg-slate-800 text-white font-bold"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white text-slate-900 font-bold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               ALL
@@ -201,10 +205,10 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
                 setStatusFilter("SENT");
                 setPage(1);
               }}
-              className={`px-3 py-1 text-xs font-mono rounded-md transition-all min-h-[36px] ${
+              className={`px-3 py-1 text-xs font-mono rounded-md transition-all ${
                 statusFilter === "SENT"
-                  ? "bg-emerald-950/80 text-emerald-400 font-bold border border-emerald-800/60"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white text-emerald-700 font-bold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               SENT
@@ -215,10 +219,10 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
                 setStatusFilter("FAILED");
                 setPage(1);
               }}
-              className={`px-3 py-1 text-xs font-mono rounded-md transition-all min-h-[36px] ${
+              className={`px-3 py-1 text-xs font-mono rounded-md transition-all ${
                 statusFilter === "FAILED"
-                  ? "bg-rose-950/80 text-rose-400 font-bold border border-rose-800/60"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white text-rose-700 font-bold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               FAILED
@@ -231,20 +235,20 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="min-h-[44px] min-w-[44px] border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white"
+            className="h-8.5 px-3 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs shadow-2xs font-medium"
           >
-            <RefreshCw className={`size-4 mr-1.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`size-3.5 mr-1.5 ${isRefreshing ? "animate-spin text-slate-900" : "text-slate-500"}`} />
             Làm mới
           </Button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[#1E293B] bg-[#0F172A] overflow-hidden overflow-x-auto">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs overflow-x-auto">
         <Table>
-          <TableHeader className="bg-slate-900/80 border-b border-[#1E293B]">
-            <TableRow className="border-b border-slate-800 hover:bg-transparent">
-              <TableHead className="font-mono text-xs uppercase text-slate-400 py-3.5">
+          <TableHeader className="bg-slate-50 border-b border-slate-200">
+            <TableRow className="border-b border-slate-200 hover:bg-transparent">
+              <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider py-2.5 px-4">
                 Thời gian (VN)
               </TableHead>
               <TableHead className="font-mono text-xs uppercase text-slate-400">
@@ -281,7 +285,7 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
                 <TableCell colSpan={6} className="py-12 text-center text-slate-500">
                   <FileText className="size-8 mx-auto mb-2 text-slate-600" />
                   <p className="text-sm font-mono">Chưa có nhật ký phát thông báo nào.</p>
-                  <p className="text-xs text-slate-600 mt-1">Bấm "Test Send Emergency Alert" để khởi tạo bài kiểm tra.</p>
+                  <p className="text-xs text-slate-600 mt-1">Bấm &quot;Test Send Emergency Alert&quot; để khởi tạo bài kiểm tra.</p>
                 </TableCell>
               </TableRow>
             ) : (
@@ -302,7 +306,7 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
                     <TableCell>{getAlertTypeBadge(item.alertType)}</TableCell>
 
                     <TableCell className="text-xs font-mono text-slate-300">
-                      <div className="flex items-center gap-1 flex-wrap max-w-[280px]">
+                      <div className="flex items-center gap-1 flex-wrap max-w-70">
                         {recipientList.slice(0, 2).map((r, i) => (
                           <span
                             key={i}
@@ -329,7 +333,7 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedLog(item)}
-                        className="min-h-[44px] min-w-[44px] p-2 text-cyan-400 hover:bg-cyan-950/40 hover:text-cyan-300"
+                        className="min-h-11 min-w-11 p-2 text-cyan-400 hover:bg-cyan-950/40 hover:text-cyan-300"
                         title="Xem chi tiết bản ghi"
                       >
                         <Eye className="size-4" />
@@ -358,7 +362,7 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
             size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="min-h-[44px] min-w-[44px] p-2 border-slate-700 bg-slate-800/40 disabled:opacity-40"
+            className="min-h-11 min-w-11 p-2 border-slate-700 bg-slate-800/40 disabled:opacity-40"
           >
             <ChevronLeft className="size-4" />
           </Button>
@@ -368,7 +372,7 @@ export function EmergencyAuditLogTable({ refreshTrigger }: EmergencyAuditLogTabl
             size="sm"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="min-h-[44px] min-w-[44px] p-2 border-slate-700 bg-slate-800/40 disabled:opacity-40"
+            className="min-h-11 min-w-11 p-2 border-slate-700 bg-slate-800/40 disabled:opacity-40"
           >
             <ChevronRight className="size-4" />
           </Button>

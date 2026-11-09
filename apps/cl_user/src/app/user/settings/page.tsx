@@ -92,7 +92,7 @@ export default function UserSettingsPage() {
               type="button"
               variant="outline"
               onClick={() => toast.success("Khóa bảo mật sinh trắc học đã sẵn sàng!")}
-              className="w-full min-h-[44px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
+              className="w-full min-h-11 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
             >
               <KeyRound className="size-4 text-slate-700 dark:text-slate-300" />
               <span>Thêm Thiết Bị Xác Thực Sinh Trắc Học Mới</span>

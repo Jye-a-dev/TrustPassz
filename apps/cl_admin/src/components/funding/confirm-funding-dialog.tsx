@@ -9,14 +9,10 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import {
-  AlertTriangle,
-  ArrowRight,
   CheckCircle2,
-  ExternalLink,
   KeyRound,
   Loader2,
   ShieldAlert,
-  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -197,47 +193,27 @@ export function ConfirmFundingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md border border-slate-800 bg-[#0B0F17] text-slate-100 shadow-2xl">
-        <DialogHeader className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-500/30 bg-cyan-950/40 text-cyan-400">
-              <ShieldAlert className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-base font-bold font-mono text-white">
-                Xác Thực Cấp Vốn Ví Relayer (2FA)
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-400">
-                Hành động chuyển SOL từ ví cá nhân Admin vào ví tổng Relayer hệ thống.
-              </DialogDescription>
-            </div>
+      <DialogContent className="max-w-md border border-slate-200 bg-white text-slate-900 shadow-xl rounded-2xl p-6 text-xs">
+        <DialogHeader className="border-b border-slate-100 pb-3">
+          <div className="flex items-center space-x-2">
+            <ShieldAlert className="h-4 w-4 text-slate-700" />
+            <DialogTitle className="text-sm font-bold text-slate-900">
+              Xác Nhận Ký Chuyển SOL Cho Relayer
+            </DialogTitle>
           </div>
+          <DialogDescription className="text-xs text-slate-500 pt-1">
+            Hành động chuyển SOL từ ví cá nhân Admin vào ví tổng Relayer hệ thống.
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleExecuteTransfer} className="space-y-4 pt-2">
+        <form onSubmit={handleExecuteTransfer} className="space-y-4 pt-1">
           {/* Summary Box */}
-          <div className="rounded-lg border border-slate-800/80 bg-[#0F172A]/70 p-3.5 space-y-2.5 text-xs">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Ví nguồn (Admin):</span>
-              <span className="font-mono font-medium text-slate-200">
-                {publicKey ? truncateAddress(publicKey.toBase58()) : "Chưa kết nối"}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Ví đích (Relayer):</span>
-              <span className="font-mono font-medium text-cyan-400">
-                {truncateAddress(effectiveRelayerAddress)}
-              </span>
-            </div>
-
-            <div className="h-px bg-slate-800 my-1" />
-
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Số lượng chuyển:</span>
+              <span className="text-slate-500 font-medium">Số lượng chuyển:</span>
               <div className="text-right">
-                <span className="font-mono text-sm font-bold text-emerald-400">
-                  {amountSol} SOL
+                <span className="font-mono text-base font-bold text-slate-900 tabular-nums">
+                  {amountSol.toFixed(4)} SOL
                 </span>
                 <span className="block text-[10px] text-slate-400 font-mono">
                   ≈ {lamportsBigInt.toLocaleString()} Lamports
@@ -245,19 +221,33 @@ export function ConfirmFundingDialog({
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Mạng lưới:</span>
-              <span className="font-mono text-[11px] text-cyan-400 uppercase">
-                Solana {network}
-              </span>
+            <div className="h-px bg-slate-200/60 my-1" />
+
+            <div className="text-[11px] space-y-1 text-slate-600 font-mono">
+              <p className="flex justify-between">
+                <span className="text-slate-500 font-sans">Từ (Admin):</span>
+                <span className="font-semibold text-slate-800">
+                  {publicKey ? truncateAddress(publicKey.toBase58()) : "Chưa kết nối"}
+                </span>
+              </p>
+              <p className="flex justify-between">
+                <span className="text-slate-500 font-sans">Đến (Relayer):</span>
+                <span className="font-semibold text-indigo-600">
+                  {truncateAddress(effectiveRelayerAddress)}
+                </span>
+              </p>
+              <p className="flex justify-between text-slate-400">
+                <span className="font-sans">Phí mạng ước tính:</span>
+                <span>~0.000005 SOL</span>
+              </p>
             </div>
           </div>
 
           {/* 2FA Input Section */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-              <KeyRound className="h-3.5 w-3.5 text-cyan-400" />
-              Mã bảo mật 2 bước (2FA OTP / PIN 6 số)
+            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+              <KeyRound className="h-3.5 w-3.5 text-slate-600" />
+              Nhập mã PIN 2FA bảo mật:
             </label>
             <Input
               type="password"
@@ -268,17 +258,14 @@ export function ConfirmFundingDialog({
               value={twoFactorCode}
               onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
               disabled={isSubmitting}
-              className="h-11 border-slate-700 bg-slate-900/90 text-center font-mono text-base tracking-[0.3em] text-cyan-300 placeholder:tracking-normal placeholder:text-slate-400 focus-visible:border-cyan-400 focus-visible:ring-1 focus-visible:ring-cyan-400"
+              className="h-10 border-slate-200 bg-white text-center font-mono text-base tracking-[0.3em] text-slate-900 font-bold placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400 focus-visible:ring-slate-400 rounded-lg"
             />
-            <p className="text-[11px] text-slate-400">
-              Mã bảo mật chống hành động chuyển tiền ngoài ý muốn và chống Replay Attack.
-            </p>
           </div>
 
           {/* Stepper Status Indicator when submitting */}
           {isSubmitting && (
-            <div className="rounded-md border border-cyan-500/20 bg-cyan-950/20 p-2.5 text-xs flex items-center gap-2 text-cyan-300 animate-pulse">
-              <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs flex items-center gap-2 text-slate-700 animate-pulse">
+              <Loader2 className="h-4 w-4 animate-spin shrink-0 text-slate-900" />
               <span>
                 {stepStatus === "signing" && "Đang chờ ký giao dịch trên ví..."}
                 {stepStatus === "confirming" && "Đang xác thực giao dịch trên Solana..."}
@@ -288,20 +275,20 @@ export function ConfirmFundingDialog({
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+          <DialogFooter className="gap-2 sm:gap-2 pt-2 border-t border-slate-100">
             <Button
               type="button"
               variant="outline"
               disabled={isSubmitting}
               onClick={() => onOpenChange(false)}
-              className="h-11 min-h-[44px] border-slate-800 bg-[#0F172A] text-slate-300 hover:bg-slate-800"
+              className="h-10 px-4 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
             >
-              Hủy bỏ
+              Hủy
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || twoFactorCode.length !== 6 || !connected}
-              className="h-11 min-h-[44px] gap-2 border-0 bg-gradient-to-r from-emerald-600 to-cyan-600 font-semibold text-white hover:from-emerald-500 hover:to-cyan-500 disabled:opacity-50"
+              className="h-10 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs gap-1.5 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -311,7 +298,7 @@ export function ConfirmFundingDialog({
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Ký & Chuyển {amountSol} SOL</span>
+                  <span>Ký & Chuyển Ngay</span>
                 </>
               )}
             </Button>
@@ -321,4 +308,3 @@ export function ConfirmFundingDialog({
     </Dialog>
   );
 }
-

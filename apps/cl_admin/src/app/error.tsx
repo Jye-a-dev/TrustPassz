@@ -17,26 +17,26 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
-      <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
-        <AlertCircle className="size-8" />
+    <div className="min-h-[50vh] flex flex-col items-center justify-center text-center space-y-4 p-6">
+      <div className="size-12 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center">
+        <AlertCircle className="size-5 text-rose-600" />
       </div>
-      <h2 className="text-2xl font-bold tracking-tight">Đã xảy ra sự cố không mong muốn</h2>
-      <p className="mt-2 text-sm text-muted-foreground max-w-md">
-        {error.message || "Hệ thống gặp lỗi trong quá trình xử lý yêu cầu của bạn. Vui lòng thử tải lại trang."}
-      </p>
+      <h2 className="text-lg font-bold text-slate-900">Sự Cố Hệ Thống - Crash Boundary</h2>
       {error.digest && (
-        <p className="mt-1 font-mono text-xs text-muted-foreground/60">
-          Mã lỗi: {error.digest}
-        </p>
+        <div className="rounded-lg bg-rose-50 border border-rose-200 px-3 py-1.5 text-xs text-rose-700 font-mono">
+          {error.digest}
+        </div>
       )}
-      <div className="mt-6 flex items-center gap-3">
-        <Button onClick={() => reset()} className="gap-2">
-          <RotateCcw className="size-4" />
-          <span>Thử lại</span>
+      <p className="text-xs text-slate-500 max-w-md">
+        {error.message || "Giao dịch broadcast sang Base Sepolia RPC bị gián đoạn. Phiên làm việc đã được giữ an toàn."}
+      </p>
+      <div className="flex gap-2">
+        <Button onClick={() => reset()} className="h-9 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 shadow-2xs">
+          <RotateCcw className="size-3.5" />
+          <span>Tải lại</span>
         </Button>
-        <Button variant="outline" onClick={() => (window.location.href = "/")}>
-          Về trang chủ
+        <Button variant="outline" onClick={() => (window.location.href = "/dashboard")} className="h-9 px-4 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium flex items-center shadow-2xs">
+          Về trang tổng quan
         </Button>
       </div>
     </div>

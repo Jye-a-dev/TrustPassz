@@ -17,6 +17,7 @@ import {
   BarChart3,
   UserCog,
   BellRing,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,57 +34,74 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  category?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   {
+    category: "ĐIỀU HÀNH",
     label: "Tổng quan điều hành",
     href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
+    category: "ĐIỀU HÀNH",
     label: "Phân tích & Thống kê",
     href: "/analytics",
     icon: BarChart3,
   },
   {
+    category: "ĐIỀU HÀNH",
     label: "Kèo & Escrow State",
     href: "/deals",
     icon: Scale,
   },
   {
+    category: "TRỌNG TÀI & AI",
     label: "Hàng đợi tranh chấp",
     href: "/disputes",
     icon: ShieldAlert,
     badge: "AI Queue",
   },
   {
+    category: "TRỌNG TÀI & AI",
     label: "Kiểm định AI Lab",
     href: "/ai-lab",
     icon: Bot,
   },
   {
+    category: "HẠ TẦNG & BẢO MẬT",
     label: "5 Trụ cột Hệ thống",
     href: "/system-status",
     icon: Activity,
   },
   {
+    category: "HẠ TẦNG & BẢO MẬT",
     label: "Người dùng & RBAC",
     href: "/users",
     icon: Users,
   },
   {
-    label: "Hồ sơ & Bảo mật",
+    category: "HẠ TẦNG & BẢO MẬT",
+    label: "Quỹ Gas & Faucet",
+    href: "/funding",
+    icon: Coins,
+  },
+  {
+    category: "HẠ TẦNG & BẢO MẬT",
+    label: "Hồ sơ cá nhân",
     href: "/admin/profile",
     icon: UserCog,
   },
   {
-    label: "Cảnh báo Khẩn cấp",
+    category: "HẠ TẦNG & BẢO MẬT",
+    label: "Cảnh báo khẩn cấp",
     href: "/admin/settings/emergency-alerts",
     icon: BellRing,
     badge: "2FA",
   },
   {
+    category: "HẠ TẦNG & BẢO MẬT",
     label: "Super API Explorer",
     href: "/api-explorer",
     icon: Terminal,
@@ -94,21 +112,17 @@ const STORAGE_KEY = "tpz_admin_sidebar_collapsed";
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = React.useState(false);
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  // Sync state with localStorage to prevent hydration layout flicker
-  React.useEffect(() => {
-    setIsMounted(true);
+  const [collapsed, setCollapsed] = React.useState(() => {
+    if (typeof window === "undefined") return false;
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored !== null) {
-        setCollapsed(stored === "true");
-      }
+      return localStorage.getItem(STORAGE_KEY) === "true";
     } catch {
-      // Safe fallback if localStorage is blocked
+      return false;
     }
-  }, []);
+  });
+  const [isMounted] = React.useState(() =>
+    typeof window !== "undefined",
+  );
 
   const toggleCollapsed = () => {
     const nextState = !collapsed;
@@ -124,18 +138,17 @@ export function AdminSidebar() {
     <TooltipProvider>
       <aside
         className={cn(
-          "hidden lg:flex relative flex-col border-r border-slate-800 bg-cyber-surface transition-all duration-300 select-none z-30 shrink-0",
-          collapsed ? "w-16" : "w-65"
+          "hidden lg:flex relative flex-col border-r border-slate-200 bg-white transition-all duration-300 select-none z-30 shrink-0",
+          collapsed ? "w-16" : "w-64"
         )}
       >
         {/* Sidebar Header & Toggle */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-800 px-3.5">
+        <div className="flex h-14 items-center justify-between border-b border-slate-100 px-4">
           {!collapsed && (
-            <div className="flex items-center space-x-2 animate-in fade-in-0 duration-200">
-              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
-                Admin Portal
-              </span>
-            </div>
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 animate-in fade-in-0 duration-200">
+              <span className="size-1.5 rounded-full bg-slate-900" />
+              Command Portal
+            </span>
           )}
           <Button
             variant="ghost"
@@ -143,7 +156,7 @@ export function AdminSidebar() {
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Mở rộng sidebar điều hướng" : "Thu gọn sidebar điều hướng"}
             className={cn(
-              "size-11 min-h-11 min-w-11 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors",
+              "size-7 min-h-7 min-w-7 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors",
               collapsed ? "mx-auto" : "ml-auto"
             )}
           >
@@ -151,35 +164,36 @@ export function AdminSidebar() {
           </Button>
         </div>
 
-        {/* Nav List */}
-        <nav className="flex-1 space-y-1.5 p-2.5 overflow-y-auto scrollbar-none">
-          {NAV_ITEMS.map((item) => {
+        {/* Nav List with Category Headers */}
+        <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto scrollbar-thin">
+          {NAV_ITEMS.map((item, index) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
+            const isNewCategory =
+              !collapsed &&
+              (index === 0 || item.category !== NAV_ITEMS[index - 1].category);
+
             const navLink = (
               <Link
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11",
+                  "group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors min-h-10",
                   isActive
-                    ? "bg-cyan-950/40 text-cyan-400 border border-cyan-800/50 font-semibold shadow-[0_0_12px_rgba(6,182,212,0.12)]"
-                    : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                    ? "bg-slate-100 text-slate-900 font-semibold border border-slate-200/80 shadow-2xs"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-cyan-400 shadow-[0_0_8px_#06B6D4]" />
-                )}
                 <Icon
                   className={cn(
-                    "size-5 shrink-0 transition-colors",
-                    isActive ? "text-cyan-400" : "text-slate-400 group-hover:text-slate-200"
+                    "size-4.5 shrink-0 transition-colors",
+                    isActive ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"
                   )}
                 />
                 {!collapsed && (
-                  <span className="flex-1 truncate tracking-tight text-xs font-sans">
+                  <span className="flex-1 truncate tracking-tight">
                     {item.label}
                   </span>
                 )}
@@ -191,37 +205,46 @@ export function AdminSidebar() {
               </Link>
             );
 
-            if (collapsed && isMounted) {
-              return (
-                <Tooltip key={item.href} delayDuration={100}>
-                  <TooltipTrigger asChild>{navLink}</TooltipTrigger>
-                  <TooltipContent side="right" className="font-sans font-medium">
-                    {item.label}
-                    {item.badge && ` (${item.badge})`}
-                  </TooltipContent>
-                </Tooltip>
-              );
-            }
-
-            return <React.Fragment key={item.href}>{navLink}</React.Fragment>;
+            return (
+              <React.Fragment key={item.href}>
+                {isNewCategory && item.category && (
+                  <div className={cn("pt-3 pb-1", index === 0 && "pt-1")}>
+                    <p className="px-3 text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">
+                      {item.category}
+                    </p>
+                  </div>
+                )}
+                {collapsed && isMounted ? (
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+                    <TooltipContent side="right" className="font-sans font-medium text-xs">
+                      {item.label}
+                      {item.badge && ` (${item.badge})`}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  navLink
+                )}
+              </React.Fragment>
+            );
           })}
         </nav>
 
         {/* Footer Info */}
-        <div className="border-t border-slate-800 p-3 bg-cyber-bg/50">
+        <div className="border-t border-slate-200 p-3 bg-slate-50">
           {!collapsed ? (
-            <div className="rounded-lg border border-slate-800/80 bg-cyber-surface p-2.5 text-[11px] text-slate-400">
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="rounded-lg border border-slate-200 bg-white p-2.5 text-[11px] text-slate-500 shadow-2xs">
+              <div className="flex items-center justify-between text-slate-700">
                 <span className="font-semibold">TrustPassz Core</span>
-                <span className="font-mono text-emerald-400 text-[10px]">v1.2.0</span>
+                <span className="font-mono text-emerald-600 font-semibold text-[10px]">v2.4.0</span>
               </div>
-              <p className="mt-1 text-[10px] text-slate-500 font-mono">
-                Base Sepolia & AI Arbitrator
+              <p className="mt-0.5 text-[10px] text-slate-400 font-mono">
+                Base Sepolia • Solana Devnet
               </p>
             </div>
           ) : (
             <div className="flex justify-center py-1">
-              <ShieldCheck className="size-5 text-slate-500" />
+              <ShieldCheck className="size-5 text-slate-400" />
             </div>
           )}
         </div>

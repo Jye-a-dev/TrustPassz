@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { Ban, Loader2, ShieldAlert, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -55,13 +54,13 @@ export function UserFreezeDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="border-slate-800 bg-[#0F172A] text-slate-100 max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base text-rose-400 font-mono">
+      <DialogContent className="border-slate-200 bg-white text-slate-900 max-w-md rounded-2xl shadow-xl p-6 text-xs">
+        <DialogHeader className="border-b border-slate-100 pb-3">
+          <DialogTitle className={`flex items-center gap-2 text-base font-bold ${user?.isFrozen ? 'text-emerald-700' : 'text-rose-700'}`}>
             <ShieldAlert className="h-5 w-5" />
-            {user?.isFrozen ? 'Xác Nhận Mở Khóa Ví' : 'Cảnh Báo Đóng Băng Ví Vi Phạm'}
+            <span>{user?.isFrozen ? 'Xác Nhận Mở Khóa Ví' : 'Cảnh Báo Đóng Băng Ví Người Dùng'}</span>
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-400">
+          <DialogDescription className="text-xs text-slate-500 pt-1">
             {user?.isFrozen
               ? 'Cho phép người dùng tiếp tục giao dịch Escrow bình thường.'
               : 'Khóa toàn bộ hành động ký quỹ, rút tiền và tải tài sản số của ví này.'}
@@ -69,60 +68,63 @@ export function UserFreezeDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="p-3 rounded-lg border border-slate-800 bg-slate-900/90 text-xs space-y-1 font-mono">
-            <div className="text-slate-400">
-              Địa chỉ ví: <span className="text-cyan-300">{user?.walletAddress || 'Chưa liên kết'}</span>
+          <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-1">
+            <p className="font-bold text-slate-900">{user?.displayName || 'Tài khoản'}</p>
+            <div className="text-[11px] text-slate-500 font-mono break-all select-all">
+              Ví: <span className="text-slate-800">{user?.walletAddress || 'Chưa liên kết'}</span>
             </div>
-            <div className="text-slate-400">
-              Tỷ lệ khiếu nại: <span className="text-rose-400">{user?.disputeRate || 0}%</span>
-            </div>
+            {user?.disputeRate !== undefined && (
+              <div className="text-[11px] text-slate-500 font-mono">
+                Tỷ lệ tranh chấp: <span className="text-rose-600 font-semibold">{user.disputeRate}%</span>
+              </div>
+            )}
           </div>
 
-          <div>
-            <label className="text-xs text-slate-300 font-mono mb-1.5 block">
-              Lý do kiểm toán can thiệp (<span className="text-rose-400">tối thiểu 10 ký tự</span>):
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 block">
+              Lý do kiểm toán can thiệp (<span className="text-rose-600">tối thiểu 10 ký tự</span>):
             </label>
-            <Input
+            <textarea
+              rows={3}
               value={freezeReason}
               onChange={(e) => setFreezeReason(e.target.value)}
-              placeholder="Nhập lý do đóng băng/mở khóa ví..."
-              className="bg-slate-900 border-slate-800 text-xs min-h-[44px]"
+              placeholder="Nhập lý do đóng băng/mở khóa ví chi tiết..."
+              className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400 placeholder:text-slate-400 leading-relaxed"
             />
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 pt-2 border-t border-slate-100">
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="border-slate-800 min-h-[44px] text-xs"
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
           >
-            Hủy
+            Hủy Bỏ
           </Button>
           <Button
-            variant={user?.isFrozen ? 'default' : 'destructive'}
-            size="sm"
+            type="button"
             disabled={isSubmitting || freezeReason.trim().length < 10}
             onClick={handleConfirm}
-            className={`min-h-[44px] text-xs gap-1.5 ${
+            className={`h-10 px-4 rounded-lg text-xs font-medium text-white gap-1.5 ${
               user?.isFrozen
                 ? 'bg-emerald-600 hover:bg-emerald-500'
                 : 'bg-rose-600 hover:bg-rose-500'
             }`}
           >
             {isSubmitting ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : user?.isFrozen ? (
-              <Unlock className="h-3.5 w-3.5" />
+              <Unlock className="h-4 w-4" />
             ) : (
-              <Ban className="h-3.5 w-3.5" />
+              <Ban className="h-4 w-4" />
             )}
-            <span>{user?.isFrozen ? 'Xác Nhận Mở Khóa' : 'Xác Nhận Đóng Băng'}</span>
+            <span>{user?.isFrozen ? 'Xác Nhận Mở Khóa' : 'Xác Nhận Đóng Băng Ví'}</span>
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

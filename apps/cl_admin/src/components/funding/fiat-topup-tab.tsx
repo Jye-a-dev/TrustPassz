@@ -74,33 +74,34 @@ export function FiatTopupTab({
 
   if (activeOrder) {
     return (
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 text-center space-y-3">
-        <div className="font-mono text-xs text-amber-400 flex items-center justify-center gap-1.5 font-semibold">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center space-y-3">
+        <div className="font-mono text-xs text-amber-700 flex items-center justify-center gap-1.5 font-bold">
           <QrCode className="h-4 w-4" />
           <span>Đơn Nạp #{activeOrder.orderCode} ({activeOrder.status})</span>
         </div>
 
         {activeOrder.qrUrl && (
           <div className="flex justify-center py-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={activeOrder.qrUrl}
               alt="VietQR Invoice"
-              className="w-48 h-48 rounded-lg border border-slate-700 bg-white p-2"
+              className="w-48 h-48 rounded-xl border border-slate-200 bg-white p-2 shadow-xs"
             />
           </div>
         )}
 
-        <div className="text-xs font-mono text-slate-300">
+        <div className="text-xs font-mono text-slate-700">
           Số tiền:{' '}
-          <strong className="text-amber-400">
+          <strong className="text-slate-900 font-bold">
             {activeOrder.fiatAmount.toLocaleString('vi-VN')} {activeOrder.fiatCurrency}
           </strong>{' '}
-          → <strong className="text-emerald-400">{activeOrder.cryptoAmount} SOL</strong>
+          → <strong className="text-emerald-700 font-bold">{activeOrder.cryptoAmount} SOL</strong>
         </div>
 
         {activeOrder.status === 'FULFILLED' ? (
-          <div className="p-2.5 rounded bg-emerald-950/40 border border-emerald-800 text-emerald-400 font-mono text-xs flex items-center justify-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4" />
+          <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-xs flex items-center justify-center gap-1.5 font-semibold">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             <span>Đã giải ngân on-chain! Tx: {activeOrder.solanaTxHash?.slice(0, 10)}...</span>
           </div>
         ) : (
@@ -108,7 +109,7 @@ export function FiatTopupTab({
             type="button"
             disabled={isMockPaying}
             onClick={handleSimulatePayment}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white min-h-[44px] text-xs font-mono gap-1.5"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-10 text-xs font-medium gap-1.5 rounded-xl"
           >
             {isMockPaying ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -124,7 +125,7 @@ export function FiatTopupTab({
           variant="ghost"
           size="sm"
           onClick={() => setActiveOrder(null)}
-          className="text-xs text-slate-400 min-h-[44px]"
+          className="text-xs text-slate-500 hover:text-slate-800 h-9"
         >
           Tạo đơn nạp khác
         </Button>
@@ -133,7 +134,7 @@ export function FiatTopupTab({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 py-1">
       <div className="flex gap-2">
         <Button
           type="button"
@@ -142,8 +143,10 @@ export function FiatTopupTab({
             setFiatCurrency('VND');
             setFiatAmount(100000);
           }}
-          className={`flex-1 min-h-[44px] text-xs font-mono ${
-            fiatCurrency === 'VND' ? 'bg-amber-600 hover:bg-amber-500' : 'border-slate-800 bg-slate-900'
+          className={`flex-1 h-10 text-xs font-medium rounded-lg ${
+            fiatCurrency === 'VND'
+              ? 'bg-slate-900 text-white hover:bg-slate-800'
+              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
           }`}
         >
           Tiền Việt (VNĐ - VietQR)
@@ -155,8 +158,10 @@ export function FiatTopupTab({
             setFiatCurrency('USD');
             setFiatAmount(20);
           }}
-          className={`flex-1 min-h-[44px] text-xs font-mono ${
-            fiatCurrency === 'USD' ? 'bg-amber-600 hover:bg-amber-500' : 'border-slate-800 bg-slate-900'
+          className={`flex-1 h-10 text-xs font-medium rounded-lg ${
+            fiatCurrency === 'USD'
+              ? 'bg-slate-900 text-white hover:bg-slate-800'
+              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
           }`}
         >
           Đô La Mỹ (USD)
@@ -170,23 +175,27 @@ export function FiatTopupTab({
             type="button"
             variant={fiatAmount === amt ? 'secondary' : 'outline'}
             onClick={() => setFiatAmount(amt)}
-            className="border-slate-800 bg-slate-900 text-xs min-h-[44px] font-mono"
+            className={`h-10 text-xs font-mono font-medium rounded-lg border ${
+              fiatAmount === amt
+                ? 'border-slate-900 bg-slate-900 text-white'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
           >
             {fiatCurrency === 'VND' ? `${amt.toLocaleString('vi-VN')} đ` : `$${amt}`}
           </Button>
         ))}
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-3 space-y-1 font-mono text-[11px]">
-        <div className="flex justify-between text-slate-400">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1 font-mono text-xs">
+        <div className="flex justify-between text-slate-500 text-[11px]">
           <span>Tỷ giá quy đổi dự kiến:</span>
-          <span className="text-cyan-400">
+          <span className="font-semibold text-slate-700">
             {fiatCurrency === 'VND' ? '1 SOL = 4.500.000 VNĐ' : '1 SOL = $180 USD'}
           </span>
         </div>
-        <div className="flex justify-between text-slate-200 font-semibold">
+        <div className="flex justify-between text-slate-800 font-semibold text-xs pt-0.5">
           <span>Lượng SOL nhận được:</span>
-          <span className="text-emerald-400">~{expectedSol} SOL</span>
+          <span className="text-emerald-700 font-bold">~{expectedSol} SOL</span>
         </div>
       </div>
 
@@ -194,7 +203,7 @@ export function FiatTopupTab({
         type="button"
         disabled={isCreatingOrder}
         onClick={handleCreateFiatOrder}
-        className="w-full bg-amber-600 hover:bg-amber-500 text-white min-h-[44px] text-xs font-mono gap-1.5"
+        className="w-full bg-slate-900 hover:bg-slate-800 text-white h-10 text-xs font-medium gap-1.5 rounded-xl shadow-xs"
       >
         {isCreatingOrder ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -206,4 +215,3 @@ export function FiatTopupTab({
     </div>
   );
 }
-
