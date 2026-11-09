@@ -72,7 +72,7 @@ void main() {
         'expiresIn': 86400,
         'user': {
           'id': 'user-dev-test-1',
-          'email': 'dev-tester@trustpassz.io',
+          'email': 'tester.sandbox@trustpassz.io',
           'displayName': 'Dev Tester',
           'role': 'USER'
         }
@@ -91,7 +91,7 @@ void main() {
 
       expect(storedToken, 'mock_access_jwt_token');
       expect(storedRefreshToken, 'mock_refresh_jwt_token');
-      expect(storedUser?.email, 'dev-tester@trustpassz.io');
+      expect(storedUser?.email, 'tester.sandbox@trustpassz.io');
       expect(storedUser?.role, Role.user);
 
       await AuthService.instance.logout();

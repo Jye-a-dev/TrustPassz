@@ -9,7 +9,6 @@ import {
   Unlock,
   UserCog,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -53,57 +52,73 @@ export function UserSearchTable({
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
       case 'SUPER_ADMIN':
-        return <span className="rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-semibold px-2 py-0.5">SUPER ADMIN</span>;
+        return (
+          <span className="rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/30 text-[11px] font-semibold px-2.5 py-0.5 font-mono">
+            SUPER ADMIN
+          </span>
+        );
       case 'ADMIN':
-        return <span className="rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold px-2 py-0.5">ADMIN</span>;
+        return (
+          <span className="rounded-full bg-purple-500/10 text-purple-500 border border-purple-500/30 text-[11px] font-semibold px-2.5 py-0.5 font-mono">
+            ADMIN
+          </span>
+        );
       case 'ARBITRATOR':
-        return <span className="rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-semibold px-2 py-0.5">ARBITRATOR</span>;
+        return (
+          <span className="rounded-full bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 text-[11px] font-semibold px-2.5 py-0.5 font-mono">
+            ARBITRATOR
+          </span>
+        );
       default:
-        return <span className="rounded-full bg-slate-50 text-slate-600 border border-slate-200 text-[11px] px-2 py-0.5">USER</span>;
+        return (
+          <span className="rounded-full bg-slate-500/10 text-slate-500 border border-slate-500/30 text-[11px] font-medium px-2 py-0.5 font-mono">
+            USER
+          </span>
+        );
     }
   };
 
   return (
     <div className="space-y-4">
       {/* Table Container */}
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+      <div className="rounded-xl border border-border-subtle bg-surface overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50 border-b border-slate-200">
-              <TableRow className="border-slate-200 hover:bg-transparent">
-                <TableHead className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
+            <TableHeader className="bg-muted/40 border-b border-border-subtle">
+              <TableRow className="border-border-subtle hover:bg-transparent">
+                <TableHead className="text-text-muted text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
                   Người Dùng / Email
                 </TableHead>
-                <TableHead className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
+                <TableHead className="text-text-muted text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
                   Địa Chỉ Ví Web3
                 </TableHead>
-                <TableHead className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
+                <TableHead className="text-text-muted text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
                   Vai Trò
                 </TableHead>
-                <TableHead className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
+                <TableHead className="text-text-muted text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
                   KYC &amp; Ví
                 </TableHead>
-                <TableHead className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
-                  Kèo / Khiếu Nại
+                <TableHead className="text-text-muted text-[11px] font-semibold uppercase tracking-wider py-3 px-4">
+                  Giao Dịch / Khiếu Nại
                 </TableHead>
-                <TableHead className="text-slate-500 text-[11px] font-semibold uppercase tracking-wider py-3 px-4 text-right pr-4">
+                <TableHead className="text-text-muted text-[11px] font-semibold uppercase tracking-wider py-3 px-4 text-right pr-4">
                   Thao Tác Quản Trị
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-slate-100 text-xs">
+            <TableBody className="divide-y divide-border-subtle text-xs">
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-44 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
-                      <Loader2 className="h-6 w-6 animate-spin text-slate-700" />
+                    <div className="flex flex-col items-center justify-center gap-2 text-text-muted">
+                      <Loader2 className="h-6 w-6 animate-spin text-text-primary" />
                       <span className="text-xs font-mono">Đang truy vấn cơ sở dữ liệu người dùng...</span>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-36 text-center text-slate-500 text-xs font-mono">
+                  <TableCell colSpan={6} className="h-36 text-center text-text-muted text-xs font-mono">
                     Không tìm thấy người dùng phù hợp với tiêu chí tra cứu.
                   </TableCell>
                 </TableRow>
@@ -114,20 +129,20 @@ export function UserSearchTable({
                   const disputeRate = user.disputeRate ?? 0;
 
                   return (
-                    <TableRow key={user.id} className="border-slate-100 hover:bg-slate-50/80 transition-colors">
+                    <TableRow key={user.id} className="border-border-subtle hover:bg-muted/40 transition-colors">
                       {/* Identity Column */}
-                      <TableCell className="py-3.5 px-4 font-medium text-slate-900">
+                      <TableCell className="py-3.5 px-4 font-medium text-text-primary">
                         <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+                          <span className="text-xs font-semibold text-text-primary flex items-center gap-1.5">
                             {user.displayName || 'Vô danh'}
                             {isFrozen && (
-                              <span className="text-[10px] text-rose-700 font-mono px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200">
+                              <span className="text-[10px] text-rose-500 font-mono px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/30">
                                 FROZEN
                               </span>
                             )}
                           </span>
-                          <span className="text-[11px] text-slate-400 font-mono">{user.email || 'Chưa liên kết email'}</span>
-                          <span className="text-[10px] text-slate-400 font-mono">UUID: {user.id.slice(0, 8)}...</span>
+                          <span className="text-[11px] text-text-muted font-mono">{user.email || 'Chưa liên kết email'}</span>
+                          <span className="text-[10px] text-text-muted font-mono">UUID: {user.id.slice(0, 8)}...</span>
                         </div>
                       </TableCell>
 
@@ -136,10 +151,10 @@ export function UserSearchTable({
                         {user.walletAddress ? (
                           <div className="flex items-center gap-2">
                             <div className="flex flex-col font-mono">
-                              <span className="text-xs text-slate-600 font-semibold tabular-nums">
+                              <span className="text-xs text-text-primary font-semibold tabular-nums">
                                 {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-6)}
                               </span>
-                              <span className="text-[10px] text-slate-400 font-sans">
+                              <span className="text-[10px] text-text-muted font-sans">
                                 {isSolana ? 'Solana Devnet (Base58)' : 'Base Sepolia (EVM 0x)'}
                               </span>
                             </div>
@@ -147,14 +162,14 @@ export function UserSearchTable({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleCopy(user.walletAddress!, user.id)}
-                              className="h-8 w-8 min-h-8 min-w-8 p-0 text-slate-400 hover:text-slate-800"
+                              className="h-8 w-8 min-h-8 min-w-8 p-0 text-text-muted hover:text-text-primary cursor-pointer"
                               title="Sao chép ví"
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">Chưa kết nối ví</span>
+                          <span className="text-xs text-text-muted italic">Chưa kết nối ví</span>
                         )}
                       </TableCell>
 
@@ -164,12 +179,12 @@ export function UserSearchTable({
                       {/* KYC & Wallet Status */}
                       <TableCell className="py-3.5 px-4">
                         <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                             {user.kycStatus || 'VERIFIED'}
                           </span>
                           {user.walletBalanceSol !== undefined && user.walletBalanceSol !== null && (
-                            <span className="text-[11px] font-mono font-bold text-slate-900 tabular-nums">
+                            <span className="text-[11px] font-mono font-bold text-text-primary tabular-nums">
                               {user.walletBalanceSol} SOL
                             </span>
                           )}
@@ -179,8 +194,8 @@ export function UserSearchTable({
                       {/* Dispute & Deals Column */}
                       <TableCell className="py-3.5 px-4">
                         <div className="flex flex-col text-xs font-mono">
-                          <span className="text-slate-700">Tổng kèo: {user.totalDeals ?? 0}</span>
-                          <span className={disputeRate > 20 ? 'text-rose-600 font-semibold' : 'text-slate-400'}>
+                          <span className="text-text-primary">Tổng giao dịch: {user.totalDeals ?? 0}</span>
+                          <span className={disputeRate > 20 ? 'text-rose-500 font-semibold' : 'text-text-muted'}>
                             Khiếu nại: {user.totalDisputes ?? 0} ({disputeRate}%)
                           </span>
                         </div>
@@ -193,9 +208,9 @@ export function UserSearchTable({
                             variant="outline"
                             size="sm"
                             onClick={() => setRoleModalUser(user)}
-                            className="border-slate-200 bg-white hover:bg-slate-50 text-xs h-8 px-2.5 gap-1.5 text-slate-700 shadow-2xs font-medium"
+                            className="border-border-subtle bg-surface hover:bg-muted text-xs h-8 px-2.5 gap-1.5 text-text-primary shadow-2xs font-medium cursor-pointer"
                           >
-                            <UserCog className="h-3.5 w-3.5 text-slate-500" />
+                            <UserCog className="h-3.5 w-3.5 text-text-muted" />
                             <span>Đổi quyền</span>
                           </Button>
 
@@ -203,10 +218,10 @@ export function UserSearchTable({
                             variant="outline"
                             size="sm"
                             onClick={() => setFreezeModalUser(user)}
-                            className={`text-xs h-8 px-2.5 gap-1.5 shadow-2xs font-medium border ${
+                            className={`text-xs h-8 px-2.5 gap-1.5 shadow-2xs font-medium border cursor-pointer ${
                               isFrozen
-                                ? 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
-                                : 'border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100'
+                                ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20'
+                                : 'border-rose-500/30 text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20'
                             }`}
                           >
                             {isFrozen ? (

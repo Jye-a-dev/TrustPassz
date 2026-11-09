@@ -195,25 +195,25 @@ export class EmergencyAlertService implements OnModuleInit, OnModuleDestroy {
           );
         }
       } catch (dbErr: unknown) {
-        // Safe fallback to configured admin emails if table has not been migrated yet
         const msg = dbErr instanceof Error ? dbErr.message : String(dbErr);
-        this.logger.warn(
-          `[EmergencyAlertService] Failed to fetch dynamic emergency mailing list, falling back to static config: ${msg}`,
-        );
+        this.logger.warn(`[EmergencyAlertService] Dynamic mailing list fallback: ${msg}`);
+      }
+
+      if (recipients.length === 0) {
+        try {
+          const admins = await this.prisma.user.findMany({
+            where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] }, email: { not: null } },
+            select: { email: true },
+          });
+          const adminEmails = admins.map((u) => u.email).filter((e): e is string => Boolean(e));
+          if (adminEmails.length > 0) recipients = Array.from(new Set(adminEmails));
+        } catch {
+          // ignore fallback error
+        }
       }
     }
     if (recipients.length === 0) {
-      this.logger.error(
-        `[EmergencyAlertService] Alert [${event.errorCode}] discarded: No EMERGENCY_ADMIN_EMAILS configured.`,
-      );
-      return {
-        success: false,
-        fingerprint,
-        suppressed: false,
-        durationMs: Date.now() - startTime,
-        recipientsCount: 0,
-        error: 'No recipients configured',
-      };
+      recipients = ['security@trustpassz.io'];
     }
 
     if (!this.transporter) {

@@ -1,39 +1,5 @@
 @import "tailwindcss";
-
-@layer base {
-  :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222 47% 11%;
-    --radius: 0.5rem;
-
-    /* Slate Executive Design Tokens */
-    --cyber-bg: #f8fafc;
-    --cyber-surface: #ffffff;
-    --cyber-card: #ffffff;
-    --cyber-border: #e2e8f0;
-    --cyber-emerald: #10b981;
-    --cyber-cyan: #06b6d4;
-    --cyber-amber: #f59e0b;
-    --cyber-rose: #ef4444;
-  }
-}
+@import "../styles/theme-tokens.css";
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -55,31 +21,52 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --color-cyber-bg: #f8fafc;
-  --color-cyber-surface: #ffffff;
-  --color-cyber-card: #ffffff;
-  --color-cyber-border: #e2e8f0;
-  --color-cyber-emerald: #10b981;
-  --color-cyber-cyan: #06b6d4;
-  --color-cyber-amber: #f59e0b;
-  --color-cyber-rose: #ef4444;
+
+  /* TrustPassz Central Semantic Theme Tokens */
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-card-bg: var(--bg-card);
+  --color-input-bg: var(--bg-input);
+  --color-muted-bg: var(--bg-muted);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+
+  /* Cyber Escrow Compatibility Mappings */
+  --color-cyber-bg: var(--bg-canvas);
+  --color-cyber-surface: var(--bg-surface);
+  --color-cyber-card: var(--bg-card);
+  --color-cyber-border: var(--border-subtle);
+  --color-cyber-emerald: var(--accent-emerald);
+  --color-cyber-cyan: var(--accent-cyan);
+  --color-cyber-amber: var(--accent-amber);
+  --color-cyber-rose: var(--accent-rose);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--border-subtle, hsl(var(--border)));
   box-sizing: border-box;
 }
 
 html, body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Touch targets >= 44x44px for accessibility */
@@ -94,19 +81,19 @@ button, a, input, select, textarea {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f8fafc;
+  background: var(--bg-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-strong);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-muted);
 }
 
-/* Cyber Glow Utilitites */
+/* Cyber Glow Utilities */
 .cyber-glow-cyan {
   box-shadow: 0 0 16px rgba(6, 182, 212, 0.22);
 }
@@ -124,7 +111,7 @@ button, a, input, select, textarea {
 }
 
 .cyber-border-glow {
-  border-color: #1e293b;
+  border-color: var(--border-subtle);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 

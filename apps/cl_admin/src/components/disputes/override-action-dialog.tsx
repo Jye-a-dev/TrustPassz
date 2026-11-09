@@ -196,7 +196,7 @@ function OverrideActionDialogInner({
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2 font-mono text-[11px]">
             <div className="flex justify-between">
-              <span className="text-slate-500 font-sans">Kèo (Deal ID):</span>
+              <span className="text-slate-500 font-sans">Giao dịch (Deal ID):</span>
               <span className="text-slate-800 truncate max-w-60 font-semibold">{deal.id}</span>
             </div>
             <div className="flex justify-between">

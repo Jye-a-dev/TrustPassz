@@ -32,7 +32,7 @@ const PRESETS: PresetEndpoint[] = [
     endpoint: '/api/v1/deals/count',
   },
   {
-    name: '2. Danh sách Kèo Escrow (GET)',
+    name: '2. Danh sách Giao dịch Escrow (GET)',
     method: 'GET',
     endpoint: '/api/v1/deals?page=1&limit=5',
   },

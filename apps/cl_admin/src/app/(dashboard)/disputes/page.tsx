@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ShieldAlert, ChevronRight, AlertOctagon, Flame } from 'lucide-react';
+import {  ChevronRight, AlertOctagon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,10 +17,12 @@ const STATUS_FILTERS = ['ALL', 'ADMIN_ESCALATED', 'OPENED'] as const;
 
 export default function DisputesPage() {
   const [disputes, setDisputes] = React.useState<DisputeLog[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
   const [statusFilter, setStatusFilter] = React.useState<string>('ALL');
+  const [loadedStatusFilter, setLoadedStatusFilter] = React.useState<string | null>(null);
+  const isLoading = loadedStatusFilter !== statusFilter;
   const [page, setPage] = React.useState(0);
   const pageSize = 15;
+  const [now] = React.useState(() => Date.now());
 
   const [filterState, setFilterState] = React.useState<EmergencyFilterState>({
     uncertainOnly: false,
@@ -34,7 +36,6 @@ export default function DisputesPage() {
 
   React.useEffect(() => {
     let ignore = false;
-    setIsLoading(true);
     apiClient<{ data: DisputeLog[]; meta: unknown }>('/api/v1/disputes', {
       params: {
         status: statusFilter === 'ALL' ? undefined : statusFilter,
@@ -44,14 +45,14 @@ export default function DisputesPage() {
       .then((res) => {
         if (!ignore) {
           setDisputes(res.data || []);
-          setIsLoading(false);
+          setLoadedStatusFilter(statusFilter);
         }
       })
       .catch((err: unknown) => {
         if (!ignore) {
           const msg = err instanceof Error ? err.message : 'Lỗi truy vấn danh sách tranh chấp';
           toast.error(msg);
-          setIsLoading(false);
+          setLoadedStatusFilter(statusFilter);
         }
       });
 
@@ -67,7 +68,6 @@ export default function DisputesPage() {
     let highValue = 0;
     let pendingAdmin = 0;
 
-    const now = Date.now();
     disputes.forEach((d) => {
       const conf = d.aiConfidenceScore ?? 0.5;
       if (conf < filterState.confidenceThreshold || d.aiVerdict === 'ESCALATE_TO_ADMIN') {
@@ -94,10 +94,9 @@ export default function DisputesPage() {
       highValue,
       pendingAdmin,
     };
-  }, [disputes, filterState.confidenceThreshold]);
+  }, [disputes, filterState.confidenceThreshold, now]);
 
   const filteredDisputes = React.useMemo(() => {
-    const now = Date.now();
     return disputes
       .filter((d) => {
         const conf = d.aiConfidenceScore ?? 0.5;
@@ -154,12 +153,12 @@ export default function DisputesPage() {
             return (a.status === 'ADMIN_ESCALATED' ? 0 : 1) - (b.status === 'ADMIN_ESCALATED' ? 0 : 1);
         }
       });
-  }, [disputes, filterState]);
+  }, [disputes, filterState, now]);
 
   const columns: ColumnDef<DisputeLog>[] = [
     {
       key: 'deal',
-      header: 'Hồ Sơ Kèo / Dispute ID',
+      header: 'Hồ Sơ Giao Dịch / Dispute ID',
       className: 'w-72',
       cell: (dispute) => {
         const conf = dispute.aiConfidenceScore ?? 0.5;
@@ -253,7 +252,7 @@ export default function DisputesPage() {
         <Link href={`/disputes/${dispute.dealId}`}>
           <Button
             size="sm"
-            className="min-h-[36px] sm:min-h-[40px] px-3.5 text-xs bg-slate-900 hover:bg-slate-800 text-white font-medium gap-1 shadow-2xs cursor-pointer border border-slate-900"
+            className="min-h-9 sm:min-h-10 px-3.5 text-xs bg-slate-900 hover:bg-slate-800 text-white font-medium gap-1 shadow-2xs cursor-pointer border border-slate-900"
           >
             <span>Thẩm định</span>
             <ChevronRight className="size-3.5" />
@@ -349,7 +348,7 @@ export default function DisputesPage() {
                 </strong>
               </span>
               <Link href={`/disputes/${dispute.dealId}`}>
-                <Button size="sm" className="min-h-[36px] px-3.5 text-xs bg-slate-900 hover:bg-slate-800 text-white gap-1">
+                <Button size="sm" className="min-h-9 px-3.5 text-xs bg-slate-900 hover:bg-slate-800 text-white gap-1">
                   <span>Thẩm định</span>
                   <ChevronRight className="size-3.5" />
                 </Button>

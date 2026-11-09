@@ -5,19 +5,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  BarChart3,
   Scale,
   ShieldAlert,
   Bot,
   Activity,
   Users,
+  Coins,
+  UserCog,
+  BellRing,
   Terminal,
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  BarChart3,
-  UserCog,
-  BellRing,
-  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,11 +30,11 @@ import {
 } from "@/components/ui/tooltip";
 
 interface NavItem {
+  category?: string;
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
-  category?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -52,7 +52,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     category: "ĐIỀU HÀNH",
-    label: "Kèo & Escrow State",
+    label: "Giao dịch & Escrow State",
     href: "/deals",
     icon: Scale,
   },
@@ -90,7 +90,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     category: "HẠ TẦNG & BẢO MẬT",
     label: "Hồ sơ cá nhân",
-    href: "/admin/profile",
+    href: "/settings/profile",
     icon: UserCog,
   },
   {
@@ -120,9 +120,7 @@ export function AdminSidebar() {
       return false;
     }
   });
-  const [isMounted] = React.useState(() =>
-    typeof window !== "undefined",
-  );
+  const [isMounted] = React.useState(() => typeof window !== "undefined");
 
   const toggleCollapsed = () => {
     const nextState = !collapsed;
@@ -138,15 +136,15 @@ export function AdminSidebar() {
     <TooltipProvider>
       <aside
         className={cn(
-          "hidden lg:flex relative flex-col border-r border-slate-200 bg-white transition-all duration-300 select-none z-30 shrink-0",
+          "hidden lg:flex relative flex-col border-r border-border-subtle bg-surface transition-all duration-300 select-none z-30 shrink-0",
           collapsed ? "w-16" : "w-64"
         )}
       >
         {/* Sidebar Header & Toggle */}
-        <div className="flex h-14 items-center justify-between border-b border-slate-100 px-4">
+        <div className="flex h-14 items-center justify-between border-b border-border-subtle px-4">
           {!collapsed && (
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 animate-in fade-in-0 duration-200">
-              <span className="size-1.5 rounded-full bg-slate-900" />
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5 animate-in fade-in-0 duration-200">
+              <span className="size-1.5 rounded-full bg-text-primary" />
               Command Portal
             </span>
           )}
@@ -156,7 +154,7 @@ export function AdminSidebar() {
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Mở rộng sidebar điều hướng" : "Thu gọn sidebar điều hướng"}
             className={cn(
-              "size-7 min-h-7 min-w-7 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors",
+              "size-7 min-h-7 min-w-7 text-text-muted hover:bg-muted hover:text-text-primary transition-colors cursor-pointer",
               collapsed ? "mx-auto" : "ml-auto"
             )}
           >
@@ -182,14 +180,14 @@ export function AdminSidebar() {
                 className={cn(
                   "group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors min-h-10",
                   isActive
-                    ? "bg-slate-100 text-slate-900 font-semibold border border-slate-200/80 shadow-2xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-muted text-text-primary font-semibold border border-border-subtle shadow-2xs"
+                    : "text-text-secondary hover:bg-muted/50 hover:text-text-primary"
                 )}
               >
                 <Icon
                   className={cn(
                     "size-4.5 shrink-0 transition-colors",
-                    isActive ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"
+                    isActive ? "text-text-primary" : "text-text-muted group-hover:text-text-primary"
                   )}
                 />
                 {!collapsed && (
@@ -209,7 +207,7 @@ export function AdminSidebar() {
               <React.Fragment key={item.href}>
                 {isNewCategory && item.category && (
                   <div className={cn("pt-3 pb-1", index === 0 && "pt-1")}>
-                    <p className="px-3 text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">
+                    <p className="px-3 text-[11px] font-mono font-semibold uppercase tracking-wider text-text-muted">
                       {item.category}
                     </p>
                   </div>
@@ -231,20 +229,20 @@ export function AdminSidebar() {
         </nav>
 
         {/* Footer Info */}
-        <div className="border-t border-slate-200 p-3 bg-slate-50">
+        <div className="border-t border-border-subtle p-3 bg-muted/20">
           {!collapsed ? (
-            <div className="rounded-lg border border-slate-200 bg-white p-2.5 text-[11px] text-slate-500 shadow-2xs">
-              <div className="flex items-center justify-between text-slate-700">
+            <div className="rounded-lg border border-border-subtle bg-surface p-2.5 text-[11px] text-text-muted shadow-2xs">
+              <div className="flex items-center justify-between text-text-primary">
                 <span className="font-semibold">TrustPassz Core</span>
-                <span className="font-mono text-emerald-600 font-semibold text-[10px]">v2.4.0</span>
+                <span className="font-mono text-emerald-500 font-semibold text-[10px]">v2.4.0</span>
               </div>
-              <p className="mt-0.5 text-[10px] text-slate-400 font-mono">
+              <p className="mt-0.5 text-[10px] text-text-muted font-mono">
                 Base Sepolia • Solana Devnet
               </p>
             </div>
           ) : (
             <div className="flex justify-center py-1">
-              <ShieldCheck className="size-5 text-slate-400" />
+              <ShieldCheck className="size-5 text-text-muted" />
             </div>
           )}
         </div>

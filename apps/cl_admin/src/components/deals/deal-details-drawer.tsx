@@ -71,7 +71,7 @@ export function DealDetailsDrawer({
                 {deal.state}
               </Badge>
               <DialogTitle className="text-base font-bold text-slate-900">
-                Chi Tiết Kèo: #{deal.id.slice(0, 8)}
+                Chi Tiết Giao Dịch: #{deal.id.slice(0, 8)}
               </DialogTitle>
             </div>
           </div>

@@ -158,7 +158,7 @@ export function EmergencyDisputeFilter({
               onChange={(e) =>
                 onFilterChange({ ...filterState, searchQuery: e.target.value })
               }
-              placeholder="Tìm mã kèo, asset, buyer/seller..."
+              placeholder="Tìm mã giao dịch, asset, buyer/seller..."
               className="min-h-[40px] pl-9 bg-white border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus-visible:ring-slate-400"
             />
           </div>

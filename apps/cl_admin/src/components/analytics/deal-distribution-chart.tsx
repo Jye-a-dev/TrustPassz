@@ -86,10 +86,10 @@ export function DealDistributionChart({
       <div className="mb-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-slate-100">
-            Phân bổ trạng thái Kèo
+            Phân bổ trạng thái Giao dịch
           </h3>
           <span className="rounded bg-slate-800/80 px-2 py-0.5 text-xs font-mono font-medium text-slate-300">
-            Tổng: {totalDeals.toLocaleString("vi-VN")} deals
+            Tổng: {totalDeals.toLocaleString("vi-VN")} giao dịch
           </span>
         </div>
         <p className="mt-0.5 text-xs text-slate-400">
@@ -135,7 +135,7 @@ export function DealDistributionChart({
           {/* Center Hole Content */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
             <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
-              Tổng Kèo
+              Tổng Giao Dịch
             </span>
             <span className="font-mono text-2xl font-bold text-slate-100">
               {totalDeals.toLocaleString("vi-VN")}

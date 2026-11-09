@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await AuthService.instance.verifyAndAuthenticate(
           provider: 'dev',
           token: 'dev_test_session_token',
-          email: 'dev-tester@trustpassz.io',
+          email: 'tester.sandbox@trustpassz.io',
         );
       }
 
@@ -151,16 +151,19 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      String displayError = 'Đã có lỗi xảy ra trong quá trình xác thực. Vui lòng thử lại.';
+      String displayError =
+          'Đã có lỗi xảy ra trong quá trình xác thực. Vui lòng thử lại.';
       if (e is ApiException) {
         if (e.statusCode == 401) {
-          displayError = 'Phiên xác thực không hợp lệ hoặc đã hết hạn. Vui lòng thử lại bằng Test Session.';
+          displayError =
+              'Phiên xác thực không hợp lệ hoặc đã hết hạn. Vui lòng thử lại bằng Test Session.';
         } else if (e.statusCode == 400) {
           displayError = e.message.isNotEmpty
               ? e.message
               : 'Yêu cầu không hợp lệ. Vui lòng kiểm tra định dạng dữ liệu gửi lên.';
         } else if (e.statusCode == 0) {
-          displayError = 'Không thể kết nối đến máy chủ backend (lỗi mạng hoặc server chưa khởi chạy).';
+          displayError =
+              'Không thể kết nối đến máy chủ backend (lỗi mạng hoặc server chưa khởi chạy).';
         } else {
           displayError = 'Lỗi máy chủ (${e.statusCode}): ${e.message}';
         }
@@ -239,11 +242,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF4C0519).withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFF43F5E).withValues(alpha: 0.5)),
+                    border: Border.all(
+                        color: const Color(0xFFF43F5E).withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: Color(0xFFF43F5E), size: 18),
+                      const Icon(Icons.error_outline,
+                          color: Color(0xFFF43F5E), size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -281,7 +286,8 @@ class _LoginScreenState extends State<LoginScreen> {
               // Passkey / Biometric Auth Button
               OutlinedButton.icon(
                 onPressed: _isLoading ? null : () => _handleLogin('PASSKEY'),
-                icon: const Icon(Icons.fingerprint_rounded, size: 20, color: Color(0xFF10B981)),
+                icon: const Icon(Icons.fingerprint_rounded,
+                    size: 20, color: Color(0xFF10B981)),
                 label: const Text('Xác thực với Passkey / Vân tay'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,

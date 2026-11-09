@@ -145,7 +145,7 @@ function DealOverrideDialogContent({
           <div className="flex items-center space-x-2">
             <ShieldAlert className="h-5 w-5 text-amber-600" />
             <DialogTitle className="text-base font-bold text-slate-900">
-              Super Admin Override: Kèo Escrow
+              Super Admin Override: Giao dịch Escrow
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-slate-500 font-mono">

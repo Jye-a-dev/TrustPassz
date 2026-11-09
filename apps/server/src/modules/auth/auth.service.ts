@@ -143,11 +143,16 @@ export class AuthService {
 
   /**
    * Cấp phiên thử nghiệm Dev Sandbox cho mobile / testing client (non-production).
+   * Yêu cầu email thực nghiệm tường minh, cấm mock user mặc định.
    */
   private async handleDevSandboxAuth(dto: VerifyAuthDto) {
-    const testEmail =
-      dto.email?.trim().toLowerCase() || 'dev-tester@trustpassz.io';
-    const testDisplayName = dto.displayName?.trim() || 'Dev Tester';
+    if (!dto.email || !dto.email.trim()) {
+      throw new BadRequestException(
+        'Email xác thực là bắt buộc trong môi trường sandbox, không chấp nhận mock user mặc định.',
+      );
+    }
+    const testEmail = dto.email.trim().toLowerCase();
+    const testDisplayName = dto.displayName?.trim() || 'Sandbox Tester';
 
     let user = await this.prisma.user.findFirst({
       where: {

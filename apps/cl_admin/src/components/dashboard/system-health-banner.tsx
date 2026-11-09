@@ -21,15 +21,15 @@ export function SystemHealthBanner() {
   }, []);
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">
+    <div className="rounded-xl border border-border-subtle bg-surface p-4 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">
       <div className="flex flex-wrap items-center gap-6 text-xs font-mono">
         {pillars.length === 0 ? (
-          <div className="flex items-center gap-2 text-slate-400 font-sans">
-            <span className="size-2 rounded-full bg-slate-300 animate-pulse" />
-            <span>Đang kiểm tra 5 trụ cột hệ thống...</span>
+          <div className="flex items-center gap-2 text-text-muted font-sans">
+            <span className="size-2 rounded-full bg-border-strong animate-pulse" />
+            <span>Đang kiểm tra ma trận trụ cột hệ thống...</span>
           </div>
         ) : (
-          pillars.map((p) => (
+          pillars.slice(0, 5).map((p) => (
             <div key={p.id} className="flex items-center gap-2">
               <span
                 className={`size-2 rounded-full ${
@@ -40,18 +40,18 @@ export function SystemHealthBanner() {
                     : 'bg-rose-500'
                 }`}
               />
-              <span className="font-semibold text-slate-800 font-sans">{p.name}:</span>
-              <span className="text-slate-500 tabular-nums">{p.latencyMs}ms</span>
+              <span className="font-semibold text-text-primary font-sans">{p.name.split(' (')[0]}:</span>
+              <span className="text-text-muted tabular-nums">{p.latencyMs}ms</span>
             </div>
           ))
         )}
       </div>
       <Link
         href="/system-status"
-        className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0 font-sans transition-colors"
+        className="text-xs font-medium text-text-secondary hover:text-text-primary flex items-center gap-1 shrink-0 font-sans transition-colors"
       >
         <span>Chi tiết ma trận</span>
-        <ArrowRight className="size-3.5 text-slate-400" />
+        <ArrowRight className="size-3.5 text-text-muted" />
       </Link>
     </div>
   );

@@ -49,7 +49,7 @@ export default function DealsPage() {
           toast.success("Đã đồng bộ dữ liệu với PostgreSQL & Base Sepolia");
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Lỗi truy vấn danh sách kèo";
+        const msg = err instanceof Error ? err.message : "Lỗi truy vấn danh sách giao dịch";
         toast.error(msg);
       } finally {
         setIsLoading(false);
@@ -74,7 +74,7 @@ export default function DealsPage() {
   const columns: ColumnDef<Deal>[] = [
     {
       key: "title",
-      header: "Tiêu đề Kèo",
+      header: "Tiêu đề Giao dịch",
       className: "w-72",
       cell: (deal) => (
         <div className="space-y-0.5">
@@ -157,14 +157,14 @@ export default function DealsPage() {
           <div className="flex items-center gap-2 text-xs font-medium">
             <span className="text-slate-500">Command Center</span>
             <span className="text-slate-300">/</span>
-            <span className="text-slate-900 font-semibold">Kèo &amp; Escrow State</span>
+            <span className="text-slate-900 font-semibold">Giao dịch &amp; Escrow State</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">
             Giám sát toàn bộ trạng thái ký quỹ, chi tiết Digital Vault và quyền can thiệp Super Admin.
           </p>
         </div>
         <Badge variant="outline" className="font-mono text-xs w-fit border-slate-200 bg-white text-slate-700">
-          Tổng cộng: {deals.length} kèo
+          Tổng cộng: {deals.length} giao dịch
         </Badge>
       </div>
 
@@ -186,8 +186,8 @@ export default function DealsPage() {
         isLoading={isLoading}
         searchQuery={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Tìm theo tiêu đề kèo, UUID hoặc người bán..."
-        emptyMessage="Không tìm thấy kèo ký quỹ nào phù hợp với bộ lọc."
+        searchPlaceholder="Tìm theo tiêu đề giao dịch, UUID hoặc người bán..."
+        emptyMessage="Không tìm thấy giao dịch ký quỹ nào phù hợp với bộ lọc."
         actionsSlot={
           <Button
             variant="outline"

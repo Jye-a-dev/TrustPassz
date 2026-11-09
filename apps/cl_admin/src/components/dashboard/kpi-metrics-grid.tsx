@@ -68,9 +68,9 @@ export function KpiMetricsGrid({ data }: KpiMetricsGridProps) {
       {/* 2. Total Deals & Active State */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between text-xs font-medium text-slate-500 uppercase tracking-wider font-mono">
-          <span>Kèo Đang Chạy</span>
+          <span>Giao Dịch Đang Chạy</span>
           <span className="bg-slate-100 text-slate-700 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-slate-200 font-mono">
-            {kpi.totalDeals} Kèo
+            {kpi.totalDeals} Giao Dịch
           </span>
         </div>
         <div className="text-2xl font-bold font-mono text-slate-900 mt-2 tabular-nums">

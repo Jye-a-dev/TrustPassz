@@ -157,7 +157,7 @@ export default function DashboardPage() {
               className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs h-8.5 shadow-2xs"
             >
               <Scale className="mr-1.5 h-3.5 w-3.5 text-slate-500" />
-              Quản lý Kèo
+              Quản lý Giao dịch
             </Button>
           </Link>
           <Link href="/disputes">
@@ -193,7 +193,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
               <h3 className="text-sm font-bold text-slate-900">
-                Phân Bổ Kèo Ký Quỹ &amp; Tranh Chấp Thực Tế
+                Phân Bổ Giao Dịch Ký Quỹ &amp; Tranh Chấp Thực Tế
               </h3>
               <p className="text-xs text-slate-500">
                 Dữ liệu đồng bộ trực tiếp từ Neon PostgreSQL Database
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
                 <span className="text-[10px] text-slate-500">Tài sản Ký Quỹ</span>
-                <p className="font-mono text-sm font-bold text-slate-900 tabular-nums">{totalDeals} kèo</p>
+                <p className="font-mono text-sm font-bold text-slate-900 tabular-nums">{totalDeals} giao dịch</p>
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ interface AdminLayoutShellProps {
 export function AdminLayoutShell({ children }: AdminLayoutShellProps) {
   return (
     <AdminAuthGuard>
-      <div className="flex h-screen w-full flex-col bg-cyber-bg text-slate-900 overflow-hidden font-sans select-none antialiased">
+      <div className="flex h-screen w-full flex-col bg-cyber-bg text-text-primary overflow-hidden font-sans select-none antialiased">
         {/* Top Sticky Navbar */}
         <AdminNavbar />
 

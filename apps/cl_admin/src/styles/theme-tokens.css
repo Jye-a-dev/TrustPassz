@@ -1,0 +1,141 @@
+/**
+ * TrustPassz Cyber-Escrow Design System: Centralized Theme Tokens
+ * Defines all design tokens and CSS Custom Properties for both Light and Dark modes.
+ * Complies with UI-Skills Enterprise Standards.
+ */
+
+:root,
+.light {
+  /* Surfaces & Backgrounds */
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --bg-muted: #e2e8f0;
+
+  /* Typography Colors */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Structural Borders */
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #06b6d4;
+
+  /* Semantic Accents */
+  --accent-emerald: #10b981;
+  --accent-emerald-subtle: #ecfdf5;
+  --accent-amber: #f59e0b;
+  --accent-amber-subtle: #fffbeb;
+  --accent-rose: #ef4444;
+  --accent-rose-subtle: #fef2f2;
+  --accent-primary: #0f172a;
+  --accent-primary-subtle: #f1f5f9;
+  --accent-cyan: #06b6d4;
+  --accent-cyan-subtle: #ecfeff;
+  --accent-indigo: #6366f1;
+  --accent-indigo-subtle: #eef2ff;
+
+  /* Typography Families */
+  --font-sans: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Radix UI & Shadcn compatibility tokens */
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222 47% 11%;
+  --radius: 0.5rem;
+
+  /* Cyber Escrow Compatibility Aliases */
+  --cyber-bg: #f8fafc;
+  --cyber-surface: #ffffff;
+  --cyber-card: #ffffff;
+  --cyber-border: #e2e8f0;
+  --cyber-emerald: #10b981;
+  --cyber-cyan: #06b6d4;
+  --cyber-amber: #f59e0b;
+  --cyber-rose: #ef4444;
+}
+
+.dark {
+  /* Surfaces & Backgrounds */
+  --bg-canvas: #0b0f17;
+  --bg-surface: #0f172a;
+  --bg-card: #131d31;
+  --bg-input: #070a12;
+  --bg-muted: #1e293b;
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+
+  /* Structural Borders */
+  --border-subtle: #1e293b;
+  --border-strong: #334155;
+  --border-focus: #06b6d4;
+
+  /* Semantic Accents */
+  --accent-emerald: #10b981;
+  --accent-emerald-subtle: rgba(16, 185, 129, 0.15);
+  --accent-amber: #f59e0b;
+  --accent-amber-subtle: rgba(245, 158, 11, 0.15);
+  --accent-rose: #f43f5e;
+  --accent-rose-subtle: rgba(244, 63, 94, 0.15);
+  --accent-primary: #38bdf8;
+  --accent-primary-subtle: rgba(56, 189, 248, 0.15);
+  --accent-cyan: #06b6d4;
+  --accent-cyan-subtle: rgba(6, 182, 212, 0.15);
+  --accent-indigo: #818cf8;
+  --accent-indigo-subtle: rgba(129, 140, 248, 0.15);
+
+  /* Radix UI & Shadcn compatibility tokens */
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+
+  /* Cyber Escrow Compatibility Aliases */
+  --cyber-bg: #0b0f17;
+  --cyber-surface: #0f172a;
+  --cyber-card: #131d31;
+  --cyber-border: #1e293b;
+  --cyber-emerald: #10b981;
+  --cyber-cyan: #06b6d4;
+  --cyber-amber: #f59e0b;
+  --cyber-rose: #f43f5e;
+}

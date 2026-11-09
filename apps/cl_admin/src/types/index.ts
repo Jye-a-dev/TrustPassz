@@ -36,6 +36,7 @@ export type ArbitrationVerdict =
 export interface AdminUser {
   id: string;
   email?: string | null;
+  phone?: string | null;
   displayName?: string | null;
   walletAddress?: string | null;
   role: UserRole;
@@ -156,11 +157,14 @@ export interface AdminAuditLog {
 }
 
 export interface SystemPillarStatus {
-  id: 'cl_user' | 'server' | 'cl_admin' | 'pipeline' | 'contract';
+  id: string;
   name: string;
+  environment?: 'local' | 'deployed';
   status: 'healthy' | 'degraded' | 'down';
   latencyMs: number;
   endpoint: string;
+  httpStatus?: number;
+  sslActive?: boolean;
   details: Record<string, string | number | boolean>;
   lastChecked: string;
 }
