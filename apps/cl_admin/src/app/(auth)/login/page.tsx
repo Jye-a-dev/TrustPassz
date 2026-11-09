@@ -3,11 +3,14 @@
 import * as React from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import { KeyRound, Cpu, Compass } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { AuthErrorBanner } from '@/components/auth/auth-error-banner';
 import { StandardLoginTab } from '@/components/auth/standard-login-tab';
 import { useAdminAuthHandlers } from '@/components/auth/use-admin-auth-handlers';
+import { useAdminAuthStore } from '@/lib/admin-auth-store';
 
 // Code-split Web3/Passkey tab for efficient hydration
 const Web3PasskeyTab = dynamic(
@@ -25,6 +28,32 @@ type AuthTab = 'standard' | 'web3';
 
 function LoginFormContent() {
   const [activeTab, setActiveTab] = React.useState<AuthTab>('standard');
+  const searchParams = useSearchParams();
+
+  React.useEffect(() => {
+    const isLogout = searchParams?.get('logout') === '1';
+    const isForce = searchParams?.get('force') === '1';
+
+    if (isLogout || isForce) {
+      if (typeof document !== 'undefined') {
+        document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+        document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=None; Secure';
+        document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+      }
+      try {
+        localStorage.removeItem('trustpassz-admin-auth');
+        sessionStorage.clear();
+      } catch {}
+
+      useAdminAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+
+      if (isLogout) {
+        toast.success('Đã đăng xuất tài khoản quản trị thành công.', {
+          id: 'admin-logout-toast',
+        });
+      }
+    }
+  }, [searchParams]);
 
   const {
     connected,

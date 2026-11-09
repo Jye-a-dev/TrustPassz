@@ -164,7 +164,17 @@ export async function cleanSeededUsers(): Promise<CleanupSummary> {
       }
     }
 
-    // 2.11 Finally, purge target User records
+    // 2.11 Purge emergency mailing list entries for seeded emails
+    await tx.emergencyMailingList.deleteMany({
+      where: {
+        email: {
+          in: [...SEEDED_USER_EMAILS],
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    // 2.12 Finally, purge target User records
     const deletedUsers = await tx.user.deleteMany({
       where: {
         id: { in: userIds },

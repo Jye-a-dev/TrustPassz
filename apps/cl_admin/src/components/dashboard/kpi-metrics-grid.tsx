@@ -1,12 +1,8 @@
+"use client";
+
 import * as React from 'react';
-import {
-  Coins,
-  Scale,
-  ShieldAlert,
-  Fuel,
-} from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Fuel } from 'lucide-react';
+import { useRelayerBalance } from '@/hooks/use-relayer-balance';
 
 interface KpiData {
   tvlVnd: number;
@@ -21,7 +17,7 @@ interface KpiData {
     DISPUTED: number;
   };
   disputeRate: number;
-  relayerGasEth: number;
+  relayerGasEth?: number;
 }
 
 interface KpiMetricsGridProps {
@@ -29,6 +25,8 @@ interface KpiMetricsGridProps {
 }
 
 export function KpiMetricsGrid({ data }: KpiMetricsGridProps) {
+  const relayerGas = useRelayerBalance();
+
   const kpi: KpiData = {
     tvlVnd: data?.tvlVnd ?? 0,
     tvlEth: data?.tvlEth ?? 0,
@@ -42,10 +40,10 @@ export function KpiMetricsGrid({ data }: KpiMetricsGridProps) {
       DISPUTED: 0,
     },
     disputeRate: data?.disputeRate ?? 0,
-    relayerGasEth: data?.relayerGasEth ?? 0.05,
+    relayerGasEth: data?.relayerGasEth ?? relayerGas.ethBalance,
   };
 
-  const isLowGas = kpi.relayerGasEth < 0.1;
+  const isLowGas = relayerGas.isLowGas;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -97,10 +95,13 @@ export function KpiMetricsGrid({ data }: KpiMetricsGridProps) {
         </p>
       </div>
 
-      {/* 4. Oracle Relayer Gas */}
+      {/* 4. Dual-Chain Oracle Relayer Gas (Dong bo on-chain voi Top Navbar) */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between text-xs font-medium text-slate-500 uppercase tracking-wider font-mono">
-          <span>Gas Relayer</span>
+          <span className="flex items-center gap-1.5">
+            <Fuel className="size-3.5 text-slate-400" />
+            <span>Gas Relayer</span>
+          </span>
           <span
             className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border font-mono ${
               isLowGas
@@ -108,11 +109,22 @@ export function KpiMetricsGrid({ data }: KpiMetricsGridProps) {
                 : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
             }`}
           >
-            {isLowGas ? 'Cần Nạp' : 'Ổn định'}
+            {isLowGas ? 'CẦN NẠP' : 'ỔN ĐỊNH'}
           </span>
         </div>
-        <div className="text-2xl font-bold font-mono text-slate-900 mt-2 tabular-nums">
-          {kpi.relayerGasEth} ETH
+        <div className="mt-2">
+          <div className="text-2xl font-bold font-mono text-slate-900 tabular-nums">
+            {relayerGas.ethFormatted} ETH
+          </div>
+          <div className="flex items-center gap-1.5 font-mono text-xs text-slate-500 mt-0.5">
+            <span className={relayerGas.isLowSol ? 'text-amber-600 font-semibold' : 'text-emerald-600 font-semibold'}>
+              ◎ {relayerGas.solFormatted} SOL
+            </span>
+            <span className="text-slate-300">•</span>
+            <span className="text-[11px] text-slate-400">
+              ≈ ${relayerGas.totalEquivalentUsd.toFixed(2)} USD
+            </span>
+          </div>
         </div>
         <p className="text-xs text-slate-400 font-mono mt-1">
           Base Sepolia Relayer Node

@@ -9,6 +9,23 @@ interface JwtPayload {
   email?: string;
 }
 
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/disputes',
+  '/deals',
+  '/users',
+  '/system-status',
+  '/ai-lab',
+  '/api-explorer',
+  '/admin',
+  '/funding',
+  '/analytics',
+  '/settings',
+  '/profile',
+];
+
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password'];
+
 function parseJwtEdge(token: string): JwtPayload | null {
   try {
     const cleanToken = token
@@ -16,7 +33,10 @@ function parseJwtEdge(token: string): JwtPayload | null {
       .replace(/^"|"$/g, '')
       .trim();
 
-    // Dev/Sandbox/Web3 mock tokens support for staging & demo environments
+    if (!cleanToken || cleanToken === 'undefined' || cleanToken === 'null') {
+      return null;
+    }
+
     if (
       cleanToken.startsWith('dev-sandbox-') ||
       cleanToken.startsWith('sec-sig-')
@@ -69,7 +89,7 @@ export function proxy(request: NextRequest) {
     userRole === 'SUPER_ADMIN' ||
     userRole === 'ARBITRATOR';
 
-  // Handle Root URL redirect
+  // 1. Chuyen huong root ve /dashboard neu da dang nhap, nguoc lai ve /login
   if (pathname === '/') {
     const targetUrl = request.nextUrl.clone();
     targetUrl.pathname = !isExpired && isPrivilegedAdmin ? '/dashboard' : '/login';
@@ -77,35 +97,38 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(targetUrl);
   }
 
-  const isAuthRoute =
-    pathname.startsWith('/login') || pathname.startsWith('/register');
+  // 2. Kiem tra route xac thuc (login, register, forgot-password)
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  if (isAuthRoute) {
+    const isForceLogin =
+      request.nextUrl.searchParams.get('force') === '1' ||
+      request.nextUrl.searchParams.get('prompt') === 'login' ||
+      request.nextUrl.searchParams.get('logout') === '1' ||
+      request.nextUrl.searchParams.get('expired') === '1';
 
-  const isProtectedAdminRoute =
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/deals') ||
-    pathname.startsWith('/disputes') ||
-    pathname.startsWith('/ai-lab') ||
-    pathname.startsWith('/system-status') ||
-    pathname.startsWith('/users') ||
-    pathname.startsWith('/api-explorer') ||
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/funding') ||
-    pathname.startsWith('/analytics');
+    // Neu dang yeu cau dang nhap lai hoac token khong con hop le -> xoa cookie va cho vao trang login
+    if (isForceLogin || !token || isExpired || !isPrivilegedAdmin) {
+      const response = NextResponse.next();
+      if (token) {
+        response.cookies.delete('access_token');
+      }
+      return response;
+    }
 
-  // Authenticated admin accessing login/register -> redirect to dashboard
-  if (isAuthRoute && !isExpired && isPrivilegedAdmin) {
+    // Chi da ve /dashboard neu token hop le va khong co co force login
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = '/dashboard';
     dashboardUrl.search = '';
     return NextResponse.redirect(dashboardUrl);
   }
 
-  // Protect all administrative and financial routes
-  if (isProtectedAdminRoute) {
+  // 3. Bao ve cac route quan tri (Protected Admin Routes)
+  const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  if (isProtected) {
     if (!token || isExpired) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = '/login';
-      loginUrl.searchParams.set('callbackUrl', pathname);
+      loginUrl.searchParams.set('callbackUrl', encodeURI(pathname));
       const response = NextResponse.redirect(loginUrl);
       if (token) {
         response.cookies.delete('access_token');
@@ -126,20 +149,25 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+export default proxy;
+
 export const config = {
   matcher: [
     '/',
-    '/login',
-    '/register',
     '/dashboard/:path*',
-    '/deals/:path*',
     '/disputes/:path*',
-    '/ai-lab/:path*',
-    '/system-status/:path*',
+    '/deals/:path*',
     '/users/:path*',
+    '/system-status/:path*',
+    '/ai-lab/:path*',
     '/api-explorer/:path*',
     '/admin/:path*',
     '/funding/:path*',
     '/analytics/:path*',
+    '/settings/:path*',
+    '/profile/:path*',
+    '/login',
+    '/register',
+    '/forgot-password',
   ],
 };

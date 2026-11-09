@@ -25,7 +25,7 @@ describe('EmergencyAlertAdminService (TASK-c-4: Admin Emergency Alert Operations
         findMany: jest.fn().mockResolvedValue([
           {
             id: 'uuid-1',
-            email: 'admin@trustpassz.io',
+            email: 'secops@trustpassz.io',
             label: 'Primary SecOps',
             isActive: true,
             addedBy: 'superadmin@trustpassz.io',
@@ -48,7 +48,7 @@ describe('EmergencyAlertAdminService (TASK-c-4: Admin Emergency Alert Operations
     };
 
     alertService = {
-      getConfigAdminEmails: jest.fn().mockReturnValue(['admin@trustpassz.io']),
+      getConfigAdminEmails: jest.fn().mockReturnValue(['secops@trustpassz.io']),
       getConfig: jest.fn().mockReturnValue({
         senderName: 'TrustPassz Emergency Sentinel',
         smtpUser: 'dev@trustpassz.local',
@@ -93,7 +93,7 @@ describe('EmergencyAlertAdminService (TASK-c-4: Admin Emergency Alert Operations
     it('should return list of registered emergency emails', async () => {
       const list = await service.getMailingList();
       expect(list).toHaveLength(1);
-      expect(list[0].email).toBe('admin@trustpassz.io');
+      expect(list[0].email).toBe('secops@trustpassz.io');
     });
 
     it('should create new emergency email when 2FA is valid and email unique', async () => {
@@ -122,13 +122,13 @@ describe('EmergencyAlertAdminService (TASK-c-4: Admin Emergency Alert Operations
     it('should reject duplicate email with ConflictException', async () => {
       prisma.emergencyMailingList.findUnique.mockResolvedValue({
         id: 'existing-id',
-        email: 'admin@trustpassz.io',
+        email: 'duplicate@trustpassz.io',
       });
 
       await expect(
         service.addEmail(
           {
-            email: 'admin@trustpassz.io',
+            email: 'duplicate@trustpassz.io',
             label: 'Duplicate',
             pin2FA: '888999',
           },

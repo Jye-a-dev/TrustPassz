@@ -51,13 +51,38 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       },
 
       logout: () => {
-        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-        const secureAttr = isSecure ? '; Secure' : '';
-
         set({ user: null, token: null, isAuthenticated: false });
+
         if (typeof document !== 'undefined') {
-          document.cookie = `access_token=; path=/; max-age=0; SameSite=Lax${secureAttr}`;
-          window.location.href = '/login';
+          document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+          document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=None; Secure';
+          document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+        }
+
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.removeItem('trustpassz-admin-auth');
+            sessionStorage.clear();
+          } catch {}
+
+          const apiUrl = (
+            process.env.NEXT_PUBLIC_API_URL ||
+            `${window.location.protocol}//${window.location.hostname}:3000`
+          ).replace(/\/$/, '');
+
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+          fetch(`${apiUrl}/api/v1/auth/logout`, {
+            method: 'POST',
+            credentials: 'include',
+            signal: controller.signal,
+          })
+            .catch(() => null)
+            .finally(() => {
+              clearTimeout(timeoutId);
+              window.location.href = '/login?logout=1&force=1';
+            });
         }
       },
 

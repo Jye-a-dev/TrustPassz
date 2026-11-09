@@ -13,9 +13,7 @@ import {
   User,
   KeyRound,
   Coins,
-  ShieldAlert,
   CheckCheck,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -313,7 +311,7 @@ export function AdminNavbar() {
                   {user?.displayName || "Quản trị viên"}
                 </span>
                 <span className="text-xs text-text-muted font-mono truncate">
-                  {user?.email || user?.walletAddress || "admin@trustpassz.io"}
+                  {user?.email || (user?.walletAddress ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}` : "Chưa liên kết email")}
                 </span>
                 <Badge
                   variant="outline"

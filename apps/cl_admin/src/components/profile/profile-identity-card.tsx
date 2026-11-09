@@ -11,8 +11,6 @@ import {
   Sparkles,
   Upload,
   Phone,
-  Send,
-  RefreshCw,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,7 +31,7 @@ const CUTE_AVATAR_PRESETS = [
 export function ProfileIdentityCard() {
   const { user, updateUser } = useAdminAuthStore();
   const [displayName, setDisplayName] = React.useState(user?.displayName || "Admin User");
-  const [email, setEmail] = React.useState(user?.email || "admin@trustpassz.io");
+  const [email, setEmail] = React.useState(user?.email || "");
   const [phone, setPhone] = React.useState(user?.phone || "");
   const [avatarUrl, setAvatarUrl] = React.useState(user?.avatarUrl || "");
   const [previousUserId, setPreviousUserId] = React.useState(user?.id);
@@ -44,7 +42,7 @@ export function ProfileIdentityCard() {
   if (user?.id !== previousUserId) {
     setPreviousUserId(user?.id);
     setDisplayName(user?.displayName || "Admin User");
-    setEmail(user?.email || "admin@trustpassz.io");
+    setEmail(user?.email || "");
     setPhone(user?.phone || "");
     setAvatarUrl(user?.avatarUrl || "");
   }
@@ -287,7 +285,7 @@ export function ProfileIdentityCard() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@trustpassz.io"
+              placeholder="admin@yourdomain.com"
               className="bg-surface border-border-subtle text-xs text-text-primary h-9 font-mono"
               required
             />
