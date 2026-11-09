@@ -21,7 +21,7 @@ Due Date: 08/10/2026
 
 - Relational Database: Neon Serverless PostgreSQL with pgBouncer connection pooling.
 - BaaS & Realtime Evidence: Supabase Storage & Postgres Changes.
-- Escrow Smart Contract: DigitalEscrow on Base Sepolia (`0x165B47291B87569b91696DCE6f1207eE15C9f783`).
+- Escrow Smart Contract: DigitalEscrow on Base Sepolia (`0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15`).
 
 ---
 
@@ -44,7 +44,7 @@ DIRECT_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-sample.ap-southeast-1.aws
 
 # Base Sepolia Blockchain & Relayer Wallet
 BASE_SEPOLIA_RPC_URL="https://sepolia.base.org"
-ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 ORACLE_RELAYER_PRIVATE_KEY="0xYOUR_32_BYTE_PRIVATE_KEY_HEX_WITHOUT_QUOTES"
 
 # Authentication & Cryptography Secrets
@@ -101,7 +101,7 @@ GEMINI_API_KEY="YOUR_OPTIONAL_GEMINI_API_KEY"
 NEXT_PUBLIC_API_URL="https://trustpassz-server.onrender.com"
 
 # On-chain Escrow Contract Address (Base Sepolia)
-NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 
 # Blockchain Network Identifiers
 NEXT_PUBLIC_CHAIN_ID="84532"
@@ -126,7 +126,7 @@ NEXT_PUBLIC_PAYOS_CLIENT_ID="YOUR_PAYOS_CLIENT_ID"
 NEXT_PUBLIC_API_URL="https://trustpassz-server.onrender.com"
 
 # On-chain Escrow Contract Address (Base Sepolia)
-NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 
 # Blockchain Network Identifiers
 NEXT_PUBLIC_CHAIN_ID="84532"
@@ -141,7 +141,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
 
 ```bash
 VITE_API_URL="https://trustpassz-server.onrender.com"
-VITE_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+VITE_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 VITE_CHAIN_ID="84532"
 VITE_SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
 VITE_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"

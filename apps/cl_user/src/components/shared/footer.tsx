@@ -93,12 +93,14 @@ export function Footer() {
             <div className="p-3 rounded-xl bg-input-bg border border-subtle text-xs space-y-1.5">
               <div className="text-[11px] text-muted font-mono">Base Sepolia L2 (84532)</div>
               <Link
-                href="https://sepolia.basescan.org/address/0x165B47291B87569b91696DCE6f1207eE15C9f783"
+                href={`https://sepolia.basescan.org/address/${process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS || "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"}`}
                 target="_blank"
                 rel="noreferrer"
                 className="font-mono text-brand-pink hover:text-brand-pink-hover font-bold flex items-center gap-1 text-[11px] break-all"
               >
-                <span>0x165B4729...f783</span>
+                <span>
+                  {(process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS || "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15").slice(0, 10)}...{(process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS || "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15").slice(-4)}
+                </span>
                 <ExternalLink className="size-3 shrink-0" />
               </Link>
               <div className="text-[10px] text-emerald-700 font-medium flex items-center gap-1">

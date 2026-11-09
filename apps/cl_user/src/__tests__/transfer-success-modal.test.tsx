@@ -12,7 +12,7 @@ import { secureClipboard } from "../lib/secure-clipboard.ts";
 
 describe("TASK-b-13: TransferSuccessModal & Realtime Lifecycle Tests", () => {
   const sampleDealId = "deal-8888-settle-confirm";
-  const sampleTxHash = "0x165b47291b87569b91696dce6f1207ee15c9f783";
+  const sampleTxHash = "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15";
   const sampleAmount = 500000;
 
   let clipboardWrites: string[] = [];
@@ -111,7 +111,7 @@ describe("TASK-b-13: TransferSuccessModal & Realtime Lifecycle Tests", () => {
 
       // Verify truncated hash
       const truncated = formatTruncatedHash(stateData.txHash);
-      assert.equal(truncated, "0x165b47...c9f783");
+      assert.equal(truncated, "0x88a82f...c2ec15");
 
       // Instantiate component element with updated state
       const modalElement = React.createElement(TransferSuccessModal, {

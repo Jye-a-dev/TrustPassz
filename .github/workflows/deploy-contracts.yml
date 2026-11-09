@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: packages/contracts
     env:
-      DEPLOYED_ESCROW_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+      DEPLOYED_ESCROW_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 
     steps:
       - name: Checkout Repository
@@ -139,7 +139,7 @@ jobs:
 
             forge script script/DeployEscrow.s.sol:DeployEscrow -vvv
 
-            MOCK_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            MOCK_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
             echo "DEPLOYED_ESCROW_ADDRESS=$MOCK_ADDRESS" >> $GITHUB_ENV
             echo "contract_address=$MOCK_ADDRESS" >> $GITHUB_OUTPUT
             echo "is_simulated=true" >> $GITHUB_OUTPUT
@@ -149,7 +149,7 @@ jobs:
       - name: Extract Deployed Contract Address
         id: extract-address
         run: |
-          if [ -n "$DEPLOYED_ESCROW_ADDRESS" ] && [ "$DEPLOYED_ESCROW_ADDRESS" != "0x165B47291B87569b91696DCE6f1207eE15C9f783" ]; then
+          if [ -n "$DEPLOYED_ESCROW_ADDRESS" ] && [ "$DEPLOYED_ESCROW_ADDRESS" != "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15" ]; then
             echo "Using registered contract address: $DEPLOYED_ESCROW_ADDRESS"
             echo "contract_address=$DEPLOYED_ESCROW_ADDRESS" >> $GITHUB_OUTPUT
             exit 0
@@ -158,7 +158,7 @@ jobs:
           BROADCAST_FILE="broadcast/DeployEscrow.s.sol/84532/run-latest.json"
           if [ ! -f "$BROADCAST_FILE" ]; then
             echo "Broadcast log not found. Falling back to default mock address."
-            FALLBACK_ADDR="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            FALLBACK_ADDR="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
             echo "DEPLOYED_ESCROW_ADDRESS=$FALLBACK_ADDR" >> $GITHUB_ENV
             echo "contract_address=$FALLBACK_ADDR" >> $GITHUB_OUTPUT
             exit 0
@@ -184,7 +184,7 @@ jobs:
         env:
           EXTRACTED_ADDRESS: ${{ steps.extract-address.outputs.contract_address }}
         run: |
-          ADDR="${EXTRACTED_ADDRESS:-${DEPLOYED_ESCROW_ADDRESS:-0x165B47291B87569b91696DCE6f1207eE15C9f783}}"
+          ADDR="${EXTRACTED_ADDRESS:-${DEPLOYED_ESCROW_ADDRESS:-0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15}}"
           RPC="${ACTIVE_RPC_URL:-https://sepolia.base.org}"
           IS_SIM="${{ steps.deploy-step.outputs.is_simulated }}"
 

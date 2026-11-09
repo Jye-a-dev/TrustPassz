@@ -65,7 +65,7 @@ jobs:
       DIRECT_URL: "postgresql://mock:mock@localhost:5432/trustpassz_ci?schema=public"
       JWT_SECRET: "mock-jwt-secret-min-32-chars-for-ci"
       BASE_SEPOLIA_RPC_URL: "https://sepolia.base.org"
-      ESCROW_CONTRACT_ADDRESS: "0xef976eb14fdba8cb722789b451e2b9f903005c26"
+      ESCROW_CONTRACT_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
       NODE_OPTIONS: "--max-old-space-size=4096"
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_API_URL: "https://mock-api.trustpassz.com"
-      NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0xef976eb14fdba8cb722789b451e2b9f903005c26"
+      NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
       NEXT_PUBLIC_CHAIN_ID: "84532"
       NEXT_PUBLIC_RPC_URL: "https://sepolia.base.org"
       NEXT_PUBLIC_SUPABASE_URL: "https://mock-supabase.supabase.co"

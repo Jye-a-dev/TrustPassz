@@ -5,6 +5,11 @@ import Link from "next/link";
 import { LifeBuoy, FileText, CheckCircle2, Terminal, ExternalLink } from "lucide-react";
 
 export function UserFooter() {
+  const contractAddress =
+    process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS ||
+    "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15";
+  const displayAddress = `${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`;
+
   return (
     <footer className="border-t border-slate-200 bg-white text-slate-500 py-3.5 px-4 sm:px-6 mt-auto">
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs max-w-7xl mx-auto">
@@ -15,12 +20,12 @@ export function UserFooter() {
           </div>
           <span className="text-slate-600">HỆ THỐNG BẢO VỆ:</span>
           <Link
-            href="https://sepolia.basescan.org/address/0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            href={`https://sepolia.basescan.org/address/${contractAddress}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-rose-600 hover:text-rose-700 hover:underline bg-slate-50 px-2 py-0.5 rounded border border-slate-200 inline-flex items-center gap-1 shadow-2xs"
           >
-            <span>0x165B...f783</span>
+            <span>{displayAddress}</span>
             <ExternalLink className="size-2.5 text-rose-500" />
           </Link>
           <span className="text-slate-400">• Tự Động 24/7</span>

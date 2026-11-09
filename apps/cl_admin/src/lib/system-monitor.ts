@@ -1,6 +1,8 @@
 import type { SystemPillarStatus } from '@/types';
 
-export const CONTRACT_ADDRESS = '0x165B47291B87569b91696DCE6f1207eE15C9f783';
+export const CONTRACT_ADDRESS =
+  process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS ||
+  '0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15';
 export const RELAYER_ADDRESS = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 
 const BASE_SEPOLIA_RPC =
