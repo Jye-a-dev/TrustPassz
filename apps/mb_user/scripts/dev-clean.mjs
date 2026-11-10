@@ -308,11 +308,11 @@ runSilent(`"${adbPath}" reverse tcp:3001 tcp:3001`);
 console.log('  Reverse port forwarding active (3000 -> 3000, 3001 -> 3001).');
 
 // -----------------------------------------------------------------------------
-// [4/6] Uninstalling old package (com.trustpassz.mobile)
+// [4/6] Uninstalling old package (com.trustpassz.mb_user.mb_user)
 // -----------------------------------------------------------------------------
-logStep(4, 'Uninstalling old package (com.trustpassz.mobile)...');
+logStep(4, 'Uninstalling old package (com.trustpassz.mb_user.mb_user)...');
 try {
-  const res = runSilent(`"${adbPath}" uninstall com.trustpassz.mobile`);
+  const res = runSilent(`"${adbPath}" uninstall com.trustpassz.mb_user.mb_user`);
   if (res && res.includes('Success')) {
     console.log('  Existing package uninstalled successfully.');
   } else {

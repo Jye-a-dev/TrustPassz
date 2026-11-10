@@ -1,8 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
-import '../widgets/common/server_status_bar.dart';
+import '../theme/app_tokens.dart';
+import '../widgets/modals/google_oauth_dialog.dart';
+import '../widgets/modals/passkey_dialog.dart';
+import 'login/login_header.dart';
+import 'login/otp_verification_card.dart';
 
+/// Screen 02: Light-default Authentication Screen with Google OAuth, Passkey,
+/// Email/Phone + 6-box OTP flow, and Email/Password visibility toggle.
 class LoginScreen extends StatefulWidget {
   final VoidCallback onSuccess;
 
@@ -13,372 +20,322 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _identifierController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  late final List<TextEditingController> _otpControllers;
+  late final List<FocusNode> _otpFocusNodes;
+
   bool _isLoading = false;
+  bool _isOtpStep = false;
+  bool _usePasswordMode = false;
+  bool _obscurePassword = true;
+  int _resendCountdown = 0;
+  Timer? _resendTimer;
   String? _errorMessage;
-  final TextEditingController _walletController = TextEditingController(
-    text: '0x71C...49b2',
-  );
+
+  @override
+  void initState() {
+    super.initState();
+    _otpControllers = List.generate(6, (_) => TextEditingController());
+    _otpFocusNodes = List.generate(6, (_) => FocusNode());
+  }
 
   @override
   void dispose() {
-    _walletController.dispose();
+    _resendTimer?.cancel();
+    _identifierController.dispose();
+    _passwordController.dispose();
+    for (final c in _otpControllers) {
+      c.dispose();
+    }
+    for (final f in _otpFocusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
-  void _showGoogleSignInDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF27272A)),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.info_outline, color: Color(0xFF22D3EE), size: 22),
-            SizedBox(width: 8),
-            Text(
-              'Google OAuth',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'Google Sign-in SDK chưa được cấu hình Client ID cho nền tảng di động này. Vui lòng sử dụng nút "Đăng Nhập Test Session" để kiểm thử API xác thực.',
-          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Đã hiểu',
-              style: TextStyle(
-                color: Color(0xFF22D3EE),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _startOtpCountdown() {
+    _resendTimer?.cancel();
+    setState(() => _resendCountdown = 60);
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendCountdown <= 1) {
+        timer.cancel();
+        setState(() => _resendCountdown = 0);
+      } else {
+        setState(() => _resendCountdown--);
+      }
+    });
   }
 
-  void _showPasskeyDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF27272A)),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.fingerprint_rounded, color: Color(0xFF10B981), size: 22),
-            SizedBox(width: 8),
-            Text(
-              'FIDO2 / Passkey',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'Yêu cầu xác thực Passkey bị hủy hoặc chưa cấu hình trên thiết bị ảo. Ngoại lệ được kiểm soát an toàn, không văng lỗi crash màn hình.',
-          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Đã hiểu',
-              style: TextStyle(
-                color: Color(0xFF10B981),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  void _proceedToOtpOrPassword() {
+    final identifier = _identifierController.text.trim();
+    if (identifier.isEmpty) {
+      setState(() {
+        _errorMessage = 'Vui lòng nhập Email hoặc số điện thoại hợp lệ.';
+      });
+      return;
+    }
 
-  Future<void> _handleLogin(String provider) async {
+    if (_usePasswordMode) {
+      _submitEmailPassword();
+      return;
+    }
+
     setState(() {
+      _errorMessage = null;
+      _isOtpStep = true;
+    });
+    _startOtpCountdown();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _otpFocusNodes.first.requestFocus();
+    });
+  }
+
+  Future<void> _submitEmailPassword() async {
+    final email = _identifierController.text.trim();
+    final password = _passwordController.text;
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Vui lòng nhập đầy đủ Email và mật khẩu.');
+      return;
+    }
+    await _executeAuth(() async {
+      await AuthService.instance.authenticateWithEmailPassword(
+        email: email,
+        password: password,
+      );
+    });
+  }
+
+  Future<void> _submitOtp() async {
+    final code = _otpControllers.map((c) => c.text.trim()).join();
+    if (code.length < 6) {
+      setState(() => _errorMessage = 'Vui lòng nhập đủ 6 chữ số OTP.');
+      return;
+    }
+    await _executeAuth(() async {
+      await AuthService.instance.verifyOtp(
+        identifier: _identifierController.text.trim(),
+        otpCode: code,
+      );
+    });
+  }
+
+  Future<void> _submitGoogleIdToken(String idToken) async {
+    await _executeAuth(() async {
+      await AuthService.instance.verifyAndAuthenticate(
+        provider: 'google',
+        token: idToken,
+      );
+    });
+  }
+
+  Future<void> _executeAuth(Future<void> Function() action) async {
+    setState(() {
+      _isLoading = true;
       _errorMessage = null;
     });
 
-    if (provider == 'GOOGLE') {
-      _showGoogleSignInDialog();
-      return;
-    }
-
-    if (provider == 'PASSKEY') {
-      _showPasskeyDialog();
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
-      if (provider == 'SOLANA') {
-        await AuthService.instance.verifyAndAuthenticate(
-          provider: 'solana',
-          token: 'siws_solana_signature_payload',
-          walletAddress: _walletController.text.trim(),
-        );
-      } else {
-        // Dev auth mode: payload chuẩn RFC/Backend cho test session
-        await AuthService.instance.verifyAndAuthenticate(
-          provider: 'dev',
-          token: 'dev_test_session_token',
-          email: 'tester.sandbox@trustpassz.io',
-        );
-      }
-
+      await action();
       if (!mounted) return;
       widget.onSuccess();
     } catch (e) {
       if (!mounted) return;
-
-      String displayError =
-          'Đã có lỗi xảy ra trong quá trình xác thực. Vui lòng thử lại.';
+      String displayError = 'Xác thực thất bại. Vui lòng thử lại.';
       if (e is ApiException) {
-        if (e.statusCode == 401) {
-          displayError =
-              'Phiên xác thực không hợp lệ hoặc đã hết hạn. Vui lòng thử lại bằng Test Session.';
-        } else if (e.statusCode == 400) {
-          displayError = e.message.isNotEmpty
-              ? e.message
-              : 'Yêu cầu không hợp lệ. Vui lòng kiểm tra định dạng dữ liệu gửi lên.';
-        } else if (e.statusCode == 0) {
-          displayError =
-              'Không thể kết nối đến máy chủ backend (lỗi mạng hoặc server chưa khởi chạy).';
-        } else {
-          displayError = 'Lỗi máy chủ (${e.statusCode}): ${e.message}';
-        }
+        displayError = e.statusCode == 0
+            ? 'Không thể kết nối đến máy chủ backend. Vui lòng kiểm tra kết nối.'
+            : (e.message.isNotEmpty
+                ? e.message
+                : 'Lỗi xác thực (${e.statusCode}).');
       } else {
         displayError = e.toString().replaceFirst('Exception: ', '');
       }
-
-      setState(() {
-        _errorMessage = displayError;
-      });
+      setState(() => _errorMessage = displayError);
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0F17),
+      backgroundColor: c.canvas,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 16),
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF22D3EE), Color(0xFF34D399)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'TP',
-                  style: TextStyle(
-                    color: Color(0xFF020617),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Đăng Nhập Khóa Ký Quỹ',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Xác thực danh tính để tạo kèo đàm phán, thanh toán VietQR và giải mã Digital Vault.',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: ServerStatusBar(),
-              ),
-              const Spacer(),
-
-              // Error Display Banner
-              if (_errorMessage != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4C0519).withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: const Color(0xFFF43F5E).withValues(alpha: 0.5)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline,
-                          color: Color(0xFFF43F5E), size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFFFDA4AF),
-                            fontSize: 12,
-                          ),
+              LoginHeaderSection(errorMessage: _errorMessage),
+              OutlinedButton.icon(
+                onPressed: _isLoading
+                    ? null
+                    : () => GoogleOAuthDialog.show(
+                          context,
+                          onSubmitIdToken: _submitGoogleIdToken,
                         ),
-                      ),
-                    ],
-                  ),
+                icon: const Icon(
+                  Icons.g_mobiledata_rounded,
+                  size: 24,
+                  color: AppTokens.googleBlue,
                 ),
-                const SizedBox(height: 16),
-              ],
-
-              // Google OAuth Button
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : () => _handleLogin('GOOGLE'),
-                icon: const Icon(Icons.account_circle, size: 20),
-                label: const Text('Tiếp tục với Google OAuth'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 48),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: Color(0xFF27272A)),
-                  ),
+                label: const Text(
+                  'Tiếp tục với Google',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                style: AppTokens.outlinedButtonStyle(
+                  c,
+                  backgroundColor: c.surface,
+                  foregroundColor: c.textPrimary,
+                  borderColor: c.borderStrong,
+                  minHeight: 48,
                 ),
               ),
               const SizedBox(height: 10),
-
-              // Passkey / Biometric Auth Button
-              OutlinedButton.icon(
-                onPressed: _isLoading ? null : () => _handleLogin('PASSKEY'),
-                icon: const Icon(Icons.fingerprint_rounded,
-                    size: 20, color: Color(0xFF10B981)),
-                label: const Text('Xác thực với Passkey / Vân tay'),
-                style: OutlinedButton.styleFrom(
+              ElevatedButton.icon(
+                onPressed: _isLoading ? null : () => PasskeyDialog.show(context),
+                icon: const Icon(Icons.fingerprint_rounded, size: 20),
+                label: const Text(
+                  'Đăng nhập với Passkey / Face ID',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                style: AppTokens.primaryButtonStyle(
+                  c,
+                  backgroundColor:
+                      c.isDark ? c.surfaceSubtle : const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 48),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: Color(0xFF1E293B)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  borderColor: c.borderStrong,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Separator
-              const Row(
+              const SizedBox(height: 22),
+              Row(
                 children: [
-                  Expanded(child: Divider(color: Color(0xFF27272A))),
+                  Expanded(child: Divider(color: c.border)),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
-                      'HOẶC CHẾ ĐỘ DEV',
-                      style: TextStyle(
-                        color: Color(0xFF64748B),
+                      'HOẶC SỐ ĐIỆN THOẠI / EMAIL',
+                      style: AppTokens.monoStyle(
+                        color: c.textMuted,
                         fontSize: 10,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: Color(0xFF27272A))),
+                  Expanded(child: Divider(color: c.border)),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // Dev Login Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF27272A)),
+              const SizedBox(height: 18),
+              if (!_isOtpStep) ...[
+                TextField(
+                  controller: _identifierController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: TextStyle(color: c.textPrimary, fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Email hoặc số điện thoại',
+                    prefixIcon: Icon(Icons.alternate_email_rounded, size: 18),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      'Xác Thực Backend Trực Tiếp (DEV API)',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Gọi /api/v1/auth/verify để cấp phiên JWT thật trên Emulator.',
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : () => _handleLogin('DEV'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF06B6D4),
-                        foregroundColor: const Color(0xFF020617),
-                        minimumSize: const Size(double.infinity, 48),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                if (_usePasswordMode) ...[
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    style: TextStyle(color: c.textPrimary, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Mật khẩu tài khoản',
+                      prefixIcon:
+                          const Icon(Icons.lock_outline_rounded, size: 18),
+                      suffixIcon: IconButton(
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 18,
                         ),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.black,
-                              ),
-                            )
-                          : const Text(
-                              'Đăng Nhập Test Session',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
                     ),
-                  ],
+                  ),
+                ],
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _proceedToOtpOrPassword,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF020617),
+                          ),
+                        )
+                      : const Icon(Icons.arrow_forward_rounded, size: 18),
+                  label: Text(
+                    _usePasswordMode
+                        ? 'Đăng Nhập Tài Khoản'
+                        : 'Tiếp tục với OTP',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: AppTokens.primaryButtonStyle(c),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                    onPressed: () => setState(() {
+                      _usePasswordMode = !_usePasswordMode;
+                      _errorMessage = null;
+                    }),
+                    style: TextButton.styleFrom(
+                      side: BorderSide(color: c.border),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                    ),
+                    child: Text(
+                      _usePasswordMode
+                          ? 'Chuyển sang xác thực OTP 6 số'
+                          : 'Hoặc đăng nhập bằng Email & Mật khẩu',
+                      style: TextStyle(color: c.cyanText, fontSize: 12),
+                    ),
+                  ),
+                ),
+              ] else ...[
+                OtpVerificationCard(
+                  identifier: _identifierController.text.trim(),
+                  otpControllers: _otpControllers,
+                  otpFocusNodes: _otpFocusNodes,
+                  resendCountdown: _resendCountdown,
+                  isLoading: _isLoading,
+                  onChangeIdentifier: () => setState(() {
+                    _isOtpStep = false;
+                    _errorMessage = null;
+                  }),
+                  onSubmitOtp: _submitOtp,
+                  onResend: _startOtpCountdown,
+                ),
+              ],
+              const SizedBox(height: 28),
+              Text(
+                'Bảo chứng an toàn bởi Smart Contract Base Sepolia',
+                textAlign: TextAlign.center,
+                style: AppTokens.monoStyle(
+                  color: c.textMuted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const Spacer(),
             ],
           ),
         ),

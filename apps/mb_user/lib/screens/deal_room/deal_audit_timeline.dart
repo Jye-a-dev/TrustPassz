@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/deal_model.dart';
+import '../../theme/app_tokens.dart';
 
-/// DealAuditTimeline
-/// Khối render lịch sử giao dịch và mốc thời gian inspection window đếm ngược.
+/// DealAuditTimeline V2: 4-step horizontal grid (Khởi tạo -> Ký quỹ -> Đồng kiểm -> Giải ngân).
 class DealAuditTimeline extends StatelessWidget {
   final DealModel deal;
 
@@ -14,17 +14,15 @@ class DealAuditTimeline extends StatelessWidget {
   bool _isStepCompleted(int stepIndex) {
     switch (stepIndex) {
       case 0:
-        return true; // Deal đã khởi tạo
+        return true;
       case 1:
         return deal.state != DealState.pending;
       case 2:
-        return deal.state == DealState.inInspection ||
-            deal.state == DealState.settled ||
-            deal.state == DealState.disputed;
+        return deal.state == DealState.settled ||
+            deal.state == DealState.refunded;
       case 3:
         return deal.state == DealState.settled ||
-            deal.state == DealState.refunded ||
-            deal.state == DealState.disputed;
+            deal.state == DealState.refunded;
       default:
         return false;
     }
@@ -37,11 +35,11 @@ class DealAuditTimeline extends StatelessWidget {
       case 1:
         return deal.state == DealState.deposited;
       case 2:
-        return deal.state == DealState.inInspection;
+        return deal.state == DealState.inInspection ||
+            deal.state == DealState.disputed;
       case 3:
         return deal.state == DealState.settled ||
-            deal.state == DealState.refunded ||
-            deal.state == DealState.disputed;
+            deal.state == DealState.refunded;
       default:
         return false;
     }
@@ -49,176 +47,143 @@ class DealAuditTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
     final inspectionHours = deal.inspectionDuration ~/ 3600;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E293B)),
-      ),
+      decoration: AppTokens.cardDecoration(c, radius: 22),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Icon(Icons.history_toggle_off, size: 16, color: Color(0xFF22D3EE)),
-                  SizedBox(width: 8),
-                  Text(
-                    'TIẾN TRÌNH & ĐỒNG KIỂM',
-                    style: TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
+              Text(
+                'TIẾN TRÌNH HỢP ĐỒNG KÝ QUỸ',
+                style: AppTokens.monoStyle(
+                  color: c.textMuted,
+                  fontSize: 10.5,
+                  letterSpacing: 0.6,
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF164E63).withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(6),
+                  color: c.cyanSoft,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: c.cyanBorder),
                 ),
                 child: Text(
-                  'Hạn kiểm định: $inspectionHours Giờ',
-                  style: const TextStyle(
-                    color: Color(0xFF22D3EE),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
-                  ),
+                  'Hạn kiểm: ${inspectionHours}h',
+                  style: AppTokens.monoStyle(color: c.cyanText, fontSize: 10),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
 
-          // Timeline Step List
-          _buildTimelineItem(
-            index: 0,
-            title: 'Khởi tạo Deal & Thỏa thuận giá',
-            subtitle: 'Thỏa thuận giá niêm yết qua Bargain Slider',
-            isLast: false,
-          ),
-          _buildTimelineItem(
-            index: 1,
-            title: 'Ký quỹ Escrow (Napas 247)',
-            subtitle: 'Tiền buyer được khóa an toàn trên Smart Contract',
-            isLast: false,
-          ),
-          _buildTimelineItem(
-            index: 2,
-            title: 'Mở Két Số & Thời hạn Đồng kiểm',
-            subtitle: 'Kiểm thử license key/source code trong $inspectionHours giờ',
-            isLast: false,
-          ),
-          _buildTimelineItem(
-            index: 3,
-            title: 'Tất toán / Phân xử Trọng tài AI',
-            subtitle: deal.state == DealState.disputed
-                ? 'Đang tiếp nhận phân xử tranh chấp'
-                : 'Giải ngân thanh toán trực tiếp cho seller',
-            isLast: true,
+          // 4-Column Horizontal Stepper Grid
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildStep(c, 0, 'Khởi tạo')),
+              Expanded(child: _buildStep(c, 1, 'Ký quỹ')),
+              Expanded(
+                child: _buildStep(
+                  c,
+                  2,
+                  deal.state == DealState.disputed ? 'Tranh chấp' : 'Đồng kiểm',
+                ),
+              ),
+              Expanded(child: _buildStep(c, 3, 'Giải ngân')),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTimelineItem({
-    required int index,
-    required String title,
-    required String subtitle,
-    required bool isLast,
-  }) {
-    final isDone = _isStepCompleted(index);
-    final isActive = _isStepActive(index);
+  Widget _buildStep(AppColorPalette c, int index, String label) {
+    final done = _isStepCompleted(index);
+    final active = _isStepActive(index);
+    final isDisputed = index == 2 && deal.state == DealState.disputed;
 
-    final dotColor = isDone
-        ? const Color(0xFF10B981)
-        : (isActive ? const Color(0xFF06B6D4) : const Color(0xFF334155));
+    Color circleBg;
+    Color circleBorder;
+    Color textColor;
+    Widget inner;
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Step Dot and Connector Line
-          SizedBox(
-            width: 24,
-            child: Column(
-              children: [
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: dotColor,
-                    border: Border.all(
-                      color: isActive
-                          ? Colors.white
-                          : dotColor.withValues(alpha: 0.5),
-                      width: isActive ? 2 : 1,
-                    ),
-                  ),
-                  child: isDone
-                      ? const Icon(Icons.check, size: 9, color: Colors.black)
-                      : null,
-                ),
-                if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      color: isDone
-                          ? const Color(0xFF10B981).withValues(alpha: 0.5)
-                          : const Color(0xFF1E293B),
-                    ),
-                  ),
-              ],
-            ),
+    if (isDisputed) {
+      circleBg = AppTokens.rose;
+      circleBorder = c.roseBorder;
+      textColor = c.roseText;
+      inner = const Text(
+        '!',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          fontSize: 13,
+        ),
+      );
+    } else if (done) {
+      circleBg = AppTokens.emerald;
+      circleBorder = c.emeraldBorder;
+      textColor = c.emeraldText;
+      inner = const Icon(Icons.check_rounded, size: 16, color: Color(0xFF020617));
+    } else if (active) {
+      circleBg = AppTokens.cyan;
+      circleBorder = c.cyanBorder;
+      textColor = c.cyanText;
+      inner = Text(
+        '${index + 1}',
+        style: const TextStyle(
+          color: Color(0xFF020617),
+          fontWeight: FontWeight.w900,
+          fontSize: 12,
+        ),
+      );
+    } else {
+      circleBg = c.surfaceSubtle;
+      circleBorder = c.borderStrong;
+      textColor = c.textMuted;
+      inner = Text(
+        '${index + 1}',
+        style: TextStyle(
+          color: c.textMuted,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: circleBg,
+            shape: BoxShape.circle,
+            border: Border.all(color: circleBorder, width: 1.5),
           ),
-          const SizedBox(width: 8),
-
-          // Content
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: isDone || isActive
-                          ? Colors.white
-                          : const Color(0xFF64748B),
-                      fontSize: 13,
-                      fontWeight:
-                          isActive ? FontWeight.bold : FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: isDone || isActive
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF475569),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          alignment: Alignment.center,
+          child: inner,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 10.5,
+            fontWeight: (done || active) ? FontWeight.bold : FontWeight.w500,
           ),
-        ],
-      ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
-

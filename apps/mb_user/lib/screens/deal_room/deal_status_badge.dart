@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/deal_model.dart';
+import '../../theme/app_tokens.dart';
 
-/// DealStatusBadge
-/// Quản lý hiển thị badge trạng thái động (PENDING, DEPOSITED, IN_INSPECTION, SETTLED, REFUNDED, DISPUTED)
-/// theo chuẩn Cyber-Escrow Dark Theme của TrustPassz.
+/// DealStatusBadge supporting Light & Dark semantic styling.
 class DealStatusBadge extends StatelessWidget {
   final DealState state;
   final bool showIcon;
@@ -18,20 +17,19 @@ class DealStatusBadge extends StatelessWidget {
     this.fontSize = 11,
   });
 
-  Color _getBadgeColor() {
+  ({Color text, Color bg, Color border}) _colors(AppColorPalette c) {
     switch (state) {
       case DealState.pending:
-        return const Color(0xFFF59E0B); // Amber
+        return (text: c.amberText, bg: c.amberSoft, border: c.amberBorder);
       case DealState.deposited:
-        return const Color(0xFF10B981); // Emerald
-      case DealState.inInspection:
-        return const Color(0xFF06B6D4); // Cyan
       case DealState.settled:
-        return const Color(0xFF10B981); // Emerald
+        return (text: c.emeraldText, bg: c.emeraldSoft, border: c.emeraldBorder);
+      case DealState.inInspection:
+        return (text: c.cyanText, bg: c.cyanSoft, border: c.cyanBorder);
       case DealState.refunded:
-        return const Color(0xFF94A3B8); // Slate
+        return (text: c.textMuted, bg: c.surfaceSubtle, border: c.borderStrong);
       case DealState.disputed:
-        return const Color(0xFFF43F5E); // Rose
+        return (text: c.roseText, bg: c.roseSoft, border: c.roseBorder);
     }
   }
 
@@ -54,31 +52,32 @@ class DealStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = _getBadgeColor();
+    final c = context.tp;
+    final palette = _colors(c);
     final text = useVietnamese ? state.vietnameseLabel : state.label;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: baseColor.withValues(alpha: 0.15),
+        color: palette.bg,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: baseColor.withValues(alpha: 0.6)),
+        border: Border.all(color: palette.border, width: 1.0),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showIcon) ...[
-            Icon(_getBadgeIcon(), size: fontSize + 2, color: baseColor),
+            Icon(_getBadgeIcon(), size: fontSize + 2, color: palette.text),
             const SizedBox(width: 5),
           ],
           Text(
             text,
             style: TextStyle(
-              color: baseColor,
+              color: palette.text,
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
               fontFamily: useVietnamese ? null : 'monospace',
-              letterSpacing: 0.5,
+              letterSpacing: 0.4,
             ),
           ),
         ],

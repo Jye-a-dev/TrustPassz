@@ -2,20 +2,29 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/deal_model.dart';
 import '../services/deal_service.dart';
+import '../theme/app_tokens.dart';
+import '../utils/formatters.dart';
 import '../widgets/bargain_slider.dart';
-import '../widgets/vietqr_payment_view.dart';
-import '../widgets/vault_modal.dart';
-import 'deal_room/deal_status_badge.dart';
+import '../widgets/modals/bargain_confirm_dialog.dart';
+import 'checkout_vietqr_screen.dart';
 import 'deal_room/deal_audit_timeline.dart';
+import 'deal_room/deal_status_badge.dart';
+import 'deal_room/deal_summary_card.dart';
+import 'deal_room/deal_vault_ready_card.dart';
+import 'digital_vault_screen.dart';
 
+/// Screen 06: Deal Negotiation Room V2 (Light/Dark adaptive, 4-step horizontal timeline,
+/// BargainSlider with -5/-10/-15% chips, separated CheckoutVietQrScreen).
 class DealRoomScreen extends StatefulWidget {
   final String dealId;
+  final bool initialFocusVault;
   final VoidCallback onBack;
   final ValueChanged<String> onOpenDispute;
 
   const DealRoomScreen({
     super.key,
     required this.dealId,
+    this.initialFocusVault = false,
     required this.onBack,
     required this.onOpenDispute,
   });
@@ -45,30 +54,21 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
   }
 
   Future<void> _fetchDeal() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() => _isLoading = true);
     try {
       final deal = await DealService.instance.fetchDealById(widget.dealId);
       if (!mounted) return;
-      setState(() {
-        _deal = deal;
-      });
+      setState(() => _deal = deal);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lỗi tải deal: $e'),
-          backgroundColor: const Color(0xFFF43F5E),
+          content: Text('Lỗi tải giao dịch: $e'),
+          backgroundColor: AppTokens.rose,
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -76,37 +76,21 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
     try {
       final updated = await DealService.instance.fetchDealById(widget.dealId);
       if (!mounted) return;
-
-      if (_deal != null &&
-          _deal!.state == DealState.pending &&
-          (updated.state == DealState.deposited ||
-              updated.state == DealState.inInspection)) {
-        _onAutoUnlockVault(updated);
-      }
-
-      setState(() {
-        _deal = updated;
-      });
-    } catch (_) {
-      // Polling silent error suppression
-    }
-  }
-
-  Future<void> _onAutoUnlockVault(DealModel deal) async {
-    try {
-      final vault = await DealService.instance.unlockDealVault(deal.id);
-      if (!mounted) return;
-      VaultModal.show(
-        context: context,
-        deal: deal,
-        vaultData: vault,
-        onSettle: _handleSettle,
-        onDispute: () => widget.onOpenDispute(deal.id),
-      );
+      setState(() => _deal = updated);
     } catch (_) {}
   }
 
-  Future<void> _handleBargainSubmit(double newPrice) async {
+  Future<void> _handleBargainRequest(double newPrice) async {
+    if (_deal == null) return;
+    await BargainConfirmDialog.show(
+      context,
+      originalPrice: _deal!.amount,
+      proposedPrice: newPrice,
+      onConfirm: () => _submitBargain(newPrice),
+    );
+  }
+
+  Future<void> _submitBargain(double newPrice) async {
     if (_deal == null) return;
     try {
       await DealService.instance.proposeBargain(
@@ -114,71 +98,56 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
         offerPrice: newPrice,
       );
       if (!mounted) return;
-      setState(() {
-        _feedbackMessage = '✓ Đã gửi đề xuất giá mới thành công!';
-      });
+      setState(() => _feedbackMessage = '✓ Đã gửi đề xuất giá mới thành công!');
       Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _feedbackMessage = null;
-          });
-        }
+        if (mounted) setState(() => _feedbackMessage = null);
       });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lỗi đề xuất giá: $e'),
-          backgroundColor: const Color(0xFFF43F5E),
+          content: Text('Lỗi gửi đề xuất giá: $e'),
+          backgroundColor: AppTokens.rose,
         ),
       );
     }
   }
 
-  Future<void> _handleOpenVault() async {
-    if (_deal == null) return;
-    try {
-      final vault = await DealService.instance.unlockDealVault(_deal!.id);
-      if (!mounted) return;
-      VaultModal.show(
-        context: context,
-        deal: _deal!,
-        vaultData: vault,
-        onSettle: _handleSettle,
-        onDispute: () => widget.onOpenDispute(_deal!.id),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi mở két số: $e'),
-          backgroundColor: const Color(0xFFF43F5E),
+  void _openCheckoutVietQr(DealModel deal) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (ctx) => CheckoutVietQrScreen(
+          dealId: deal.id,
+          initialDeal: deal,
+          onBack: () => Navigator.of(ctx).pop(),
+          onOpenVault: () {
+            Navigator.of(ctx).pushReplacement(
+              MaterialPageRoute<void>(
+                builder: (vCtx) => DigitalVaultScreen(
+                  dealId: deal.id,
+                  inspectionDeadline: deal.inspectionDeadline,
+                  onBack: () => Navigator.of(vCtx).pop(),
+                  onOpenDispute: widget.onOpenDispute,
+                ),
+              ),
+            );
+          },
         ),
-      );
-    }
+      ),
+    );
   }
 
-  Future<void> _handleSettle() async {
-    if (_deal == null) return;
-    try {
-      await DealService.instance.settleEscrowDeal(_deal!.id);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✓ Đã xác nhận nhận hàng và giải ngân thành công!'),
-          backgroundColor: Color(0xFF10B981),
+  void _openDigitalVault(DealModel deal) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (ctx) => DigitalVaultScreen(
+          dealId: deal.id,
+          inspectionDeadline: deal.inspectionDeadline,
+          onBack: () => Navigator.of(ctx).pop(),
+          onOpenDispute: widget.onOpenDispute,
         ),
-      );
-      _fetchDeal();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi giải ngân: $e'),
-          backgroundColor: const Color(0xFFF43F5E),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   @override
@@ -189,27 +158,32 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     if (_isLoading && _deal == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF080C14),
-        body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF22D3EE)),
+      return Scaffold(
+        backgroundColor: c.canvas,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppTokens.cyan),
         ),
       );
     }
 
     if (_deal == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF080C14),
+        backgroundColor: c.canvas,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Không tìm thấy giao dịch',
-                  style: TextStyle(color: Colors.white)),
+              Text(
+                'Không tìm thấy giao dịch',
+                style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
-              ElevatedButton(
+              OutlinedButton(
                 onPressed: widget.onBack,
+                style: AppTokens.outlinedButtonStyle(c),
                 child: const Text('Quay lại'),
               ),
             ],
@@ -224,23 +198,80 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
         deal.state == DealState.inInspection;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080C14),
+      backgroundColor: c.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF080C14),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: widget.onBack,
-        ),
-        title: Text(
-          'Deal: ${deal.id.length > 8 ? deal.id.substring(0, 8) : deal.id}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'monospace',
+        backgroundColor: c.canvas,
+        leadingWidth: 60,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Center(
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: OutlinedButton(
+                onPressed: widget.onBack,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(44, 44),
+                  backgroundColor: c.surface,
+                  side: BorderSide(color: c.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 18,
+                  color: c.textPrimary,
+                ),
+              ),
+            ),
           ),
         ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Bàn Đàm Phán',
+                  style: TextStyle(
+                    color: c.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: c.cyanSoft,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: c.cyanBorder),
+                  ),
+                  child: Text(
+                    TrustPasszFormatters.formatDealCode(deal.id),
+                    style: AppTokens.monoStyle(color: c.cyanText, fontSize: 9.5),
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              'Đối tác: ${deal.sellerName ?? "Thành viên eKYC (Uy tín 99.8%)"}',
+              style: AppTokens.monoStyle(
+                color: c.textMuted,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(child: DealStatusBadge(state: deal.state)),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -250,153 +281,51 @@ class _DealRoomScreenState extends State<DealRoomScreen> {
             children: [
               if (_feedbackMessage != null) ...[
                 Container(
+                  margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF064E3B).withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF10B981)),
+                    color: c.emeraldSoft,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: c.emeraldBorder),
                   ),
                   child: Text(
                     _feedbackMessage!,
-                    style: const TextStyle(
-                      color: Color(0xFF34D399),
+                    style: TextStyle(
+                      color: c.emeraldText,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
               ],
-
-              // Deal Summary Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF1E293B)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            deal.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        DealStatusBadge(state: deal.state),
-                      ],
-                    ),
-                    if (deal.description != null &&
-                        deal.description!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        deal.description!,
-                        style: const TextStyle(
-                            color: Color(0xFF94A3B8), fontSize: 12),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Audit Timeline & Inspection Window
               DealAuditTimeline(deal: deal),
-              const SizedBox(height: 16),
-
-              // Pending State: Bargain Slider & VietQR Payment View
+              const SizedBox(height: 14),
+              DealSummaryCard(deal: deal),
+              const SizedBox(height: 14),
               if (isPending) ...[
                 BargainSlider(
                   dealId: deal.id,
                   basePrice: deal.amount,
                   currentUserId: deal.buyerId ?? 'buyer_current_user',
-                  onOfferSubmit: _handleBargainSubmit,
+                  onOfferSubmit: _handleBargainRequest,
                 ),
-                const SizedBox(height: 16),
-                VietQrPaymentView(
-                  dealId: deal.id,
-                  bankName: 'MBBank',
-                  bin: '970422',
-                  accountNo: '0385966888',
-                  accountName: 'TRUSTPASSZ ESCROW',
-                  amount: deal.amount,
-                  memo:
-                      'TPZ ${deal.id.length > 8 ? deal.id.substring(0, 8).toUpperCase() : deal.id}',
-                  deepLink:
-                      'vietqr://pay?acc=0385966888&bin=970422&amount=${deal.amount.toInt()}&memo=TPZ${deal.id.length > 8 ? deal.id.substring(0, 8) : deal.id}',
-                  onPaymentConfirmed: _fetchDeal,
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => _openCheckoutVietQr(deal),
+                  style: AppTokens.outlinedButtonStyle(c, minHeight: 46),
+                  child: const Text(
+                    'Chấp Nhận Giá Gốc & Thanh Toán VietQR',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
                 ),
               ],
-
-              // Deposited State: Digital Vault Banner & Actions
               if (hasDeposited) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF064E3B).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.5)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.verified_user,
-                              color: Color(0xFF10B981), size: 22),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Tiền Ký Quỹ Đã Được Khóa An Toàn',
-                              style: TextStyle(
-                                color: Color(0xFF34D399),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Két số Digital Vault đã được mở khóa. Bạn có thể kiểm tra nội dung/license key và xác nhận giải ngân.',
-                        style:
-                            TextStyle(color: Color(0xFFCBD5E1), fontSize: 12),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _handleOpenVault,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          backgroundColor: const Color(0xFF10B981),
-                          foregroundColor: const Color(0xFF020617),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Mở Két Số Digital Vault',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
+                DealVaultReadyCard(
+                  highlighted: widget.initialFocusVault,
+                  onOpenVault: () => _openDigitalVault(deal),
                 ),
               ],
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
             ],
           ),
         ),

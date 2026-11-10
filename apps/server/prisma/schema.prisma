@@ -139,6 +139,7 @@ model User {
   relayerFundingLogs RelayerFundingLog[] @relation("AdminRelayerFunding")
   auditLogs          AuditLog[]          @relation("AdminAuditLogs")
   fiatFundingOrders  FiatCryptoFundingOrder[] @relation("AdminFiatOrders")
+  deviceTokens       DeviceToken[]
 
   @@map("users")
 }
@@ -459,4 +460,34 @@ model EmergencyDispatchLog {
   @@index([alertType])
   @@index([createdAt])
   @@map("emergency_dispatch_logs")
+}
+
+// ==============================================================================
+// 8. PUSH NOTIFICATIONS & FCM DEVICE TOKENS (TASK-c-8)
+// ==============================================================================
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+
+  @@map("device_platform_enum")
+}
+
+model DeviceToken {
+  id          String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId      String         @map("user_id") @db.Uuid
+  token       String         @unique @db.VarChar(512)
+  platform    DevicePlatform
+  deviceModel String?        @map("device_model") @db.VarChar(150)
+  appVersion  String?        @map("app_version") @db.VarChar(50)
+  isActive    Boolean        @default(true) @map("is_active")
+  lastUsedAt  DateTime       @default(now()) @map("last_used_at") @db.Timestamptz(6)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@map("device_tokens")
 }

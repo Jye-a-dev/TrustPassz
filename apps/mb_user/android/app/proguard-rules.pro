@@ -96,6 +96,9 @@
 
 -keep class com.google.firebase.messaging.** { *; }
 -dontwarn com.google.firebase.messaging.**
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
 
 # ------------------------------------------------------------------------------
 # 6. JSON Serialization & Reflection Data Transfer Objects

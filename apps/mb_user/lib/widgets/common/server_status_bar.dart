@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../services/api_client.dart';
+import '../../theme/app_tokens.dart';
 
 enum ServerHealthState { checking, online, degraded, offline }
 
 /// Non-blocking, real-time backend health check and network latency badge.
-/// Complies with Cyber-Escrow Dark Theme and Touch Target >= 44px.
+/// Dual-theme compliant with mandatory border and >= 44x44px touch target.
 class ServerStatusBar extends StatefulWidget {
   final Duration checkInterval;
   final Duration latencyThreshold;
@@ -70,16 +71,16 @@ class _ServerStatusBarState extends State<ServerStatusBar> {
     }
   }
 
-  Color _getStatusColor() {
+  Color _getStatusColor(AppColorPalette c) {
     switch (_state) {
       case ServerHealthState.online:
-        return const Color(0xFF10B981); // Emerald
+        return c.emeraldText;
       case ServerHealthState.degraded:
-        return const Color(0xFFF59E0B); // Amber
+        return c.amberText;
       case ServerHealthState.offline:
-        return const Color(0xFFF43F5E); // Rose
+        return c.roseText;
       case ServerHealthState.checking:
-        return const Color(0xFF06B6D4); // Cyan
+        return c.cyanText;
     }
   }
 
@@ -100,47 +101,38 @@ class _ServerStatusBarState extends State<ServerStatusBar> {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor();
+    final c = context.tp;
+    final statusColor = _getStatusColor(c);
     final statusText = _getStatusText();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.only(left: 12, right: 4, top: 2, bottom: 2),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: c.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: c.border, width: 1.0),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Glowing status indicator dot
           Container(
             width: 8,
             height: 8,
             decoration: BoxDecoration(
               color: statusColor,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: statusColor.withValues(alpha: 0.6),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                ),
-              ],
             ),
           ),
           const SizedBox(width: 8),
           Text(
             statusText,
-            style: TextStyle(
+            style: AppTokens.monoStyle(
               color: statusColor,
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              fontFamily: 'monospace',
             ),
           ),
           const SizedBox(width: 4),
-          // Touch target >= 44x44px for manual retry
           SizedBox(
             width: 44,
             height: 44,
@@ -150,9 +142,8 @@ class _ServerStatusBarState extends State<ServerStatusBar> {
               constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               icon: Icon(Icons.refresh_rounded, color: statusColor),
               tooltip: 'Kiểm tra lại kết nối backend',
-              onPressed: _state == ServerHealthState.checking
-                  ? null
-                  : _executeHealthCheck,
+              onPressed:
+                  _state == ServerHealthState.checking ? null : _executeHealthCheck,
             ),
           ),
         ],
@@ -160,4 +151,3 @@ class _ServerStatusBarState extends State<ServerStatusBar> {
     );
   }
 }
-

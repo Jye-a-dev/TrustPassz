@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_tokens.dart';
 
 class ShimmerBox extends StatefulWidget {
   final double? width;
@@ -41,6 +42,10 @@ class _ShimmerBoxState extends State<ShimmerBox>
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+    final baseColor = c.surfaceSubtle;
+    final highlightColor = c.border;
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -48,11 +53,7 @@ class _ShimmerBoxState extends State<ShimmerBox>
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: Color.lerp(
-              const Color(0xFF0F172A),
-              const Color(0xFF1E293B),
-              _animation.value,
-            ),
+            color: Color.lerp(baseColor, highlightColor, _animation.value),
             borderRadius: BorderRadius.circular(widget.borderRadius),
           ),
         );
@@ -66,13 +67,11 @@ class BalanceCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF1E293B)),
-      ),
+      decoration: AppTokens.cardDecoration(c, radius: 24),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,13 +121,11 @@ class TransactionItemSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E293B)),
-      ),
+      decoration: AppTokens.cardDecoration(c, radius: 18),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

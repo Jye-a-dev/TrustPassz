@@ -2,25 +2,36 @@ import 'package:flutter/material.dart';
 import '../models/deal_model.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
-import '../services/deal_service.dart';
 import '../services/deal_cache_service.dart';
-import '../widgets/home/home_app_bar.dart';
+import '../services/deal_service.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/home/balance_escrow_card.dart';
+import '../widgets/home/home_app_bar.dart';
+import '../widgets/home/home_shimmer.dart';
 import '../widgets/home/quick_actions_bar.dart';
 import '../widgets/home/recent_transactions_list.dart';
-import '../widgets/home/home_shimmer.dart';
-import '../widgets/vault_modal.dart';
+import '../widgets/modals/qr_scan_sheet.dart';
+import 'checkout_vietqr_screen.dart';
+import 'digital_vault_screen.dart';
 
+/// Screen 03: Home & Escrow Dashboard V2 (Light Mode Default, 5-tab Shell ready,
+/// zero sticky dispute button, zero SnackBar placeholders).
 class HomeScreen extends StatefulWidget {
   final ValueChanged<DealModel> onSelectDeal;
-  final VoidCallback onOpenDisputeFlow;
+  final ValueChanged<String> onOpenDisputeFlow;
   final VoidCallback onLogout;
+  final VoidCallback? onCreateDealTap;
+  final VoidCallback? onViewAllOrdersTap;
+  final VoidCallback? onProfileTap;
 
   const HomeScreen({
     super.key,
     required this.onSelectDeal,
     required this.onOpenDisputeFlow,
     required this.onLogout,
+    this.onCreateDealTap,
+    this.onViewAllOrdersTap,
+    this.onProfileTap,
   });
 
   @override
@@ -51,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadInitialData() async {
-    // Phase 1: Fast local cache hydration for FCP < 1s
     final cachedDeals = await DealCacheService.instance.loadCachedDeals();
     final storedUser = await AuthService.instance.getStoredUser();
 
@@ -65,12 +75,13 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    // Phase 2: Live network synchronization
     await _fetchDeals(isInitial: true);
   }
 
-  Future<void> _fetchDeals(
-      {bool isInitial = false, bool resetPage = false}) async {
+  Future<void> _fetchDeals({
+    bool isInitial = false,
+    bool resetPage = false,
+  }) async {
     if (resetPage) {
       _currentPage = 1;
       _hasMore = true;
@@ -90,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (!mounted) return;
-
       setState(() {
         if (resetPage || isInitial) {
           _deals = results;
@@ -101,31 +111,20 @@ class _HomeScreenState extends State<HomeScreen> {
         _balanceSummary = EscrowBalanceSummary.fromDeals(_deals);
       });
 
-      // Persist in-memory & local storage
       if (_activeFilter == 'ALL') {
         await DealCacheService.instance.cacheDeals(_deals);
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      setState(() => _errorMessage = e.toString());
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _loadMoreDeals() async {
     if (_isFetchingMore || !_hasMore || _isLoading) return;
-
-    setState(() {
-      _isFetchingMore = true;
-    });
-
+    setState(() => _isFetchingMore = true);
     try {
       final nextPage = _currentPage + 1;
       final results = await DealService.instance.fetchDeals(
@@ -133,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
         limit: 20,
         status: _activeFilter == 'ALL' ? null : _activeFilter,
       );
-
       if (!mounted) return;
       setState(() {
         _currentPage = nextPage;
@@ -142,104 +140,187 @@ class _HomeScreenState extends State<HomeScreen> {
         _balanceSummary = EscrowBalanceSummary.fromDeals(_deals);
       });
     } catch (_) {
-      // Keep existing list on pagination error
+      // Keep loaded items on pagination error
     } finally {
-      if (mounted) {
-        setState(() {
-          _isFetchingMore = false;
-        });
-      }
+      if (mounted) setState(() => _isFetchingMore = false);
     }
   }
 
   void _onFilterChanged(String filter) {
     if (_activeFilter == filter) return;
-    setState(() {
-      _activeFilter = filter;
-    });
+    setState(() => _activeFilter = filter);
     _fetchDeals(resetPage: true);
   }
 
-  void _handleCreateDeal() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Khởi tạo giao dịch ký quỹ mới qua Smart Contract...'),
-        backgroundColor: Color(0xFF0F766E),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _handleScanQr() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mở module quét mã VietQR bảo lưu...'),
-        backgroundColor: Color(0xFF0284C7),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  Future<void> _handleOpenVault() async {
-    final depositedDeals = _deals
-        .where((d) =>
-            d.state == DealState.deposited || d.state == DealState.inInspection)
-        .toList();
-
-    if (depositedDeals.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Chưa có hợp đồng nào ở trạng thái đã khóa tiền để mở két số.'),
-          backgroundColor: Color(0xFFB45309),
-          behavior: SnackBarBehavior.floating,
+  void _handleDepositTap() {
+    final pendingDeals =
+        _deals.where((d) => d.state == DealState.pending).toList();
+    if (pendingDeals.isNotEmpty) {
+      final target = pendingDeals.first;
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (ctx) => CheckoutVietQrScreen(
+            dealId: target.id,
+            initialDeal: target,
+            onBack: () => Navigator.of(ctx).pop(),
+            onOpenVault: () {
+              Navigator.of(ctx).pushReplacement(
+                MaterialPageRoute<void>(
+                  builder: (vCtx) => DigitalVaultScreen(
+                    dealId: target.id,
+                    onBack: () => Navigator.of(vCtx).pop(),
+                    onOpenDispute: widget.onOpenDisputeFlow,
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       );
       return;
     }
 
-    final targetDeal = depositedDeals.first;
-    try {
-      final vault = await DealService.instance.unlockDealVault(targetDeal.id);
-      if (!mounted) return;
+    if (widget.onCreateDealTap != null) {
+      widget.onCreateDealTap!();
+    }
+  }
 
-      await VaultModal.show(
-        context: context,
-        deal: targetDeal,
-        vaultData: vault,
-        onSettle: () => DealService.instance.settleEscrowDeal(targetDeal.id),
-        onDispute: widget.onOpenDisputeFlow,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi mở két số: $e'),
-          backgroundColor: const Color(0xFFBE123C),
-          behavior: SnackBarBehavior.floating,
+  Future<void> _handleWithdrawTap() async {
+    final c = context.tp;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: c.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: c.border),
+        ),
+        title: Text(
+          'Rút Tiền Về Ngân Hàng VietQR',
+          style: TextStyle(
+            color: c.textPrimary,
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Số dư khả dụng được chuyển tự động về tài khoản ngân hàng VietQR đã liên kết trong mục Cá Nhân.',
+          style: TextStyle(color: c.textMuted, fontSize: 13),
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              widget.onProfileTap?.call();
+            },
+            style: AppTokens.outlinedButtonStyle(c),
+            child: const Text('Cấu hình STK'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: AppTokens.primaryButtonStyle(c),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleScanQr() async {
+    final scannedCode = await QrScanSheet.show(context);
+    if (!mounted || scannedCode == null || scannedCode.trim().isEmpty) return;
+
+    final clean = scannedCode.trim();
+    final matched = _deals.where((d) => d.id == clean).toList();
+    if (matched.isNotEmpty) {
+      widget.onSelectDeal(matched.first);
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (ctx) => CheckoutVietQrScreen(
+            dealId: clean,
+            onBack: () => Navigator.of(ctx).pop(),
+          ),
         ),
       );
     }
   }
 
+  Future<void> _handleOpenVault() async {
+    final vaultDeals = _deals
+        .where((d) =>
+            d.state == DealState.deposited || d.state == DealState.inInspection)
+        .toList();
+
+    if (vaultDeals.isEmpty) {
+      final c = context.tp;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: c.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: c.border),
+          ),
+          title: Text(
+            'Chưa Có Két Số Sẵn Sàng',
+            style: TextStyle(
+              color: c.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Chưa có giao dịch nào ở trạng thái đã khóa tiền ký quỹ. Bạn có thể tạo giao dịch mới hoặc thanh toán VietQR trước.',
+            style: TextStyle(color: c.textMuted, fontSize: 13),
+          ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: AppTokens.outlinedButtonStyle(c),
+              child: const Text('Đóng'),
+            ),
+            if (widget.onCreateDealTap != null)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  widget.onCreateDealTap!();
+                },
+                style: AppTokens.primaryButtonStyle(c),
+                child: const Text('Tạo Giao Dịch'),
+              ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final target = vaultDeals.first;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (ctx) => DigitalVaultScreen(
+          dealId: target.id,
+          inspectionDeadline: target.inspectionDeadline,
+          onBack: () => Navigator.of(ctx).pop(),
+          onOpenDispute: widget.onOpenDisputeFlow,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF080C14),
+      backgroundColor: c.canvas,
       appBar: HomeAppBar(
         user: _currentUser,
         isRefreshing: _isLoading,
         onRefresh: () => _fetchDeals(resetPage: true),
-        onNotificationsTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Không có thông báo mới từ hệ thống Trọng tài AI.'),
-              backgroundColor: Color(0xFF1E293B),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
-        onLogout: widget.onLogout,
+        onNotificationsTap: () => widget.onViewAllOrdersTap?.call(),
+        onProfileTap: widget.onProfileTap,
+        onLogout: () {},
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -247,99 +328,56 @@ class _HomeScreenState extends State<HomeScreen> {
             final isTablet = constraints.maxWidth > 600;
             final horizontalPadding = isTablet ? 32.0 : 16.0;
 
+            final topSection = Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  if (_isLoading && _deals.isEmpty)
+                    const BalanceCardSkeleton()
+                  else
+                    BalanceEscrowCard(
+                      balanceSummary: _balanceSummary,
+                      onDepositTap: _handleDepositTap,
+                      onWithdrawTap: _handleWithdrawTap,
+                    ),
+                  const SizedBox(height: 12),
+                  QuickActionsBar(
+                    onCreateDeal: widget.onCreateDealTap ?? _handleDepositTap,
+                    onScanQr: _handleScanQr,
+                    onOpenVault: _handleOpenVault,
+                  ),
+                  const SizedBox(height: 14),
+                ],
+              ),
+            );
+            final list = RecentTransactionsList(
+              deals: _deals,
+              isLoading: _isLoading,
+              isFetchingMore: _isFetchingMore,
+              errorMessage: _errorMessage,
+              activeFilter: _activeFilter,
+              onFilterChanged: _onFilterChanged,
+              onSelectDeal: widget.onSelectDeal,
+              onRefresh: () => _fetchDeals(resetPage: true),
+              onLoadMore: _loadMoreDeals,
+              onRetry: () => _fetchDeals(resetPage: true),
+              onViewAll: widget.onViewAllOrdersTap,
+            );
+
             return Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 720),
-                child: Column(
-                  children: [
-                    // Top Overview Section
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: horizontalPadding),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          if (_isLoading && _deals.isEmpty)
-                            const BalanceCardSkeleton()
-                          else
-                            BalanceEscrowCard(
-                              balanceSummary: _balanceSummary,
-                              onDepositTap: _handleCreateDeal,
-                              onWithdrawTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Số dư khả dụng sẵn sàng rút về tài khoản ngân hàng liên kết.'),
-                                    backgroundColor: Color(0xFF0F766E),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              },
-                            ),
-                          const SizedBox(height: 12),
-                          QuickActionsBar(
-                            onCreateDeal: _handleCreateDeal,
-                            onScanQr: _handleScanQr,
-                            onOpenVault: _handleOpenVault,
-                          ),
-                          const SizedBox(height: 14),
-                        ],
-                      ),
-                    ),
-
-                    // Recent Transactions List Section
-                    Expanded(
-                      child: RecentTransactionsList(
-                        deals: _deals,
-                        isLoading: _isLoading,
-                        isFetchingMore: _isFetchingMore,
-                        errorMessage: _errorMessage,
-                        activeFilter: _activeFilter,
-                        onFilterChanged: _onFilterChanged,
-                        onSelectDeal: widget.onSelectDeal,
-                        onRefresh: () => _fetchDeals(resetPage: true),
-                        onLoadMore: _loadMoreDeals,
-                        onRetry: () => _fetchDeals(resetPage: true),
-                      ),
-                    ),
-
-                    // AI Dispute Center Action Bar
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        horizontalPadding,
-                        6,
-                        horizontalPadding,
-                        12,
-                      ),
-                      child: SizedBox(
-                        height: 48,
-                        child: ElevatedButton.icon(
-                          onPressed: widget.onOpenDisputeFlow,
-                          icon:
-                              const Text('⚖️', style: TextStyle(fontSize: 14)),
-                          label: const Text(
-                            'Khiếu Nại Trọng Tài AI (Dispute Center)',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F172A),
-                            foregroundColor: const Color(0xFFF43F5E),
-                            side: const BorderSide(
-                              color: Color(0xFFF43F5E),
-                              width: 0.8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
+                child: constraints.maxHeight < 640
+                    ? SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            topSection,
+                            SizedBox(height: 360, child: list),
+                          ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
+                      )
+                    : Column(children: [topSection, Expanded(child: list)]),
               ),
             );
           },

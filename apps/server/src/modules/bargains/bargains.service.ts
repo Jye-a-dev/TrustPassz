@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import { RequestUser } from '../../common/decorators/current-user.decorator';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   CreateBargainDto,
   QueryBargainDto,
@@ -20,6 +21,7 @@ export class BargainsService {
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly supabaseService?: SupabaseService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
 
   async create(dto: CreateBargainDto) {
@@ -99,7 +101,7 @@ export class BargainsService {
       ...(dto.dealId ? { dealId: dto.dealId } : {}),
     };
 
-    return this.prisma.bargainOffer.create({
+    const offer = await this.prisma.bargainOffer.create({
       data: {
         productId: effectiveProductId,
         buyerId: dto.buyerId,
@@ -117,6 +119,8 @@ export class BargainsService {
         },
       },
     });
+    this.notificationsService?.notifyOfferUpdated(product.sellerId, { dealId: dto.dealId ?? effectiveProductId, dealTitle: product.title, price: dto.offeredPrice, currency: product.currency, proposedBy: dto.buyerId });
+    return offer;
   }
 
   async findAll(query: QueryBargainDto) {
@@ -307,12 +311,10 @@ export class BargainsService {
         },
       );
     }
-
-    return {
-      success: true,
-      bargain: updatedOffer,
-      deal: targetDeal,
-    };
+    if (targetDeal) {
+      this.notificationsService?.notifyOfferUpdated(bargain.buyerId, { dealId: targetDeal.id, dealTitle: targetDeal.title, price: Number(bargain.offeredPrice), currency: targetDeal.currency, status: 'ACCEPTED' });
+    }
+    return { success: true, bargain: updatedOffer, deal: targetDeal };
   }
 
   async rejectOffer(id: string, currentUser?: RequestUser) {

@@ -87,7 +87,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Tạo Kèo Mới'), findsOneWidget);
+    expect(find.text('Tạo Giao Dịch Mới'), findsOneWidget);
     expect(find.text('Quét VietQR'), findsOneWidget);
     expect(find.text('Mở Két Số'), findsOneWidget);
   });

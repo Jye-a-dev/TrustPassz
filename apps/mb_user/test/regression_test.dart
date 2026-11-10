@@ -107,23 +107,25 @@ void main() {
         ),
       );
 
-      // Verify presence of buttons
-      expect(find.text('Tiếp tục với Google OAuth'), findsOneWidget);
-      expect(find.text('Xác thực với Passkey / Vân tay'), findsOneWidget);
-      expect(find.text('Đăng Nhập Test Session'), findsOneWidget);
+      // Verify V2 buttons (Dev Test Session removed, OTP/Google/Passkey present)
+      expect(find.text('Tiếp tục với Google'), findsOneWidget);
+      expect(find.text('Đăng nhập với Passkey / Face ID'), findsOneWidget);
+      expect(find.text('Tiếp tục với OTP'), findsOneWidget);
+      expect(find.text('Đăng Nhập Test Session'), findsNothing);
 
-      // Test Google OAuth cancel/unsupported safe fallback dialog
-      await tester.tap(find.text('Tiếp tục với Google OAuth'));
+      // Test Google OAuth modal dialog safely
+      await tester.tap(find.text('Tiếp tục với Google'));
       await tester.pumpAndSettle();
-      expect(find.text('Google OAuth'), findsOneWidget);
-      await tester.tap(find.text('Đã hiểu'));
+      expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
+      await tester.tap(find.text('Đóng'));
       await tester.pumpAndSettle();
 
-      // Test Passkey safe fallback dialog
-      await tester.tap(find.text('Xác thực với Passkey / Vân tay'));
-      await tester.pumpAndSettle();
-      expect(find.text('FIDO2 / Passkey'), findsOneWidget);
-      await tester.tap(find.text('Đã hiểu'));
+      // Test Passkey FIDO2 modal dialog safely
+      await tester.tap(find.text('Đăng nhập với Passkey / Face ID'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('Xác Thực Passkey FIDO2'), findsOneWidget);
+      await tester.tap(find.text('Hủy Bỏ'));
       await tester.pumpAndSettle();
 
       expect(loginSuccess, isFalse);
@@ -303,6 +305,7 @@ void main() {
       expect(find.text('Mở App Ngân Hàng Trên Điện Thoại'), findsOneWidget);
 
       // Trigger banking app launch button
+      await tester.ensureVisible(find.text('Mở App Ngân Hàng Trên Điện Thoại'));
       await tester.tap(find.text('Mở App Ngân Hàng Trên Điện Thoại'));
       await tester.pump(); // Start attempt
       await tester.pump(

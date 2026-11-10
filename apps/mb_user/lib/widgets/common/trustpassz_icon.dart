@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_tokens.dart';
 
 class TrustPasszIcon extends StatelessWidget {
   final double size;
@@ -19,19 +20,21 @@ class TrustPasszIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: const Color(0xFF0B0F17),
+        gradient: const LinearGradient(
+          colors: [AppTokens.cyan, AppTokens.emerald],
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+        ),
         borderRadius: borderRadius,
         border: Border.all(
-          color: glow ? const Color(0xFF10B981) : const Color(0xFF06B6D4),
-          width: size * 0.05,
+          color: glow ? AppTokens.emeraldDark : AppTokens.cyan,
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: glow
-                ? const Color(0xFF10B981).withValues(alpha: 0.4)
-                : const Color(0xFF06B6D4).withValues(alpha: 0.3),
-            blurRadius: glow ? 8 : 4,
-            spreadRadius: glow ? 1 : 0,
+            color: (glow ? AppTokens.emerald : AppTokens.cyan)
+                .withValues(alpha: 0.22),
+            blurRadius: glow ? 10 : 4,
           ),
         ],
       ),
@@ -39,7 +42,7 @@ class TrustPasszIcon extends StatelessWidget {
       child: Text(
         'TP',
         style: TextStyle(
-          color: const Color(0xFFF8FAFC),
+          color: const Color(0xFF020617),
           fontWeight: FontWeight.w900,
           fontSize: fontSize,
           fontFamily: 'monospace',
@@ -49,4 +52,3 @@ class TrustPasszIcon extends StatelessWidget {
     );
   }
 }
-

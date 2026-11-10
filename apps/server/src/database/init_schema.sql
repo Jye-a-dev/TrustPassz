@@ -304,3 +304,30 @@ CREATE INDEX IF NOT EXISTS idx_emergency_mailing_lists_is_active ON "emergency_m
 CREATE INDEX IF NOT EXISTS idx_emergency_dispatch_logs_status ON "emergency_dispatch_logs"("status");
 CREATE INDEX IF NOT EXISTS idx_emergency_dispatch_logs_alert_type ON "emergency_dispatch_logs"("alert_type");
 CREATE INDEX IF NOT EXISTS idx_emergency_dispatch_logs_created_at ON "emergency_dispatch_logs"("created_at");
+
+-- ============================================================================
+-- 6. PUSH NOTIFICATIONS & FCM DEVICE TOKENS (TASK-c-8)
+-- ============================================================================
+DO $$ BEGIN
+    CREATE TYPE device_platform_enum AS ENUM ('ANDROID', 'IOS');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+CREATE TABLE IF NOT EXISTS "device_tokens" (
+    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "user_id" UUID NOT NULL,
+    "token" VARCHAR(512) UNIQUE NOT NULL,
+    "platform" device_platform_enum NOT NULL,
+    "device_model" VARCHAR(150),
+    "app_version" VARCHAR(50),
+    "is_active" BOOLEAN NOT NULL DEFAULT TRUE,
+    "last_used_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_device_tokens_user FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE
+);
+
+DROP TRIGGER IF EXISTS trg_device_tokens_updated_at ON "device_tokens";
+CREATE TRIGGER trg_device_tokens_updated_at BEFORE UPDATE ON "device_tokens" FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE INDEX IF NOT EXISTS idx_device_tokens_user_id ON "device_tokens"("user_id");
+CREATE INDEX IF NOT EXISTS idx_device_tokens_user_active ON "device_tokens"("user_id", "is_active");

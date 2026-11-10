@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { DealState, Prisma } from '@prisma/client';
 import '../../common/utils/bigint-serializer.util';
@@ -25,12 +26,14 @@ import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
 import { RequestUser } from '../../common/decorators/current-user.decorator';
 import { OracleRelayerService } from '../../oracle-relayer/oracle-relayer.service';
+import { NotificationsService } from '../notifications/notifications.service';
 @Injectable()
 export class DealsService {
   private readonly logger = new Logger(DealsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly oracleRelayer: OracleRelayerService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
     /** Aggregates total deals and breakdown by state with optional seller/buyer filters. */
   async countDeals(sellerId?: string, buyerId?: string) {
@@ -135,6 +138,7 @@ export class DealsService {
         );
         DealIdempotencyManager.setCache(dedupKey, created);
         DealIdempotencyManager.setCache(semanticKey, created);
+        this.notificationsService?.notifyDealCreated(created);
         return created;
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
@@ -336,6 +340,7 @@ export class DealsService {
       });
     }
 
+    this.notificationsService?.notifyVaultUnlocked(deal, updatedAsset.id);
     return formatVaultUnlockResponse(id, updatedAsset);
   }
 

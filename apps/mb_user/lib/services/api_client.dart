@@ -250,6 +250,31 @@ class ApiClient {
     }
   }
 
+  Future<dynamic> delete(
+    String endpoint, {
+    dynamic body,
+    bool skipAuth = false,
+    Map<String, String>? headers,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    final uri = _resolveUri(endpoint);
+    final reqHeaders = await _buildHeaders(
+      skipAuth: skipAuth,
+      extraHeaders: headers,
+    );
+    final encodedBody = body != null ? jsonEncode(body) : null;
+
+    try {
+      final response = await http
+          .delete(uri, headers: reqHeaders, body: encodedBody)
+          .timeout(timeout);
+      return _handleResponse(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(0, 'Kết nối thất bại tới $uri: $e');
+    }
+  }
+
   Future<dynamic> postMultipart(
     String endpoint, {
     required Map<String, String> fields,

@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
+import '../utils/formatters.dart';
 
-/// Bargain Slider Widget for TrustPassz Mobile.
-/// Implements horizontal-only gesture tracking to ensure smooth sliding without
-/// hijacking or blocking the parent vertical scroll view.
+/// Bargain Slider Widget V2 for TrustPassz Mobile.
+/// Supports Light/Dark tokens, quick discount chips (-5%, -10%, -15%),
+/// 10k VND rounding, and 300ms broadcast debounce.
 class BargainSlider extends StatefulWidget {
   final String dealId;
   final double basePrice;
@@ -68,9 +70,8 @@ class _BargainSliderState extends State<BargainSlider> {
 
   void _onSliderChanged(double value) {
     if (widget.disabled) return;
-
-    // Round to nearest 10,000 VND step
-    final steppedValue = (value / 10000).round() * 10000.0;
+    final steppedValue =
+        ((value / 10000).round() * 10000.0).clamp(_minPrice, _maxPrice);
     setState(() {
       _currentPrice = steppedValue;
     });
@@ -81,24 +82,25 @@ class _BargainSliderState extends State<BargainSlider> {
     });
   }
 
+  void _applyDiscountChip(double rate) {
+    if (widget.disabled) return;
+    final rawTarget = widget.basePrice * (1 - rate);
+    final stepped =
+        ((rawTarget / 10000).round() * 10000.0).clamp(_minPrice, _maxPrice);
+    setState(() {
+      _currentPrice = stepped;
+    });
+    widget.onPriceBroadcast?.call(_currentPrice);
+  }
+
   int get _discountPercent {
     if (widget.basePrice <= 0) return 0;
     return (((widget.basePrice - _currentPrice) / widget.basePrice) * 100)
         .round();
   }
 
-  String _formatVnd(double amount) {
-    final intVal = amount.toInt();
-    final chars = intVal.toString().split('').reversed.toList();
-    final buffer = StringBuffer();
-    for (int i = 0; i < chars.length; i++) {
-      if (i > 0 && i % 3 == 0) {
-        buffer.write('.');
-      }
-      buffer.write(chars[i]);
-    }
-    return '${buffer.toString().split('').reversed.join()} ₫';
-  }
+  double get _discountAmount =>
+      (widget.basePrice - _currentPrice).clamp(0.0, widget.basePrice);
 
   @override
   void dispose() {
@@ -108,29 +110,16 @@ class _BargainSliderState extends State<BargainSlider> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A), // Slate 900
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E293B)), // Slate 800
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black45,
-            blurRadius: 16,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: AppTokens.cardDecoration(c, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
           Row(
             children: [
-              const Icon(Icons.trending_down,
-                  color: Color(0xFF22D3EE), size: 20),
-              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,102 +128,83 @@ class _BargainSliderState extends State<BargainSlider> {
                       widget.isBuyer
                           ? 'Thanh Thương Lượng Giá'
                           : 'Đề Xuất Giá Từ Người Mua',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: c.textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Text(
-                      'Kéo thanh ngang để đề xuất mức giá bạn mong muốn',
-                      style: TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 11,
-                      ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Kéo thanh ngang hoặc chọn nhanh mức giảm giá',
+                      style: TextStyle(color: c.textMuted, fontSize: 11),
                     ),
                   ],
                 ),
               ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _discountPercent > 0 ? c.cyanSoft : c.surfaceSubtle,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: _discountPercent > 0 ? c.cyanBorder : c.border,
+                  ),
+                ),
+                child: Text(
+                  _discountPercent > 0
+                      ? 'Giảm $_discountPercent% (-${TrustPasszFormatters.formatNumber(_discountAmount ~/ 1000)}k)'
+                      : 'Giá gốc (0%)',
+                  style: AppTokens.monoStyle(
+                    color: _discountPercent > 0 ? c.cyanText : c.textMuted,
+                    fontSize: 10.5,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
-          // Price & Discount Display
+          // Price Display Container
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF020617), // Slate 950
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF1E293B)),
+              color: c.surfaceSubtle,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: c.border),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'MỨC GIÁ ĐANG ĐỀ XUẤT',
-                      style: TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _formatVnd(_currentPrice),
-                      style: const TextStyle(
-                        color: Color(0xFF22D3EE),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _discountPercent > 0
-                        ? const Color(0xFF064E3B).withValues(alpha: 0.6)
-                        : const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: _discountPercent > 0
-                          ? const Color(0xFF10B981)
-                          : const Color(0xFF334155),
-                    ),
+                Text(
+                  'ĐỀ XUẤT GIÁ THANH TOÁN MỚI',
+                  style: AppTokens.monoStyle(
+                    color: c.textMuted,
+                    fontSize: 10,
+                    letterSpacing: 0.5,
                   ),
-                  child: Text(
-                    _discountPercent > 0
-                        ? '-$_discountPercent%'
-                        : 'Giá gốc (0%)',
-                    style: TextStyle(
-                      color: _discountPercent > 0
-                          ? const Color(0xFF34D399)
-                          : const Color(0xFF94A3B8),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'monospace',
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  TrustPasszFormatters.formatVnd(_currentPrice),
+                  style: AppTokens.monoStyle(
+                    color: c.cyanText,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Horizontal Slider with non-blocking gesture arena configuration
+          // Slider
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 6,
-              activeTrackColor: const Color(0xFF06B6D4),
-              inactiveTrackColor: const Color(0xFF020617),
-              thumbColor: const Color(0xFF22D3EE),
-              overlayColor: const Color(0xFF06B6D4).withValues(alpha: 0.2),
+              activeTrackColor: AppTokens.cyan,
+              inactiveTrackColor: c.surfaceSubtle,
+              thumbColor: AppTokens.cyan,
+              overlayColor: AppTokens.cyan.withValues(alpha: 0.18),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
               trackShape: const RoundedRectSliderTrackShape(),
             ),
@@ -256,57 +226,83 @@ class _BargainSliderState extends State<BargainSlider> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Giá thấp nhất: ${_formatVnd(_minPrice)}',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 11,
-                    fontFamily: 'monospace',
+                  'Sàn: ${TrustPasszFormatters.formatVnd(_minPrice)}',
+                  style: AppTokens.monoStyle(
+                    color: c.textMuted,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
-                  'Giá ban đầu: ${_formatVnd(_maxPrice)}',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 11,
-                    fontFamily: 'monospace',
+                  'Gốc: ${TrustPasszFormatters.formatVnd(_maxPrice)}',
+                  style: AppTokens.monoStyle(
+                    color: c.textMuted,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Confirm Button
-          if (widget.onOfferSubmit != null)
-            ElevatedButton(
+          // 3 Quick Discount Chips (-5%, -10%, -15%) with >= 44px touch target
+          Row(
+            children: [
+              _discountChip(c, 0.05, '-5%'),
+              const SizedBox(width: 8),
+              _discountChip(c, 0.10, '-10%'),
+              const SizedBox(width: 8),
+              _discountChip(c, 0.15, '-15%'),
+            ],
+          ),
+
+          if (widget.onOfferSubmit != null) ...[
+            const SizedBox(height: 14),
+            ElevatedButton.icon(
               onPressed: widget.disabled
                   ? null
                   : () => widget.onOfferSubmit!(_currentPrice),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF06B6D4),
-                foregroundColor: const Color(0xFF020617),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 4,
+              icon: const Icon(Icons.check_circle_outline, size: 18),
+              label: Text(
+                'Gửi Đề Xuất Giá (${TrustPasszFormatters.formatVnd(_currentPrice)})',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.check_circle_outline, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Xác nhận đề xuất ${_formatVnd(_currentPrice)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
+              style: AppTokens.primaryButtonStyle(c),
             ),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _discountChip(AppColorPalette c, double rate, String label) {
+    final targetPct = (rate * 100).round();
+    final isSelected = (_discountPercent - targetPct).abs() <= 1;
+
+    return Expanded(
+      child: OutlinedButton(
+        onPressed: widget.disabled ? null : () => _applyDiscountChip(rate),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(44, 44),
+          backgroundColor: isSelected ? c.cyanSoft : c.surfaceSubtle,
+          foregroundColor: isSelected ? c.cyanText : c.textSecondary,
+          side: BorderSide(
+            color: isSelected ? AppTokens.cyan : c.borderStrong,
+            width: 1.0,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTokens.monoStyle(
+            color: isSelected ? c.cyanText : c.textSecondary,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

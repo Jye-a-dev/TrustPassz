@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/deal_model.dart';
+import '../theme/app_tokens.dart';
+import '../utils/formatters.dart';
 
 class DealCard extends StatelessWidget {
   final DealModel deal;
@@ -11,49 +13,36 @@ class DealCard extends StatelessWidget {
     required this.onSelect,
   });
 
-  String _formatVnd(double amount) {
-    final intVal = amount.toInt();
-    final chars = intVal.toString().split('').reversed.toList();
-    final buffer = StringBuffer();
-    for (int i = 0; i < chars.length; i++) {
-      if (i > 0 && i % 3 == 0) {
-        buffer.write('.');
-      }
-      buffer.write(chars[i]);
-    }
-    return '${buffer.toString().split('').reversed.join()} ₫';
-  }
-
-  Color _getStateColor(DealState state) {
+  ({Color text, Color bg, Color border}) _stateColors(
+    AppColorPalette c,
+    DealState state,
+  ) {
     switch (state) {
       case DealState.pending:
-        return const Color(0xFFF59E0B); // Amber
+        return (text: c.amberText, bg: c.amberSoft, border: c.amberBorder);
       case DealState.deposited:
       case DealState.inInspection:
-        return const Color(0xFF10B981); // Emerald
+        return (text: c.emeraldText, bg: c.emeraldSoft, border: c.emeraldBorder);
       case DealState.settled:
-        return const Color(0xFF06B6D4); // Cyan
+        return (text: c.cyanText, bg: c.cyanSoft, border: c.cyanBorder);
       case DealState.refunded:
-        return const Color(0xFF64748B); // Slate
+        return (text: c.textMuted, bg: c.surfaceSubtle, border: c.borderStrong);
       case DealState.disputed:
-        return const Color(0xFFF43F5E); // Rose
+        return (text: c.roseText, bg: c.roseSoft, border: c.roseBorder);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final stateColor = _getStateColor(deal.state);
+    final c = context.tp;
+    final badgeColors = _stateColors(c, deal.state);
 
     return InkWell(
       onTap: () => onSelect(deal),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF1E293B)),
-        ),
+        decoration: AppTokens.cardDecoration(c, radius: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -64,8 +53,8 @@ class DealCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     deal.title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: c.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
@@ -75,21 +64,20 @@ class DealCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: stateColor.withValues(alpha: 0.15),
+                    color: badgeColors.bg,
                     borderRadius: BorderRadius.circular(999),
-                    border:
-                        Border.all(color: stateColor.withValues(alpha: 0.4)),
+                    border: Border.all(color: badgeColors.border),
                   ),
                   child: Text(
                     deal.state.vietnameseLabel,
-                    style: TextStyle(
-                      color: stateColor,
+                    style: AppTokens.monoStyle(
+                      color: badgeColors.text,
                       fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'monospace',
                     ),
                   ),
                 ),
@@ -99,7 +87,7 @@ class DealCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 deal.description!,
-                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                style: TextStyle(color: c.textMuted, fontSize: 12),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -109,20 +97,19 @@ class DealCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _formatVnd(deal.amount),
-                  style: const TextStyle(
-                    color: Color(0xFF22D3EE),
+                  TrustPasszFormatters.formatVnd(deal.amount),
+                  style: AppTokens.monoStyle(
+                    color: c.cyanText,
                     fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   'Đồng kiểm: ${deal.inspectionDuration ~/ 3600}h',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
+                  style: AppTokens.monoStyle(
+                    color: c.textMuted,
                     fontSize: 11,
-                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
