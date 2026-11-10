@@ -143,7 +143,8 @@ class _BargainSliderState extends State<BargainSlider> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: _discountPercent > 0 ? c.cyanSoft : c.surfaceSubtle,
                   borderRadius: BorderRadius.circular(999),
@@ -266,7 +267,8 @@ class _BargainSliderState extends State<BargainSlider> {
               icon: const Icon(Icons.check_circle_outline, size: 18),
               label: Text(
                 'Gửi Đề Xuất Giá (${TrustPasszFormatters.formatVnd(_currentPrice)})',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 13.5),
               ),
               style: AppTokens.primaryButtonStyle(c),
             ),

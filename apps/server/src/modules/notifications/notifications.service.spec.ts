@@ -173,6 +173,75 @@ describe('NotificationsService & NotificationsController (TASK-c-8)', () => {
     expect(result.revokedTokens).toBe(1);
   });
 
+  it('retries transient network errors on FCM dispatch and succeeds without throwing', async () => {
+    mockDeviceTokenDelegate.findMany.mockResolvedValue([
+      { token: 'tok_android_retry' },
+    ]);
+    mockSendEachForMulticast
+      .mockRejectedValueOnce(new Error('read ETIMEDOUT'))
+      .mockResolvedValueOnce({
+        successCount: 1,
+        failureCount: 0,
+        responses: [{ success: true }],
+      });
+
+    const result = await service.sendEscrowPushNotification(
+      'user-retry-1',
+      'NEW_DEAL',
+      {
+        dealId: 'deal-retry-1',
+        dealTitle: 'Retry Escrow Deal',
+        price: 2000000,
+        currency: 'VND',
+      },
+    );
+
+    expect(mockSendEachForMulticast).toHaveBeenCalledTimes(2);
+    expect(result.sent).toBe(1);
+    expect(result.failed).toBe(0);
+  });
+
+  it('retries transient per-token server-unavailable errors only for failed tokens', async () => {
+    mockDeviceTokenDelegate.findMany.mockResolvedValue([
+      { token: 'tok_ok' },
+      { token: 'tok_flaky' },
+    ]);
+    mockSendEachForMulticast
+      .mockResolvedValueOnce({
+        successCount: 1,
+        failureCount: 1,
+        responses: [
+          { success: true },
+          {
+            success: false,
+            error: { code: 'messaging/server-unavailable' },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        successCount: 1,
+        failureCount: 0,
+        responses: [{ success: true }],
+      });
+
+    const result = await service.sendEscrowPushNotification(
+      'user-retry-2',
+      'DEPOSIT_SUCCESS',
+      {
+        dealId: 'deal-retry-2',
+        amount: 3500000,
+        currency: 'VND',
+      },
+    );
+
+    expect(mockSendEachForMulticast).toHaveBeenCalledTimes(2);
+    const secondCall = mockSendEachForMulticast.mock
+      .calls[1][0] as MulticastMessage;
+    expect(secondCall.tokens).toEqual(['tok_flaky']);
+    expect(result.sent).toBe(2);
+    expect(result.failed).toBe(0);
+  });
+
   it('JwtAuthGuard rejects unauthenticated requests and attaches RequestUser for valid Bearer JWT', async () => {
     const mockJwtService = {
       verifyAsync: jest.fn(),

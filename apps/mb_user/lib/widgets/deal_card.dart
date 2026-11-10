@@ -22,7 +22,11 @@ class DealCard extends StatelessWidget {
         return (text: c.amberText, bg: c.amberSoft, border: c.amberBorder);
       case DealState.deposited:
       case DealState.inInspection:
-        return (text: c.emeraldText, bg: c.emeraldSoft, border: c.emeraldBorder);
+        return (
+          text: c.emeraldText,
+          bg: c.emeraldSoft,
+          border: c.emeraldBorder
+        );
       case DealState.settled:
         return (text: c.cyanText, bg: c.cyanSoft, border: c.cyanBorder);
       case DealState.refunded:

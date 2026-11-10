@@ -1,30 +1,27 @@
-import * as fs from 'node:fs';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  App,
-  ServiceAccount,
-  applicationDefault,
-  cert,
-  getApps,
-  initializeApp,
-} from 'firebase-admin/app';
-import {
-  Messaging,
-  MulticastMessage,
-  getMessaging,
-} from 'firebase-admin/messaging';
+import { ServiceAccount } from 'firebase-admin/app';
+import { Messaging, MulticastMessage } from 'firebase-admin/messaging';
 import {
   EscrowPushEventType,
   EscrowPushPayloadData,
 } from './notifications.types';
 
 export const TRUSTPASSZ_ESCROW_CHANNEL_ID = 'trustpassz_escrow_alerts';
+export const MAX_FCM_ATTEMPTS = 3;
+export const RETRY_BASE_DELAY_MS = 250;
 
 const INVALID_TOKEN_ERROR_CODES = new Set<string>([
   'messaging/registration-token-not-registered',
   'messaging/invalid-registration-token',
   'messaging/mismatched-credential',
+]);
+
+const TRANSIENT_FCM_ERROR_CODES = new Set<string>([
+  'messaging/server-unavailable',
+  'messaging/internal-error',
+  'messaging/unknown-error',
+  'app/network-error',
+  'app/network-timeout',
 ]);
 
 interface ResolvedCopy {
@@ -34,9 +31,13 @@ interface ResolvedCopy {
   action: string;
 }
 
-/**
- * Formats VND or crypto amounts cleanly for human-readable push banners.
- */
+export interface MulticastRetryOutcome {
+  sent: number;
+  failed: number;
+  deadTokens: string[];
+  lastErrorMessage?: string;
+}
+
 function formatDisplayAmount(
   rawAmount: string | number | undefined,
   currency = 'VND',
@@ -50,9 +51,6 @@ function formatDisplayAmount(
   return `${num} ${currency}`;
 }
 
-/**
- * Resolves localized Vietnamese notification copy, deep-link route, and action for each escrow trigger.
- */
 export function resolveEscrowPushCopy(
   eventType: EscrowPushEventType,
   data: EscrowPushPayloadData,
@@ -66,7 +64,7 @@ export function resolveEscrowPushCopy(
   switch (eventType) {
     case 'NEW_DEAL':
       return {
-        title: 'Kèo ký quỹ mới đang chờ xác nhận',
+        title: 'Giao dịch ký quỹ mới đang chờ xác nhận',
         body: priceText
           ? `Bạn nhận được giao dịch ${titleHint} trị giá ${priceText}. Mở phòng giao dịch để xem chi tiết.`
           : `Bạn nhận được giao dịch ký quỹ mới ${titleHint}.`,
@@ -101,16 +99,12 @@ export function resolveEscrowPushCopy(
   }
 }
 
-/**
- * Builds an FCM HTTP v1 MulticastMessage with high-priority Android & APNs content-available=1 settings.
- */
 export function buildEscrowMulticastMessage(
   tokens: string[],
   eventType: EscrowPushEventType,
   data: EscrowPushPayloadData,
 ): MulticastMessage {
   const copy = resolveEscrowPushCopy(eventType, data);
-
   const stringData: Record<string, string> = {
     type: eventType,
     dealId: data.dealId,
@@ -132,10 +126,7 @@ export function buildEscrowMulticastMessage(
 
   return {
     tokens,
-    notification: {
-      title: copy.title,
-      body: copy.body,
-    },
+    notification: { title: copy.title, body: copy.body },
     data: stringData,
     android: {
       priority: 'high',
@@ -151,16 +142,10 @@ export function buildEscrowMulticastMessage(
       },
     },
     apns: {
-      headers: {
-        'apns-priority': '10',
-        'apns-push-type': 'alert',
-      },
+      headers: { 'apns-priority': '10', 'apns-push-type': 'alert' },
       payload: {
         aps: {
-          alert: {
-            title: copy.title,
-            body: copy.body,
-          },
+          alert: { title: copy.title, body: copy.body },
           badge: 1,
           sound: 'default',
           contentAvailable: true,
@@ -170,10 +155,7 @@ export function buildEscrowMulticastMessage(
   };
 }
 
-/**
- * Parses service account JSON from raw string or Base64-encoded env value.
- */
-function parseServiceAccountJson(raw: string): ServiceAccount | null {
+export function parseServiceAccountJson(raw: string): ServiceAccount | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
 
@@ -200,82 +182,106 @@ function parseServiceAccountJson(raw: string): ServiceAccount | null {
   }
 }
 
-/**
- * Lazily initializes Firebase Admin Messaging singleton from ConfigService / environment variables.
- */
-export function initializeFirebaseMessaging(
-  configService: ConfigService,
-  logger: Logger,
-): Messaging | null {
-  try {
-    let app: App | undefined = getApps()[0];
-
-    if (!app) {
-      const rawJson =
-        configService.get<string>('FIREBASE_SERVICE_ACCOUNT_JSON') ??
-        process.env.FIREBASE_SERVICE_ACCOUNT_JSON ??
-        '';
-      const parsedAccount = parseServiceAccountJson(rawJson);
-
-      if (parsedAccount) {
-        app = initializeApp({ credential: cert(parsedAccount) });
-      } else {
-        const projectId =
-          configService.get<string>('FIREBASE_PROJECT_ID') ??
-          process.env.FIREBASE_PROJECT_ID;
-        const clientEmail =
-          configService.get<string>('FIREBASE_CLIENT_EMAIL') ??
-          process.env.FIREBASE_CLIENT_EMAIL;
-        const rawPrivateKey =
-          configService.get<string>('FIREBASE_PRIVATE_KEY') ??
-          process.env.FIREBASE_PRIVATE_KEY;
-
-        if (projectId && clientEmail && rawPrivateKey) {
-          app = initializeApp({
-            credential: cert({
-              projectId,
-              clientEmail,
-              privateKey: rawPrivateKey.replace(/\\n/g, '\n'),
-            }),
-          });
-        } else {
-          const credPath =
-            configService.get<string>('GOOGLE_APPLICATION_CREDENTIALS') ??
-            process.env.GOOGLE_APPLICATION_CREDENTIALS;
-          if (credPath && fs.existsSync(credPath)) {
-            app = initializeApp({ credential: applicationDefault() });
-          }
-        }
-      }
-    }
-
-    if (!app) {
-      logger.warn(
-        '[FCM] Firebase Admin SDK not configured (missing FIREBASE_SERVICE_ACCOUNT_JSON / FIREBASE_PRIVATE_KEY / GOOGLE_APPLICATION_CREDENTIALS). Push dispatch disabled until credentials are provided.',
-      );
-      return null;
-    }
-
-    logger.log('[FCM] Firebase Admin Messaging initialized successfully.');
-    return getMessaging(app);
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error);
-    logger.warn(`[FCM] Firebase Admin initialization skipped: ${msg}`);
-    return null;
-  }
-}
-
-/**
- * Checks whether an FCM send error code indicates a dead/unregistered device token.
- */
 export function isDeadTokenErrorCode(code: string | undefined): boolean {
   return typeof code === 'string' && INVALID_TOKEN_ERROR_CODES.has(code);
 }
 
-/**
- * Fire-and-forget helper to dispatch an escrow push notification to one or more users
- * without throwing or blocking primary ACID database/on-chain transactions.
- */
+export function isTransientFcmErrorCode(code: string | undefined): boolean {
+  return typeof code === 'string' && TRANSIENT_FCM_ERROR_CODES.has(code);
+}
+
+export function isTransientFcmError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const record = error as { code?: unknown; message?: unknown };
+  const code = typeof record.code === 'string' ? record.code : '';
+  const msg =
+    typeof record.message === 'string' ? record.message.toLowerCase() : '';
+  return (
+    isTransientFcmErrorCode(code) ||
+    /econnreset|etimedout|enotfound|eai_again|econnrefused|network|timeout|unavailable|socket hang up/.test(
+      msg,
+    )
+  );
+}
+
+export function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function sendMulticastWithRetry(
+  messaging: Messaging,
+  tokens: string[],
+  eventType: EscrowPushEventType,
+  data: EscrowPushPayloadData,
+  userId: string,
+  logger: Logger,
+): Promise<MulticastRetryOutcome> {
+  let pendingTokens = [...tokens];
+  let totalSent = 0;
+  let totalPermanentFailures = 0;
+  const deadTokens: string[] = [];
+  let lastErrorMessage: string | undefined;
+
+  for (let attempt = 1; attempt <= MAX_FCM_ATTEMPTS; attempt++) {
+    if (pendingTokens.length === 0) break;
+    const message = buildEscrowMulticastMessage(pendingTokens, eventType, data);
+
+    try {
+      const response = await messaging.sendEachForMulticast(message);
+      const retryTokens: string[] = [];
+      totalSent += response.successCount;
+
+      response.responses.forEach((res, idx) => {
+        if (res.success) return;
+        const token = pendingTokens[idx];
+        const errCode = res.error?.code;
+        if (token && isDeadTokenErrorCode(errCode)) {
+          deadTokens.push(token);
+          totalPermanentFailures += 1;
+        } else if (
+          token &&
+          attempt < MAX_FCM_ATTEMPTS &&
+          isTransientFcmErrorCode(errCode)
+        ) {
+          retryTokens.push(token);
+        } else {
+          totalPermanentFailures += 1;
+        }
+      });
+
+      pendingTokens = retryTokens;
+      if (pendingTokens.length > 0 && attempt < MAX_FCM_ATTEMPTS) {
+        await sleepMs(RETRY_BASE_DELAY_MS * attempt);
+      }
+    } catch (error: unknown) {
+      lastErrorMessage = error instanceof Error ? error.message : String(error);
+      if (attempt < MAX_FCM_ATTEMPTS && isTransientFcmError(error)) {
+        logger.warn(
+          `[FCM] Transient dispatch error for user=${userId} (attempt ${attempt}/${MAX_FCM_ATTEMPTS}): ${lastErrorMessage}`,
+        );
+        await sleepMs(RETRY_BASE_DELAY_MS * attempt);
+        continue;
+      }
+      logger.error(
+        `[FCM] Dispatch failed for user=${userId} event=${eventType}: ${lastErrorMessage}`,
+      );
+      return {
+        sent: totalSent,
+        failed: pendingTokens.length + totalPermanentFailures,
+        deadTokens,
+        lastErrorMessage,
+      };
+    }
+  }
+
+  return {
+    sent: totalSent,
+    failed: totalPermanentFailures + pendingTokens.length,
+    deadTokens,
+    lastErrorMessage,
+  };
+}
+
 export function dispatchEscrowPush(
   notifier:
     | {

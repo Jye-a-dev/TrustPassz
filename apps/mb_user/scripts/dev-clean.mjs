@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { resolveGoogleWebClientId } from './env-helpers.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -340,6 +341,8 @@ logStep(6, 'Launching Flutter app with interactive Hot Reload...');
 const rawArgs = process.argv.slice(2);
 const hasTargetDevice = rawArgs.some((arg) => arg === '-d' || arg.startsWith('-d=') || arg === '--device');
 const hasCustomApiUrl = rawArgs.some((arg) => arg.includes('API_URL'));
+const hasCustomGoogleClientId = rawArgs.some((arg) => arg.includes('GOOGLE_WEB_CLIENT_ID'));
+const googleWebClientId = hasCustomGoogleClientId ? '' : resolveGoogleWebClientId(mbUserDir);
 
 const hasEmulator = connectedDevices.some((d) => d.isEmulator);
 const isPhysicalDevice = connectedDevices.length > 0 && !hasEmulator;
@@ -353,6 +356,7 @@ if (isPhysicalDevice) {
 
 const dynamicDefines = [
   ...(hasCustomApiUrl ? [] : [`--dart-define=API_URL=${defaultApiUrl}`]),
+  ...(googleWebClientId ? [`--dart-define=GOOGLE_WEB_CLIENT_ID=${googleWebClientId}`] : []),
   `--dart-define=LAN_IP=${lanIp}`,
   `--dart-define=BACKEND_PORT=3000`,
   `--dart-define=IS_PHYSICAL_DEVICE=${isPhysicalDevice}`,

@@ -1,15 +1,20 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../theme/app_tokens.dart';
-import '../widgets/modals/google_oauth_dialog.dart';
 import '../widgets/modals/passkey_dialog.dart';
+import 'login/google_sign_in_button.dart';
+import 'login/login_credentials_section.dart';
 import 'login/login_header.dart';
 import 'login/otp_verification_card.dart';
 
-/// Screen 02: Light-default Authentication Screen with Google OAuth, Passkey,
-/// Email/Phone + 6-box OTP flow, and Email/Password visibility toggle.
+/// Screen 02: Version 2 Light-default (#FAFAFB) / Dark (#080C14) Authentication Screen
+/// featuring native OS Google Sign-In, Passkey FIDO2, 6-digit OTP, and Email/Password.
 class LoginScreen extends StatefulWidget {
   final VoidCallback onSuccess;
 
@@ -20,12 +25,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  static const String _googleWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  late final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: const <String>['email', 'profile', 'openid'],
+    serverClientId: _googleWebClientId.isNotEmpty ? _googleWebClientId : null,
+  );
+
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   late final List<TextEditingController> _otpControllers;
   late final List<FocusNode> _otpFocusNodes;
 
   bool _isLoading = false;
+  bool _isGoogleSigningIn = false;
   bool _isOtpStep = false;
   bool _usePasswordMode = false;
   bool _obscurePassword = true;
@@ -124,13 +140,122 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> _submitGoogleIdToken(String idToken) async {
-    await _executeAuth(() async {
-      await AuthService.instance.verifyAndAuthenticate(
-        provider: 'google',
-        token: idToken,
-      );
+  Future<void> _handleGoogleSignIn() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      _isGoogleSigningIn = true;
+      _errorMessage = null;
     });
+
+    try {
+      // Clear cached session so the native picker lets the user choose any account.
+      try {
+        if (await _googleSignIn.isSignedIn()) {
+          await _googleSignIn.signOut();
+        }
+      } catch (_) {
+        // Non-fatal: continue to interactive sign-in.
+      }
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      if (idToken == null || idToken.trim().isEmpty) {
+        if (!mounted) return;
+        _showErrorSnackBar(
+          'Không lấy được ID Token từ Google. Vui lòng kiểm tra cấu hình Client ID.',
+        );
+        return;
+      }
+
+      final authRes = await AuthService.instance.verifyAndAuthenticate(
+        provider: 'google',
+        token: idToken.trim(),
+        email: googleUser.email,
+      );
+      if (authRes.accessToken.isEmpty) {
+        if (!mounted) return;
+        _showErrorSnackBar(
+          'Phản hồi xác thực từ máy chủ không hợp lệ. Vui lòng thử lại.',
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      widget.onSuccess();
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == GoogleSignIn.kSignInCanceledError) {
+        return;
+      }
+      _showErrorSnackBar(_mapGooglePlatformError(e));
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      final msg = e.statusCode == 0
+          ? 'Không thể kết nối đến máy chủ backend. Vui lòng kiểm tra kết nối.'
+          : (e.message.isNotEmpty
+              ? e.message
+              : 'Lỗi xác thực (${e.statusCode}).');
+      _showErrorSnackBar(msg);
+    } catch (_) {
+      if (!mounted) return;
+      _showErrorSnackBar('Đăng nhập Google thất bại. Vui lòng thử lại sau.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isGoogleSigningIn = false;
+        });
+      }
+    }
+  }
+
+  String _mapGooglePlatformError(PlatformException e) {
+    final details = '${e.code} ${e.message ?? ''}'.toLowerCase();
+    if (e.code == GoogleSignIn.kNetworkError || details.contains('network')) {
+      return 'Lỗi kết nối mạng khi đăng nhập Google. Vui lòng kiểm tra kết nối và thử lại.';
+    }
+    if (details.contains('10:') || details.contains('developer_error')) {
+      return 'Lỗi cấu hình Google Sign-In (SHA-1 hoặc Client ID chưa khớp). Vui lòng kiểm tra lại cấu hình.';
+    }
+    if (e.code == GoogleSignIn.kSignInRequiredError) {
+      return 'Phiên Google đã hết hạn. Vui lòng chọn lại tài khoản Google.';
+    }
+    return 'Không thể đăng nhập Google (${e.code}). Vui lòng thử lại hoặc sử dụng OTP.';
+  }
+
+  void _showErrorSnackBar(String message) {
+    final c = context.tp;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: c.isDark ? const Color(0xFF9F1239) : AppTokens.rose,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+        ),
+      );
   }
 
   Future<void> _executeAuth(Future<void> Function() action) async {
@@ -174,33 +299,15 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               LoginHeaderSection(errorMessage: _errorMessage),
-              OutlinedButton.icon(
-                onPressed: _isLoading
-                    ? null
-                    : () => GoogleOAuthDialog.show(
-                          context,
-                          onSubmitIdToken: _submitGoogleIdToken,
-                        ),
-                icon: const Icon(
-                  Icons.g_mobiledata_rounded,
-                  size: 24,
-                  color: AppTokens.googleBlue,
-                ),
-                label: const Text(
-                  'Tiếp tục với Google',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                ),
-                style: AppTokens.outlinedButtonStyle(
-                  c,
-                  backgroundColor: c.surface,
-                  foregroundColor: c.textPrimary,
-                  borderColor: c.borderStrong,
-                  minHeight: 48,
-                ),
+              GoogleSignInButton(
+                isLoading: _isGoogleSigningIn,
+                isDisabled: _isLoading,
+                onPressed: _handleGoogleSignIn,
               ),
               const SizedBox(height: 10),
               ElevatedButton.icon(
-                onPressed: _isLoading ? null : () => PasskeyDialog.show(context),
+                onPressed:
+                    _isLoading ? null : () => PasskeyDialog.show(context),
                 icon: const Icon(Icons.fingerprint_rounded, size: 20),
                 label: const Text(
                   'Đăng nhập với Passkey / Face ID',
@@ -212,6 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       c.isDark ? c.surfaceSubtle : const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
                   borderColor: c.borderStrong,
+                  minHeight: 48,
                 ),
               ),
               const SizedBox(height: 22),
@@ -233,85 +341,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 18),
-              if (!_isOtpStep) ...[
-                TextField(
-                  controller: _identifierController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(color: c.textPrimary, fontSize: 14),
-                  decoration: const InputDecoration(
-                    hintText: 'Email hoặc số điện thoại',
-                    prefixIcon: Icon(Icons.alternate_email_rounded, size: 18),
+              if (!_isOtpStep)
+                LoginCredentialsSection(
+                  identifierController: _identifierController,
+                  passwordController: _passwordController,
+                  usePasswordMode: _usePasswordMode,
+                  obscurePassword: _obscurePassword,
+                  isLoading: _isLoading,
+                  showButtonSpinner: _isLoading && !_isGoogleSigningIn,
+                  onTogglePasswordVisibility: () => setState(
+                    () => _obscurePassword = !_obscurePassword,
                   ),
-                ),
-                if (_usePasswordMode) ...[
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    style: TextStyle(color: c.textPrimary, fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: 'Mật khẩu tài khoản',
-                      prefixIcon:
-                          const Icon(Icons.lock_outline_rounded, size: 18),
-                      suffixIcon: IconButton(
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _proceedToOtpOrPassword,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFF020617),
-                          ),
-                        )
-                      : const Icon(Icons.arrow_forward_rounded, size: 18),
-                  label: Text(
-                    _usePasswordMode
-                        ? 'Đăng Nhập Tài Khoản'
-                        : 'Tiếp tục với OTP',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  style: AppTokens.primaryButtonStyle(c),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    onPressed: () => setState(() {
-                      _usePasswordMode = !_usePasswordMode;
-                      _errorMessage = null;
-                    }),
-                    style: TextButton.styleFrom(
-                      side: BorderSide(color: c.border),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                    ),
-                    child: Text(
-                      _usePasswordMode
-                          ? 'Chuyển sang xác thực OTP 6 số'
-                          : 'Hoặc đăng nhập bằng Email & Mật khẩu',
-                      style: TextStyle(color: c.cyanText, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ] else ...[
+                  onSubmit: _proceedToOtpOrPassword,
+                  onToggleMode: () => setState(() {
+                    _usePasswordMode = !_usePasswordMode;
+                    _errorMessage = null;
+                  }),
+                )
+              else
                 OtpVerificationCard(
                   identifier: _identifierController.text.trim(),
                   otpControllers: _otpControllers,
@@ -325,7 +372,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   onSubmitOtp: _submitOtp,
                   onResend: _startOtpCountdown,
                 ),
-              ],
               const SizedBox(height: 28),
               Text(
                 'Bảo chứng an toàn bởi Smart Contract Base Sepolia',

@@ -21,11 +21,19 @@ class TransactionItem extends StatelessWidget {
       case DealState.pending:
         return (text: c.amberText, bg: c.amberSoft, border: c.amberBorder);
       case DealState.deposited:
-        return (text: c.emeraldText, bg: c.emeraldSoft, border: c.emeraldBorder);
+        return (
+          text: c.emeraldText,
+          bg: c.emeraldSoft,
+          border: c.emeraldBorder
+        );
       case DealState.inInspection:
         return (text: c.cyanText, bg: c.cyanSoft, border: c.cyanBorder);
       case DealState.settled:
-        return (text: c.emeraldText, bg: c.emeraldSoft, border: c.emeraldBorder);
+        return (
+          text: c.emeraldText,
+          bg: c.emeraldSoft,
+          border: c.emeraldBorder
+        );
       case DealState.refunded:
         return (text: c.textMuted, bg: c.surfaceSubtle, border: c.borderStrong);
       case DealState.disputed:

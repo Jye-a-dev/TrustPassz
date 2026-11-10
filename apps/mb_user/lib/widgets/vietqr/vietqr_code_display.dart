@@ -138,15 +138,15 @@ class VietQrCodeDisplay extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton.icon(
-                  onPressed: () =>
-                      onCopy(accountNo, 'account', 'số tài khoản'),
+                  onPressed: () => onCopy(accountNo, 'account', 'số tài khoản'),
                   icon: Icon(
                     copiedField == 'account' ? Icons.check : Icons.copy,
                     size: 16,
                   ),
                   label: const Text(
                     'Sao chép thông tin STK (Tự xóa sau 30s)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
                   ),
                   style: AppTokens.primaryButtonStyle(
                     c,

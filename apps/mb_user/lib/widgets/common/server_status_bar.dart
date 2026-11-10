@@ -142,8 +142,9 @@ class _ServerStatusBarState extends State<ServerStatusBar> {
               constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               icon: Icon(Icons.refresh_rounded, color: statusColor),
               tooltip: 'Kiểm tra lại kết nối backend',
-              onPressed:
-                  _state == ServerHealthState.checking ? null : _executeHealthCheck,
+              onPressed: _state == ServerHealthState.checking
+                  ? null
+                  : _executeHealthCheck,
             ),
           ),
         ],

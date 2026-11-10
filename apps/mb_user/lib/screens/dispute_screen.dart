@@ -58,7 +58,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
       );
       if (picked != null && mounted) {
         setState(() {
-          _selectedMedia.add(AttachedDisputeMedia(file: picked, isVideo: false));
+          _selectedMedia
+              .add(AttachedDisputeMedia(file: picked, isVideo: false));
           _statusFeedback = 'Đã đính kèm ảnh: ${picked.name}';
         });
       }
@@ -137,7 +138,8 @@ class _DisputeScreenState extends State<DisputeScreen> {
       );
 
       if (!mounted) return;
-      final prefix = dealId.substring(0, dealId.length.clamp(0, 4)).toUpperCase();
+      final prefix =
+          dealId.substring(0, dealId.length.clamp(0, 4)).toUpperCase();
       final code = '#DIS-${DateTime.now().year}-$prefix';
       await DisputeSuccessDialog.show(
         context,
@@ -364,4 +366,3 @@ class _DisputeScreenState extends State<DisputeScreen> {
     );
   }
 }
-

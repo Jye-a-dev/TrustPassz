@@ -2,49 +2,29 @@ import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../theme/app_tokens.dart';
 
-/// Modal 06: Google OAuth Identity Dialog matching V2 design.
-class GoogleOAuthDialog extends StatefulWidget {
+/// Modal 06: Read-only Google OAuth Account Status Dialog for Profile Settings.
+class GoogleOAuthDialog extends StatelessWidget {
   final UserModel? currentUser;
-  final ValueChanged<String>? onSubmitIdToken;
 
   const GoogleOAuthDialog({
     super.key,
     this.currentUser,
-    this.onSubmitIdToken,
   });
 
   static Future<void> show(
     BuildContext context, {
     UserModel? currentUser,
-    ValueChanged<String>? onSubmitIdToken,
   }) {
     return showDialog<void>(
       context: context,
-      builder: (_) => GoogleOAuthDialog(
-        currentUser: currentUser,
-        onSubmitIdToken: onSubmitIdToken,
-      ),
+      builder: (_) => GoogleOAuthDialog(currentUser: currentUser),
     );
-  }
-
-  @override
-  State<GoogleOAuthDialog> createState() => _GoogleOAuthDialogState();
-}
-
-class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
-  final TextEditingController _idTokenController = TextEditingController();
-  bool _showManualToken = false;
-
-  @override
-  void dispose() {
-    _idTokenController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.tp;
-    final user = widget.currentUser;
+    final user = currentUser;
     final hasLinkedAccount = user?.email != null && user!.email!.isNotEmpty;
     final initials = hasLinkedAccount
         ? user.displayName
@@ -90,7 +70,7 @@ class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Đăng nhập bằng Google',
+                  'Trạng thái Google OAuth',
                   style: TextStyle(
                     color: c.textSecondary,
                     fontSize: 13,
@@ -103,7 +83,9 @@ class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
             Divider(height: 1, color: c.border),
             const SizedBox(height: 14),
             Text(
-              'Chọn tài khoản tiếp tục với TrustPassz',
+              hasLinkedAccount
+                  ? 'Tài khoản Google đã liên kết'
+                  : 'Chưa liên kết tài khoản Google',
               style: TextStyle(
                 color: c.textPrimary,
                 fontSize: 15,
@@ -112,12 +94,10 @@ class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Ứng dụng sẽ chỉ nhận tên, email và ảnh đại diện công khai qua OpenID Connect.',
+              'Ứng dụng chỉ nhận tên, email và ảnh đại diện công khai qua OpenID Connect.',
               style: TextStyle(color: c.textMuted, fontSize: 12),
             ),
             const SizedBox(height: 14),
-
-            // Account status / Google Client info card
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -147,7 +127,7 @@ class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
                         Text(
                           hasLinkedAccount
                               ? user.displayName
-                              : 'Google Sign-In SDK',
+                              : 'Google Sign-In Native',
                           style: TextStyle(
                             color: c.textPrimary,
                             fontSize: 13,
@@ -158,7 +138,7 @@ class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
                         Text(
                           hasLinkedAccount
                               ? user.email!
-                              : 'Chưa cấu hình Google Client ID cho thiết bị này. Vui lòng nhập ID Token hợp lệ hoặc đăng nhập qua OTP/Mật khẩu.',
+                              : 'Đăng xuất và chọn "Tiếp tục với Google" trên màn hình đăng nhập để liên kết.',
                           style: TextStyle(color: c.textMuted, fontSize: 11),
                         ),
                       ],
@@ -173,68 +153,14 @@ class _GoogleOAuthDialogState extends State<GoogleOAuthDialog> {
                 ],
               ),
             ),
-
-            if (widget.onSubmitIdToken != null) ...[
-              const SizedBox(height: 10),
-              if (!_showManualToken)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => setState(() => _showManualToken = true),
-                    style: TextButton.styleFrom(
-                      side: BorderSide(color: c.border),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                    child: Text(
-                      'Nhập Google OAuth ID Token',
-                      style: TextStyle(color: c.cyanText, fontSize: 12),
-                    ),
-                  ),
-                )
-              else ...[
-                TextField(
-                  controller: _idTokenController,
-                  style: AppTokens.monoStyle(
-                    color: c.textPrimary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    hintText: 'Dán Google ID Token (JWT 3 đoạn)...',
-                  ),
-                ),
-              ],
-            ],
-
             const SizedBox(height: 16),
-            if (_showManualToken && widget.onSubmitIdToken != null) ...[
-              ElevatedButton(
-                onPressed: () {
-                  final token = _idTokenController.text.trim();
-                  if (token.isEmpty) return;
-                  Navigator.of(context).pop();
-                  widget.onSubmitIdToken!(token);
-                },
-                style: AppTokens.primaryButtonStyle(
-                  c,
-                  backgroundColor: AppTokens.googleBlue,
-                  foregroundColor: Colors.white,
-                  borderColor: const Color(0xFF1D4ED8),
-                ),
-                child: const Text(
-                  'Xác Thực Google ID Token',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
             OutlinedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: AppTokens.outlinedButtonStyle(c),
               child: Text(
                 hasLinkedAccount ? 'Đã hiểu' : 'Đóng',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
               ),
             ),
           ],

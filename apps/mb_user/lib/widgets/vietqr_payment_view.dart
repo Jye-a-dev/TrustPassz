@@ -141,7 +141,8 @@ class _VietQrPaymentViewState extends State<VietQrPaymentView> {
               _isAttemptingDeepLink
                   ? 'Đang kết nối App Ngân Hàng...'
                   : 'Mở App Ngân Hàng Trên Điện Thoại',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
             ),
             style: AppTokens.primaryButtonStyle(c),
           ),

@@ -160,7 +160,8 @@ class _InAppNotificationHudState extends State<InAppNotificationHud>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: c.isDark ? 0.5 : 0.14),
+                          color: Colors.black
+                              .withValues(alpha: c.isDark ? 0.5 : 0.14),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -179,7 +180,8 @@ class _InAppNotificationHudState extends State<InAppNotificationHud>
                               color: theme.accent.withValues(alpha: 0.5),
                             ),
                           ),
-                          child: Icon(theme.icon, color: theme.accentText, size: 20),
+                          child: Icon(theme.icon,
+                              color: theme.accentText, size: 20),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -253,13 +255,16 @@ class _InAppNotificationHudState extends State<InAppNotificationHud>
                         SizedBox(
                           width: 44,
                           height: 44,
-                          child: IconButton(
-                            onPressed: _dismissAnimated,
-                            tooltip: 'Đóng thông báo',
-                            icon: Icon(
-                              Icons.close_rounded,
-                              color: c.textMuted,
-                              size: 18,
+                          child: Semantics(
+                            label: 'Đóng thông báo',
+                            button: true,
+                            child: IconButton(
+                              onPressed: _dismissAnimated,
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: c.textMuted,
+                                size: 18,
+                              ),
                             ),
                           ),
                         ),

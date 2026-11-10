@@ -32,105 +32,17 @@ Future<void> main() async {
   runApp(const TrustPasszApp());
 }
 
-class TrustPasszApp extends StatelessWidget {
+class TrustPasszApp extends StatefulWidget {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
   const TrustPasszApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: ThemeProvider.instance,
-      builder: (context, _) {
-        return MaterialApp(
-          navigatorKey: navigatorKey,
-          title: 'TrustPassz',
-          debugShowCheckedModeBanner: false,
-          theme: AppTokens.lightTheme,
-          darkTheme: AppTokens.darkTheme,
-          themeMode: ThemeProvider.instance.themeMode,
-          onGenerateRoute: (settings) {
-            final args = settings.arguments;
-            if (settings.name == '/deal-room' &&
-                args is EscrowNotificationPayload) {
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (ctx) => DealRoomScreen(
-                  dealId: args.dealId,
-                  initialFocusVault: args.shouldHighlightVaultStep,
-                  onBack: () => Navigator.of(ctx).pop(),
-                  onOpenDispute: (id) {
-                    Navigator.of(ctx).pushReplacement(
-                      MaterialPageRoute<void>(
-                        builder: (dCtx) => DisputeScreen(
-                          initialDealId: id,
-                          onBack: () => Navigator.of(dCtx).pop(),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            }
-            if (settings.name == '/vault' &&
-                args is EscrowNotificationPayload) {
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (ctx) => DigitalVaultScreen(
-                  dealId: args.dealId,
-                  vaultId: args.vaultId,
-                  inspectionDeadline: args.inspectionDeadline,
-                  onBack: () => Navigator.of(ctx).pop(),
-                  onOpenDispute: (id) {
-                    Navigator.of(ctx).pushReplacement(
-                      MaterialPageRoute<void>(
-                        builder: (dCtx) => DisputeScreen(
-                          initialDealId: id,
-                          onBack: () => Navigator.of(dCtx).pop(),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            }
-            if (settings.name == '/checkout-vietqr' && args is String) {
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (ctx) => CheckoutVietQrScreen(
-                  dealId: args,
-                  onBack: () => Navigator.of(ctx).pop(),
-                ),
-              );
-            }
-            if (settings.name == '/dispute') {
-              final dealId = args is String ? args : null;
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (ctx) => DisputeScreen(
-                  initialDealId: dealId,
-                  onBack: () => Navigator.of(ctx).pop(),
-                ),
-              );
-            }
-            return null;
-          },
-          home: const AppRootNavigator(),
-        );
-      },
-    );
-  }
+  State<TrustPasszApp> createState() => _TrustPasszAppState();
 }
 
-class AppRootNavigator extends StatefulWidget {
-  const AppRootNavigator({super.key});
-
-  @override
-  State<AppRootNavigator> createState() => _AppRootNavigatorState();
-}
-
-class _AppRootNavigatorState extends State<AppRootNavigator> {
+class _TrustPasszAppState extends State<TrustPasszApp> {
   bool _isCheckingAuth = true;
   bool _isAuthenticated = false;
   bool _hasSeenGreeting = false;
@@ -200,11 +112,13 @@ class _AppRootNavigatorState extends State<AppRootNavigator> {
   }
 
   void _navigateFromPayload(EscrowNotificationPayload payload) {
+    if (!mounted || !_isAuthenticated || !payload.hasValidDealId) return;
     setState(() {
       _foregroundHudPayload = null;
     });
 
-    final nav = TrustPasszApp.navigatorKey.currentState ?? Navigator.of(context);
+    final nav = TrustPasszApp.navigatorKey.currentState;
+    if (nav == null) return;
     if (payload.resolvedRoute == '/vault') {
       nav.pushNamed('/vault', arguments: payload);
     } else {
@@ -240,7 +154,72 @@ class _AppRootNavigatorState extends State<AppRootNavigator> {
     super.dispose();
   }
 
-  Widget _buildActiveScreen() {
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    final args = settings.arguments;
+    if (settings.name == '/deal-room' && args is EscrowNotificationPayload) {
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (ctx) => DealRoomScreen(
+          dealId: args.dealId,
+          initialFocusVault: args.shouldHighlightVaultStep,
+          onBack: () => Navigator.of(ctx).pop(),
+          onOpenDispute: (id) {
+            Navigator.of(ctx).pushReplacement(
+              MaterialPageRoute<void>(
+                builder: (dCtx) => DisputeScreen(
+                  initialDealId: id,
+                  onBack: () => Navigator.of(dCtx).pop(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+    if (settings.name == '/vault' && args is EscrowNotificationPayload) {
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (ctx) => DigitalVaultScreen(
+          dealId: args.dealId,
+          vaultId: args.vaultId,
+          inspectionDeadline: args.inspectionDeadline,
+          onBack: () => Navigator.of(ctx).pop(),
+          onOpenDispute: (id) {
+            Navigator.of(ctx).pushReplacement(
+              MaterialPageRoute<void>(
+                builder: (dCtx) => DisputeScreen(
+                  initialDealId: id,
+                  onBack: () => Navigator.of(dCtx).pop(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+    if (settings.name == '/checkout-vietqr' && args is String) {
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (ctx) => CheckoutVietQrScreen(
+          dealId: args,
+          onBack: () => Navigator.of(ctx).pop(),
+        ),
+      );
+    }
+    if (settings.name == '/dispute') {
+      final dealId = args is String ? args : null;
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (ctx) => DisputeScreen(
+          initialDealId: dealId,
+          onBack: () => Navigator.of(ctx).pop(),
+        ),
+      );
+    }
+    return null;
+  }
+
+  Widget _buildActiveRootScreen(BuildContext context) {
     final c = context.tp;
 
     if (_isCheckingAuth) {
@@ -265,25 +244,43 @@ class _AppRootNavigatorState extends State<AppRootNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        _buildActiveScreen(),
-        if (_foregroundHudPayload != null)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: InAppNotificationHud(
-              payload: _foregroundHudPayload!,
-              onTap: () => _navigateFromPayload(_foregroundHudPayload!),
-              onDismiss: () {
-                if (mounted) {
-                  setState(() => _foregroundHudPayload = null);
-                }
-              },
-            ),
-          ),
-      ],
+    return AnimatedBuilder(
+      animation: ThemeProvider.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          navigatorKey: TrustPasszApp.navigatorKey,
+          title: 'TrustPassz',
+          debugShowCheckedModeBanner: false,
+          theme: AppTokens.lightTheme,
+          darkTheme: AppTokens.darkTheme,
+          themeMode: ThemeProvider.instance.themeMode,
+          onGenerateRoute: _onGenerateRoute,
+          builder: (context, child) {
+            final hudPayload = _foregroundHudPayload;
+            return Stack(
+              children: [
+                child ?? const SizedBox.shrink(),
+                if (hudPayload != null && _isAuthenticated)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: InAppNotificationHud(
+                      payload: hudPayload,
+                      onTap: () => _navigateFromPayload(hudPayload),
+                      onDismiss: () {
+                        if (mounted) {
+                          setState(() => _foregroundHudPayload = null);
+                        }
+                      },
+                    ),
+                  ),
+              ],
+            );
+          },
+          home: Builder(builder: _buildActiveRootScreen),
+        );
+      },
     );
   }
 }

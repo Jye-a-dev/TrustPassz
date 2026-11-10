@@ -186,7 +186,8 @@ class BalanceEscrowCard extends StatelessWidget {
                   icon: const Icon(Icons.add_rounded, size: 18),
                   label: const Text(
                     'Nạp Ký Quỹ',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
                   ),
                   style: AppTokens.primaryButtonStyle(c),
                 ),
@@ -201,7 +202,8 @@ class BalanceEscrowCard extends StatelessWidget {
                   ),
                   label: const Text(
                     'Rút Tiền',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
+                    style:
+                        TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
                   ),
                   style: AppTokens.outlinedButtonStyle(
                     c,

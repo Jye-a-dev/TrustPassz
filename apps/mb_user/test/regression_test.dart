@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mb_user/models/deal_model.dart';
@@ -9,10 +12,177 @@ import 'package:mb_user/services/api_client.dart';
 import 'package:mb_user/services/auth_service.dart';
 import 'package:mb_user/services/deal_cache_service.dart';
 import 'package:mb_user/services/secure_clipboard_service.dart';
+import 'package:mb_user/theme/app_tokens.dart';
 import 'package:mb_user/widgets/bargain_slider.dart';
 import 'package:mb_user/widgets/common/server_status_bar.dart';
 import 'package:mb_user/widgets/vault_modal.dart';
 import 'package:mb_user/widgets/vietqr_payment_view.dart';
+
+class _FakeAuthHttpOverrides extends HttpOverrides {
+  final List<Map<String, dynamic>> recordedRequests = [];
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return _FakeHttpClient(recordedRequests);
+  }
+}
+
+class _FakeHttpClient implements HttpClient {
+  final List<Map<String, dynamic>> recordedRequests;
+  _FakeHttpClient(this.recordedRequests);
+
+  @override
+  bool autoUncompress = true;
+
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) async {
+    return _FakeHttpClientRequest(method, url, recordedRequests);
+  }
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeHttpClientRequest implements HttpClientRequest {
+  @override
+  final String method;
+  @override
+  final Uri uri;
+  final List<Map<String, dynamic>> recordedRequests;
+  final List<int> _bodyBytes = [];
+  @override
+  final HttpHeaders headers = _FakeHttpHeaders();
+  @override
+  Encoding encoding = utf8;
+  @override
+  bool followRedirects = true;
+  @override
+  int maxRedirects = 5;
+  @override
+  bool persistentConnection = true;
+  @override
+  int contentLength = -1;
+
+  _FakeHttpClientRequest(this.method, this.uri, this.recordedRequests);
+
+  @override
+  void add(List<int> data) => _bodyBytes.addAll(data);
+
+  @override
+  Future<void> addStream(Stream<List<int>> stream) async {
+    await for (final chunk in stream) {
+      _bodyBytes.addAll(chunk);
+    }
+  }
+
+  @override
+  void write(Object? object) {
+    if (object != null) {
+      _bodyBytes.addAll(encoding.encode(object.toString()));
+    }
+  }
+
+  @override
+  Future<HttpClientResponse> close() async {
+    final rawBody = utf8.decode(_bodyBytes);
+    if (uri.path.endsWith('/api/v1/auth/verify')) {
+      recordedRequests.add(jsonDecode(rawBody) as Map<String, dynamic>);
+      return _FakeHttpClientResponse(
+        201,
+        jsonEncode({
+          'tokenType': 'Bearer',
+          'accessToken': 'jwt_native_google_verified_token',
+          'refreshToken': 'jwt_refresh_token',
+          'expiresIn': 604800,
+          'user': {
+            'id': 'user-google-1',
+            'email': 'native.user@gmail.com',
+            'displayName': 'Native Google User',
+            'role': 'USER',
+          },
+        }),
+      );
+    }
+    return _FakeHttpClientResponse(200, '{"status":"ok"}');
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeHttpClientResponse extends Stream<List<int>>
+    implements HttpClientResponse {
+  @override
+  final int statusCode;
+  final List<int> _bytes;
+  @override
+  final HttpHeaders headers = _FakeHttpHeaders();
+
+  _FakeHttpClientResponse(this.statusCode, String body)
+      : _bytes = utf8.encode(body);
+
+  @override
+  int get contentLength => _bytes.length;
+
+  @override
+  bool get isRedirect => false;
+
+  @override
+  List<RedirectInfo> get redirects => const [];
+
+  @override
+  bool get persistentConnection => false;
+
+  @override
+  HttpClientResponseCompressionState get compressionState =>
+      HttpClientResponseCompressionState.notCompressed;
+
+  @override
+  String get reasonPhrase => 'OK';
+
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return Stream<List<int>>.fromIterable([_bytes]).listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeHttpHeaders implements HttpHeaders {
+  final Map<String, List<String>> _values = {};
+
+  @override
+  void set(String name, Object value, {bool preserveHeaderCase = false}) {
+    _values[name.toLowerCase()] = [value.toString()];
+  }
+
+  @override
+  void add(String name, Object value, {bool preserveHeaderCase = false}) {
+    _values.putIfAbsent(name.toLowerCase(), () => []).add(value.toString());
+  }
+
+  @override
+  void forEach(void Function(String name, List<String> values) action) {
+    _values.forEach(action);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -98,29 +268,97 @@ void main() {
       expect(await AuthService.instance.getStoredToken(), isNull);
     });
 
-    testWidgets('LoginScreen handles Google OAuth & Passkey dialogs safely',
+    testWidgets(
+        'LoginScreen uses Native Google Sign-In safely without manual JWT dialog',
         (tester) async {
+      const channel = MethodChannel('plugins.flutter.io/google_sign_in');
+      String scenario = 'cancel';
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+        switch (call.method) {
+          case 'init':
+          case 'signOut':
+            return null;
+          case 'isSignedIn':
+            return false;
+          case 'signIn':
+            if (scenario == 'cancel') return null;
+            if (scenario == 'platform_error') {
+              throw PlatformException(
+                code: 'sign_in_failed',
+                message: 'com.google.android.gms.common.api.ApiException: 10:',
+              );
+            }
+            return <String, dynamic>{
+              'email': 'native.user@gmail.com',
+              'id': 'google-uid-1',
+              'displayName': 'Native Google User',
+              'idToken': scenario == 'missing_token'
+                  ? null
+                  : 'header.payload.signature',
+            };
+          case 'getTokens':
+            return <String, dynamic>{
+              'accessToken': 'ya29.mock_access',
+              'idToken': scenario == 'missing_token'
+                  ? null
+                  : 'header.payload.signature',
+            };
+          default:
+            return null;
+        }
+      });
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+
       bool loginSuccess = false;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTokens.lightTheme,
           home: LoginScreen(onSuccess: () => loginSuccess = true),
         ),
       );
 
-      // Verify V2 buttons (Dev Test Session removed, OTP/Google/Passkey present)
+      // Verify V2 Light canvas & buttons (no Dev Test Session, no manual token input)
       expect(find.text('Tiếp tục với Google'), findsOneWidget);
       expect(find.text('Đăng nhập với Passkey / Face ID'), findsOneWidget);
       expect(find.text('Tiếp tục với OTP'), findsOneWidget);
       expect(find.text('Đăng Nhập Test Session'), findsNothing);
+      expect(find.text('Dán Google ID Token (JWT 3 đoạn)...'), findsNothing);
 
-      // Test Google OAuth modal dialog safely
+      final googleBtnSize = tester.getSize(find.text('Tiếp tục với Google'));
+      expect(googleBtnSize.height, greaterThan(0));
+
+      // 1. Cancel picker safely -> no error SnackBar, no dialog
+      scenario = 'cancel';
       await tester.tap(find.text('Tiếp tục với Google'));
       await tester.pumpAndSettle();
-      expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
-      await tester.tap(find.text('Đóng'));
-      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('Đăng nhập bằng Google'), findsNothing);
+      expect(loginSuccess, isFalse);
 
-      // Test Passkey FIDO2 modal dialog safely
+      // 2. Missing idToken -> shows exact SnackBar, never opens manual dialog
+      scenario = 'missing_token';
+      await tester.tap(find.text('Tiếp tục với Google'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'Không lấy được ID Token từ Google. Vui lòng kiểm tra cấu hình Client ID.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Dán Google ID Token (JWT 3 đoạn)...'), findsNothing);
+
+      // 3. PlatformException -> friendly Vietnamese SnackBar, zero crash
+      scenario = 'platform_error';
+      await tester.tap(find.text('Tiếp tục với Google'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      // 4. Passkey FIDO2 modal still opens safely
       await tester.tap(find.text('Đăng nhập với Passkey / Face ID'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
@@ -129,6 +367,79 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(loginSuccess, isFalse);
+    });
+
+    testWidgets(
+        'LoginScreen verifies Google ID Token with backend and persists session',
+        (tester) async {
+      const channel = MethodChannel('plugins.flutter.io/google_sign_in');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+        switch (call.method) {
+          case 'init':
+          case 'signOut':
+            return null;
+          case 'isSignedIn':
+            return false;
+          case 'signIn':
+            return <String, dynamic>{
+              'email': 'native.user@gmail.com',
+              'id': 'google-uid-1',
+              'displayName': 'Native Google User',
+              'idToken': 'eyJ.mock.jwt',
+            };
+          case 'getTokens':
+            return <String, dynamic>{
+              'accessToken': 'ya29.mock_access',
+              'idToken': 'eyJ.mock.jwt',
+            };
+          default:
+            return null;
+        }
+      });
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+        ApiClient.instance.setBaseUrl('');
+      });
+
+      ApiClient.instance.setBaseUrl('http://127.0.0.1:3000');
+      final httpOverrides = _FakeAuthHttpOverrides();
+      bool loginSuccess = false;
+
+      await HttpOverrides.runZoned(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTokens.lightTheme,
+            home: LoginScreen(onSuccess: () => loginSuccess = true),
+          ),
+        );
+
+        await tester.tap(find.text('Tiếp tục với Google'));
+        await tester.pumpAndSettle();
+      }, createHttpClient: httpOverrides.createHttpClient);
+
+      final snackTexts = tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byType(SnackBar),
+              matching: find.byType(Text),
+            ),
+          )
+          .map((t) => t.data)
+          .toList();
+      expect(snackTexts, isEmpty);
+      expect(httpOverrides.recordedRequests.length, 1);
+      expect(httpOverrides.recordedRequests.first, {
+        'provider': 'google',
+        'token': 'eyJ.mock.jwt',
+        'email': 'native.user@gmail.com',
+      });
+      expect(
+        await AuthService.instance.getStoredToken(),
+        'jwt_native_google_verified_token',
+      );
+      expect(loginSuccess, isTrue);
     });
   });
 

@@ -37,6 +37,7 @@ class NotificationService {
   static final NotificationService instance = NotificationService._internal();
 
   static const String fcmTokenKey = 'trustpassz_fcm_device_token';
+  static const String fcmSyncedKey = 'fcm_token_synced';
   static const String channelId = 'trustpassz_escrow_alerts';
   static const String channelName = 'TrustPassz Escrow Alerts';
   static const String channelDescription =
@@ -69,6 +70,8 @@ class NotificationService {
   bool _initialized = false;
   bool _firebaseAvailable = false;
 
+  FirebaseMessaging get _fcm => FirebaseMessaging.instance;
+
   /// Stream of payloads arriving while app is active in Foreground (for In-App HUD Toast).
   Stream<EscrowNotificationPayload> get foregroundNotifications =>
       _foregroundController.stream;
@@ -81,7 +84,7 @@ class NotificationService {
   EscrowNotificationPayload? get pendingNavigationPayload =>
       _pendingNavigationPayload;
 
-  /// Initializes local notifications, notification channels, permissions, and FCM listeners.
+  /// Initializes local notification channel, permissions, cold-start launch checks, and FCM listeners.
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
@@ -96,16 +99,15 @@ class NotificationService {
     }
 
     try {
-      final messaging = FirebaseMessaging.instance;
-      await _requestPermissions(messaging);
+      await _requestPermissions(_fcm);
 
-      await messaging.setForegroundNotificationPresentationOptions(
+      await _fcm.setForegroundNotificationPresentationOptions(
         alert: false,
         badge: true,
         sound: false,
       );
 
-      final initialMessage = await messaging.getInitialMessage();
+      final initialMessage = await _fcm.getInitialMessage();
       if (initialMessage != null) {
         final payload =
             EscrowNotificationPayload.fromRemoteMessage(initialMessage);
@@ -118,7 +120,7 @@ class NotificationService {
           FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
       _onOpenedAppSub =
           FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundTap);
-      _onTokenRefreshSub = messaging.onTokenRefresh.listen(_handleTokenRefresh);
+      _onTokenRefreshSub = _fcm.onTokenRefresh.listen(_handleTokenRefresh);
     } catch (e) {
       debugPrint('[NotificationService] Messaging setup warning: $e');
     }
@@ -198,13 +200,13 @@ class NotificationService {
     }
   }
 
+  /// Foreground: only emit to InAppNotificationHud (no duplicate OS/local heads-up banner).
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     final payload = EscrowNotificationPayload.fromRemoteMessage(message);
     if (!payload.hasValidDealId) return;
 
     await _triggerAlertFeedback();
     _foregroundController.add(payload);
-    await _showHeadsUpLocalNotification(payload);
   }
 
   Future<void> _triggerAlertFeedback() async {
@@ -213,50 +215,6 @@ class NotificationService {
       await SystemSound.play(SystemSoundType.alert);
     } catch (_) {
       // Ignore on unsupported simulators or headless tests
-    }
-  }
-
-  Future<void> _showHeadsUpLocalNotification(
-    EscrowNotificationPayload payload,
-  ) async {
-    if (kIsWeb) return;
-    try {
-      const androidDetails = AndroidNotificationDetails(
-        channelId,
-        channelName,
-        channelDescription: channelDescription,
-        importance: Importance.max,
-        priority: Priority.high,
-        icon: 'ic_notification',
-        color: Color(0xFF10B981),
-        playSound: true,
-        enableVibration: true,
-        enableLights: true,
-        ledColor: Color(0xFF10B981),
-        ledOnMs: 600,
-        ledOffMs: 400,
-      );
-      const iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBanner: true,
-        presentList: true,
-        presentBadge: true,
-        presentSound: true,
-      );
-      const details =
-          NotificationDetails(android: androidDetails, iOS: iosDetails);
-
-      final notificationId =
-          payload.dealId.hashCode ^ payload.type.index ^ 0x5450;
-      await _localNotifications.show(
-        id: notificationId,
-        title: payload.displayTitle,
-        body: payload.displayBody,
-        notificationDetails: details,
-        payload: payload.toJsonString(),
-      );
-    } catch (e) {
-      debugPrint('[NotificationService] Heads-up notification error: $e');
     }
   }
 
@@ -281,6 +239,12 @@ class NotificationService {
     _navigationController.add(payload);
   }
 
+  /// Broadcasts a foreground payload in widget tests to verify root HUD rendering.
+  @visibleForTesting
+  void debugEmitForegroundPayload(EscrowNotificationPayload payload) {
+    _foregroundController.add(payload);
+  }
+
   /// Consumes and clears the pending Cold Start / deferred navigation payload once UI is ready.
   EscrowNotificationPayload? consumePendingNavigation() {
     final pending = _pendingNavigationPayload;
@@ -302,12 +266,11 @@ class NotificationService {
   }
 
   Future<String?> _resolveFcmTokenWithApnsWait() async {
-    final messaging = FirebaseMessaging.instance;
     if (!kIsWeb && Platform.isIOS) {
-      String? apns = await messaging.getAPNSToken();
+      String? apns = await _fcm.getAPNSToken();
       if (apns == null) {
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        apns = await messaging.getAPNSToken();
+        apns = await _fcm.getAPNSToken();
       }
       if (apns == null) {
         debugPrint(
@@ -315,7 +278,7 @@ class NotificationService {
         return null;
       }
     }
-    return messaging.getToken();
+    return _fcm.getToken();
   }
 
   /// Persists the FCM device token locally and registers it via POST /api/v1/notifications/device-token.
@@ -339,6 +302,7 @@ class NotificationService {
       };
       await ApiClient.instance
           .post('/api/v1/notifications/device-token', body: body);
+      await prefs.setBool(fcmSyncedKey, true);
       return true;
     } catch (e) {
       debugPrint('[NotificationService] Failed to sync FCM token: $e');
@@ -347,8 +311,10 @@ class NotificationService {
   }
 
   /// Revokes the FCM token via DELETE /api/v1/notifications/device-token (with active Bearer JWT)
-  /// and deletes the token from FirebaseMessaging instance before clearing local storage.
+  /// and guarantees local Firebase token & sync flag wipe inside `finally` even on 401/offline errors.
   Future<bool> revokeDeviceTokenOnLogout({String? userId}) async {
+    bool serverRevoked = false;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       String? currentToken = prefs.getString(fcmTokenKey);
@@ -356,7 +322,7 @@ class NotificationService {
       if ((currentToken == null || currentToken.isEmpty) &&
           Firebase.apps.isNotEmpty) {
         try {
-          currentToken = await FirebaseMessaging.instance.getToken();
+          currentToken = await _fcm.getToken();
         } catch (_) {
           currentToken = null;
         }
@@ -371,21 +337,28 @@ class NotificationService {
           },
         );
       }
-
+      serverRevoked = true;
+    } catch (e) {
+      debugPrint('[NotificationService] Failed to revoke remote FCM token: $e');
+      serverRevoked = false;
+    } finally {
       if (Firebase.apps.isNotEmpty) {
         try {
-          await FirebaseMessaging.instance.deleteToken();
+          await _fcm.deleteToken();
         } catch (e) {
           debugPrint('[NotificationService] Firebase deleteToken warning: $e');
         }
       }
-
-      await prefs.remove(fcmTokenKey);
-      return true;
-    } catch (e) {
-      debugPrint('[NotificationService] Failed to revoke FCM token: $e');
-      return false;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(fcmTokenKey);
+        await prefs.remove(fcmSyncedKey);
+      } catch (e) {
+        debugPrint('[NotificationService] Local FCM cache cleanup error: $e');
+      }
     }
+
+    return serverRevoked;
   }
 
   Future<void> dispose() async {

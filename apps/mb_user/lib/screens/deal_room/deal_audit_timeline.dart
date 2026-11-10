@@ -130,7 +130,8 @@ class DealAuditTimeline extends StatelessWidget {
       circleBg = AppTokens.emerald;
       circleBorder = c.emeraldBorder;
       textColor = c.emeraldText;
-      inner = const Icon(Icons.check_rounded, size: 16, color: Color(0xFF020617));
+      inner =
+          const Icon(Icons.check_rounded, size: 16, color: Color(0xFF020617));
     } else if (active) {
       circleBg = AppTokens.cyan;
       circleBorder = c.cyanBorder;
