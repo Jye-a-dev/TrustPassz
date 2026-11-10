@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustPassz Mobile - Đăng Nhập & Xác Thực Enclave</title>
+  <title>TrustPassz Mobile - Đăng Nhập & Xác Thực Ký Quỹ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -17,14 +17,15 @@
 </head>
 <body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
 
-  <!-- PHONE DEVICE FRAME WRAPPER (393px x 852px) -->
-  <div class="relative w-[393px] h-[852px] bg-[#0B0F17] rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between">
+  <!-- PHONE DEVICE FRAME WRAPPER (iPhone 393px x 852px) -->
+  <div class="w-[393px] h-[852px] bg-[#080C14] text-slate-100 rounded-[52px] border-[10px] border-slate-800/90 shadow-2xl relative overflow-hidden flex flex-col font-sans select-none justify-between">
     
     <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
-    <div class="h-11 w-full pt-3 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+    <div class="h-11 w-full pt-2 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
       <span class="font-semibold text-sm tracking-tight">9:41</span>
-      <div class="w-24 h-6 bg-black rounded-full -mt-1 shadow-inner flex items-center justify-end pr-2.5">
-        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/60 animate-pulse"></div>
+      <div class="w-28 h-7 bg-black rounded-full mx-auto -mt-1 flex items-center justify-between px-3 shadow-inner">
+        <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/30 border border-emerald-500/80 animate-pulse"></div>
       </div>
       <div class="flex items-center gap-1.5">
         <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
@@ -33,123 +34,100 @@
       </div>
     </div>
 
-    <!-- MAIN SCROLLABLE SCREEN CONTENT -->
-    <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-6 py-4 justify-between">
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-6 pt-2 pb-4 justify-between">
       
       <!-- Top Branding Section -->
-      <div class="flex flex-col items-center text-center mt-2">
-        <div class="relative flex items-center justify-center mb-3">
-          <div class="absolute w-16 h-16 rounded-full bg-cyan-500/20 blur-lg"></div>
-          <div class="relative w-14 h-14 rounded-2xl bg-gradient-to-b from-slate-900 to-[#0F172A] border border-cyan-500/40 flex items-center justify-center shadow-lg shadow-cyan-950/40">
-            <svg class="w-8 h-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 12 2 2 4-4" stroke="#10B981" stroke-width="2.5"/>
-            </svg>
-          </div>
+      <div class="flex flex-col items-start mt-2">
+        <!-- Brand Logo Badge -->
+        <div class="w-12 h-12 rounded-[14px] bg-gradient-to-r from-[#22D3EE] to-[#34D399] flex items-center justify-center shadow-lg shadow-cyan-950/50 mb-3">
+          <span class="text-slate-950 font-black text-xl tracking-tight">TP</span>
         </div>
 
-        <h1 class="text-2xl font-black text-white tracking-tight">TrustPassz</h1>
-        <p class="text-xs text-slate-400 mt-1 max-w-[280px]">
-          Ký quỹ số an toàn • Bảo vệ bởi phần cứng Secure Enclave
+        <h1 class="text-2xl font-black text-white tracking-tight leading-tight">
+          Đăng Nhập Khóa Ký Quỹ
+        </h1>
+        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+          Xác thực danh tính để tạo kèo đàm phán, thanh toán VietQR và giải mã Digital Vault.
         </p>
+
+        <!-- WIDGET: ServerStatusBar -->
+        <div class="mt-3.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0F172A] border border-slate-800 text-[11px] font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
+          <span class="text-emerald-400 font-semibold">Backend API: Online (Port 3000)</span>
+          <span class="text-slate-500">•</span>
+          <span class="text-cyan-400">Neon DB Connected</span>
+        </div>
       </div>
 
-      <!-- Center Forms & Biometric Module -->
-      <div class="space-y-4 my-auto">
+      <!-- CENTER AUTH BUTTONS (GOOGLE & PASSKEY FIDO2) -->
+      <div class="space-y-3.5 my-auto py-2">
         
-        <!-- 1-Tap Biometric Login Card (Hardware-Guarded) -->
-        <div class="p-4 rounded-2xl bg-[#0F172A] border-1.5 border-emerald-500/80 shadow-lg shadow-emerald-950/30 relative overflow-hidden">
-          <div class="absolute top-0 right-0 px-2.5 py-0.5 bg-emerald-500 text-slate-950 text-[10px] font-extrabold uppercase rounded-bl-lg tracking-wider">
-            1-CHẠM NHANH
+        <!-- Button 1: Google OAuth -->
+        <button type="button" class="w-full h-12 rounded-xl bg-[#0F172A] hover:bg-slate-800 border border-slate-700 text-white font-semibold text-xs tracking-wide shadow-md shadow-slate-950/40 flex items-center justify-center gap-3 cursor-pointer transition-all active:scale-[0.99] min-h-[48px]">
+          <!-- Google Multi-Color SVG -->
+          <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 5c1.54 0 2.94.55 4.04 1.45l3.03-3.03C17.24 1.7 14.78 1 12 1 7.46 1 3.59 3.58 1.63 7.37l3.71 2.88C6.23 7.42 8.87 5 12 5z"/>
+            <path fill="#4285F4" d="M23.49 12.28c0-.79-.07-1.54-.19-2.28H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58l3.71 2.88c2.16-1.99 3.71-4.93 3.71-8.69z"/>
+            <path fill="#FBBC05" d="M5.34 14.75c-.24-.72-.38-1.49-.38-2.28 0-.79.14-1.56.38-2.28L1.63 7.37C.59 9.47 0 11.67 0 14s.59 4.53 1.63 6.63l3.71-2.88z"/>
+            <path fill="#34A853" d="M12 23c3.24 0 5.95-1.08 7.93-2.91l-3.71-2.88c-1.08.72-2.45 1.16-4.22 1.16-3.13 0-5.77-2.12-6.66-4.99L1.63 16.26C3.59 20.42 7.46 23 12 23z"/>
+          </svg>
+          <span class="text-sm">Tiếp tục với Google OAuth</span>
+        </button>
+
+        <!-- Button 2: Passkey / FIDO2 -->
+        <button type="button" class="w-full h-12 rounded-xl bg-[#0F172A] hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-semibold text-xs tracking-wide shadow-md shadow-cyan-950/30 flex items-center justify-center gap-3 cursor-pointer transition-all active:scale-[0.99] min-h-[48px]">
+          <!-- Cyan Key / Fingerprint SVG -->
+          <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="7.5" cy="15.5" r="5.5"/>
+            <path d="m21 2-9.6 9.6"/>
+            <path d="m15.5 7.5 3 3L22 7l-3-3"/>
+          </svg>
+          <span class="text-sm">Xác thực với Passkey / FIDO2</span>
+        </button>
+
+        <!-- Divider with Text -->
+        <div class="flex items-center gap-3 py-1">
+          <div class="flex-1 h-px bg-slate-800"></div>
+          <span class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+            —— HOẶC CHẾ ĐỘ DEV SANDBOX ——
+          </span>
+          <div class="flex-1 h-px bg-slate-800"></div>
+        </div>
+
+        <!-- DEV API Card -->
+        <div class="p-4 rounded-2xl bg-[#0F172A] border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Xác Thực Backend Trực Tiếp (DEV API)
+            </span>
+            <span class="text-[9px] font-mono text-amber-400 bg-amber-950/60 border border-amber-500/30 px-1.5 py-0.5 rounded">
+              RFC/JWT
+            </span>
           </div>
-          
-          <div class="flex items-center gap-2 mb-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <h3 class="text-xs font-bold text-emerald-400">Khóa Sinh Trắc Học Phần Cứng</h3>
-          </div>
-          <p class="text-[11px] text-slate-400 mb-3.5">
-            Phiên đăng nhập &amp; Master Key được mã hóa trong Keystore máy.
+
+          <p class="text-[11px] text-slate-400 leading-normal">
+            Cấp phiên JWT hợp lệ ngay trên thiết bị mà không cần phụ thuộc dịch vụ OAuth bên thứ ba.
           </p>
 
-          <!-- Biometric Button >= 48px -->
-          <button type="button" class="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm tracking-wide shadow-md shadow-emerald-950/50 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.99]">
-            <svg class="w-5 h-5 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z"/>
-              <path d="M3 20c0-3.3 2.7-6 6-6h6c3.3 0 6 2.7 6 6"/>
-              <path d="M18 2h3v3M6 2H3v3M21 19v3h-3M3 19v3h3"/>
-            </svg>
-            <span>Mở khóa bằng FaceID / TouchID</span>
-          </button>
-        </div>
-
-        <!-- Divider with "HOẶC" -->
-        <div class="flex items-center gap-3 px-2">
-          <div class="flex-1 h-px bg-slate-800"></div>
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">HOẶC DÙNG VÍ / TÀI KHOẢN</span>
-          <div class="flex-1 h-px bg-slate-800"></div>
-        </div>
-
-        <!-- Standard Login Form Card -->
-        <div class="p-4 rounded-2xl bg-[#0F172A] border border-slate-800 space-y-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1.5">
-              Địa chỉ ví ký quỹ (Base / Solana)
-            </label>
-            <div class="relative flex items-center">
-              <input 
-                type="text" 
-                readonly 
-                value="0x71C836021A4f913d8F894e650A22D16a443549b2"
-                class="w-full h-11 bg-[#070A10] border border-slate-700/80 rounded-xl px-3.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500/80 pr-10"
-              />
-              <span class="absolute right-3 text-cyan-400">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 6L9 17l-5-5"/>
-                </svg>
-              </span>
-            </div>
-            <p class="text-[10px] text-slate-500 mt-1">Đã liên kết ví Smart Contract chính thức</p>
+          <!-- Payload info -->
+          <div class="p-2.5 rounded-xl bg-[#080C14] border border-slate-800/80 font-mono text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">Test Account:</span>
+            <span class="text-cyan-300 font-semibold">dev-tester@trustpassz.io</span>
           </div>
 
-          <!-- Standard Login CTA >= 48px -->
-          <button type="button" class="w-full h-12 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm tracking-wide shadow-md shadow-cyan-950/50 flex items-center justify-center gap-2 cursor-pointer transition-all">
-            <span>Đăng nhập phiên làm việc</span>
-            <svg class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- 3rd Party OAuth Buttons Grid -->
-        <div class="grid grid-cols-2 gap-2.5">
-          <!-- Google Auth Button >= 44px -->
-          <button type="button" class="h-11 rounded-xl bg-[#0F172A] hover:bg-slate-800 border border-slate-800 flex items-center justify-center gap-2 cursor-pointer transition-colors text-xs font-semibold text-slate-200">
-            <!-- Google Icon SVG -->
-            <svg class="w-4 h-4" viewBox="0 0 24 24">
-              <path fill="#EA4335" d="M12 5c1.54 0 2.94.55 4.04 1.45l3.03-3.03C17.24 1.7 14.78 1 12 1 7.46 1 3.59 3.58 1.63 7.37l3.71 2.88C6.23 7.42 8.87 5 12 5z"/>
-              <path fill="#4285F4" d="M23.49 12.28c0-.79-.07-1.54-.19-2.28H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58l3.71 2.88c2.16-1.99 3.71-4.93 3.71-8.69z"/>
-              <path fill="#FBBC05" d="M5.34 14.75c-.24-.72-.38-1.49-.38-2.28 0-.79.14-1.56.38-2.28L1.63 7.37C.59 9.47 0 11.67 0 14s.59 4.53 1.63 6.63l3.71-2.88z"/>
-              <path fill="#34A853" d="M12 23c3.24 0 5.95-1.08 7.93-2.91l-3.71-2.88c-1.08.72-2.45 1.16-4.22 1.16-3.13 0-5.77-2.12-6.66-4.99L1.63 16.26C3.59 20.42 7.46 23 12 23z"/>
-            </svg>
-            <span>Google Login</span>
-          </button>
-
-          <!-- Web3 SIWE/SIWS Button >= 44px -->
-          <button type="button" class="h-11 rounded-xl bg-[#0F172A] hover:bg-slate-800 border border-slate-800 flex items-center justify-center gap-2 cursor-pointer transition-colors text-xs font-semibold text-slate-200">
-            <!-- Web3 Wallet SVG -->
-            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
-            </svg>
-            <span>Kết nối ví Web3</span>
+          <!-- Dev Login CTA Button -->
+          <button type="button" class="w-full h-11 rounded-xl bg-gradient-to-r from-amber-500 to-cyan-500 hover:from-amber-400 hover:to-cyan-400 text-slate-950 font-bold text-xs tracking-wide shadow-md shadow-amber-950/40 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-h-[44px]">
+            <span>Đăng Nhập Test Session (1-Click DEV)</span>
+            <svg class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
           </button>
         </div>
 
       </div>
 
       <!-- Security Guarantee Footer -->
-      <div class="pt-3 border-t border-slate-900 flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono">
+      <div class="pt-2 border-t border-slate-900 flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono">
         <div class="flex items-center gap-1">
           <svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
           <span>EAL6+ ENCLAVE</span>
@@ -157,7 +135,7 @@
         <span>•</span>
         <div class="flex items-center gap-1">
           <svg class="w-3.5 h-3.5 text-cyan-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>ISO/IEC 27001</span>
+          <span>AES-256-GCM</span>
         </div>
       </div>
 
@@ -165,9 +143,7 @@
 
     <!-- BOTTOM HOME INDICATOR -->
     <div class="w-full shrink-0 z-50">
-      <div class="py-2 flex justify-center bg-[#0B0F17]">
-        <div class="w-32 h-1 bg-slate-600 rounded-full"></div>
-      </div>
+      <div class="w-32 h-1 bg-slate-600 rounded-full mx-auto my-2"></div>
     </div>
 
   </div>

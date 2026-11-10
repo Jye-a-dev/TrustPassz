@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile v2 - Khởi Tạo Kèo Ký Quỹ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#F43F5E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950 min-h-screen flex items-center justify-center p-4">
+  <!-- Device Shell (iPhone 16 Frame: 393 x 852 px) -->
+  <div id="device-shell" class="w-[393px] h-[852px] bg-white dark:bg-[#080C14] text-slate-900 dark:text-slate-100 rounded-[52px] border-[10px] border-slate-300 dark:border-slate-800 shadow-2xl relative overflow-hidden flex flex-col font-sans select-none transition-colors duration-200">
+    
+    <!-- Top System Header: Dynamic Island & Status Bar -->
+    <div class="pt-3 px-6 flex items-center justify-between text-xs font-semibold z-20 shrink-0">
+      <span>9:41</span>
+      <!-- Dynamic Island -->
+      <div class="w-28 h-7 bg-black rounded-full flex items-center justify-between px-3 text-white text-[10px]">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-[9px] text-slate-400 font-mono tracking-tighter">BASE ESCROW</span>
+      </div>
+      <!-- Theme Toggle & Battery -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTheme()" class="p-1 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-all text-xs" title="Chuyển chế độ Sáng / Tối">
+          🌓
+        </button>
+        <span class="text-xs">100%</span>
+      </div>
+    </div>
+
+    <!-- Scrollable Main Viewport (Chống tràn ngang, Touch-friendly) -->
+    <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2">
+          <a href="03_home_dashboard.html" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:border-slate-400 transition-all">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          </a>
+          <div>
+            <h1 class="text-base font-bold text-slate-900 dark:text-white">Tạo Kèo Ký Quỹ Mới</h1>
+            <p class="text-[10px] font-mono text-slate-500">Khóa tiền an toàn qua Napas 24/7</p>
+          </div>
+        </div>
+        <button type="button" class="px-2.5 py-1 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-300 dark:border-cyan-500/40 text-cyan-700 dark:text-cyan-400 text-[11px] font-mono font-bold flex items-center gap-1">
+          <span>✨ AI Magic</span>
+        </button>
+      </div>
+
+      <!-- Asset Category 6-Grid -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Loại tài sản số bàn giao</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" class="h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 flex flex-col items-center justify-center gap-1 shadow-sm">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span class="text-[10px] font-bold">Mã Nguồn Git</span>
+          </button>
+          <button type="button" class="h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex flex-col items-center justify-center gap-1 hover:border-slate-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span class="text-[10px] font-medium">License Key</span>
+          </button>
+          <button type="button" class="h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex flex-col items-center justify-center gap-1 hover:border-slate-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg>
+            <span class="text-[10px] font-medium">Ebook / PDF</span>
+          </button>
+          <button type="button" class="h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex flex-col items-center justify-center gap-1 hover:border-slate-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+            <span class="text-[10px] font-medium">Cloud / API</span>
+          </button>
+          <button type="button" class="h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex flex-col items-center justify-center gap-1 hover:border-slate-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span class="text-[10px] font-medium">Đồ Dọn Nhà</span>
+          </button>
+          <button type="button" class="h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex flex-col items-center justify-center gap-1 hover:border-slate-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            <span class="text-[10px] font-medium">Khác</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Title & Price Inputs -->
+      <div class="space-y-3">
+        <div>
+          <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">Tiêu đề hợp đồng</label>
+          <input type="text" value="Source Code AI Multi-Agent SaaS (Next.js 15)" class="w-full h-11 px-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Số tiền ký quỹ (VND)</label>
+            <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">Phí ký quỹ: 0%</span>
+          </div>
+          <input type="text" value="3.600.000 ₫" class="w-full h-11 px-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-sm font-bold font-mono text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
+          <!-- Quick Amount Chips -->
+          <div class="flex gap-1.5 mt-1.5">
+            <button type="button" class="px-2.5 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-medium hover:border-slate-400">+100k</button>
+            <button type="button" class="px-2.5 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-medium hover:border-slate-400">+500k</button>
+            <button type="button" class="px-2.5 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-medium hover:border-slate-400">+1.000k</button>
+            <button type="button" class="px-2.5 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-medium hover:border-slate-400">+5.000k</button>
+          </div>
+        </div>
+
+        <!-- Inspection Window Selector (Pills >= 44px) -->
+        <div>
+          <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">Thời hạn đồng kiểm (Inspection Window)</label>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" class="h-11 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-semibold hover:border-slate-400">6 Giờ</button>
+            <button type="button" class="h-11 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-semibold hover:border-slate-400">12 Giờ</button>
+            <button type="button" class="h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border-2 border-cyan-500 text-cyan-800 dark:text-cyan-300 text-xs font-bold">24 Giờ</button>
+            <button type="button" class="h-11 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-semibold hover:border-slate-400">48 Giờ</button>
+          </div>
+        </div>
+
+        <!-- Secret Payload Field with AES-256 Badge -->
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-cyan-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Nội dung bàn giao két số</span>
+            </span>
+            <span class="text-[9px] font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-300 dark:border-cyan-500/40">
+              AES-256-GCM Client Side
+            </span>
+          </div>
+          <textarea rows="2" class="w-full p-2.5 rounded-xl bg-white dark:bg-[#080C14] border border-slate-300 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500" placeholder="Link GitHub Private Token / License Key..."></textarea>
+          <p class="text-[10px] text-slate-500 leading-normal">
+            Dữ liệu được mã hóa trực tiếp tại thiết bị trước khi tải lên lưu trữ phi tập trung.
+          </p>
+        </div>
+      </div>
+
+      <!-- Submit CTA -->
+      <div class="pt-2">
+        <a href="06_deal_room.html" class="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-bold text-sm tracking-wide shadow-md border border-emerald-600 dark:border-emerald-400 flex items-center justify-center gap-2 transition-all">
+          <span>Tiếp Tục Tạo Hợp Đồng Ký Quỹ</span>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </main>
+
+    
+
+    <!-- Home Indicator -->
+    <div class="pt-1 pb-2 shrink-0">
+      <div class="w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto"></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+    
+  </script>
+</body>
+</html>

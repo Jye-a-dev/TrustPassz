@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile v2 - Chào Mừng Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#F43F5E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950 min-h-screen flex items-center justify-center p-4">
+  <!-- Device Shell (iPhone 16 Frame: 393 x 852 px) -->
+  <div id="device-shell" class="w-[393px] h-[852px] bg-white dark:bg-[#080C14] text-slate-900 dark:text-slate-100 rounded-[52px] border-[10px] border-slate-300 dark:border-slate-800 shadow-2xl relative overflow-hidden flex flex-col font-sans select-none transition-colors duration-200">
+    
+    <!-- Top System Header: Dynamic Island & Status Bar -->
+    <div class="pt-3 px-6 flex items-center justify-between text-xs font-semibold z-20 shrink-0">
+      <span>9:41</span>
+      <!-- Dynamic Island -->
+      <div class="w-28 h-7 bg-black rounded-full flex items-center justify-between px-3 text-white text-[10px]">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-[9px] text-slate-400 font-mono tracking-tighter">BASE ESCROW</span>
+      </div>
+      <!-- Theme Toggle & Battery -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTheme()" class="p-1 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-all text-xs" title="Chuyển chế độ Sáng / Tối">
+          🌓
+        </button>
+        <span class="text-xs">100%</span>
+      </div>
+    </div>
+
+    <!-- Scrollable Main Viewport (Chống tràn ngang, Touch-friendly) -->
+    <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
+      
+      <!-- Top Brand Header -->
+      <div class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 border border-emerald-400/50">
+            <span class="text-slate-950 font-black text-lg tracking-tight">TP</span>
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-slate-900 dark:text-white tracking-wide">TrustPassz</h1>
+            <p class="text-[10px] font-mono text-slate-500 dark:text-slate-400">Cyber-Escrow Platform v2.0</p>
+          </div>
+        </div>
+        <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 px-2.5 py-1 rounded-full">
+          Napas 24/7
+        </span>
+      </div>
+
+      <!-- Step Cards (Dynamic Stepper) -->
+      <div class="py-2">
+        <!-- Step 1 Card -->
+        <div id="step-card-0" class="step-card block p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-xl space-y-4 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h3v3H7zM14 7h3v3h-3zM7 14h3v3H7zM14 14h.01M17 14h.01M14 17h.01M17 17h.01"/></svg>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-bold">
+              Bước 1 / 3
+            </span>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Ký Quỹ Napas 24/7</h2>
+            <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">VietQR-to-Escrow Tự Động</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
+              Quét mã VietQR từ mọi ứng dụng ngân hàng. Tiền được đóng băng an toàn trong hợp đồng ký quỹ thông minh cho đến khi bạn kiểm tra và hài lòng với tài sản.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            <span>Đối soát: <strong class="text-cyan-600 dark:text-cyan-400">&lt; 1s</strong></span>
+            <span>Khóa quỹ: <strong class="text-emerald-600 dark:text-emerald-400">100% Bảo đảm</strong></span>
+          </div>
+        </div>
+
+        <!-- Step 2 Card -->
+        <div id="step-card-1" class="step-card hidden p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-xl space-y-4 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-300 dark:border-cyan-500/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-500/50 text-cyan-700 dark:text-cyan-400 text-xs font-mono font-bold">
+              Bước 2 / 3
+            </span>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Két Số Digital Vault</h2>
+            <p class="text-xs font-semibold text-cyan-600 dark:text-cyan-400 mt-1">Giải Mã AES-256 & Đếm Ngược</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
+              Mã nguồn, license key, tài liệu bí mật được mã hóa end-to-end. Bạn có đồng hồ kiểm thử độc lập (Inspection Window) trước khi bấm giải ngân.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            <span>Chuẩn mã hóa: <strong class="text-cyan-600 dark:text-cyan-400">AES-256-GCM</strong></span>
+            <span>Tự hủy token: <strong class="text-amber-600 dark:text-amber-400">30s</strong></span>
+          </div>
+        </div>
+
+        <!-- Step 3 Card -->
+        <div id="step-card-2" class="step-card hidden p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-xl space-y-4 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-500/50 text-amber-700 dark:text-amber-400 text-xs font-mono font-bold">
+              Bước 3 / 3
+            </span>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Trọng Tài AI Vision</h2>
+            <p class="text-xs font-semibold text-amber-600 dark:text-amber-400 mt-1">Phân Xử Tranh Chấp &lt; 15 Phút</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
+              Nếu hàng lỗi hoặc sai cam kết, chụp ảnh hoặc tải video mở hộp. Trọng tài đa phương thức đối soát tự động và hoàn tiền tức thì không cần chờ đợi.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            <span>SLA thẩm định: <strong class="text-amber-600 dark:text-amber-400">&lt; 15 phút</strong></span>
+            <span>Tỷ lệ chuẩn: <strong class="text-emerald-600 dark:text-emerald-400">99.8%</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dot Indicators -->
+      <div class="flex items-center justify-center gap-2 pt-2">
+        <button onclick="setStep(0)" id="dot-0" class="w-8 h-2 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-sm transition-all duration-200"></button>
+        <button onclick="setStep(1)" id="dot-1" class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 transition-all duration-200"></button>
+        <button onclick="setStep(2)" id="dot-2" class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 transition-all duration-200"></button>
+      </div>
+
+      <!-- Action Buttons with Strict Border Hierarchy -->
+      <div class="space-y-2.5 pt-4">
+        <button id="next-btn" onclick="nextStep()" class="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-bold text-sm tracking-wide shadow-md border border-emerald-600 dark:border-emerald-400 flex items-center justify-center gap-2 transition-all">
+          <span>Tiếp Tục</span>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+
+        <a href="02_login_auth.html" class="w-full h-11 rounded-xl bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-[0.98] text-slate-600 dark:text-slate-300 font-semibold text-xs tracking-wide border border-slate-300 dark:border-slate-700 flex items-center justify-center transition-all">
+          Bỏ qua và Đăng nhập ngay
+        </a>
+      </div>
+
+    </main>
+
+    
+
+    <!-- Home Indicator -->
+    <div class="pt-1 pb-2 shrink-0">
+      <div class="w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto"></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+    
+    let currentStep = 0;
+    const totalSteps = 3;
+
+    function updateStepUI() {
+      for (let i = 0; i < totalSteps; i++) {
+        const card = document.getElementById(`step-card-${i}`);
+        const dot = document.getElementById(`dot-${i}`);
+        if (i === currentStep) {
+          card.classList.remove('hidden');
+          card.classList.add('block');
+          dot.className = 'w-8 h-2 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-sm transition-all duration-200';
+        } else {
+          card.classList.add('hidden');
+          card.classList.remove('block');
+          dot.className = 'w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 transition-all duration-200';
+        }
+      }
+      const nextBtn = document.getElementById('next-btn');
+      if (currentStep === totalSteps - 1) {
+        nextBtn.innerHTML = `<span>Bắt Đầu Ngay</span><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`;
+      } else {
+        nextBtn.innerHTML = `<span>Tiếp Tục</span><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`;
+      }
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        updateStepUI();
+      } else {
+        window.location.href = '02_login_auth.html';
+      }
+    }
+
+    function setStep(idx) {
+      currentStep = idx;
+      updateStepUI();
+    }
+
+  </script>
+</body>
+</html>

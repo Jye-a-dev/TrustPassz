@@ -3,29 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustPassz Mobile - Phòng Thương Lượng Deal Room</title>
+  <title>TrustPassz Mobile - Phòng Đàm Phán & Thương Lượng Kèo (Deal Room)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .bargain-slider { touch-action: touch-pan-x; }
   </style>
 </head>
 <body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
 
-  <!-- PHONE DEVICE FRAME WRAPPER (393px x 852px) -->
-  <div class="relative w-[393px] h-[852px] bg-[#0B0F17] rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between">
+  <!-- PHONE DEVICE FRAME WRAPPER (iPhone 393px x 852px) -->
+  <div class="w-[393px] h-[852px] bg-[#080C14] text-slate-100 rounded-[52px] border-[10px] border-slate-800/90 shadow-2xl relative overflow-hidden flex flex-col font-sans select-none justify-between">
     
     <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
-    <div class="h-11 w-full pt-3 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+    <div class="h-11 w-full pt-2 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
       <span class="font-semibold text-sm tracking-tight">9:41</span>
-      <div class="w-24 h-6 bg-black rounded-full -mt-1 shadow-inner flex items-center justify-end pr-2.5">
-        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/60 animate-pulse"></div>
+      <div class="w-28 h-7 bg-black rounded-full mx-auto -mt-1 flex items-center justify-between px-3 shadow-inner">
+        <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-cyan-500/30 border border-cyan-500/80 animate-pulse"></div>
       </div>
       <div class="flex items-center gap-1.5">
         <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
@@ -34,25 +34,22 @@
       </div>
     </div>
 
-    <!-- MAIN SCROLLABLE SCREEN CONTENT -->
-    <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-4 pt-1 pb-4 gap-3">
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-4 pt-1 pb-3 space-y-3">
       
-      <!-- Top Navigation Header -->
+      <!-- Screen Top Bar with Back & Deal ID -->
       <div class="flex items-center justify-between pt-1">
-        <button type="button" class="min-h-[44px] min-w-[44px] flex items-center text-xs font-semibold text-cyan-400 gap-1 cursor-pointer">
-          <svg class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
-          </svg>
-          <span>Quay lại</span>
-        </button>
+        <a href="03_home_dashboard.html" class="w-9 h-9 rounded-xl bg-[#0F172A] border border-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer min-h-[44px] min-w-[44px]">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
         <div class="text-center">
-          <h1 class="text-xs font-bold text-white">Deal Room #DL-8821</h1>
+          <h1 class="text-xs font-bold text-white tracking-wide">Deal Room #89231</h1>
           <span class="text-[10px] text-cyan-400 font-mono flex items-center justify-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
             Realtime P2P Active
           </span>
         </div>
-        <button type="button" class="w-8 h-8 rounded-lg bg-[#0F172A] border border-slate-800 flex items-center justify-center text-slate-300 cursor-pointer">
+        <button type="button" class="w-9 h-9 rounded-xl bg-[#0F172A] border border-slate-800 flex items-center justify-center text-slate-300 cursor-pointer min-h-[44px] min-w-[44px]">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
           </svg>
@@ -60,7 +57,7 @@
       </div>
 
       <!-- Seller & Product Snapshot Card -->
-      <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-slate-800 space-y-2.5">
+      <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-slate-800 space-y-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-cyan-950 border border-cyan-500/40 flex items-center justify-center text-[10px] text-cyan-300 font-bold">
@@ -87,8 +84,77 @@
         </div>
       </div>
 
+      <!-- COMPONENT: DealAuditTimeline (Tiến trình 4 bước) -->
+      <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-slate-800 space-y-2.5">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="text-xs font-bold text-slate-200 uppercase tracking-wide">Tiến Trình &amp; Đồng Kiểm</span>
+          </div>
+          <span class="text-[10px] font-mono text-cyan-300 bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded">
+            Hạn kiểm định: 24h
+          </span>
+        </div>
+
+        <!-- 4 Step Flow -->
+        <div class="space-y-2 pt-1">
+          <!-- Step 1: Done -->
+          <div class="flex items-start gap-2.5 relative">
+            <div class="flex flex-col items-center">
+              <div class="size-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[10px] font-bold shadow-sm shadow-emerald-500/50 z-10">
+                ✓
+              </div>
+              <div class="w-0.5 h-6 bg-emerald-500/50 mt-1"></div>
+            </div>
+            <div class="flex-1 pb-1">
+              <div class="text-xs font-bold text-white">Bước 1: Khởi tạo kèo</div>
+              <div class="text-[10px] text-slate-400">Thỏa thuận giá niêm yết qua Bargain Slider</div>
+            </div>
+          </div>
+
+          <!-- Step 2: Active / Current -->
+          <div class="flex items-start gap-2.5 relative">
+            <div class="flex flex-col items-center">
+              <div class="size-5 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center text-[10px] font-bold ring-2 ring-cyan-400/50 shadow-sm shadow-cyan-500/50 z-10 animate-pulse">
+                2
+              </div>
+              <div class="w-0.5 h-6 bg-slate-800 mt-1"></div>
+            </div>
+            <div class="flex-1 pb-1">
+              <div class="text-xs font-bold text-cyan-300">Bước 2: Nạp cọc VietQR (Napas 247)</div>
+              <div class="text-[10px] text-slate-400">Tiền buyer được khóa an toàn trên Smart Contract</div>
+            </div>
+          </div>
+
+          <!-- Step 3: Pending Inspection -->
+          <div class="flex items-start gap-2.5 relative">
+            <div class="flex flex-col items-center">
+              <div class="size-5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center text-[10px] font-bold z-10">
+                3
+              </div>
+              <div class="w-0.5 h-6 bg-slate-800 mt-1"></div>
+            </div>
+            <div class="flex-1 pb-1">
+              <div class="text-xs font-semibold text-slate-300">Bước 3: Đồng kiểm Két số 24h</div>
+              <div class="text-[10px] text-slate-500">Mở két số AES-256 kiểm tra mã nguồn, tài sản số</div>
+            </div>
+          </div>
+
+          <!-- Step 4: Final Settlement -->
+          <div class="flex items-start gap-2.5">
+            <div class="size-5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+              4
+            </div>
+            <div class="flex-1">
+              <div class="text-xs font-semibold text-slate-400">Bước 4: Tất toán / Trọng tài phân xử</div>
+              <div class="text-[10px] text-slate-500">Giải ngân thanh toán hoặc phân xử bởi AI Arbitrator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Bargain Slider Card (Core Negotiation Component) -->
-      <div class="p-4 rounded-2xl bg-[#0F172A] border border-cyan-500/30 shadow-lg shadow-cyan-950/20 space-y-4">
+      <div class="p-4 rounded-2xl bg-[#0F172A] border border-cyan-500/30 shadow-lg shadow-cyan-950/20 space-y-3.5">
         
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
@@ -139,17 +205,17 @@
           <span class="text-[10px] font-semibold text-slate-400 mb-1.5 block">Chọn nhanh mức giảm giá:</span>
           <div class="grid grid-cols-3 gap-2">
             <!-- Preset 1 -->
-            <button type="button" class="h-10 rounded-xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
+            <button type="button" class="h-11 rounded-xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[44px]">
               <span class="text-xs font-bold text-slate-200 font-mono">-5%</span>
               <span class="text-[9px] text-slate-400 font-mono">14.250k</span>
             </button>
             <!-- Preset 2 (Active Selected -10%) -->
-            <button type="button" class="h-10 rounded-xl bg-cyan-950/80 border-1.5 border-cyan-500 flex flex-col items-center justify-center cursor-pointer">
+            <button type="button" class="h-11 rounded-xl bg-cyan-950/80 border-1.5 border-cyan-500 flex flex-col items-center justify-center cursor-pointer min-h-[44px]">
               <span class="text-xs font-bold text-cyan-300 font-mono">-10% ✓</span>
               <span class="text-[9px] text-cyan-300 font-mono">13.500k</span>
             </button>
             <!-- Preset 3 -->
-            <button type="button" class="h-10 rounded-xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
+            <button type="button" class="h-11 rounded-xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[44px]">
               <span class="text-xs font-bold text-slate-200 font-mono">-15%</span>
               <span class="text-[9px] text-slate-400 font-mono">12.750k</span>
             </button>
@@ -158,37 +224,27 @@
 
       </div>
 
-      <!-- Realtime Activity Log Banner -->
-      <div class="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-2.5">
-        <span class="text-emerald-400 text-sm">🤝</span>
-        <p class="text-[11px] text-emerald-200 leading-tight">
-          Bên bán <strong>TechLead_HN</strong> đã chấp thuận mức giá <strong>13.500.000 ₫</strong>. Bạn có thể tiến hành đặt cọc ngay!
-        </p>
-      </div>
-
       <!-- Action Buttons -->
-      <div class="space-y-2 pt-1">
+      <div class="space-y-2 pt-1 pb-1">
         <!-- Primary CTA: Confirm & Checkout VietQR >= 48px -->
-        <button type="button" class="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm tracking-wide shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]">
+        <a href="07_checkout_vietqr.html" class="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm tracking-wide shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-h-[48px]">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 6L9 17l-5-5"/>
           </svg>
           <span>Đồng Thuận &amp; Thanh Toán VietQR</span>
-        </button>
+        </a>
 
         <!-- Secondary CTA: Counter-Offer >= 44px -->
-        <button type="button" class="w-full h-11 rounded-xl bg-[#0F172A] hover:bg-slate-800 border border-slate-800 text-slate-300 font-semibold text-xs tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-colors">
+        <a href="modal_02_bargain_confirm_dialog.html" class="w-full h-11 rounded-xl bg-[#0F172A] hover:bg-slate-800 border border-slate-800 text-slate-300 font-semibold text-xs tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-colors min-h-[44px]">
           <span>Gửi đề xuất giá mới khác</span>
-        </button>
+        </a>
       </div>
 
     </div>
 
     <!-- BOTTOM HOME INDICATOR -->
     <div class="w-full shrink-0 z-50">
-      <div class="py-2 flex justify-center bg-[#0B0F17]">
-        <div class="w-32 h-1 bg-slate-600 rounded-full"></div>
-      </div>
+      <div class="w-32 h-1 bg-slate-600 rounded-full mx-auto my-2"></div>
     </div>
 
   </div>

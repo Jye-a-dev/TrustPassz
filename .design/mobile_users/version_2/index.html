@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile v2 - Design System & Screen Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#F43F5E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-[#080C14] text-slate-900 dark:text-slate-100 min-h-screen p-6 md:p-10 transition-colors duration-200">
+  
+  <div class="max-w-6xl mx-auto space-y-8">
+    
+    <!-- Top Showcase Banner -->
+    <header class="p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg border border-emerald-400">
+            TP
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">TrustPassz Mobile UI v2.0</h1>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-bold">
+                Production-Grade
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+              Phân Hệ Người Dùng Di Động (apps/mb_user) • Dual-Theme Dark & Light • Strict 100% Border Hierarchy
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="toggleGlobalTheme()" class="h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:border-slate-400 text-xs font-bold flex items-center gap-2 transition-all">
+          <span>🌓 Chuyển Theme (Dark/Light)</span>
+        </button>
+        <span class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-mono text-cyan-600 dark:text-cyan-400">
+          20 Màn Hình & Modals
+        </span>
+      </div>
+    </header>
+
+    <!-- SECTION 1: 11 CORE SCREENS -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span>Phần I: 11 Màn Hình Chính (Core Screens)</span>
+        </h2>
+        <span class="text-xs font-mono text-slate-500">iPhone 16 Frame (393 × 852 px)</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Screen 1 -->
+        <a href="01_greeting_onboarding.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">01_greeting_onboarding.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Chào Mừng & Onboarding</h3>
+          <p class="text-xs text-slate-500">Stepper Carousel 3 bước: Napas 24/7, Digital Vault AES-256, Trọng tài AI Vision.</p>
+        </a>
+
+        <!-- Screen 2 -->
+        <a href="02_login_auth.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">02_login_auth.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Đăng Nhập & Xác Thực</h3>
+          <p class="text-xs text-slate-500">FIDO2 Passkey, Google OAuth, 6 ô OTP SMS tự động tiêu điểm, Email/Password mắt ẩn/hiện.</p>
+        </a>
+
+        <!-- Screen 3 -->
+        <a href="03_home_dashboard.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">03_home_dashboard.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Trang Chủ & Ký Quỹ</h3>
+          <p class="text-xs text-slate-500">BalanceEscrowCard, 2 nút Nạp/Rút có viền, Quick Actions Bar, Bottom Nav 5 tab chuẩn.</p>
+        </a>
+
+        <!-- Screen 4 -->
+        <a href="04_explore_deals.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">04_explore_deals.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Khám Phá Kèo Marketplace</h3>
+          <p class="text-xs text-slate-500">Bộ lọc Filter Chips cuộn ngang, danh sách tài sản số có hạn kiểm thử (6h - 48h) và eKYC.</p>
+        </a>
+
+        <!-- Screen 5 -->
+        <a href="05_deal_create.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">05_deal_create.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Khởi Tạo Kèo Ký Quỹ</h3>
+          <p class="text-xs text-slate-500">Lưới 6 loại tài sản số, chip VND nhanh, pills thời hạn kiểm >= 44px, AES-256 Secret box, AI Magic.</p>
+        </a>
+
+        <!-- Screen 6 -->
+        <a href="06_deal_room.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">06_deal_room.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Bàn Đàm Phán Kèo</h3>
+          <p class="text-xs text-slate-500">DealAuditTimeline 4 mốc, BargainSlider kéo tương tác với tooltip % giảm giá thời gian thực.</p>
+        </a>
+
+        <!-- Screen 7 -->
+        <a href="07_checkout_vietqr.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">07_checkout_vietqr.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Thanh Toán VietQR Napas</h3>
+          <p class="text-xs text-slate-500">Mã VietQR động tương phản cao, đồng hồ 15p đếm ngược, nút copy 1-chạm có visual toast, deep link.</p>
+        </a>
+
+        <!-- Screen 8 -->
+        <a href="08_digital_vault.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">08_digital_vault.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Két Số Digital Vault</h3>
+          <p class="text-xs text-slate-500">Đồng hồ đếm ngược Inspection Window, hộp tài sản số khóa mờ, cảnh báo tự hủy 30s, 2 nút Giải ngân/Khiếu nại.</p>
+        </a>
+
+        <!-- Screen 9 -->
+        <a href="09_dispute_filing.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-rose-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-rose-600 dark:text-rose-400">09_dispute_filing.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Lập Hồ Sơ Khiếu Nại AI</h3>
+          <p class="text-xs text-slate-500">Banner 3 quy định chế tài, chụp ảnh/video unbox, preview file bằng chứng kèm nút xóa Rose, CTA Rose có viền.</p>
+        </a>
+
+        <!-- Screen 10 -->
+        <a href="10_orders_history.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-slate-600 dark:text-slate-400">10_orders_history.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Lịch Sử Giao Dịch</h3>
+          <p class="text-xs text-slate-500">Tab Kèo Mua / Kèo Bán, trạng thái Đang giữ cọc/Đang đồng kiểm/Hoàn tất/Tranh chấp, TxHash Base Sepolia.</p>
+        </a>
+
+        <!-- Screen 11 -->
+        <a href="11_profile_settings.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">11_profile_settings.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Trung Tâm Bảo Mật & Hồ Sơ</h3>
+          <p class="text-xs text-slate-500">Avatar, Trust Score 99.8%, Google OAuth + FIDO2 Passkey, tài khoản rút tiền VietQR Napas, Toggle Dark/Light.</p>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2: 9 MODALS & BOTTOM SHEETS -->
+    <section class="space-y-4 pt-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+          <span>Phần II: 9 Modals & Bottom Sheets (Active State)</span>
+        </h2>
+        <span class="text-xs font-mono text-slate-500">Interactive Overlays with Backdrop Blur</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Modal 1 -->
+        <a href="modal_01_qr_scan_sheet.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-cyan-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">modal_01_qr_scan_sheet.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Quét QR Scanner Viewfinder</h3>
+          <p class="text-xs text-slate-500">Tia laser quét động, nút bật Flash, nút chọn ảnh từ album.</p>
+        </a>
+
+        <!-- Modal 2 -->
+        <a href="modal_02_bargain_confirm_dialog.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-cyan-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">modal_02_bargain_confirm_dialog.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Xác Nhận Đề Xuất Giá</h3>
+          <p class="text-xs text-slate-500">So sánh giá gốc vs Giá mới, khoản tiết kiệm và thời hạn người bán phản hồi.</p>
+        </a>
+
+        <!-- Modal 3 -->
+        <a href="modal_03_transfer_success_sheet.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">modal_03_transfer_success_sheet.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Khớp Lệnh Ký Quỹ Napas</h3>
+          <p class="text-xs text-slate-500">Napas 247 đã khớp lệnh, tiền đã khóa vào Smart Contract, TxHash Base Sepolia, nút Vào két.</p>
+        </a>
+
+        <!-- Modal 4 -->
+        <a href="modal_04_dispute_warning_dialog.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-rose-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-rose-600 dark:text-rose-400">modal_04_dispute_warning_dialog.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Cảnh Báo Chế Tài Khiếu Nại</h3>
+          <p class="text-xs text-slate-500">Cảnh báo trách nhiệm pháp lý và trừ điểm uy tín nếu khiếu nại sai sự thật.</p>
+        </a>
+
+        <!-- Modal 5 -->
+        <a href="modal_05_vault_unlock_sheet.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-cyan-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">modal_05_vault_unlock_sheet.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Xác Thực Mở Khóa Két Số</h3>
+          <p class="text-xs text-slate-500">Face ID sinh trắc học hoặc bàn phím số PIN cá nhân 6 số bảo vệ két AES-256.</p>
+        </a>
+
+        <!-- Modal 6 -->
+        <a href="modal_06_google_oauth_dialog.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-blue-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">modal_06_google_oauth_dialog.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Google OAuth Identity Dialog</h3>
+          <p class="text-xs text-slate-500">Hộp thoại chuẩn Google Sign-In, avatar người dùng, quyền truy cập tối thiểu.</p>
+        </a>
+
+        <!-- Modal 7 -->
+        <a href="modal_07_passkey_dialog.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-cyan-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">modal_07_passkey_dialog.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Quét Khóa Passkey FIDO2</h3>
+          <p class="text-xs text-slate-500">Vòng quét Touch ID / Face ID Cyan phát sáng và hiệu ứng xác thực phần cứng an toàn.</p>
+        </a>
+
+        <!-- Modal 8 -->
+        <a href="modal_08_dispute_success_dialog.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-cyan-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">modal_08_dispute_success_dialog.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tiếp Nhận Phân Xử Trọng Tài</h3>
+          <p class="text-xs text-slate-500">Khiên bảo vệ phát sáng, cam kết SLA thẩm định tự động < 15 phút, mã hồ sơ DIS-2026-9901.</p>
+        </a>
+
+        <!-- Modal 9 -->
+        <a href="modal_09_vault_decrypted_sheet.html" target="_blank" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:border-emerald-500 hover:shadow-lg transition-all group block space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">modal_09_vault_decrypted_sheet.html</span>
+            <span class="text-xs text-slate-400 group-hover:translate-x-1 transition-transform">↗</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Giải Mã Két Số Nhạy Cảm</h3>
+          <p class="text-xs text-slate-500">Hiển thị link Google Drive token 1 lần, license key, thanh tiến trình tự hủy sau 30s và nút Nghiệm thu.</p>
+        </a>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function toggleGlobalTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+  </script>
+</body>
+</html>
