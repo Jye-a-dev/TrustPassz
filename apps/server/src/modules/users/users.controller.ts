@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -20,12 +21,26 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateStorefrontDto, UpdateStorefrontDto } from './dto/storefront.dto';
 import { UserRole } from '@prisma/client';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Users & Social Storefronts')
 @ApiBearerAuth('JWT-auth')
 @Controller('api/v1/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Get current authenticated user profile',
+    description: 'Retrieves current user details extracted from JWT Guard context.',
+  })
+  @ApiResponse({ status: 200, description: 'Current user profile.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async getMe(@CurrentUser('id') userId: string) {
+    return this.usersService.findById(userId);
+  }
 
   @Get()
   @ApiOperation({

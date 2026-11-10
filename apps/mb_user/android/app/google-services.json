@@ -12,10 +12,23 @@
           "package_name": "com.trustpassz.mb_user.mb_user"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "108765432109-androidclientid.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trustpassz.mb_user.mb_user",
+            "certificate_hash": "a1b2c3d4e5f67890123456789abcdef012345678"
+          }
+        },
+        {
+          "client_id": "108765432109-webclientid.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyFakeKeyTrustPasszEscrow1234567890"
+          "current_key": "AIzaSyC0123456789abcdefghijklmnopqrstuv"
         }
       ],
       "services": {
@@ -27,4 +40,3 @@
   ],
   "configuration_version": "1"
 }
-

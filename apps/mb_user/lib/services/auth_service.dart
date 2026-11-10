@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import 'api_client.dart';
+import 'deal_cache_service.dart';
 import 'notification_service.dart';
 
 class AuthService {
@@ -90,7 +91,16 @@ class AuthService {
     );
   }
 
+  Future<void> clearUserSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(tokenKey);
+    await prefs.remove(refreshTokenKey);
+    await prefs.remove(userKey);
+    await DealCacheService.instance.clearCache();
+  }
+
   Future<void> _persistSession(AuthResponse authRes) async {
+    await clearUserSession();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(tokenKey, authRes.accessToken);
     if (authRes.refreshToken != null && authRes.refreshToken!.isNotEmpty) {
@@ -146,9 +156,6 @@ class AuthService {
       // Ignore network error on logout
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(tokenKey);
-    await prefs.remove(refreshTokenKey);
-    await prefs.remove(userKey);
+    await clearUserSession();
   }
 }

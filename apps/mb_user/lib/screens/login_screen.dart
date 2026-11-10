@@ -167,10 +167,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
-      if (idToken == null || idToken.trim().isEmpty) {
+      if (idToken == null ||
+          idToken.trim().isEmpty ||
+          idToken.trim().split('.').length != 3) {
         if (!mounted) return;
         _showErrorSnackBar(
-          'Không lấy được ID Token từ Google. Vui lòng kiểm tra cấu hình Client ID.',
+          'Không trích xuất được Google ID Token (yêu cầu chuỗi JWT 3 đoạn hợp lệ). Vui lòng kiểm tra Client ID & SHA-1.',
         );
         return;
       }
@@ -182,9 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (authRes.accessToken.isEmpty) {
         if (!mounted) return;
-        _showErrorSnackBar(
-          'Phản hồi xác thực từ máy chủ không hợp lệ. Vui lòng thử lại.',
-        );
+        _showErrorSnackBar('Phản hồi xác thực không hợp lệ. Vui lòng thử lại.');
         return;
       }
 
@@ -192,9 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onSuccess();
     } on PlatformException catch (e) {
       if (!mounted) return;
-      if (e.code == GoogleSignIn.kSignInCanceledError) {
-        return;
-      }
+      if (e.code == GoogleSignIn.kSignInCanceledError) return;
       _showErrorSnackBar(_mapGooglePlatformError(e));
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -217,18 +215,28 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleDevSessionLogin() async {
+    await _executeAuth(() async {
+      await AuthService.instance.verifyAndAuthenticate(
+        provider: 'dev',
+        token: 'dev_test_session_token',
+        email: 'dev-tester@trustpassz.io',
+      );
+    });
+  }
+
   String _mapGooglePlatformError(PlatformException e) {
     final details = '${e.code} ${e.message ?? ''}'.toLowerCase();
     if (e.code == GoogleSignIn.kNetworkError || details.contains('network')) {
-      return 'Lỗi kết nối mạng khi đăng nhập Google. Vui lòng kiểm tra kết nối và thử lại.';
+      return 'Lỗi kết nối mạng khi đăng nhập Google. Vui lòng thử lại.';
     }
     if (details.contains('10:') || details.contains('developer_error')) {
-      return 'Lỗi cấu hình Google Sign-In (SHA-1 hoặc Client ID chưa khớp). Vui lòng kiểm tra lại cấu hình.';
+      return 'Lỗi cấu hình Google Sign-In (SHA-1 hoặc Client ID chưa khớp).';
     }
     if (e.code == GoogleSignIn.kSignInRequiredError) {
       return 'Phiên Google đã hết hạn. Vui lòng chọn lại tài khoản Google.';
     }
-    return 'Không thể đăng nhập Google (${e.code}). Vui lòng thử lại hoặc sử dụng OTP.';
+    return 'Không thể đăng nhập Google (${e.code}). Vui lòng thử lại.';
   }
 
   void _showErrorSnackBar(String message) {
@@ -239,19 +247,15 @@ class _LoginScreenState extends State<LoginScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          content: Text(message,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500)),
           backgroundColor: c.isDark ? const Color(0xFF9F1239) : AppTokens.rose,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.all(16),
           duration: const Duration(seconds: 4),
         ),
@@ -320,6 +324,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   foregroundColor: Colors.white,
                   borderColor: c.borderStrong,
                   minHeight: 48,
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: _isLoading ? null : _handleDevSessionLogin,
+                icon: Icon(Icons.developer_mode_rounded,
+                    size: 18, color: c.cyanText),
+                label: Text(
+                  'Đăng Nhập Test Session (Dev Sandbox)',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: c.cyanText),
+                ),
+                style: AppTokens.outlinedButtonStyle(
+                  c,
+                  borderColor: c.cyanBorder,
+                  backgroundColor: c.cyanSoft,
+                  minHeight: 44,
                 ),
               ),
               const SizedBox(height: 22),

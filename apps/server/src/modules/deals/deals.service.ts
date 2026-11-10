@@ -21,6 +21,10 @@ import {
   executeDealCreateTransaction,
   executeDealUpdateTransaction,
 } from './deals.helper';
+import {
+  executeCalculateUserEscrowBalance,
+  executeFindMyDeals,
+} from './my-deals.helper';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
@@ -344,13 +348,18 @@ export class DealsService {
     return formatVaultUnlockResponse(id, updatedAsset);
   }
 
-    /** Manually triggers settle on-chain for a deal. */
+  async findMyDeals(userId: string, query: QueryDealDto) {
+    return executeFindMyDeals(this.prisma, userId, query);
+  }
+
+  async calculateUserEscrowBalance(userId: string) {
+    return executeCalculateUserEscrowBalance(this.prisma, userId);
+  }
+
+  /** Manually triggers settle on-chain for a deal. */
   async triggerSettle(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
-
-    if (!deal) {
-      throw new NotFoundException(`Deal ${dealId} not found`);
-    }
+    if (!deal) throw new NotFoundException(`Deal ${dealId} not found`);
     if (
       deal.state !== DealState.IN_INSPECTION &&
       deal.state !== DealState.DEPOSITED
@@ -374,21 +383,16 @@ export class DealsService {
     return txResult || { success: true, state: DealState.SETTLED };
   }
 
-    /** Triggers the oracle relayer to start inspection on-chain explicitly. */
+  /** Triggers the oracle relayer to start inspection on-chain explicitly. */
   async triggerStartInspection(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
-    if (!deal) {
-      throw new NotFoundException(`Deal ${dealId} not found`);
-    }
+    if (!deal) throw new NotFoundException(`Deal ${dealId} not found`);
     if (deal.state !== DealState.DEPOSITED) {
       throw new BadRequestException(
         `Cannot start inspection for deal in state ${deal.state}. Expected DEPOSITED.`,
       );
     }
-
-    this.logger.log(
-      `[triggerStartInspection] Initiating startInspection for deal=${dealId}`,
-    );
+    this.logger.log(`[triggerStartInspection] Initiating startInspection for deal=${dealId}`);
     return this.oracleRelayer.startInspection(dealId);
   }
 }

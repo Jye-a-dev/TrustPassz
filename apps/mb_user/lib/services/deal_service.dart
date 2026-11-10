@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import '../models/deal_model.dart';
 import 'api_client.dart';
+import 'deal_cache_service.dart';
 
 class DealService {
   DealService._internal();
@@ -27,7 +28,7 @@ class DealService {
     }
 
     final queryString = Uri(queryParameters: queryParams).query;
-    final endpoint = '/api/v1/deals?$queryString';
+    final endpoint = '/api/v1/deals/my-deals?$queryString';
 
     final response = await ApiClient.instance.get(endpoint);
 
@@ -45,6 +46,31 @@ class DealService {
     return dealsJson
         .map((e) => DealModel.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<EscrowBalanceSummary> fetchEscrowBalance() async {
+    try {
+      final response = await ApiClient.instance.get('/api/v1/deals/my-balance');
+      if (response is Map<String, dynamic>) {
+        return EscrowBalanceSummary(
+          lockedBalance: (response['lockedBalance'] as num?)?.toDouble() ?? 0.0,
+          availableBalance:
+              (response['availableBalance'] as num?)?.toDouble() ?? 0.0,
+          disputedBalance:
+              (response['disputedBalance'] as num?)?.toDouble() ?? 0.0,
+          activeDealsCount:
+              (response['activeDealsCount'] as num?)?.toInt() ?? 0,
+        );
+      }
+    } catch (_) {
+      // Non-fatal: balance will be computed from user deals
+    }
+    return const EscrowBalanceSummary(
+      lockedBalance: 0,
+      availableBalance: 0,
+      disputedBalance: 0,
+      activeDealsCount: 0,
+    );
   }
 
   Future<DealModel> fetchDealById(String id) async {

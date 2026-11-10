@@ -100,6 +100,15 @@ class _HomeScreenState extends State<HomeScreen> {
         status: _activeFilter == 'ALL' ? null : _activeFilter,
       );
 
+      EscrowBalanceSummary summary = EscrowBalanceSummary.fromDeals(
+        resetPage || isInitial ? results : [..._deals, ...results],
+      );
+      try {
+        summary = await DealService.instance.fetchEscrowBalance();
+      } catch (_) {
+        // Fallback to locally computed balance from fetched deals
+      }
+
       if (!mounted) return;
       setState(() {
         if (resetPage || isInitial) {
@@ -108,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _deals.addAll(results);
         }
         _hasMore = results.length >= 20;
-        _balanceSummary = EscrowBalanceSummary.fromDeals(_deals);
+        _balanceSummary = summary;
       });
 
       if (_activeFilter == 'ALL') {
@@ -116,7 +125,17 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = e.toString());
+      setState(() {
+        _errorMessage = e.toString();
+        if (_deals.isEmpty) {
+          _balanceSummary = const EscrowBalanceSummary(
+            lockedBalance: 0,
+            availableBalance: 0,
+            disputedBalance: 0,
+            activeDealsCount: 0,
+          );
+        }
+      });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -191,20 +210,14 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: c.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: c.border),
-        ),
-        title: Text(
-          'Rút Tiền Về Ngân Hàng VietQR',
-          style: TextStyle(
-            color: c.textPrimary,
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Rút Tiền Về Ngân Hàng VietQR',
+            style: TextStyle(
+                color: c.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.bold)),
         content: Text(
-          'Số dư khả dụng được chuyển tự động về tài khoản ngân hàng VietQR đã liên kết trong mục Cá Nhân.',
+          'Số dư khả dụng được chuyển tự động về STK VietQR đã liên kết trong mục Cá Nhân.',
           style: TextStyle(color: c.textMuted, fontSize: 13),
         ),
         actions: [
@@ -229,7 +242,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleScanQr() async {
     final scannedCode = await QrScanSheet.show(context);
     if (!mounted || scannedCode == null || scannedCode.trim().isEmpty) return;
-
     final clean = scannedCode.trim();
     final matched = _deals.where((d) => d.id == clean).toList();
     if (matched.isNotEmpty) {
@@ -238,9 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (ctx) => CheckoutVietQrScreen(
-            dealId: clean,
-            onBack: () => Navigator.of(ctx).pop(),
-          ),
+              dealId: clean, onBack: () => Navigator.of(ctx).pop()),
         ),
       );
     }
@@ -258,20 +268,15 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: c.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: c.border),
-          ),
-          title: Text(
-            'Chưa Có Két Số Sẵn Sàng',
-            style: TextStyle(
-              color: c.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Chưa Có Két Số Sẵn Sàng',
+              style: TextStyle(
+                  color: c.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold)),
           content: Text(
-            'Chưa có giao dịch nào ở trạng thái đã khóa tiền ký quỹ. Bạn có thể tạo giao dịch mới hoặc thanh toán VietQR trước.',
+            'Chưa có giao dịch nào ở trạng thái đã khóa ký quỹ.',
             style: TextStyle(color: c.textMuted, fontSize: 13),
           ),
           actions: [
