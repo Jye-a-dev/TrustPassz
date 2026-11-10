@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile UI Kit - Design Preview Directory (v1)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen p-6 sm:p-10 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <div class="max-w-6xl mx-auto space-y-8">
+    
+    <!-- Top Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <div class="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <span class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded">
+            TRUSTPASSZ MOBILE v1.0
+          </span>
+          <span class="text-xs font-mono text-emerald-400 bg-emerald-950/70 border border-emerald-500/30 px-2 py-0.5 rounded">
+            FIGMA-COMPATIBLE 1:1
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Danh Mục Màn Hình &amp; Modals Mobile User
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl leading-relaxed">
+          Tập hợp 16 tệp HTML tự chứa độc lập (Single-file HTML) bọc trong khung iPhone 16 (393 × 852 px). Sẵn sàng để copy/import lên Figma qua plugin <strong>Builder.io</strong>, <strong>Copy to Figma</strong> hoặc <strong>html.to.design</strong>.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="text-right hidden sm:block">
+          <div class="text-[10px] text-slate-500 font-mono">ĐƯỜNG DẪN ĐẦU RA</div>
+          <div class="text-xs text-slate-300 font-mono">.design/mobile_users/version_1/</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Core Screens (11 Screens) -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+          <span>I. Màn Hình Chính (Core Screens - 11 Màn)</span>
+        </h2>
+        <span class="text-xs font-mono text-slate-400">393 × 852 px Viewport</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Card 1 -->
+        <a href="01_greeting_onboarding.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>01</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">01. Chào Mừng &amp; Onboarding</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Logo phát sáng, 3 thẻ giá trị (VietQR-to-Escrow, Digital Vault AES-256, AI Arbitrator), CTA Bắt đầu ngay.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>01_greeting_onboarding.html</span>
+          </div>
+        </a>
+
+        <!-- Card 2 -->
+        <a href="02_login_auth.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>02</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">02. Đăng Nhập &amp; Xác Thực</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Xác thực 1-chạm phần cứng Enclave FaceID / Vân tay, Form ví ký quỹ, Google Sign-in, Web3 SIWE.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>02_login_auth.html</span>
+          </div>
+        </a>
+
+        <!-- Card 3 -->
+        <a href="03_home_dashboard.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>03</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">03. Bảng Điều Khiển Ký Quỹ</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              TopBar avatar &amp; ServerStatusBar pill, BalanceEscrowCard 250M VND, 3 nút tắt tròn, Recent Deals, TabBar cố định.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>03_home_dashboard.html</span>
+          </div>
+        </a>
+
+        <!-- Card 4 -->
+        <a href="04_explore_deals.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>04</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">04. Khám Phá Sàn Ký Quỹ</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Thanh tìm kiếm, Bộ lọc chips ngang (Code, Key, Design, Data), danh sách Deal Cards kèm giá VND và uy tín người bán.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>04_explore_deals.html</span>
+          </div>
+        </a>
+
+        <!-- Card 5 -->
+        <a href="05_deal_create.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>05</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">05. Khởi Tạo Kèo Ký Quỹ</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Form nhập tiêu đề, lưới 4 loại tài sản số, giá VND, pills đồng kiểm (6h, 12h, 24h, 48h), ô Digital Vault mã hóa AES.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>05_deal_create.html</span>
+          </div>
+        </a>
+
+        <!-- Card 6 -->
+        <a href="06_deal_room.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>06</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">06. Phòng Thương Lượng (Deal Room)</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Thông tin Seller, thanh trượt Bargain Slider thumb ≥ 44px, hiển thị giá đề xuất, Quick-Bid pills (-5%, -10%, -15%).
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>06_deal_room.html</span>
+          </div>
+        </a>
+
+        <!-- Card 7 -->
+        <a href="07_checkout_vietqr.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>07</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">07. Thanh Toán VietQR Tự Động</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Khung mã VietQR Napas 247, nút DeepLink ngân hàng, panel STK &amp; cú pháp TPZ kèm nút sao chép 1 chạm.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>07_checkout_vietqr.html</span>
+          </div>
+        </a>
+
+        <!-- Card 8 -->
+        <a href="08_digital_vault.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>08</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">08. Két Số Digital Vault</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Đồng hồ đếm ngược đồng kiểm lớn Amber (05:42:18), Secret box đã giải mã AES-256 kèm SHA-256 hash, nút Tất toán vs Khiếu nại.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>08_digital_vault.html</span>
+          </div>
+        </a>
+
+        <!-- Card 9 -->
+        <a href="09_dispute_filing.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>09</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">09. Trọng Tài AI &amp; Khiếu Nại</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Lưới 3 khung hình chứng cứ 512x512 client-side (20%, 50%, 80%), lý do khiếu nại, quy trình thẩm định sVLM Vision.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>09_dispute_filing.html</span>
+          </div>
+        </a>
+
+        <!-- Card 10 -->
+        <a href="10_orders_history.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>10</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">10. Đơn Hàng &amp; Hóa Đơn</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Bộ lọc trạng thái (Đồng kiểm, Đã khóa tiền, Tất toán, Khiếu nại), State Machine badges, giá tiền tabular-nums.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>10_orders_history.html</span>
+          </div>
+        </a>
+
+        <!-- Card 11 -->
+        <a href="11_profile_settings.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span>11</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">11. Cài Đặt Hồ Sơ &amp; Bảo Mật</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Avatar &amp; KYC Pro, tài khoản nhận tiền giải ngân VietQR MBBank, Toggle FaceID Enclave, Zero-Restart Language, Đăng xuất.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>11_profile_settings.html</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Section 2: Modals & Bottom Sheets (5 Files) -->
+    <div class="space-y-4 pt-6 border-t border-slate-800">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span>II. Modals &amp; Bottom Sheets (Active Trên Nền Mờ - 5 Tệp)</span>
+        </h2>
+        <span class="text-xs font-mono text-slate-400">Modal Popup &amp; Bottom Sheet Shells</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Modal 1 -->
+        <a href="modal_01_qr_scan_sheet.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span class="text-cyan-400">MODAL 01</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">Quét Mã QR Scanner Viewfinder</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Camera scanner toàn khung hình, 4 góc cyan phát sáng, tia laser quét ngang, nút bật Flash, tải ảnh từ máy.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>modal_01_qr_scan_sheet.html</span>
+          </div>
+        </a>
+
+        <!-- Modal 2 -->
+        <a href="modal_02_bargain_confirm_dialog.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span class="text-cyan-400">MODAL 02</span>
+              <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">Xác Nhận Đề Xuất Giá Kèo</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Hộp thoại popup căn giữa trên nền Deal Room mờ, bảng đối soát giá ban đầu vs giá mới (-10%), 2 nút xác nhận.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>modal_02_bargain_confirm_dialog.html</span>
+          </div>
+        </a>
+
+        <!-- Modal 3 -->
+        <a href="modal_03_transfer_success_sheet.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-emerald-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span class="text-emerald-400">MODAL 03</span>
+              <span class="text-emerald-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Chuyển Tiền Ký Quỹ Thành Công</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Bottom sheet trượt từ đáy, icon ShieldCheck xanh phát sáng, chi tiết nạp 13.5M VND, TxHash Base Sepolia, nút vào két số.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>modal_03_transfer_success_sheet.html</span>
+          </div>
+        </a>
+
+        <!-- Modal 4 -->
+        <a href="modal_04_dispute_warning_dialog.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-rose-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span class="text-rose-400">MODAL 04</span>
+              <span class="text-rose-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-rose-300 transition-colors">Cảnh Báo Khiếu Nại Trọng Tài AI</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Dialog popup cảnh báo màu Rose/Amber, 3 điều khoản đóng băng hợp đồng và chế tài gian lận, nút chấp nhận rủi ro.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>modal_04_dispute_warning_dialog.html</span>
+          </div>
+        </a>
+
+        <!-- Modal 5 -->
+        <a href="modal_05_vault_unlock_sheet.html" target="_blank" class="p-4 rounded-2xl bg-[#0B0F17] border border-slate-800 hover:border-amber-500/50 hover:bg-[#0F172A] transition-all group flex flex-col justify-between h-44">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
+              <span class="text-amber-400">MODAL 05</span>
+              <span class="text-amber-400 group-hover:translate-x-1 transition-transform">Xem →</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">Xác Thực Mở Két Số AES-256</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+              Bottom sheet cảnh báo mở két 1 lần duy nhất, 6 chấm PIN, Numpad Cyber-Escrow 3x4 số, nút xác thực FaceID nhanh.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+            <span>modal_05_vault_unlock_sheet.html</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Figma Import Guide Footer -->
+    <div class="p-5 rounded-3xl bg-[#0F172A] border border-slate-800 space-y-3">
+      <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+        <span>🎨</span>
+        <span>Hướng Dẫn Copy / Import Chuẩn 1:1 Vào Figma</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400">
+        <div class="p-3 rounded-xl bg-[#0B0F17] border border-slate-800 space-y-1">
+          <strong class="text-white block font-semibold">1. Builder.io Plugin</strong>
+          <p>Mở file HTML bất kỳ trong trình duyệt, click chuột phải chọn "Copy Page" hoặc paste URL localhost vào plugin Builder.io trên Figma.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-[#0B0F17] border border-slate-800 space-y-1">
+          <strong class="text-white block font-semibold">2. html.to.design</strong>
+          <p>Nhập địa chỉ Live Server (vd: <code>http://localhost:5500/...</code>) trực tiếp vào plugin html.to.design, chọn khung Viewport 393px.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-[#0B0F17] border border-slate-800 space-y-1">
+          <strong class="text-white block font-semibold">3. Vector &amp; Auto Layout</strong>
+          <p>Tất cả icon đã được chuẩn hóa thành Inline SVG nên khi import sẽ tự động nhận diện thành Vector Layer và Frame linh hoạt.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
