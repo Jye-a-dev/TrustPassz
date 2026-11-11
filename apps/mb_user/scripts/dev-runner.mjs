@@ -4,11 +4,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { resolveGoogleWebClientId } from './env-helpers.mjs';
+import { resolveGoogleWebClientId, sanitizeGradleProperties } from './env-helpers.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const mbUserDir = path.resolve(__dirname, '..');
+const androidDir = path.join(mbUserDir, 'android');
 const isWin = process.platform === 'win32';
 const flutterCmd = isWin ? 'flutter.bat' : 'flutter';
 
@@ -134,8 +135,9 @@ function getConnectedDevices(adbPath) {
 
 console.log(`${colors.cyan}${colors.bold}[TrustPassz] Starting Mobile Fast Dev Runner...${colors.reset}`);
 
-// Clear any orphaned Gradle locks before resolving tools
+// Clear any orphaned Gradle locks and deprecated global cache flags before resolving tools
 cleanGradleWrapperLocks();
+sanitizeGradleProperties([path.join(androidDir, 'gradle.properties')]);
 
 const { adbPath, emulatorPath } = resolveAndroidTools();
 const lanIp = getLocalLanIp();

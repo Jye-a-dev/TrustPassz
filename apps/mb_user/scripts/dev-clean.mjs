@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { resolveGoogleWebClientId } from './env-helpers.mjs';
+import { resolveGoogleWebClientId, sanitizeGradleProperties } from './env-helpers.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -222,6 +222,7 @@ if (isWin) {
 }
 
 cleanGradleWrapperLocks();
+sanitizeGradleProperties([path.join(androidDir, 'gradle.properties')]);
 sleepSync(500);
 
 const { adbPath, emulatorPath } = resolveAndroidTools();
@@ -232,12 +233,10 @@ const lanIp = getLocalLanIp();
 // -----------------------------------------------------------------------------
 logStep(2, 'Cleaning Flutter, Metro & Android build artifacts...');
 const purgePaths = [
-  path.join(mbUserDir, 'build'),
-  path.join(mbUserDir, '.dart_tool'),
-  path.join(androidDir, '.gradle'),
-  path.join(androidDir, 'app', 'build'),
-  path.join(androidDir, '.kotlin'),
-  path.join(mbUserDir, 'node_modules', '.cache'),
+  ...['build', '.dart_tool', path.join('node_modules', '.cache')].map((p) => path.join(mbUserDir, p)),
+  ...['.gradle', path.join('app', 'build'), 'build', 'build-cache', path.join('app', 'build-cache'), '.kotlin'].map((p) =>
+    path.join(androidDir, p),
+  ),
 ];
 
 for (const p of purgePaths) {
