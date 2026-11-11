@@ -9,6 +9,10 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY, RoleType } from '../decorators/roles.decorator';
 import { RequestUser } from '../decorators/current-user.decorator';
 
+/**
+ * Enterprise Role-Based Access Control (RBAC) Guard for NestJS.
+ * Validates request.user against permitted roles declared on route handlers or controllers.
+ */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
@@ -19,7 +23,7 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    // If no role restriction is declared, route is accessible to any valid session
+    // Route requires no specific role -> Allow access
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
@@ -28,9 +32,11 @@ export class RolesGuard implements CanActivate {
     const user = request.user as RequestUser | undefined;
 
     if (!user || !user.role) {
-      throw new UnauthorizedException(
-        'Yêu cầu xác thực danh tính trước khi kiểm tra quyền hạn',
-      );
+      throw new UnauthorizedException({
+        statusCode: 401,
+        message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn',
+        error: 'Unauthorized',
+      });
     }
 
     const normalizedRequiredRoles = requiredRoles.map((r) =>
@@ -42,9 +48,11 @@ export class RolesGuard implements CanActivate {
     const hasPermission = normalizedRequiredRoles.includes(userRole);
 
     if (!hasPermission) {
-      throw new ForbiddenException(
-        'Bạn không có quyền truy cập tài nguyên này',
-      );
+      throw new ForbiddenException({
+        statusCode: 403,
+        message: 'Bạn không có quyền truy cập tài nguyên này',
+        error: 'Forbidden',
+      });
     }
 
     return true;

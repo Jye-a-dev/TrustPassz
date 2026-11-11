@@ -3,8 +3,9 @@ import type { NextRequest } from 'next/server';
 import { isTokenExpired } from '@/lib/jwt-edge';
 
 /**
- * Next.js Edge Middleware & Proxy handler.
- * Enforces session lifecycle verification, legacy aliases 307 routing, and route gating.
+ * Next.js Edge Middleware & Network Proxy for User Portal (cl_user).
+ * Pre-emptively executes 307 HTTP redirects at edge network level before page hydration
+ * to eliminate Flash of Unauthenticated Content (FOUC).
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,7 +14,7 @@ export function proxy(request: NextRequest) {
   const isExpired = !rawToken || isTokenExpired(rawToken, 15);
   const isAuthenticated = hasToken && !isExpired;
 
-  // 1. Alias redirects (307 Temporary Redirect)
+  // 1. Legacy Route Aliases (HTTP 307 Temporary Redirect)
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
     return NextResponse.redirect(new URL('/user', request.url), 307);
   }
@@ -27,14 +28,13 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/user/settings', request.url), 307);
   }
 
-  // 2. Protected Routes (/user and /user/*)
+  // 2. Protected User Routes (/user and /user/*)
   if (pathname === '/user' || pathname.startsWith('/user/')) {
     if (!isAuthenticated) {
       const loginUrl = new URL('/login', request.url);
       const callbackTarget = pathname + (request.nextUrl.search || '');
-      loginUrl.searchParams.set('callbackUrl', callbackTarget);
+      loginUrl.searchParams.set('callbackUrl', encodeURIComponent(callbackTarget));
 
-      // Nếu có token nhưng đã hết hạn -> kích hoạt thông báo phiên hết hạn
       if (hasToken && isExpired) {
         loginUrl.searchParams.set('expired', '1');
       }
@@ -61,16 +61,25 @@ export function proxy(request: NextRequest) {
       return response;
     }
 
-    // Người dùng đã có token hợp lệ -> tự động chuyển hướng vào /user (hoặc callbackUrl nếu có)
     if (isAuthenticated) {
-      const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
-      const targetUrl =
-        callbackUrl &&
-        callbackUrl.startsWith('/') &&
-        !callbackUrl.startsWith('/login') &&
-        !callbackUrl.startsWith('/register')
-          ? callbackUrl
-          : '/user';
+      const rawCallbackUrl = request.nextUrl.searchParams.get('callbackUrl');
+      let targetUrl = '/user';
+
+      if (rawCallbackUrl) {
+        try {
+          const decoded = decodeURIComponent(rawCallbackUrl);
+          if (
+            decoded.startsWith('/') &&
+            !decoded.startsWith('//') &&
+            !decoded.startsWith('/login') &&
+            !decoded.startsWith('/register')
+          ) {
+            targetUrl = decoded;
+          }
+        } catch {
+          targetUrl = '/user';
+        }
+      }
 
       return NextResponse.redirect(new URL(targetUrl, request.url), 307);
     }
@@ -82,6 +91,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const middleware = proxy;
+export default proxy;
 
 export const config = {
   matcher: [

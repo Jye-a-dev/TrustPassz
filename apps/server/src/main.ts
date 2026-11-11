@@ -77,8 +77,8 @@ async function bootstrap() {
     app.set('trust proxy', 1);
   }
 
-  // Parse cookies so AuthGuard can read httpOnly access_token cookie
-  app.use(cookieParser());
+  // Parse cookies so AuthGuard/JwtAuthGuard can read signed or unsigned access_token
+  app.use(cookieParser(process.env.COOKIE_SECRET));
 
   // Enterprise Security Headers
   app.use(
