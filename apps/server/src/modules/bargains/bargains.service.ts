@@ -325,6 +325,16 @@ export class BargainsService {
       );
     }
 
+    if (targetDeal?.id) {
+      this.notificationsService?.notifyOfferUpdated(bargain.buyerId, {
+        dealId: targetDeal.id,
+        dealTitle: targetDeal.title,
+        price: Number(bargain.offeredPrice),
+        currency: targetDeal.currency,
+        status: 'REJECTED',
+      });
+    }
+
     return { success: true, bargain: updatedOffer, deal: targetDeal };
   }
 

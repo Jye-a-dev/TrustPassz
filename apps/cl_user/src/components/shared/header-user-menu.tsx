@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Lock, Bell, User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { User, Settings, LogOut, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -97,20 +97,6 @@ export function HeaderUserMenu({
           {displayBalance.toLocaleString("vi-VN")} ₫
         </span>
       </Link>
-
-      {/* Thông báo chuông biến động giao dịch */}
-      <button
-        type="button"
-        className="relative flex size-9 items-center justify-center rounded-xl border border-strong bg-surface hover:bg-input-bg text-secondary hover:text-primary hover:border-brand-pink/50 shadow-sm transition-all cursor-pointer"
-        title="Thông báo biến động giao dịch"
-        aria-label="Thông báo"
-      >
-        <Bell className="size-4" />
-        <span className="absolute -top-0.5 -right-0.5 flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand-pink opacity-75" />
-          <span className="relative inline-flex size-2 rounded-full bg-brand-pink" />
-        </span>
-      </button>
 
       {/* User Avatar Profile Dropdown */}
       <DropdownMenu>

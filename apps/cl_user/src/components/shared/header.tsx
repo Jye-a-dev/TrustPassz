@@ -8,6 +8,7 @@ import { KeyRound, ShoppingBag, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SubNavbar } from "@/components/layout/sub-navbar";
+import { NotificationCenter } from "@/components/layout/notification-center";
 import { useAuthStore } from "@/lib/auth-store";
 import { apiClient } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase-client";
@@ -170,6 +171,8 @@ export function Header() {
                     <Plus className="size-4" />
                     <span>Đăng bán / Tạo kèo</span>
                   </Link>
+
+                  <NotificationCenter />
 
                   <HeaderUserMenu
                     user={user}

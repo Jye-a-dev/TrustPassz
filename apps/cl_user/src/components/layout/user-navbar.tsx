@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Menu,
-  Bell,
   Coins,
   Lock,
   User,
@@ -16,6 +15,7 @@ import {
   Plus,
   CheckCircle2,
 } from "lucide-react";
+import { NotificationCenter } from "@/components/layout/notification-center";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -138,19 +138,8 @@ export function UserNavbar({
         {/* Theme Toggle (Light / Dark / System) */}
         <ThemeToggle />
 
-        {/* Realtime Notification Bell */}
-        <button
-          type="button"
-          className="relative flex size-9 items-center justify-center rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all cursor-pointer"
-          title="Thông báo biến động giao dịch"
-          aria-label="Thông báo"
-        >
-          <Bell className="size-4" />
-          <span className="absolute -top-0.5 -right-0.5 flex size-2.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-rose-400 opacity-75" />
-            <span className="relative inline-flex size-2.5 rounded-full bg-rose-500" />
-          </span>
-        </button>
+        {/* Realtime Notification Center */}
+        <NotificationCenter />
 
         {/* User Profile Avatar Dropdown */}
         {mounted && (

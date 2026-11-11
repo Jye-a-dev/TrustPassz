@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import dynamic from "next/dynamic";
 import { getQueryClient } from "@/lib/query-client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { RealtimeNotificationBridge } from "@/components/layout/realtime-notification-bridge";
 
 const SolanaProvider = dynamic(
   () => import("@/providers/solana-provider").then((mod) => mod.SolanaProvider),
@@ -30,6 +31,7 @@ export function Providers({ children }: ProvidersProps) {
         <NuqsAdapter>
           <GoogleOAuthProvider clientId={googleClientId}>
             <SolanaProvider>
+              <RealtimeNotificationBridge />
               {children}
               <Toaster richColors position="bottom-right" closeButton />
             </SolanaProvider>

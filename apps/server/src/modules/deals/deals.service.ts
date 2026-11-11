@@ -380,6 +380,7 @@ export class DealsService {
         `[triggerSettle] DB updated → SETTLED for deal=${dealId} (fiat / off-chain settlement)`,
       );
     }
+    this.notificationsService?.notifyDealSettled(deal, txResult?.txHash);
     return txResult || { success: true, state: DealState.SETTLED };
   }
 

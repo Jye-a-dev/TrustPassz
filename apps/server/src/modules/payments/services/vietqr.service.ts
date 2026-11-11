@@ -18,6 +18,7 @@ import {
   VietQrCheckoutResponseDto,
 } from '../dto/payment.dto';
 import { EmergencyAlertService } from '../../emergency-alert/emergency-alert.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class VietQrService {
@@ -30,6 +31,7 @@ export class VietQrService {
     private readonly prisma: PrismaService,
     @Optional() private readonly supabaseService?: SupabaseService,
     @Optional() private readonly emergencyAlertService?: EmergencyAlertService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {
     const clientId = process.env.PAYOS_CLIENT_ID || 'mock-payos-client-id';
     const apiKey = process.env.PAYOS_API_KEY || 'mock-payos-api-key';
@@ -340,11 +342,9 @@ export class VietQrService {
     });
 
     if (this.supabaseService) {
-      await this.supabaseService.broadcastPaymentSuccess(
-        deal.id,
-        DealState.DEPOSITED,
-      );
+      await this.supabaseService.broadcastPaymentSuccess(deal.id, DealState.DEPOSITED);
     }
+    this.notificationsService?.notifyDepositSuccess(deal, data.reference);
 
     return result;
   }
