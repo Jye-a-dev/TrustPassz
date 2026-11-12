@@ -40,6 +40,7 @@ test('Route Matrix & Gating Audit Suite', async (t) => {
       const location = res.headers.get('location') || '';
       assert.ok(location.includes('/login'), `Expected redirect to /login for path ${path}`);
       assert.ok(location.includes(`callbackUrl=${encodeURIComponent(path)}`), `Expected callbackUrl for path ${path}`);
+      assert.ok(location.includes('edge_unauth=1'), `Expected edge_unauth=1 flag for path ${path}`);
       assert.ok(!location.includes('expired=1'), `Guest should not have expired=1 flag for path ${path}`);
     }
   });
@@ -95,22 +96,19 @@ test('Route Matrix & Gating Audit Suite', async (t) => {
     assert.strictEqual(registerRes.headers.get('location'), 'http://localhost:5000/user');
   });
 
-  await t.test('5. Auth Routes: Authenticated user with force=1 or expired=1 can view login page', () => {
+  await t.test('5. Auth Routes: Authenticated user with force=1, expired=1, logout=1, or edge_unauth=1 can view login page', () => {
     const validToken = createMockJwt(86400);
 
-    const forceReq = new NextRequest(new URL('http://localhost:5000/login?force=1'), {
-      headers: { cookie: `access_token=${validToken}` },
-    });
-    const forceRes = proxy(forceReq);
-    assert.strictEqual(forceRes.status, 200);
-    assert.strictEqual(forceRes.headers.get('x-middleware-next'), '1');
-
-    const expiredReq = new NextRequest(new URL('http://localhost:5000/login?expired=1'), {
-      headers: { cookie: `access_token=${validToken}` },
-    });
-    const expiredRes = proxy(expiredReq);
-    assert.strictEqual(expiredRes.status, 200);
-    assert.strictEqual(expiredRes.headers.get('x-middleware-next'), '1');
+    for (const query of ['force=1', 'expired=1', 'logout=1', 'edge_unauth=1']) {
+      const req = new NextRequest(new URL(`http://localhost:5000/login?${query}`), {
+        headers: { cookie: `access_token=${validToken}` },
+      });
+      const res = proxy(req);
+      assert.strictEqual(res.status, 200, `Expected 200 for /login?${query}`);
+      assert.strictEqual(res.headers.get('x-middleware-next'), '1');
+      const setCookie = res.headers.get('set-cookie') || '';
+      assert.ok(setCookie.includes('access_token=;'), `Expected access_token cleared for /login?${query}`);
+    }
   });
 
   await t.test('6. Legacy Alias Redirects (307 Temporary Redirect)', () => {
