@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -18,6 +18,11 @@ import {
 } from "@/components/ui/card";
 import { verifyAuthApi, type AuthResponse } from "@/lib/auth-api";
 import { useAuthStore, generateClientSessionJwt } from "@/lib/auth-store";
+import {
+  clearRedirectGuard,
+  evaluateAuthPageRedirect,
+  resolveSafeCallbackTarget,
+} from "@/lib/auth-redirect-guard";
 import { RegisterFastTab } from "@/components/auth/register-fast-tab";
 import {
   RegisterForm,
@@ -25,10 +30,13 @@ import {
 } from "@/components/auth/register-form";
 
 function RegisterContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const setAuth = useAuthStore((s) => s.setAuth);
+  const cleanedSearchKeyRef = React.useRef<string | null>(null);
 
   const { publicKey, signMessage, connected } = useWallet();
   const { setVisible: setWalletModalVisible } = useWalletModal();
@@ -39,35 +47,46 @@ function RegisterContent() {
   const [agreeFastTerms, setAgreeFastTerms] = React.useState(true);
 
   const getRedirectTarget = React.useCallback((): string => {
-    const cb = searchParams?.get("callbackUrl");
-    if (cb && cb.startsWith("/") && !cb.startsWith("/login") && !cb.startsWith("/register")) {
-      return cb;
-    }
-    return "/user";
+    return resolveSafeCallbackTarget(searchParams?.get("callbackUrl"));
   }, [searchParams]);
 
   React.useEffect(() => {
+    const searchKey = searchParams?.toString() ?? "";
+    const isExpired = searchParams?.get("expired") === "1";
+    const isLogout = searchParams?.get("logout") === "1";
+    const isEdgeUnauth = searchParams?.get("edge_unauth") === "1";
     const isForce = searchParams?.get("force") === "1";
-    if (!isForce && isAuthenticated && user) {
-      window.location.href = getRedirectTarget();
-    }
-  }, [searchParams, isAuthenticated, user, getRedirectTarget]);
+
+    evaluateAuthPageRedirect({
+      isExpired,
+      isLogout,
+      isEdgeUnauth,
+      isForce,
+      callbackUrl: searchParams?.get("callbackUrl"),
+      alreadyCleanedForQuery: cleanedSearchKeyRef.current === searchKey,
+      onCleanupExecuted: () => {
+        cleanedSearchKeyRef.current = searchKey;
+      },
+      onNavigate: (target) => {
+        router.replace(target);
+      },
+    });
+  }, [searchParams, isAuthenticated, user, token, router]);
 
   const handleRegisterSuccess = React.useCallback(
     (result: AuthResponse, methodDesc: string) => {
-      const token = result.accessToken || generateClientSessionJwt(result.user);
-      if (typeof document !== "undefined") {
-        document.cookie = `access_token=${token}; path=/; Max-Age=${result.expiresIn || 604800}; SameSite=Lax;`;
-      }
-      setAuth(result.user, token);
+      const resolvedToken = result.accessToken || generateClientSessionJwt(result.user);
+      clearRedirectGuard();
+      setAuth(result.user, resolvedToken);
 
       toast.success(`${methodDesc} thành công!`, {
         description: `Chào mừng ${result.user.displayName || result.user.email || "bạn"} đến với TrustPassz`,
       });
 
-      window.location.href = getRedirectTarget();
+      const target = getRedirectTarget();
+      router.replace(target);
     },
-    [getRedirectTarget, setAuth]
+    [getRedirectTarget, router, setAuth]
   );
 
   // 1-Click Onboarding via Solana Wallet

@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { isTokenExpired, parseJwtPayload } from "./jwt-edge";
+import {
+  clearClientAuthCookie,
+  getClientAuthCookie,
+  isTokenExpired,
+  setClientAuthCookie,
+} from "./jwt-edge";
+
+export const AUTH_STORAGE_KEY = "trustpassz-auth-session";
 
 export interface AuthUser {
   id: string;
@@ -17,10 +24,12 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setAuth: (user: AuthUser, token?: string | null) => void;
+  login: (user: AuthUser, token?: string | null) => void;
   updateUser: (fields: Partial<AuthUser>) => void;
   setToken: (token: string | null) => void;
   setLoading: (isLoading: boolean) => void;
   checkSessionExpiry: () => boolean;
+  clearAuthState: () => void;
   logout: (isExpired?: boolean) => void;
 }
 
@@ -44,10 +53,15 @@ function safeBase64UrlEncode(str: string): string {
 }
 
 /**
- * Creates an Edge/Browser compatible JWT session token when offline or backend emits cookie only.
+ * Creates a base64url JWT representation when needed by legacy callers.
  */
-export function generateClientSessionJwt(user: AuthUser, expiresInSeconds = 7 * 86400): string {
-  const header = safeBase64UrlEncode(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+export function generateClientSessionJwt(
+  user: AuthUser,
+  expiresInSeconds = 7 * 86400
+): string {
+  const header = safeBase64UrlEncode(
+    JSON.stringify({ alg: "HS256", typ: "JWT" })
+  );
   const now = Math.floor(Date.now() / 1000);
   const payload = safeBase64UrlEncode(
     JSON.stringify({
@@ -64,10 +78,15 @@ export function generateClientSessionJwt(user: AuthUser, expiresInSeconds = 7 * 
   return `${header}.${payload}.client_verified_sig`;
 }
 
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
-  return match ? decodeURIComponent(match[1]) : null;
+function removePersistedAuthStorage(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  } catch {
+    // Ignore storage access errors in restricted browser contexts
+  }
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -82,12 +101,10 @@ export const useAuthStore = create<AuthState>()(
         const resolvedToken =
           token ||
           get().token ||
-          getCookie("access_token") ||
+          getClientAuthCookie() ||
           generateClientSessionJwt(user);
 
-        if (typeof document !== "undefined") {
-          document.cookie = `access_token=${resolvedToken}; path=/; Max-Age=604800; SameSite=Lax;`;
-        }
+        setClientAuthCookie(resolvedToken);
 
         set({
           user,
@@ -97,54 +114,56 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
+      login: (user: AuthUser, token: string | null = null) => {
+        get().setAuth(user, token);
+      },
+
       updateUser: (fields: Partial<AuthUser>) => {
         const currentUser = get().user;
         if (!currentUser) return;
-        const updatedUser = { ...currentUser, ...fields };
-        set({ user: updatedUser });
+        set({ user: { ...currentUser, ...fields } });
       },
 
       setToken: (token: string | null) => {
-        if (token && typeof document !== "undefined") {
-          document.cookie = `access_token=${token}; path=/; Max-Age=604800; SameSite=Lax;`;
+        if (token) {
+          setClientAuthCookie(token);
+        } else {
+          clearClientAuthCookie();
         }
         set({ token });
       },
 
       setLoading: (isLoading: boolean) => set({ isLoading }),
 
-      checkSessionExpiry: (): boolean => {
-        const currentToken = get().token || getCookie("access_token");
+      clearAuthState: () => {
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+        clearClientAuthCookie();
+        removePersistedAuthStorage();
+      },
 
-        if (currentToken) {
-          if (isTokenExpired(currentToken, 15)) {
-            // Verify if true JWT expiry occurred
-            const payload = parseJwtPayload(currentToken);
-            if (payload?.exp && Date.now() >= payload.exp * 1000) {
-              get().logout(true);
-              return true;
-            }
-            // If token lacked exp claim but state holds valid user, re-sign client token
-            if (get().isAuthenticated && get().user) {
-              const recovered = generateClientSessionJwt(get().user!);
-              get().setToken(recovered);
-              return false;
-            }
+      checkSessionExpiry: (): boolean => {
+        const currentToken = get().token || getClientAuthCookie();
+
+        if (!currentToken || isTokenExpired(currentToken, 15)) {
+          if (get().isAuthenticated) {
             get().logout(true);
             return true;
           }
-          // Synchronize cookie if state has token but cookie was dropped
-          if (typeof document !== "undefined" && !getCookie("access_token")) {
-            document.cookie = `access_token=${currentToken}; path=/; Max-Age=604800; SameSite=Lax;`;
-          }
+          get().clearAuthState();
           return false;
         }
 
-        // If authenticated user profile exists but cookie/token was lost during navigation
-        if (get().isAuthenticated && get().user) {
-          const recovered = generateClientSessionJwt(get().user!);
-          get().setToken(recovered);
-          return false;
+        if (getClientAuthCookie() !== currentToken) {
+          setClientAuthCookie(currentToken);
+        }
+
+        if (!get().token) {
+          set({ token: currentToken });
         }
 
         return false;
@@ -158,42 +177,40 @@ export const useAuthStore = create<AuthState>()(
           isLoading: false,
         });
 
-        if (typeof document !== "undefined") {
-          document.cookie = "access_token=; Max-Age=0; path=/;";
-          document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-        }
+        clearClientAuthCookie();
+        removePersistedAuthStorage();
 
         if (typeof window !== "undefined") {
-          try {
-            localStorage.removeItem("trustpassz-auth-session");
-            sessionStorage.clear();
-          } catch {}
-
-          const pathname = window.location.pathname;
-          const search = window.location.search;
-          const isAuthPage = pathname === "/login" || pathname === "/register";
-
-          let targetUrl = "/login";
-          if (isExpired) {
-            if (!isAuthPage && pathname.startsWith("/user")) {
-              const callbackUrl = encodeURIComponent(pathname + search);
-              targetUrl = `/login?callbackUrl=${callbackUrl}&expired=1`;
-            } else {
-              targetUrl = "/login?expired=1";
-            }
+          const currentPath = window.location.pathname;
+          if (currentPath !== "/login") {
+            const targetUrl = isExpired ? "/login?expired=1" : "/login";
+            window.location.replace(targetUrl);
           }
-
-          window.location.href = targetUrl;
         }
       },
     }),
     {
-      name: "trustpassz-auth-session",
+      name: AUTH_STORAGE_KEY,
       partialize: (state) => ({
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (rehydratedState, error) => {
+        if (error || !rehydratedState) {
+          return;
+        }
+
+        const { token, user, isAuthenticated } = rehydratedState;
+        if (token && !isTokenExpired(token, 15) && user) {
+          setClientAuthCookie(token);
+          return;
+        }
+
+        if (token || isAuthenticated || user) {
+          rehydratedState.clearAuthState();
+        }
+      },
     }
   )
 );
