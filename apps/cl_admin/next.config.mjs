@@ -51,13 +51,11 @@ const nextConfig = {
     ],
   },
   webpack: (config) => {
-    // Tắt cảnh báo Critical dependency cho dynamic expression từ ox/tempo
     config.module = {
       ...config.module,
       exprContextCritical: false,
     };
 
-    // Fallback cho node modules nếu cần
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
@@ -67,6 +65,17 @@ const nextConfig = {
     };
 
     return config;
+  },
+  async rewrites() {
+    const backendUrl = (
+      process.env.NEXT_PUBLIC_API_URL || "https://trustpassz-server.onrender.com"
+    ).replace(/\/$/, "");
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${backendUrl}/api/v1/:path*`,
+      },
+    ];
   },
   async redirects() {
     return [

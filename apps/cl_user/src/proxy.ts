@@ -33,10 +33,8 @@ function resolveSafeCallbackUrl(rawCallbackUrl: string | null): string {
  */
 export function proxy(request: NextRequest): NextResponse {
   const { pathname, search, searchParams } = request.nextUrl;
-  const rawToken = request.cookies.get(AUTH_COOKIE_NAME)?.value;
-  const hasToken = Boolean(rawToken);
-  const isExpired = !rawToken || isTokenExpired(rawToken, 15);
-  const isAuthenticated = hasToken && !isExpired;
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+  const hasValidSession = Boolean(token && !isTokenExpired(token, 15));
 
   // 1. Legacy Route Aliases (HTTP 307 Temporary Redirect)
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
@@ -54,18 +52,16 @@ export function proxy(request: NextRequest): NextResponse {
 
   // 2. Protected User Routes (/user and /user/*)
   if (pathname === "/user" || pathname.startsWith("/user/")) {
-    if (!isAuthenticated) {
+    if (!hasValidSession) {
       const loginUrl = new URL("/login", request.url);
       const callbackTarget = pathname + (search || "");
-      loginUrl.searchParams.set("callbackUrl", callbackTarget);
+      loginUrl.searchParams.set("callbackUrl", encodeURIComponent(callbackTarget));
       loginUrl.searchParams.set("edge_unauth", "1");
 
-      if (hasToken && isExpired) {
-        loginUrl.searchParams.set("expired", "1");
-      }
-
       const response = NextResponse.redirect(loginUrl, 307);
-      response.cookies.delete(AUTH_COOKIE_NAME);
+      if (token) {
+        response.cookies.delete(AUTH_COOKIE_NAME);
+      }
       return response;
     }
 
@@ -81,18 +77,16 @@ export function proxy(request: NextRequest): NextResponse {
       searchParams.get("force") === "1" ||
       searchParams.get("prompt") === "login";
 
-    if (hasBypassParam) {
+    if (hasBypassParam || !hasValidSession) {
       const response = NextResponse.next();
-      response.cookies.delete(AUTH_COOKIE_NAME);
+      if (token && (hasBypassParam || !hasValidSession)) {
+        response.cookies.delete(AUTH_COOKIE_NAME);
+      }
       return response;
     }
 
-    if (isAuthenticated) {
-      const targetUrl = resolveSafeCallbackUrl(searchParams.get("callbackUrl"));
-      return NextResponse.redirect(new URL(targetUrl, request.url), 307);
-    }
-
-    return NextResponse.next();
+    const targetUrl = resolveSafeCallbackUrl(searchParams.get("callbackUrl"));
+    return NextResponse.redirect(new URL(targetUrl, request.url), 307);
   }
 
   return NextResponse.next();

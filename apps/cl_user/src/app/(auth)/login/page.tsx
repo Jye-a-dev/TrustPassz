@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { KeyRound, Mail, Sparkles, AlertTriangle } from "lucide-react";
 import {
@@ -17,17 +17,18 @@ import { LoginWeb3Tab } from "@/components/auth/login-web3-tab";
 import { LoginEmailForm } from "@/components/auth/login-email-form";
 import { useAuthHandlers } from "@/components/auth/use-auth-handlers";
 import { useAuthStore } from "@/lib/auth-store";
-import { evaluateAuthPageRedirect } from "@/lib/auth-redirect-guard";
+import {
+  clearClientAuthCookie,
+  getClientAuthCookie,
+  isTokenExpired,
+  setClientAuthCookie,
+} from "@/lib/jwt-edge";
+
+const LOGIN_LOOP_GUARD_KEY = "tp_login_loop_guard";
 
 function LoginContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeMethod, setActiveMethod] = React.useState<"web3" | "email">("web3");
-  const isSessionExpired = searchParams?.get("expired") === "1";
-  const cleanedSearchKeyRef = React.useRef<string | null>(null);
 
   const {
     connected,
@@ -43,35 +44,80 @@ function LoginContent() {
     onEmailSubmit,
   } = useAuthHandlers();
 
+  const isSessionExpired = searchParams?.get("expired") === "1";
+
   React.useEffect(() => {
-    const searchKey = searchParams?.toString() ?? "";
     const isExpired = searchParams?.get("expired") === "1";
     const isLogout = searchParams?.get("logout") === "1";
     const isEdgeUnauth = searchParams?.get("edge_unauth") === "1";
     const isForce = searchParams?.get("force") === "1";
+    const hasUnauthQuery = isExpired || isLogout || isEdgeUnauth || isForce;
 
-    if (isExpired) {
-      toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.", {
-        id: "session-expired-toast",
-        duration: 5000,
-      });
+    // 1. SessionStorage Circuit Breaker: prevent ping-pong redirect loop within 4 seconds
+    try {
+      const now = Date.now();
+      const raw = window.sessionStorage.getItem(LOGIN_LOOP_GUARD_KEY);
+      const history: number[] = raw ? JSON.parse(raw) : [];
+      const recent = history.filter((t) => now - t < 4000);
+      recent.push(now);
+      window.sessionStorage.setItem(LOGIN_LOOP_GUARD_KEY, JSON.stringify(recent));
+
+      if (recent.length > 2) {
+        console.warn("[Security] Login loop circuit breaker triggered. Stopping at /login.");
+        clearClientAuthCookie();
+        useAuthStore.getState().clearAuthState();
+        window.sessionStorage.removeItem(LOGIN_LOOP_GUARD_KEY);
+        toast.error("Phát hiện vòng lặp chuyển hướng bất thường. Đã khôi phục trạng thái an toàn.");
+        return;
+      }
+    } catch {
+      // Storage access fail-safe
     }
 
-    evaluateAuthPageRedirect({
-      isExpired,
-      isLogout,
-      isEdgeUnauth,
-      isForce,
-      callbackUrl: searchParams?.get("callbackUrl"),
-      alreadyCleanedForQuery: cleanedSearchKeyRef.current === searchKey,
-      onCleanupExecuted: () => {
-        cleanedSearchKeyRef.current = searchKey;
-      },
-      onNavigate: (target) => {
-        router.replace(target);
-      },
-    });
-  }, [searchParams, isAuthenticated, user, token, router]);
+    // 2. If unauth flags are present: STRICTLY FORBID auto-redirect and PURGE old auth state
+    if (hasUnauthQuery) {
+      clearClientAuthCookie();
+      useAuthStore.getState().clearAuthState();
+
+      if (isExpired) {
+        toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.", {
+          id: "session-expired-toast",
+        });
+      } else if (isLogout) {
+        toast.success("Đã đăng xuất tài khoản thành công.", {
+          id: "session-logout-toast",
+        });
+      } else if (isEdgeUnauth) {
+        toast.info("Vui lòng đăng nhập để truy cập tài nguyên bảo mật.", {
+          id: "session-edge-unauth-toast",
+        });
+      }
+      return;
+    }
+
+    // 3. Only auto-redirect if store has valid non-expired credentials AND matching cookie
+    const { user, token, isAuthenticated, _hasHydrated } = useAuthStore.getState();
+    if (_hasHydrated && isAuthenticated && user) {
+      if (token && !isTokenExpired(token, 15)) {
+        const cookieToken = getClientAuthCookie();
+        if (cookieToken !== token && token.split(".").length === 3) {
+          setClientAuthCookie(token);
+        }
+
+        const rawCallbackUrl = searchParams?.get("callbackUrl");
+        let safeTarget = "/user";
+        if (rawCallbackUrl) {
+          try {
+            const decoded = decodeURIComponent(rawCallbackUrl);
+            if (decoded.startsWith("/") && !decoded.startsWith("//") && !decoded.startsWith("/login")) {
+              safeTarget = decoded;
+            }
+          } catch {}
+        }
+        window.location.assign(safeTarget);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-canvas overflow-hidden">
@@ -89,7 +135,6 @@ function LoginContent() {
         </CardHeader>
 
         <CardContent className="space-y-5 p-0">
-          {/* Amber Expired Session Alert Banner */}
           {isSessionExpired && (
             <div className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-800 flex items-center gap-2.5 shadow-xs">
               <AlertTriangle className="size-5 text-amber-600 shrink-0" />
@@ -102,7 +147,6 @@ function LoginContent() {
             </div>
           )}
 
-          {/* Method Selector Tabs */}
           <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
             <button
               type="button"
@@ -149,7 +193,6 @@ function LoginContent() {
             />
           )}
 
-          {/* Security Notice */}
           <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3 text-[11px] text-slate-500 flex items-start gap-2">
             <KeyRound className="size-4 text-emerald-600 shrink-0 mt-0.5" />
             <p>

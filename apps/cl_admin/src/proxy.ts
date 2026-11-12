@@ -1,64 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-export interface AdminEdgeJwtPayload {
-  id?: string;
-  sub?: string;
-  role?: string;
-  exp?: number;
-  email?: string | null;
-  [key: string]: unknown;
-}
+import {
+  parseJwtPayload,
+  isTokenExpired,
+  type AdminEdgeJwtPayload,
+} from './lib/jwt-edge';
 
 /**
- * Parses JWT payload using Web standard APIs for Edge Runtime compatibility.
- * Strictly avoids Node.js built-ins (crypto, buffer, stream).
- */
-function parseEdgeJwt(token: string): AdminEdgeJwtPayload | null {
-  try {
-    const cleanToken = token
-      .replace(/^Bearer\s+/i, '')
-      .replace(/^"|"$/g, '')
-      .trim();
-
-    if (!cleanToken || cleanToken === 'undefined' || cleanToken === 'null') {
-      return null;
-    }
-
-    // Support dev mock tokens if present in local sandbox environments
-    if (
-      cleanToken.startsWith('dev-sandbox-') ||
-      cleanToken.startsWith('sec-sig-')
-    ) {
-      const isArbitrator = cleanToken.toLowerCase().includes('arbitrator');
-      const isSuperAdmin = cleanToken.toLowerCase().includes('super');
-      return {
-        role: isSuperAdmin ? 'SUPER_ADMIN' : isArbitrator ? 'ARBITRATOR' : 'ADMIN',
-        exp: Math.floor(Date.now() / 1000) + 86400,
-      };
-    }
-
-    const segments = cleanToken.split('.');
-    if (segments.length !== 3) {
-      return null;
-    }
-
-    let base64 = segments[1].replace(/-/g, '+').replace(/_/g, '/');
-    while (base64.length % 4 !== 0) {
-      base64 += '=';
-    }
-
-    const binary = atob(base64);
-    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    const jsonStr = new TextDecoder().decode(bytes);
-    return JSON.parse(jsonStr) as AdminEdgeJwtPayload;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Next.js Edge Middleware & Network Proxy for Admin Portal (cl_admin).
+ * Next.js Edge Network Proxy for Admin Portal (cl_admin).
  * Enforces Zero-Trust RBAC: strictly guards administrative routes against unauthenticated
  * or unauthorized (non-ADMIN / non-ARBITRATOR) sessions via HTTP 307 pre-render redirects.
  */
@@ -72,10 +21,8 @@ export function proxy(request: NextRequest) {
     : null;
   const token = rawCookieToken || headerToken;
 
-  const payload = token ? parseEdgeJwt(token) : null;
-  const nowInSeconds = Math.floor(Date.now() / 1000);
-  const isExpired = !payload || !payload.exp || payload.exp < nowInSeconds;
-  const isAuthenticated = Boolean(token && !isExpired);
+  const hasValidSession = Boolean(token && !isTokenExpired(token, 15));
+  const payload = hasValidSession && token ? parseJwtPayload<AdminEdgeJwtPayload>(token) : null;
 
   const userRole = (payload?.role || '').toUpperCase();
   const isPrivilegedAdmin =
@@ -85,27 +32,28 @@ export function proxy(request: NextRequest) {
 
   // 1. Root route handling: redirect to /dashboard if privileged, else /login
   if (pathname === '/') {
-    const targetPath = isAuthenticated && isPrivilegedAdmin ? '/dashboard' : '/login';
+    const targetPath = hasValidSession && isPrivilegedAdmin ? '/dashboard' : '/login';
     return NextResponse.redirect(new URL(targetPath, request.url), 307);
   }
 
   // 2. Auth Route (/login)
   if (pathname === '/login') {
-    const isForceLogin =
-      request.nextUrl.searchParams.get('force') === '1' ||
-      request.nextUrl.searchParams.get('prompt') === 'login' ||
+    const hasUnauthQuery =
+      request.nextUrl.searchParams.get('expired') === '1' ||
       request.nextUrl.searchParams.get('logout') === '1' ||
-      request.nextUrl.searchParams.get('expired') === '1';
+      request.nextUrl.searchParams.get('edge_unauth') === '1' ||
+      request.nextUrl.searchParams.get('force') === '1' ||
+      request.nextUrl.searchParams.get('prompt') === 'login';
 
-    if (isForceLogin || !isAuthenticated || !isPrivilegedAdmin) {
+    if (hasUnauthQuery || !hasValidSession || !isPrivilegedAdmin) {
       const response = NextResponse.next();
-      if (token && (isForceLogin || isExpired || !isPrivilegedAdmin)) {
+      if (token && (hasUnauthQuery || !hasValidSession || !isPrivilegedAdmin)) {
         response.cookies.delete('access_token');
       }
       return response;
     }
 
-    // Already authenticated with valid admin privileges -> redirect into /dashboard
+    // Already authenticated with valid admin privileges -> redirect to /dashboard
     return NextResponse.redirect(new URL('/dashboard', request.url), 307);
   }
 
@@ -117,14 +65,18 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/users') ||
     pathname.startsWith('/system-status') ||
     pathname.startsWith('/ai-lab') ||
-    pathname.startsWith('/api-explorer');
+    pathname.startsWith('/api-explorer') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/admin');
 
   if (isProtectedRoute) {
-    // 3a. Missing or expired session -> Redirect to /login
-    if (!isAuthenticated) {
+    // 3a. Missing or expired session -> Redirect to /login with edge_unauth=1
+    if (!hasValidSession) {
       const loginUrl = new URL('/login', request.url);
       const callbackTarget = pathname + (request.nextUrl.search || '');
       loginUrl.searchParams.set('callbackUrl', encodeURIComponent(callbackTarget));
+      loginUrl.searchParams.set('edge_unauth', '1');
 
       const response = NextResponse.redirect(loginUrl, 307);
       if (token) {
@@ -133,7 +85,7 @@ export function proxy(request: NextRequest) {
       return response;
     }
 
-    // 3b. Insufficient privilege (role is not ADMIN or ARBITRATOR) -> Redirect to /403
+    // 3b. Insufficient privilege (role is not ADMIN, ARBITRATOR, or SUPER_ADMIN) -> Redirect to /403, NOT /login
     if (!isPrivilegedAdmin) {
       const forbiddenUrl = new URL('/403', request.url);
       return NextResponse.redirect(forbiddenUrl, 307);
@@ -156,6 +108,9 @@ export const config = {
     '/system-status/:path*',
     '/ai-lab/:path*',
     '/api-explorer/:path*',
+    '/settings/:path*',
+    '/profile/:path*',
+    '/admin/:path*',
     '/login',
   ],
 };

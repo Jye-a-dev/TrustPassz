@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
-import { useAdminAuthStore } from './admin-auth-store';
+import { useAuthStore } from './auth-store';
+import { getAdminAuthCookie, isTokenExpired } from './jwt-edge';
 
 export class ApiError extends Error {
   constructor(
@@ -17,7 +18,60 @@ interface RequestOptions extends RequestInit {
   timeoutMs?: number;
 }
 
-const DEFAULT_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/$/, '');
+function resolveBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return '';
+  }
+  return (
+    process.env.NEXT_PUBLIC_API_URL || 'https://trustpassz-server.onrender.com'
+  ).replace(/\/$/, '');
+}
+
+function isAuthEndpoint(url: string): boolean {
+  return /\/auth\/(login|verify|nonce|register|logout)/i.test(url);
+}
+
+function isOnAuthPage(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  const { pathname } = window.location;
+  return pathname === '/login' || pathname === '/register';
+}
+
+function buildFinalUrl(
+  endpoint: string,
+  params?: Record<string, string | number | boolean | undefined | null>
+): string {
+  const baseUrl = resolveBaseUrl();
+  let fullUrl: string;
+
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+    fullUrl = endpoint;
+  } else if (!baseUrl) {
+    fullUrl = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  } else {
+    fullUrl = `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  }
+
+  if (!params) {
+    return fullUrl;
+  }
+
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null) {
+      searchParams.append(key, String(val));
+    }
+  });
+
+  const queryString = searchParams.toString();
+  if (!queryString) {
+    return fullUrl;
+  }
+
+  return `${fullUrl}${fullUrl.includes('?') ? '&' : '?'}${queryString}`;
+}
 
 export async function apiClient<T>(
   endpoint: string,
@@ -25,35 +79,24 @@ export async function apiClient<T>(
 ): Promise<T> {
   const { params, timeoutMs = 15000, headers, ...customConfig } = options;
 
-  let url = endpoint.startsWith('http')
-    ? endpoint
-    : `${DEFAULT_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  const finalUrl = buildFinalUrl(endpoint, params);
 
-  if (params) {
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, val]) => {
-      if (val !== undefined && val !== null) {
-        searchParams.append(key, String(val));
-      }
-    });
-    const queryString = searchParams.toString();
-    if (queryString) {
-      url += (url.includes('?') ? '&' : '?') + queryString;
-    }
-  }
+  // Retrieve token from Zustand store, fallback to browser cookie
+  const storeToken = useAuthStore.getState().token;
+  const cookieToken = getAdminAuthCookie();
+  const rawToken = storeToken && storeToken.trim() !== '' ? storeToken : cookieToken;
 
-  const token = useAdminAuthStore.getState().token;
   const authHeaders: Record<string, string> = {};
-  if (token) {
-    authHeaders['Authorization'] = `Bearer ${token}`;
+  if (rawToken && !isTokenExpired(rawToken)) {
+    authHeaders['Authorization'] = `Bearer ${rawToken.trim()}`;
   }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(url, {
-      credentials: customConfig.credentials ?? 'include',
+    const response = await fetch(finalUrl, {
+      credentials: 'include',
       ...customConfig,
       headers: {
         'Content-Type': 'application/json',
@@ -66,12 +109,26 @@ export async function apiClient<T>(
 
     clearTimeout(timeoutId);
 
-    if (response.status === 401 || response.status === 403) {
-      if (typeof window !== 'undefined') {
-        toast.error('Phiên đăng nhập hết hạn hoặc không đủ thẩm quyền (401/403).');
-        useAdminAuthStore.getState().logout();
+    if (response.status === 401) {
+      const isAuthCall = isAuthEndpoint(finalUrl);
+      const isAuthPage = isOnAuthPage();
+
+      if (!isAuthCall && !isAuthPage) {
+        if (typeof window !== 'undefined') {
+          toast.error('Phiên đăng nhập đã hết hạn (401). Vui lòng đăng nhập lại.');
+        }
+        useAuthStore.getState().logout(true);
       }
-      throw new ApiError(response.status, response.statusText, 'Unauthorized or Forbidden');
+
+      throw new ApiError(401, response.statusText, 'Unauthorized');
+    }
+
+    if (response.status === 403) {
+      const isAuthPage = isOnAuthPage();
+      if (!isAuthPage && typeof window !== 'undefined') {
+        toast.error('Không đủ thẩm quyền thực hiện thao tác (403 Forbidden).');
+      }
+      throw new ApiError(403, response.statusText, 'Forbidden');
     }
 
     if (!response.ok) {
