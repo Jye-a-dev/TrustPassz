@@ -17,14 +17,17 @@ import { LoginWeb3Tab } from "@/components/auth/login-web3-tab";
 import { LoginEmailForm } from "@/components/auth/login-email-form";
 import { useAuthHandlers } from "@/components/auth/use-auth-handlers";
 import { useAuthStore } from "@/lib/auth-store";
+import { evaluateAuthPageRedirect } from "@/lib/auth-redirect-guard";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeMethod, setActiveMethod] = React.useState<"web3" | "email">("web3");
   const isSessionExpired = searchParams?.get("expired") === "1";
+  const cleanedSearchKeyRef = React.useRef<string | null>(null);
 
   const {
     connected,
@@ -41,30 +44,34 @@ function LoginContent() {
   } = useAuthHandlers();
 
   React.useEffect(() => {
+    const searchKey = searchParams?.toString() ?? "";
+    const isExpired = searchParams?.get("expired") === "1";
+    const isLogout = searchParams?.get("logout") === "1";
+    const isEdgeUnauth = searchParams?.get("edge_unauth") === "1";
     const isForce = searchParams?.get("force") === "1";
-    if (isForce || isSessionExpired) {
-      if (typeof document !== "undefined") {
-        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-        document.cookie = "access_token=; path=/; Max-Age=0;";
-      }
-    }
-    if (isSessionExpired) {
+
+    if (isExpired) {
       toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.", {
         id: "session-expired-toast",
         duration: 5000,
       });
-      return;
     }
 
-    if (!isForce && isAuthenticated && user) {
-      const cb = searchParams?.get("callbackUrl");
-      const target =
-        cb && cb.startsWith("/") && !cb.startsWith("/login") && !cb.startsWith("/register")
-          ? cb
-          : "/user";
-      router.replace(target);
-    }
-  }, [searchParams, isSessionExpired, isAuthenticated, user, router]);
+    evaluateAuthPageRedirect({
+      isExpired,
+      isLogout,
+      isEdgeUnauth,
+      isForce,
+      callbackUrl: searchParams?.get("callbackUrl"),
+      alreadyCleanedForQuery: cleanedSearchKeyRef.current === searchKey,
+      onCleanupExecuted: () => {
+        cleanedSearchKeyRef.current = searchKey;
+      },
+      onNavigate: (target) => {
+        router.replace(target);
+      },
+    });
+  }, [searchParams, isAuthenticated, user, token, router]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-canvas overflow-hidden">

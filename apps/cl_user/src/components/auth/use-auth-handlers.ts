@@ -13,6 +13,10 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import bs58 from "bs58";
 import { verifyAuthApi, type AuthResponse } from "@/lib/auth-api";
 import { useAuthStore, generateClientSessionJwt } from "@/lib/auth-store";
+import {
+  clearRedirectGuard,
+  resolveSafeCallbackTarget,
+} from "@/lib/auth-redirect-guard";
 import type { LoginFormValues } from "@/components/auth/login-email-form";
 
 export function useAuthHandlers() {
@@ -31,19 +35,13 @@ export function useAuthHandlers() {
   >("idle");
 
   const getRedirectTarget = React.useCallback((): string => {
-    const cb = searchParams?.get("callbackUrl");
-    if (cb && cb.startsWith("/") && !cb.startsWith("/login") && !cb.startsWith("/register")) {
-      return cb;
-    }
-    return "/user";
+    return resolveSafeCallbackTarget(searchParams?.get("callbackUrl"));
   }, [searchParams]);
 
   const handleAuthSuccess = React.useCallback(
     (result: AuthResponse, methodDesc: string) => {
       const token = result.accessToken || generateClientSessionJwt(result.user);
-      if (typeof document !== "undefined") {
-        document.cookie = `access_token=${token}; path=/; Max-Age=${result.expiresIn || 604800}; SameSite=Lax;`;
-      }
+      clearRedirectGuard();
       setAuth(result.user, token);
 
       toast.success(`${methodDesc} thành công!`, {
