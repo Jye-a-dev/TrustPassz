@@ -110,11 +110,14 @@ export const useAuthStore = create<AuthState>()(
           setClientAuthCookie(cleanToken);
         }
 
+        const effectiveToken = cleanToken && isValidJwt ? cleanToken : (get().token ?? null);
+
         set({
           user,
-          token: cleanToken && isValidJwt ? cleanToken : get().token,
+          token: effectiveToken,
           isAuthenticated: true,
           isLoading: false,
+          _hasHydrated: true,
         });
       },
 
@@ -147,6 +150,7 @@ export const useAuthStore = create<AuthState>()(
           token: null,
           isAuthenticated: false,
           isLoading: false,
+          _hasHydrated: true,
         });
         clearClientAuthCookie();
         removePersistedAuthStorage();
@@ -188,6 +192,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
+            _hasHydrated: true,
           });
 
           clearClientAuthCookie();
@@ -225,7 +230,7 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (rehydratedState) => {
-        useAuthStore.setState({ _hasHydrated: true });
+        useAuthStore.setState({ _hasHydrated: true, isLoading: false });
         if (!rehydratedState) {
           return;
         }
@@ -234,11 +239,16 @@ export const useAuthStore = create<AuthState>()(
         if (token) {
           if (!isTokenExpired(token, 15) && token.split(".").length === 3) {
             setClientAuthCookie(token);
+            useAuthStore.setState({ _hasHydrated: true, isLoading: false });
             return;
           }
           rehydratedState.clearAuthState();
+          useAuthStore.setState({ _hasHydrated: true, isLoading: false });
         } else if (!user) {
           clearClientAuthCookie();
+          useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+        } else {
+          useAuthStore.setState({ _hasHydrated: true, isLoading: false });
         }
       },
     }

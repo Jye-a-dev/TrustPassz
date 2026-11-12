@@ -54,7 +54,14 @@ export function useAdminAuthHandlers() {
         createdAt: new Date().toISOString(),
       };
 
-      const success = setSession(result.accessToken, adminUser);
+      const rawResult = result as unknown as Record<string, unknown>;
+      const extractedToken =
+        (typeof rawResult.accessToken === "string" && rawResult.accessToken) ||
+        (typeof rawResult.access_token === "string" && rawResult.access_token) ||
+        (typeof rawResult.token === "string" && rawResult.token) ||
+        null;
+
+      const success = setSession(extractedToken, adminUser);
       if (success) {
         toast.success(`${methodDesc} thành công!`, {
           description: `Chào mừng ${adminUser.displayName} (${role}) quay lại hệ thống.`,

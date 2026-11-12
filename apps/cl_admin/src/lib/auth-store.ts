@@ -11,8 +11,10 @@ export interface AdminAuthState {
   user: AdminUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   _hasHydrated: boolean;
   setHasHydrated: (hasHydrated: boolean) => void;
+  setLoading: (isLoading: boolean) => void;
   setSession: (token: string | null | undefined, user: AdminUser) => boolean;
   setAuth: (user: AdminUser, token?: string | null) => boolean;
   login: (user: AdminUser, token?: string | null) => boolean;
@@ -30,7 +32,7 @@ export const useAuthStore = create<AdminAuthState>()(
     (set, get) => {
       const applySession = (token: string | null | undefined, user: AdminUser): boolean => {
         if (!ALLOWED_ROLES.includes(user.role)) {
-          set({ user: null, token: null, isAuthenticated: false });
+          set({ user: null, token: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
           clearAdminAuthCookie();
           return false;
         }
@@ -44,8 +46,10 @@ export const useAuthStore = create<AdminAuthState>()(
 
         set({
           user,
-          token: cleanToken && isValidJwt ? cleanToken : get().token,
+          token: cleanToken && isValidJwt ? cleanToken : (get().token ?? null),
           isAuthenticated: true,
+          isLoading: false,
+          _hasHydrated: true,
         });
         return true;
       };
@@ -54,9 +58,11 @@ export const useAuthStore = create<AdminAuthState>()(
         user: null,
         token: null,
         isAuthenticated: false,
+        isLoading: false,
         _hasHydrated: false,
 
         setHasHydrated: (_hasHydrated: boolean) => set({ _hasHydrated }),
+        setLoading: (isLoading: boolean) => set({ isLoading }),
 
         setSession: (token: string | null | undefined, user: AdminUser) =>
           applySession(token, user),
@@ -79,7 +85,7 @@ export const useAuthStore = create<AdminAuthState>()(
           isLoggingOut = true;
 
           try {
-            set({ user: null, token: null, isAuthenticated: false });
+            set({ user: null, token: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
             clearAdminAuthCookie();
 
             if (typeof window !== 'undefined') {
@@ -128,18 +134,22 @@ export const useAuthStore = create<AdminAuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        useAuthStore.setState({ _hasHydrated: true });
+        useAuthStore.setState({ _hasHydrated: true, isLoading: false });
         if (!state) return;
         const token = state.token;
         if (token) {
           if (!isTokenExpired(token, 15) && token.split('.').length === 3) {
             setAdminAuthCookie(token);
+            useAuthStore.setState({ _hasHydrated: true, isLoading: false });
           } else {
-            useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+            useAuthStore.setState({ user: null, token: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
             clearAdminAuthCookie();
           }
         } else if (!state.user) {
           clearAdminAuthCookie();
+          useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+        } else {
+          useAuthStore.setState({ _hasHydrated: true, isLoading: false });
         }
       },
     }

@@ -98,10 +98,12 @@ function LoginContent() {
     // 3. Only auto-redirect if store has valid non-expired credentials AND matching cookie
     const { user, token, isAuthenticated, _hasHydrated } = useAuthStore.getState();
     if (_hasHydrated && isAuthenticated && user) {
-      if (token && !isTokenExpired(token, 15)) {
-        const cookieToken = getClientAuthCookie();
-        if (cookieToken !== token && token.split(".").length === 3) {
-          setClientAuthCookie(token);
+      if (!token || !isTokenExpired(token, 15)) {
+        if (token && token.split(".").length === 3) {
+          const cookieToken = getClientAuthCookie();
+          if (cookieToken !== token) {
+            setClientAuthCookie(token);
+          }
         }
 
         const rawCallbackUrl = searchParams?.get("callbackUrl");

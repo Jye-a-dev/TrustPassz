@@ -39,9 +39,15 @@ export function useAuthHandlers() {
 
   const handleAuthSuccess = React.useCallback(
     (result: AuthResponse, methodDesc: string) => {
-      const token = result.accessToken || null;
+      const rawResult = result as unknown as Record<string, unknown>;
+      const extractedToken =
+        (typeof rawResult.accessToken === "string" && rawResult.accessToken) ||
+        (typeof rawResult.access_token === "string" && rawResult.access_token) ||
+        (typeof rawResult.token === "string" && rawResult.token) ||
+        null;
+
       clearRedirectGuard();
-      setAuth(result.user, token);
+      setAuth(result.user, extractedToken);
 
       toast.success(`${methodDesc} thành công!`, {
         description: `Chào mừng ${result.user.displayName || result.user.email || "bạn"} trở lại.`,
