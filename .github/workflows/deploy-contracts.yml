@@ -14,11 +14,6 @@ on:
         required: false
         default: false
         type: boolean
-      force_deploy:
-        description: "Bypass test check and force deployment"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -64,13 +59,12 @@ jobs:
           forge install OpenZeppelin/openzeppelin-contracts --no-commit
 
       - name: Verify Contract Integrity (Unit & Component Tests)
-        if: ${{ !inputs.force_deploy }}
         run: forge test -vvv
 
       - name: Resolve Multi-RPC Fallback Endpoint
         id: rpc-resolver
         env:
-          BASE_SEPOLIA_RPC_URL: ${{ secrets[format('{0}', 'BASE_SEPOLIA_RPC_URL')] }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
         run: |
           RPC_CANDIDATES=()
           if [ -n "$BASE_SEPOLIA_RPC_URL" ]; then
@@ -109,10 +103,10 @@ jobs:
       - name: Deploy or Simulate DigitalEscrow Deployment
         id: deploy-step
         env:
-          DEPLOYER_PRIVATE_KEY: ${{ secrets[format('{0}', 'DEPLOYER_PRIVATE_KEY')] }}
-          ORACLE_RELAYER_ADDRESS: ${{ secrets[format('{0}', 'ORACLE_RELAYER_ADDRESS')] }}
-          DISPUTE_RESOLVER_ADDRESS: ${{ secrets[format('{0}', 'DISPUTE_RESOLVER_ADDRESS')] }}
-          BASESCAN_API_KEY: ${{ secrets[format('{0}', 'BASESCAN_API_KEY')] }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ORACLE_RELAYER_ADDRESS: ${{ secrets.ORACLE_RELAYER_ADDRESS }}
+          DISPUTE_RESOLVER_ADDRESS: ${{ secrets.DISPUTE_RESOLVER_ADDRESS }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           RPC_URL="${ACTIVE_RPC_URL:-https://sepolia.base.org}"

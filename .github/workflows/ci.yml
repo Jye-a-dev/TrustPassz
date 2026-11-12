@@ -149,12 +149,25 @@ jobs:
             npm install --prefer-offline --no-audit --no-fund
           fi
 
+      - name: Run Frontend Unit Tests (${{ matrix.app }})
+        run: |
+          if [ "${{ matrix.app }}" = "cl_user" ]; then
+            npm test --workspace=apps/cl_user
+          elif [ -f "apps/${{ matrix.app }}/package.json" ] && grep -q '"test":' "apps/${{ matrix.app }}/package.json"; then
+            npm test --workspace=apps/${{ matrix.app }}
+          fi
+
       - name: Build Next.js Application (${{ matrix.app }})
         run: npm run build --workspace=apps/${{ matrix.app }}
 
   verify-ai-pipeline:
     name: Verify AI Pipeline (Python 3.11)
     runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: "test"
+      GEMINI_API_KEY: "mock-ci-key"
+      AI_MODEL_PATH: "Qwen/Qwen2-VL-2B-Instruct"
+      AI_DEVICE: "cpu"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -179,6 +192,15 @@ jobs:
         run: |
           python -m py_compile apps/ai_pipeline/main.py
           python -c "import ast; [ast.parse(open(f, encoding='utf-8').read()) for f in ['apps/ai_pipeline/engine.py', 'apps/ai_pipeline/main.py']]"
+
+      - name: Run AI Pipeline Pytest Suite (Arbitration & Suggestion)
+        env:
+          PYTHONPATH: apps/ai_pipeline
+          ENVIRONMENT: "test"
+          GEMINI_API_KEY: "mock-ci-key"
+          AI_MODEL_PATH: "Qwen/Qwen2-VL-2B-Instruct"
+          AI_DEVICE: "cpu"
+        run: pytest apps/ai_pipeline/tests apps/ai_pipeline/test_suggestion.py -v
 
   verify-contracts:
     name: Verify Smart Contracts (Foundry)
@@ -206,9 +228,50 @@ jobs:
       - name: Run Foundry Unit & Integration Tests
         run: forge test -vvv
 
+  verify-e2e-tests:
+    name: Verify E2E Integration Tests (packages/e2e-tests)
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      NODE_OPTIONS: "--max-old-space-size=4096"
+      DATABASE_URL: "postgresql://mock:mock@localhost:5432/trustpassz_ci?schema=public"
+      DIRECT_URL: "postgresql://mock:mock@localhost:5432/trustpassz_ci?schema=public"
+      JWT_SECRET: "mock-jwt-secret-min-32-chars-for-ci"
+      BASE_SEPOLIA_RPC_URL: "https://sepolia.base.org"
+      ESCROW_CONTRACT_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
+      API_URL: "http://localhost:3001"
+      AI_PIPELINE_URL: "http://localhost:3100"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Monorepo Dependencies (Resilient Fallback)
+        run: |
+          if [ -s package-lock.json ]; then
+            npm ci --prefer-offline --no-audit
+          elif [ -f package.json ]; then
+            npm install --prefer-offline --no-audit --no-fund
+          fi
+
+      - name: Generate Prisma Client Types
+        working-directory: apps/server
+        run: npx prisma generate
+
+      - name: Run E2E Integration Tests (State Machine, Dispute, Concurrency)
+        working-directory: packages/e2e-tests
+        run: npm test
+
   ci-status-gate:
     name: CI Pipeline Quality Gate
-    needs: [audit-lint-types, verify-server, verify-frontends, verify-ai-pipeline, verify-contracts]
+    needs: [audit-lint-types, verify-server, verify-frontends, verify-ai-pipeline, verify-contracts, verify-e2e-tests]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -222,13 +285,15 @@ jobs:
           echo "verify-frontends:    ${{ needs.verify-frontends.result }}"
           echo "verify-ai-pipeline:  ${{ needs.verify-ai-pipeline.result }}"
           echo "verify-contracts:    ${{ needs.verify-contracts.result }}"
+          echo "verify-e2e-tests:    ${{ needs.verify-e2e-tests.result }}"
           echo "=========================================================="
 
           if [ "${{ needs.audit-lint-types.result }}" != "success" ] || \
              [ "${{ needs.verify-server.result }}" != "success" ] || \
              [ "${{ needs.verify-frontends.result }}" != "success" ] || \
              [ "${{ needs.verify-ai-pipeline.result }}" != "success" ] || \
-             [ "${{ needs.verify-contracts.result }}" != "success" ]; then
+             [ "${{ needs.verify-contracts.result }}" != "success" ] || \
+             [ "${{ needs.verify-e2e-tests.result }}" != "success" ]; then
             echo "::error::CI Pipeline Failed: One or more matrix jobs did not complete with exit code 0. Pull Request merge blocked."
             exit 1
           fi
