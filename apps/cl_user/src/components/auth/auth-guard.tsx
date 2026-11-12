@@ -29,11 +29,47 @@ export function AuthGuard({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const setAuth = useAuthStore((s) => s.setAuth);
-  const logout = useAuthStore((s) => s.logout);
   const checkSessionExpiry = useAuthStore((s) => s.checkSessionExpiry);
 
   const [isVerifyingServerSession, setIsVerifyingServerSession] = useState(false);
   const [serverSessionChecked, setServerSessionChecked] = useState(false);
+
+  // Client mount: kick off Zustand rehydration and guarantee hydration flag flips
+  useEffect(() => {
+    if (typeof useAuthStore.persist?.rehydrate === "function") {
+      void useAuthStore.persist.rehydrate();
+    }
+    if (typeof useAuthStore.persist?.hasHydrated === "function" && useAuthStore.persist.hasHydrated()) {
+      useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+    } else {
+      const timer = setTimeout(() => {
+        useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Failsafe Timeout 2000ms: prevent hanging in INITIALIZING AUTH ENCLAVE...
+  useEffect(() => {
+    const failsafeTimer = setTimeout(() => {
+      const state = useAuthStore.getState();
+      if (!state._hasHydrated || !serverSessionChecked) {
+        console.warn("[AuthGuard] Failsafe timeout 2000ms triggered. Unblocking auth state.");
+        useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+        setServerSessionChecked(true);
+        setIsVerifyingServerSession(false);
+
+        if (!state.isAuthenticated || !state.user) {
+          const currentPath = typeof window !== "undefined" ? window.location.pathname : "/user";
+          if (currentPath !== "/login") {
+            router.replace(`/login?force=1&callbackUrl=${encodeURIComponent(currentPath)}`);
+          }
+        }
+      }
+    }, 2000);
+
+    return () => clearTimeout(failsafeTimer);
+  }, [serverSessionChecked, router]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -44,13 +80,12 @@ export function AuthGuard({
         return;
       }
 
-      // If already authenticated with a valid token, no need for active probe
+      // If already authenticated with a valid user, unlock immediately and skip active probe
       const currentToken = useAuthStore.getState().token;
-      if (
-        useAuthStore.getState().isAuthenticated &&
-        useAuthStore.getState().user &&
-        (!currentToken || !isTokenExpired(currentToken, 15))
-      ) {
+      const currentUser = useAuthStore.getState().user;
+      const isAuth = useAuthStore.getState().isAuthenticated;
+
+      if (isAuth && currentUser && (!currentToken || !isTokenExpired(currentToken, 15))) {
         setServerSessionChecked(true);
         return;
       }
@@ -95,8 +130,10 @@ export function AuthGuard({
 
         if (res.ok && !isCancelled) {
           const data = await res.json();
-          if (data?.user) {
-            setAuth(data.user, data.token || data.accessToken || null);
+          const fetchedUser = data?.user || data?.data?.user;
+          const fetchedToken = data?.token || data?.accessToken || data?.access_token || null;
+          if (fetchedUser) {
+            setAuth(fetchedUser, fetchedToken);
           }
         }
       } catch {
@@ -105,6 +142,7 @@ export function AuthGuard({
         if (!isCancelled) {
           setIsVerifyingServerSession(false);
           setServerSessionChecked(true);
+          useAuthStore.setState({ isLoading: false });
         }
       }
     }
@@ -133,8 +171,13 @@ export function AuthGuard({
     };
   }, [isAuthenticated, checkSessionExpiry]);
 
-  // Wait for client store hydration and server session verification before rendering or evaluating unauth
-  if (!hasHydrated || (!serverSessionChecked && !isAuthenticated)) {
+  const activeUser = user || useAuthStore.getState().user;
+  const isAuth = isAuthenticated || useAuthStore.getState().isAuthenticated;
+  const isReady = isAuth && Boolean(activeUser);
+
+  // If already authenticated with user, render children immediately!
+  // Otherwise, only wait for hydration and server session check if NOT yet ready
+  if (!isReady && (!hasHydrated || !serverSessionChecked)) {
     return fallback ? (
       <>{fallback}</>
     ) : (
@@ -148,9 +191,6 @@ export function AuthGuard({
       </div>
     );
   }
-
-  const activeUser = user || useAuthStore.getState().user;
-  const isAuth = isAuthenticated || useAuthStore.getState().isAuthenticated;
 
   // Not authenticated: render UnauthScreen with preserved callbackUrl
   if (!isAuth || !activeUser) {

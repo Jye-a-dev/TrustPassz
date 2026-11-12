@@ -112,16 +112,18 @@ function LoginFormContent() {
 
     // 3. Only auto-redirect if store has valid non-expired admin credentials
     const { user, token, isAuthenticated } = useAuthStore.getState();
-    if (isAuthenticated && user && token && !isTokenExpired(token)) {
+    if (isAuthenticated && user && (!token || !isTokenExpired(token))) {
       const isPrivileged =
         user.role === 'ADMIN' ||
         user.role === 'ARBITRATOR' ||
         user.role === 'SUPER_ADMIN';
 
       if (isPrivileged) {
-        const cookieToken = getAdminAuthCookie();
-        if (cookieToken !== token && token.split('.').length === 3) {
-          setAdminAuthCookie(token);
+        if (token && token.split('.').length === 3) {
+          const cookieToken = getAdminAuthCookie();
+          if (cookieToken !== token) {
+            setAdminAuthCookie(token);
+          }
         }
         window.location.assign(safeCallbackUrl || '/dashboard');
       }

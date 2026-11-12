@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth-store';
 import { clearAdminAuthCookie, isTokenExpired } from '@/lib/jwt-edge';
 import { Loader2 } from 'lucide-react';
@@ -13,11 +14,65 @@ interface AdminAuthGuardProps {
 const ALLOWED_ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN', 'ARBITRATOR'];
 
 export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, _hasHydrated, setAuth } = useAuthStore();
   const [isVerifyingSession, setIsVerifyingSession] = React.useState(false);
   const [sessionCheckComplete, setSessionCheckComplete] = React.useState(false);
 
+  // 1. Immediate Bypass for Public Routes: /login, /register, /403
+  const isPublicRoute =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/403' ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/403');
+
+  // Client mount: kick off Zustand rehydration and guarantee hydration flag flips
   React.useEffect(() => {
+    if (isPublicRoute) return;
+
+    if (typeof useAuthStore.persist?.rehydrate === 'function') {
+      void useAuthStore.persist.rehydrate();
+    }
+    if (typeof useAuthStore.persist?.hasHydrated === 'function' && useAuthStore.persist.hasHydrated()) {
+      useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+    } else {
+      const timer = setTimeout(() => {
+        useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isPublicRoute]);
+
+  // Failsafe Timeout 2000ms: prevent hanging in "Đang khởi tạo Enclave quản trị..."
+  React.useEffect(() => {
+    if (isPublicRoute) return;
+
+    const failsafeTimer = setTimeout(() => {
+      const state = useAuthStore.getState();
+      if (!state._hasHydrated || !sessionCheckComplete) {
+        console.warn('[AdminAuthGuard] Failsafe timeout 2000ms triggered. Forcing ready state.');
+        useAuthStore.setState({ _hasHydrated: true, isLoading: false });
+        setSessionCheckComplete(true);
+        setIsVerifyingSession(false);
+
+        if (!state.isAuthenticated || !state.user) {
+          const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/dashboard';
+          if (currentPath !== '/login') {
+            router.replace(`/login?force=1&callbackUrl=${encodeURIComponent(currentPath)}`);
+          }
+        }
+      }
+    }, 2000);
+
+    return () => clearTimeout(failsafeTimer);
+  }, [isPublicRoute, sessionCheckComplete, router]);
+
+  React.useEffect(() => {
+    if (isPublicRoute) return;
+
     let isCancelled = false;
 
     async function verifyOrRecoverAdminSession() {
@@ -48,18 +103,31 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
 
         if (res.ok && !isCancelled) {
           const data = await res.json();
-          if (data?.user && ALLOWED_ADMIN_ROLES.includes(data.user.role)) {
-            setAuth(data.user, data.token || data.accessToken || null);
+          const fetchedUser = data?.user || data?.data?.user;
+          const rawToken = data?.token || data?.accessToken || data?.access_token || null;
+          if (fetchedUser && ALLOWED_ADMIN_ROLES.includes(fetchedUser.role)) {
+            setAuth(fetchedUser, rawToken);
             setSessionCheckComplete(true);
             return;
           }
         }
+
+        // Response not ok (401/403/etc) or user is not privileged admin
+        if (!isCancelled) {
+          useAuthStore.setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
+          clearAdminAuthCookie();
+        }
       } catch {
-        // Non-fatal probe fallback
+        // Non-fatal probe fallback (network/server error)
+        if (!isCancelled) {
+          useAuthStore.setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
+          clearAdminAuthCookie();
+        }
       } finally {
         if (!isCancelled) {
           setIsVerifyingSession(false);
           setSessionCheckComplete(true);
+          useAuthStore.setState({ isLoading: false });
         }
       }
 
@@ -70,14 +138,16 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
 
         if (finalUser && !ALLOWED_ADMIN_ROLES.includes(finalUser.role)) {
           toast.error('403 Forbidden: Tài khoản không có thẩm quyền truy cập Admin Portal.');
-          window.location.replace('/403');
+          router.replace('/403');
           return;
         }
 
         if (!finalAuth || !finalUser) {
           clearAdminAuthCookie();
           const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/dashboard';
-          window.location.replace(`/login?force=1&callbackUrl=${encodeURIComponent(currentPath)}`);
+          if (currentPath !== '/login') {
+            router.replace(`/login?force=1&callbackUrl=${encodeURIComponent(currentPath)}`);
+          }
         }
       }
     }
@@ -87,7 +157,12 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     return () => {
       isCancelled = true;
     };
-  }, [_hasHydrated, setAuth]);
+  }, [isPublicRoute, _hasHydrated, setAuth, router]);
+
+  // Bypass public routes immediately: NEVER wait or block
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
 
   // Show loading during hydration and server session sync
   if (!_hasHydrated || (!sessionCheckComplete && !isAuthenticated)) {
