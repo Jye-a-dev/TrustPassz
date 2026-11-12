@@ -4,45 +4,19 @@ import * as React from "react";
 import Link from "next/link";
 import {
   Receipt,
-  CheckCircle2,
-  Clock,
-  ArrowUpRight,
+  PlusCircle,
   AlertCircle,
-  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { apiClient } from "@/lib/api-client";
-
-interface OrderEntity {
-  id: string;
-  orderNumber: string;
-  dealId?: string | null;
-  status: "PENDING" | "PAID" | "IN_INSPECTION" | "COMPLETED" | "CANCELLED" | "REFUNDED";
-  totalAmount: string | number;
-  paymentMetadata?: {
-    txHash?: string;
-    orderCode?: number | string;
-    paymentMethod?: string;
-  } | null;
-  product?: {
-    id: string;
-    title: string;
-    category?: string;
-  } | null;
-  deal?: {
-    id: string;
-    state?: string;
-    amount?: string | number;
-  } | null;
-  createdAt: string;
-}
+import { UserOrderCard, type OrderItem } from "@/components/orders/user-order-card";
 
 export default function UserOrdersPage() {
-  const [orders, setOrders] = React.useState<OrderEntity[]>([]);
+  const [orders, setOrders] = React.useState<OrderItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = React.useState<string>("ALL");
 
   React.useEffect(() => {
     let isMounted = true;
@@ -51,12 +25,12 @@ export default function UserOrdersPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await apiClient<OrderEntity[] | { data: OrderEntity[] }>("/api/v1/orders?limit=50");
+        const res = await apiClient<OrderItem[] | { data: OrderItem[] }>("/api/v1/orders?limit=50");
         if (!isMounted) return;
         const items = Array.isArray(res)
           ? res
-          : Array.isArray((res as { data: OrderEntity[] }).data)
-          ? (res as { data: OrderEntity[] }).data
+          : Array.isArray((res as { data: OrderItem[] }).data)
+          ? (res as { data: OrderItem[] }).data
           : [];
         setOrders(items);
       } catch (err: unknown) {
@@ -77,153 +51,128 @@ export default function UserOrdersPage() {
     };
   }, []);
 
+  const filteredOrders = React.useMemo(() => {
+    if (selectedFilter === "ALL") return orders;
+    if (selectedFilter === "PENDING") return orders.filter((o) => o.status === "PENDING");
+    if (selectedFilter === "INSPECTION") return orders.filter((o) => o.status === "IN_INSPECTION");
+    if (selectedFilter === "COMPLETED") return orders.filter((o) => o.status === "COMPLETED" || o.status === "PAID");
+    return orders;
+  }, [orders, selectedFilter]);
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-          <Receipt className="size-6 text-cyan-400" />
-          Lịch Sử Đơn Hàng &amp; Biên Lai Thanh Toán
-        </h1>
-        <p className="text-xs text-slate-400">
-          Tra cứu mã giao dịch, biên lai chuyển khoản VietQR và thông tin bảo vệ tự động.
-        </p>
+    <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 pb-12 sm:pb-16">
+      {/* Title & Subtitle */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 shrink-0">
+              <Receipt className="size-6" />
+            </div>
+            <span>Đơn Hàng &amp; Hóa Đơn Ký Quỹ</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Tra cứu mã đơn hàng, biên lai chuyển khoản VietQR PayOS và trạng thái mở két của từng đơn.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            asChild
+            className="min-h-[44px] px-4 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-1.5 shadow-xs transition-all border border-slate-950 cursor-pointer"
+          >
+            <Link href="/user/deals/create">
+              <PlusCircle className="size-4 mr-1" />
+              <span>+ Tạo Kèo Mới</span>
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Filter Category Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+        <button
+          type="button"
+          onClick={() => setSelectedFilter("ALL")}
+          className={`min-h-[44px] px-4 rounded-full font-bold transition-all shrink-0 border cursor-pointer ${
+            selectedFilter === "ALL"
+              ? "bg-rose-500 text-white border-rose-600 shadow-sm"
+              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-rose-300 hover:text-rose-600 shadow-2xs"
+          }`}
+        >
+          Tất Cả ({orders.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectedFilter("PENDING")}
+          className={`min-h-[44px] px-4 rounded-full font-semibold transition-all shrink-0 border cursor-pointer ${
+            selectedFilter === "PENDING"
+              ? "bg-rose-500 text-white border-rose-600 shadow-sm"
+              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-rose-300 hover:text-rose-600 shadow-2xs"
+          }`}
+        >
+          Chờ Quét VietQR ({orders.filter((o) => o.status === "PENDING").length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectedFilter("INSPECTION")}
+          className={`min-h-[44px] px-4 rounded-full font-semibold transition-all shrink-0 border cursor-pointer ${
+            selectedFilter === "INSPECTION"
+              ? "bg-rose-500 text-white border-rose-600 shadow-sm"
+              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-rose-300 hover:text-rose-600 shadow-2xs"
+          }`}
+        >
+          Đang Kiểm Tra ({orders.filter((o) => o.status === "IN_INSPECTION").length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectedFilter("COMPLETED")}
+          className={`min-h-[44px] px-4 rounded-full font-semibold transition-all shrink-0 border cursor-pointer ${
+            selectedFilter === "COMPLETED"
+              ? "bg-rose-500 text-white border-rose-600 shadow-sm"
+              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-rose-300 hover:text-rose-600 shadow-2xs"
+          }`}
+        >
+          Đã Hoàn Tất ({orders.filter((o) => o.status === "COMPLETED" || o.status === "PAID").length})
+        </button>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-950/30 flex items-center gap-2 text-rose-300 text-xs">
-          <AlertCircle className="size-4 shrink-0" />
+        <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 flex items-center gap-2.5 text-rose-700 dark:text-rose-400 text-xs font-medium">
+          <AlertCircle className="size-4 shrink-0 text-rose-600" />
           <span>{error}</span>
         </div>
       )}
 
+      {/* Responsive Card Grid (1 col mobile, 2 col tablet, 3 col desktop) */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="h-24 rounded-xl border border-slate-800 bg-slate-900/40 p-4 animate-pulse flex items-center justify-between"
+              className="h-64 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 animate-pulse space-y-4 shadow-sm"
             >
-              <div className="space-y-2 w-1/2">
-                <div className="h-4 bg-slate-800 rounded w-1/4" />
-                <div className="h-5 bg-slate-800 rounded w-2/3" />
+              <div className="flex justify-between items-center">
+                <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-28" />
+                <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-20" />
               </div>
-              <div className="h-8 bg-slate-800 rounded w-24" />
+              <div className="h-6 bg-slate-100 dark:bg-slate-800 rounded w-3/4" />
+              <div className="h-8 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
+              <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl w-full mt-auto" />
             </div>
           ))}
         </div>
-      ) : orders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         <EmptyState
-          title="Chưa có đơn hàng nào"
+          title="Chưa có đơn hàng nào trong mục này"
           description="Lịch sử đơn hàng và biên lai chuyển khoản VietQR PayOS sẽ hiển thị tại đây khi bạn thực hiện giao dịch."
-          actionLabel="Khám Phá Giao Dịch"
-          actionHref="/explore"
+          actionLabel="Khám Phá Sàn Kèo"
+          actionHref="/deals"
         />
       ) : (
-        <div className="space-y-3">
-          {orders.map((order) => {
-            const amountNum = Number(order.totalAmount || 0);
-            const title =
-              order.product?.title ||
-              `Đơn hàng #${order.orderNumber}`;
-            const orderCode =
-              order.paymentMetadata?.orderCode ||
-              order.orderNumber.replace(/[^0-9]/g, "").slice(-8) ||
-              "88990000";
-            const paymentMethod =
-              order.paymentMetadata?.paymentMethod || "VietQR (PayOS MBBank)";
-            const txHash = order.paymentMetadata?.txHash;
-            const dateStr = new Date(order.createdAt).toLocaleString("vi-VN", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-            const isCompleted = order.status === "COMPLETED";
-            const isInspection = order.status === "IN_INSPECTION";
-            const isPending = order.status === "PENDING";
-            const isPaid = order.status === "PAID";
-
-            return (
-              <div
-                key={order.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 hover:border-slate-700/80 transition-all shadow-sm"
-              >
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs font-bold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">
-                      #{orderCode}
-                    </span>
-
-                    {(isCompleted || isPaid) && (
-                      <Badge className="bg-emerald-950/80 border-emerald-500/40 text-emerald-300 text-[10px]">
-                        <CheckCircle2 className="size-3 mr-1" />
-                        Đã Thanh Toán ({order.status})
-                      </Badge>
-                    )}
-
-                    {isInspection && (
-                      <Badge className="bg-blue-950/80 border-blue-500/40 text-blue-300 text-[10px]">
-                        <Clock className="size-3 mr-1" />
-                        Đang Kiểm Tra Hàng
-                      </Badge>
-                    )}
-
-                    {isPending && (
-                      <Badge className="bg-amber-950/80 border-amber-500/40 text-amber-300 text-[10px]">
-                        <Clock className="size-3 mr-1" />
-                        Chờ Thanh Toán
-                      </Badge>
-                    )}
-                  </div>
-
-                  <h3 className="font-bold text-white text-sm sm:text-base">
-                    {title}
-                  </h3>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono">
-                    <span>{dateStr}</span>
-                    <span>•</span>
-                    <span>{paymentMethod}</span>
-                    {txHash && (
-                      <>
-                        <span>•</span>
-                        <a
-                          href={`https://sepolia.basescan.org/tx/${txHash}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-cyan-400 hover:text-cyan-300 flex items-center gap-0.5 transition-colors"
-                        >
-                          Tx: {txHash.slice(0, 10)}... <ArrowUpRight className="size-3" />
-                        </a>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
-                  <span className="font-mono font-black text-lg text-cyan-400">
-                    {amountNum.toLocaleString("vi-VN")} ₫
-                  </span>
-
-                  {order.dealId && (
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="min-h-10 border-slate-700 bg-slate-800 text-slate-200 text-xs hover:bg-slate-700"
-                    >
-                      <Link href={`/user/deals/${order.dealId}/vault`}>
-                        <KeyRound className="size-3.5 mr-1" />
-                        Xem Kho Nhận Hàng
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {filteredOrders.map((order) => (
+            <UserOrderCard key={order.id} order={order} />
+          ))}
         </div>
       )}
     </div>

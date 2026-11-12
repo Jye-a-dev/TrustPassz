@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { OracleRelayerService } from '../oracle-relayer/oracle-relayer.service';
+import { EmergencyAlertService } from '../modules/emergency-alert/emergency-alert.service';
 
 export interface HealthResponsePayload {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -42,6 +43,7 @@ export class HealthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly oracleRelayerService: OracleRelayerService,
+    @Optional() private readonly emergencyAlertService?: EmergencyAlertService,
   ) {}
 
   async checkHealth(deep = false): Promise<HealthResponsePayload> {
@@ -92,6 +94,20 @@ export class HealthService {
       dbLatencyMs = Date.now() - dbStartTime;
       dbError = err?.message || 'Database connection error';
       this.logger.error(`Database health check failed: ${dbError}`);
+      if (this.emergencyAlertService) {
+        await this.emergencyAlertService.triggerCriticalAlert({
+          service: 'HealthService (Neon PostgreSQL / Prisma)',
+          errorCode: 'DATABASE_CONNECTION_LOST',
+          summary: 'Mất Kết Nối Cơ Sở Dữ Liệu PostgreSQL / Pool Exhaustion',
+          message: `Health ping query 'SELECT 1' thất bại sau ${dbLatencyMs}ms: ${dbError}. Nguy cơ Neon PostgreSQL pool exhaustion, disconnect hoặc failover mạng.`,
+          stackTrace: err instanceof Error ? err.stack : undefined,
+          metadata: {
+            provider: 'Neon PostgreSQL (pgBouncer Pool)',
+            latencyMs: dbLatencyMs,
+            error: dbError,
+          },
+        });
+      }
     }
 
     // On-chain Relayer & Base Sepolia block timestamp check

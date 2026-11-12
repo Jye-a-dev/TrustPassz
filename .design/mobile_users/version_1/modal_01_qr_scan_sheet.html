@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile - Quét Mã QR Scanner Viewfinder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes scanLaser {
+      0% { top: 10%; opacity: 0.8; }
+      50% { top: 85%; opacity: 1; }
+      100% { top: 10%; opacity: 0.8; }
+    }
+    .animate-laser { animation: scanLaser 2.2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- PHONE DEVICE FRAME WRAPPER (393px x 852px) -->
+  <div class="relative w-[393px] h-[852px] bg-[#0B0F17] rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between">
+    
+    <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
+    <div class="h-11 w-full pt-3 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+      <span class="font-semibold text-sm tracking-tight">9:41</span>
+      <div class="w-24 h-6 bg-black rounded-full -mt-1 shadow-inner flex items-center justify-end pr-2.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/60 animate-pulse"></div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
+        <svg class="w-4 h-4 fill-slate-200" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.22c3.43 0 6.55 1.39 8.84 3.64l-8.84 8.84-8.84-8.84C5.45 8.61 8.57 7.22 12 7.22z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-300 rounded-sm p-0.5 flex items-center"><div class="w-3.5 h-1.5 bg-slate-100 rounded-2xs"></div></div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTAINER WITH DIMMED PARENT UNDERNEATH & ACTIVE MODAL OVERLAY -->
+    <div class="flex-1 overflow-hidden relative flex flex-col">
+      
+      <!-- DIMMED PARENT BACKGROUND SCREEN (HOME DASHBOARD) -->
+      <div class="absolute inset-0 px-4 pt-1 pb-4 flex flex-col gap-3 opacity-30 pointer-events-none select-none blur-[1px]">
+        <div class="flex items-center justify-between pt-1">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-cyan-600"></div>
+            <div>
+              <div class="h-3 w-20 bg-slate-700 rounded"></div>
+              <div class="h-2 w-14 bg-slate-800 rounded mt-1"></div>
+            </div>
+          </div>
+          <div class="h-8 w-24 bg-slate-800 rounded-full"></div>
+        </div>
+        <div class="h-36 rounded-2xl bg-[#0F172A] border border-slate-800 p-4"></div>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="h-18 bg-[#0F172A] rounded-2xl"></div>
+          <div class="h-18 bg-[#0F172A] rounded-2xl"></div>
+          <div class="h-18 bg-[#0F172A] rounded-2xl"></div>
+        </div>
+        <div class="h-24 bg-[#0F172A] rounded-2xl mt-2"></div>
+      </div>
+
+      <!-- ACTIVE MODAL OVERLAY: CAMERA QR SCANNER & BOTTOM SHEET -->
+      <div class="relative z-40 flex-1 flex flex-col justify-between bg-black/80 backdrop-blur-md">
+        
+        <!-- Scanner Top Controls Header -->
+        <div class="px-5 pt-3 pb-2 flex items-center justify-between">
+          <!-- Close Button >= 44px -->
+          <button type="button" class="w-11 h-11 rounded-full bg-slate-900/80 border border-slate-700 flex items-center justify-center text-slate-200 cursor-pointer">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          
+          <div class="text-center">
+            <span class="text-xs font-bold text-white block">Quét VietQR &amp; Mã Deal</span>
+            <span class="text-[10px] text-cyan-400 font-mono">Tự động nhận diện</span>
+          </div>
+
+          <!-- Flash Toggle Button >= 44px -->
+          <button type="button" class="w-11 h-11 rounded-full bg-slate-900/80 border border-slate-700 flex items-center justify-center text-amber-400 cursor-pointer">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </button>
+        </div>
+
+        <!-- Center Viewfinder with Laser Scanner -->
+        <div class="my-auto flex flex-col items-center px-6">
+          <div class="relative w-64 h-64 rounded-3xl overflow-hidden bg-slate-950/40 border border-cyan-500/20 shadow-2xl flex items-center justify-center">
+            
+            <!-- 4 Glowing Cyan Corners -->
+            <div class="absolute top-2 left-2 w-8 h-8 border-t-3 border-l-3 border-cyan-400 rounded-tl-lg"></div>
+            <div class="absolute top-2 right-2 w-8 h-8 border-t-3 border-r-3 border-cyan-400 rounded-tr-lg"></div>
+            <div class="absolute bottom-2 left-2 w-8 h-8 border-b-3 border-l-3 border-cyan-400 rounded-bl-lg"></div>
+            <div class="absolute bottom-2 right-2 w-8 h-8 border-b-3 border-r-3 border-cyan-400 rounded-br-lg"></div>
+
+            <!-- Animated Laser Scan Line -->
+            <div class="absolute inset-x-3 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_rgba(6,182,212,1)] animate-laser"></div>
+
+            <!-- Guidance Center Crosshair -->
+            <div class="w-8 h-8 border border-dashed border-cyan-500/40 rounded-full flex items-center justify-center">
+              <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></div>
+            </div>
+
+          </div>
+
+          <p class="text-xs text-slate-300 text-center mt-4 max-w-[260px] leading-relaxed">
+            Căn chỉnh mã <strong>VietQR Napas</strong> hoặc <strong>mã Kèo ký quỹ</strong> vào chính giữa khung hình camera.
+          </p>
+        </div>
+
+        <!-- Bottom Sheet Actions Card -->
+        <div class="rounded-t-[32px] bg-[#0F172A] border-t border-slate-800 p-5 shadow-2xl space-y-3">
+          <!-- Grab Handle -->
+          <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto -mt-1 mb-2"></div>
+
+          <!-- Upload from Library CTA >= 48px -->
+          <button type="button" class="w-full h-12 rounded-xl bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-colors">
+            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+            <span>Tải Ảnh Mã QR Từ Thư Viện Máy</span>
+          </button>
+
+          <!-- Input Manual Deal ID CTA >= 44px -->
+          <button type="button" class="w-full h-10 rounded-xl bg-transparent hover:bg-slate-900 text-slate-400 font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>Hoặc nhập mã giao dịch bằng tay</span>
+            <span>→</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM HOME INDICATOR -->
+    <div class="w-full shrink-0 z-50">
+      <div class="py-2 flex justify-center bg-[#0B0F17]">
+        <div class="w-32 h-1 bg-slate-600 rounded-full"></div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -17,6 +17,7 @@ import { PrismaService } from '../../../database/prisma.service';
 import { SupabaseService } from '../../../integrations/supabase/supabase.service';
 import { RequestUser } from '../../../common/decorators/current-user.decorator';
 import { AsyncMutex } from '../../../oracle-relayer/async-mutex';
+import { NotificationsService } from '../../notifications/notifications.service';
 import {
   CreateSolanaIntentDto,
   DepositStatusResponseDto,
@@ -40,6 +41,7 @@ export class SolanaDepositService {
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly supabaseService?: SupabaseService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {
     const rpcUrl =
       process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
@@ -301,6 +303,7 @@ export class SolanaDepositService {
           DealState.DEPOSITED,
         );
       }
+      this.notificationsService?.notifyDepositSuccess(deal, signature);
 
       this.logger.log(
         `Deal ${deal.id} nạp tiền Solana thành công qua tx ${signature} -> DEPOSITED`,

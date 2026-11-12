@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz - 08 Thanh Toán Ký Quỹ VietQR (Version 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            rose: {
+              50: '#FFF1F2',
+              100: '#FFE4E6',
+              500: '#F43F5E',
+              600: '#E11D48',
+              700: '#BE123C',
+            },
+            emerald: {
+              50: '#ECFDF5',
+              100: '#D1FAE5',
+              500: '#10B981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.01em;
+    }
+  </style>
+</head>
+<body class="bg-[#F6F7F9] text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between overflow-x-hidden pb-20 lg:pb-0">
+
+  <!-- ================= TOP NOTICE BAR ================= -->
+  <div role="banner" class="w-full bg-amber-50 border-b border-amber-200 px-3 sm:px-6 py-2 text-xs text-amber-900">
+    <div class="w-full max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 font-bold text-amber-800 shrink-0">
+          <svg class="size-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Chế Độ Sandbox
+        </span>
+        <span class="truncate">Môi trường thử nghiệm bảo chứng tự động qua cổng thanh toán PayOS Napas 24/7.</span>
+      </div>
+      <a href="07_deal_room.html" class="text-xs font-semibold text-rose-600 hover:underline shrink-0">
+        Hủy &amp; quay lại kèo
+      </a>
+    </div>
+  </div>
+
+  <!-- ================= HEADER ================= -->
+    <!-- ================= E-COMMERCE STICKY HEADER ================= -->
+  <header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-3 lg:gap-6">
+        
+        <!-- Khối Trái: Logo TrustPassz + Nút "Danh mục" -->
+        <div class="flex items-center gap-3 lg:gap-4 shrink-0">
+          <a href="01_landing_page.html" class="flex items-center gap-2.5 group shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-lg font-bold text-slate-900 tracking-tight leading-none">TrustPassz</span>
+              <span class="text-[10px] text-slate-400 font-medium tracking-wide mt-0.5">SÀN KÝ QUỸ AN TOÀN</span>
+            </div>
+          </a>
+
+          <!-- Nút "Danh mục" (có icon menu, có border) -->
+          <a href="02_explore.html" class="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 shadow-sm active:translate-y-0.5 transition-all shrink-0">
+            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <span>Danh mục</span>
+          </a>
+        </div>
+
+        <!-- Khối Giữa: Thanh tìm kiếm lớn Marketplace (Chiếm toàn bộ không gian còn lại) -->
+        <div class="hidden sm:flex flex-1 max-w-2xl mx-2 lg:mx-4">
+          <form action="02_explore.html" method="get" class="w-full relative flex items-center rounded-xl border border-slate-300 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-100 bg-white transition-all shadow-sm">
+            <div class="pl-3.5 text-slate-400 flex items-center pointer-events-none">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input type="text" name="q" placeholder="Tìm tài khoản, tài liệu số, mã nguồn, đồ công nghệ..." class="w-full py-2.5 pl-2.5 pr-24 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none" />
+            <button type="submit" class="absolute right-1 px-3.5 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs border border-rose-600 shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <span>Tìm kiếm</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Khối Phải (Cụm hành động người dùng) -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <!-- Nút "Đơn hàng" (icon túi hàng/biên lai, text, viền mỏng) -->
+          <a href="11_orders.html" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm active:translate-y-0.5 transition-all shrink-0" title="Quản lý đơn hàng">
+            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <span>Đơn hàng</span>
+          </a>
+
+          <!-- Nút "Két số / Đang giữ" (Badge số dư ký quỹ có viền) -->
+          <a href="09_digital_vault.html" class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-semibold shadow-sm active:translate-y-0.5 transition-all shrink-0" title="Két số bảo chứng an toàn">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Két số:</span>
+            <span class="font-mono font-bold text-emerald-700">25.450.000đ</span>
+          </a>
+
+          <!-- Nút "Đăng bán / Tạo kèo" (Nút CTA chính, màu Rose-500 có viền tone-sur-tone đậm hơn) -->
+          <a href="06_deal_create.html" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs sm:text-sm border border-rose-600 shadow-sm active:translate-y-0.5 transition-all shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Đăng bán / Tạo kèo</span>
+          </a>
+
+          <!-- Nút "Đăng nhập" hoặc Avatar cá nhân -->
+          <a href="05_user_dashboard.html" class="inline-flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-sm transition-all" title="Tài khoản cá nhân">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 text-white font-bold text-xs flex items-center justify-center border border-rose-600">
+              A
+            </div>
+            <span class="hidden xl:inline text-xs font-semibold text-slate-800">Admin</span>
+          </a>
+
+          <!-- Mobile Hamburger Button (có border) -->
+          <button type="button" class="md:hidden border border-slate-200 rounded-lg p-2 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-sm" aria-label="Menu" onclick="const d=document.getElementById('mobile-nav-drawer'); if(d) d.classList.toggle('hidden');">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Search Bar (Collapsible/compact below header on small mobile screens) -->
+      <div class="sm:hidden pb-2.5 pt-1">
+        <form action="02_explore.html" method="get" class="relative flex items-center rounded-xl border border-slate-300 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-100 bg-white shadow-sm">
+          <div class="pl-3 text-slate-400 flex items-center pointer-events-none">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input type="text" name="q" placeholder="Tìm tài khoản, tài liệu số..." class="w-full py-1.5 pl-2 pr-20 text-xs text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none" />
+          <button type="submit" class="absolute right-1 px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold text-[11px] border border-rose-600 shadow-sm">
+            Tìm
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Drawer Menu -->
+    <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2 text-xs font-medium shadow-lg">
+      <a href="02_explore.html" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700">
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span>Danh mục sản phẩm</span>
+      </a>
+      <a href="11_orders.html" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700">
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <span>Quản lý Đơn hàng</span>
+      </a>
+      <a href="09_digital_vault.html" class="flex items-center justify-between px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Két số / Đang giữ</span>
+        </span>
+        <span class="font-mono font-bold text-emerald-700">25.450.000đ</span>
+      </a>
+      <div class="pt-2 flex items-center gap-2">
+        <a href="03_login.html" class="flex-1 text-center py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium shadow-sm">Đăng nhập</a>
+        <a href="04_register.html" class="flex-1 text-center py-2 rounded-xl border border-rose-600 bg-rose-500 hover:bg-rose-600 text-white font-semibold shadow-sm">Đăng ký</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= CHECKOUT 2-COLUMN MAIN CONTENT ================= -->
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-12 sm:pb-16 space-y-8">
+    
+    <!-- Top Status Indicator -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200 gap-2">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <span>Quét Mã VietQR Nạp Két Bảo Chứng</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500">
+          Tiền chuyển khoản sẽ được khóa tự động vào két an toàn. Tiền chỉ chuyển cho người bán khi bạn kiểm tra và hài lòng.
+        </p>
+      </div>
+
+      <span class="bg-amber-50 border border-amber-300 text-amber-800 text-xs px-3.5 py-1 rounded-full flex items-center gap-2 font-bold self-start sm:self-auto shrink-0">
+        <span class="size-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span>Chờ Quét Mã VietQR</span>
+      </span>
+    </div>
+
+    <!-- 2-Column Checkout Grid: Left (7 cols: QR Code & Bank Info) + Right (5 cols: Order Summary & Fast Copy) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      
+      <!-- ================= LEFT COLUMN: QR CODE & PAYMENT GATEWAY (lg:col-span-7) ================= -->
+      <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
+        
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2.5">
+            <span class="p-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200">
+              <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
+            </span>
+            <div>
+              <h2 class="font-bold text-sm sm:text-base text-slate-900">Mã VietQR Động Chuẩn Napas 24/7</h2>
+              <span class="text-xs text-slate-500">Mở app mọi ngân hàng nội địa để quét tự động</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-mono text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+            TỰ ĐỘNG KHÓA KÉT
+          </span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-6 justify-center">
+          
+          <!-- VietQR Box Frame -->
+          <div class="p-5 sm:p-6 my-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-center shrink-0">
+            <!-- Simulated QR SVG Graphic -->
+            <svg class="size-48 sm:size-56 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+              <rect x="5" y="5" width="25" height="25" rx="3" fill="#0F172A"/>
+              <rect x="10" y="10" width="15" height="15" rx="1" fill="#FFFFFF"/>
+              <rect x="13" y="13" width="9" height="9" fill="#0F172A"/>
+
+              <rect x="70" y="5" width="25" height="25" rx="3" fill="#0F172A"/>
+              <rect x="75" y="10" width="15" height="15" rx="1" fill="#FFFFFF"/>
+              <rect x="78" y="13" width="9" height="9" fill="#0F172A"/>
+
+              <rect x="5" y="70" width="25" height="25" rx="3" fill="#0F172A"/>
+              <rect x="10" y="75" width="15" height="15" rx="1" fill="#FFFFFF"/>
+              <rect x="13" y="78" width="9" height="9" fill="#0F172A"/>
+
+              <circle cx="40" cy="15" r="3" fill="#0F172A"/>
+              <circle cx="50" cy="15" r="3" fill="#0F172A"/>
+              <circle cx="60" cy="15" r="3" fill="#0F172A"/>
+              <circle cx="35" cy="25" r="3" fill="#0F172A"/>
+              <circle cx="45" cy="35" r="3" fill="#0F172A"/>
+              <circle cx="55" cy="45" r="3" fill="#0F172A"/>
+              <circle cx="65" cy="55" r="3" fill="#0F172A"/>
+              <circle cx="75" cy="65" r="3" fill="#0F172A"/>
+              <circle cx="85" cy="75" r="3" fill="#0F172A"/>
+              <circle cx="40" cy="75" r="3" fill="#0F172A"/>
+              <circle cx="50" cy="85" r="3" fill="#0F172A"/>
+              <circle cx="60" cy="75" r="3" fill="#0F172A"/>
+
+              <!-- Center Logo Shield -->
+              <circle cx="50" cy="50" r="11" fill="#F43F5E"/>
+              <path d="M50 43 L56 46 L56 52 L50 56 L44 52 L44 46 Z" fill="#FFFFFF"/>
+            </svg>
+            <div class="text-[10px] font-mono font-bold text-slate-500 mt-2 tracking-wider">
+              VIETQR.IO • MBBANK PAYOS
+            </div>
+          </div>
+
+          <!-- Countdown & Instruction Details -->
+          <div class="space-y-4 text-center sm:text-left flex-1">
+            <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+              <span class="text-xs text-amber-900 font-semibold block">Mã QR có hiệu lực trong:</span>
+              <div class="font-mono text-2xl font-black text-amber-700">14 phút 35 giây</div>
+              <p class="text-[11px] text-amber-800">Sau 15 phút, mã sẽ tự động hủy nếu chưa nhận được giao dịch.</p>
+            </div>
+
+            <div class="space-y-2 text-xs text-slate-600">
+              <div class="flex items-center gap-2">
+                <span class="flex size-5 rounded-full bg-rose-100 text-rose-600 font-bold items-center justify-center text-[10px]">1</span>
+                <span>Mở app ngân hàng (VCB, MB, Techcom, BIDV...)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="flex size-5 rounded-full bg-rose-100 text-rose-600 font-bold items-center justify-center text-[10px]">2</span>
+                <span>Chọn Quét QR &amp; quét mã bên cạnh</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="flex size-5 rounded-full bg-rose-100 text-rose-600 font-bold items-center justify-center text-[10px]">3</span>
+                <span>Giữ nguyên nội dung chuyển khoản để két khóa tự động</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Direct Action: I Have Transferred Button -->
+        <div class="pt-4 border-t border-slate-100">
+          <a href="17_modal_transfer_success.html" class="w-full min-h-[50px] rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-sm sm:text-base shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all border border-emerald-700">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Tôi Đã Chuyển Tiền - Kiểm Tra Trạng Thái Két</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- ================= RIGHT COLUMN: ORDER SUMMARY & 1-CLICK COPY (lg:col-span-5) ================= -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Order Summary Card -->
+        <div class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-5 shadow-sm">
+          <h3 class="font-bold text-sm text-slate-900 uppercase font-mono tracking-wider pb-3 border-b border-slate-100">
+            TÓM TẮT ĐƠN HÀNG
+          </h3>
+
+          <div class="flex gap-3 items-start pb-4 border-b border-slate-100">
+            <div class="size-14 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shrink-0">
+              <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div class="space-y-1">
+              <span class="text-[10px] font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Code / Git</span>
+              <h4 class="text-xs sm:text-sm font-semibold text-slate-900 leading-tight">
+                Fullstack Next.js SaaS Boilerplate (Clean Architecture &amp; Supabase)
+              </h4>
+              <div class="text-[11px] text-slate-500 font-mono">Người bán: TranDev (Pro Seller)</div>
+            </div>
+          </div>
+
+          <!-- Price Calculation -->
+          <div class="p-4 sm:p-5 my-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3 text-xs">
+            <div class="flex items-center justify-between text-slate-600">
+              <span>Giá sản phẩm:</span>
+              <span class="font-mono font-bold text-slate-900">1.500.000 ₫</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-600">
+              <span>Phí dịch vụ bảo chứng (Escrow):</span>
+              <span class="font-mono text-emerald-700 font-bold">0 ₫ (Miễn phí)</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-600">
+              <span>Thời hạn dùng thử &amp; nghiệm thu:</span>
+              <span class="font-mono font-bold text-slate-900">24 Giờ</span>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-baseline justify-between">
+              <span class="font-bold text-slate-900 text-sm">TỔNG THANH TOÁN:</span>
+              <span class="font-mono text-2xl font-black text-rose-600">1.500.000 ₫</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1-Click Copy Transfer Info Box -->
+        <div class="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-5 shadow-sm">
+          <h3 class="font-bold text-xs uppercase font-mono tracking-wider text-slate-800">
+            THÔNG TIN CHUYỂN KHOẢN THỦ CÔNG
+          </h3>
+          <p class="text-[11px] text-slate-500">Nếu không thể quét QR, vui lòng chuyển khoản chính xác thông tin sau:</p>
+
+          <div class="space-y-3 text-xs font-mono">
+            <!-- Bank Name -->
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 font-sans block">NGÂN HÀNG THỤ HƯỞNG</span>
+                <span class="font-bold text-slate-900">MBBank (Quân Đội)</span>
+              </div>
+              <span class="text-[10px] text-slate-500 font-sans">Napas 24/7</span>
+            </div>
+
+            <!-- Account Number with Copy -->
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 font-sans block">SỐ TÀI KHOẢN</span>
+                <span class="font-bold text-slate-900 text-sm">09882940294</span>
+              </div>
+              <button type="button" class="min-h-[36px] px-3 rounded-lg bg-white border border-slate-200 hover:border-rose-400 text-rose-600 font-sans font-bold text-xs shadow-2xs transition-colors flex items-center gap-1">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                <span>Sao chép</span>
+              </button>
+            </div>
+
+            <!-- Account Holder -->
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 font-sans block">CHỦ TÀI KHOẢN</span>
+                <span class="font-bold text-slate-900">TRUSTPASSZ ESCROW CORP</span>
+              </div>
+              <span class="text-emerald-700 text-[10px] font-sans font-bold">✓ Xác thực</span>
+            </div>
+
+            <!-- Transfer Content with Copy -->
+            <div class="p-3 rounded-xl bg-rose-50/60 border border-rose-200 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-rose-700 font-sans block font-bold">NỘI DUNG CHUYỂN KHOẢN (BẮT BUỘC)</span>
+                <span class="font-bold text-rose-600 text-sm">TPZ 84920</span>
+              </div>
+              <button type="button" class="min-h-[36px] px-3 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans font-bold text-xs shadow-2xs transition-colors flex items-center gap-1 border border-rose-700">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                <span>Sao chép</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="mt-12 sm:mt-16 lg:mt-20 border-t border-slate-200/80 bg-white text-slate-400 py-10 sm:py-12 text-center text-xs">
+    © 2026 TrustPassz • Cổng thanh toán bảo chứng tự động qua PayOS.
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+{
+  "$schema": "https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages",
+  "scenarios": {
+    "scenario_1_new_deal_or_offer_updated": {
+      "description": "Kich ban 1: Deal moi hoac doi tac cap nhat gia tren Bargain Slider -> Dieu huong /deal-room",
+      "message": {
+        "token": "<DEVICE_FCM_TOKEN>",
+        "notification": {
+          "title": "Đề xuất giá mới từ đối tác",
+          "body": "Người mua vừa cập nhật mức giá thỏa thuận 2,450,000 VND cho Cloud Enterprise Tier 3."
+        },
+        "data": {
+          "type": "OFFER_UPDATED",
+          "dealId": "d798a623-289b-4467-bc18-2e21b711a19f",
+          "dealTitle": "Cloud Enterprise - Tier 3",
+          "price": "2450000",
+          "currency": "VND",
+          "proposedBy": "buyer_0x4b21",
+          "route": "/deal-room",
+          "action": "VIEW_DEAL"
+        },
+        "android": {
+          "priority": "HIGH",
+          "notification": {
+            "channel_id": "trustpassz_escrow_alerts",
+            "color": "#10B981",
+            "icon": "ic_notification",
+            "sound": "default",
+            "default_sound": true,
+            "default_vibrate_timings": true,
+            "notification_priority": "PRIORITY_HIGH",
+            "click_action": "FLUTTER_NOTIFICATION_CLICK"
+          }
+        },
+        "apns": {
+          "headers": {
+            "apns-priority": "10",
+            "apns-push-type": "alert"
+          },
+          "payload": {
+            "aps": {
+              "alert": {
+                "title": "Đề xuất giá mới từ đối tác",
+                "body": "Người mua vừa cập nhật mức giá thỏa thuận 2,450,000 VND cho Cloud Enterprise Tier 3."
+              },
+              "badge": 1,
+              "sound": "default",
+              "content-available": 1
+            }
+          }
+        }
+      }
+    },
+    "scenario_2_deposit_success": {
+      "description": "Kich ban 2: Webhook VietQR / Solana thanh toan coc thanh cong -> Dieu huong /deal-room hien thi buoc mo ket",
+      "message": {
+        "token": "<DEVICE_FCM_TOKEN>",
+        "notification": {
+          "title": "Xác nhận cọc tiền thành công",
+          "body": "Khoản ký quỹ 5,000,000 VND đã vào hợp đồng bảo chứng. Sẵn sàng mở két Digital Vault."
+        },
+        "data": {
+          "type": "DEPOSIT_SUCCESS",
+          "dealId": "d798a623-289b-4467-bc18-2e21b711a19f",
+          "dealTitle": "Cloud Enterprise - Tier 3",
+          "amount": "5000000",
+          "currency": "VND",
+          "txHash": "0x9812f8a42cbe81248011fa9230578129712a8398104812f0",
+          "status": "DEPOSITED",
+          "route": "/deal-room",
+          "action": "INSPECT_ESCROW"
+        },
+        "android": {
+          "priority": "HIGH",
+          "notification": {
+            "channel_id": "trustpassz_escrow_alerts",
+            "color": "#10B981",
+            "icon": "ic_notification",
+            "sound": "default",
+            "default_sound": true,
+            "default_vibrate_timings": true,
+            "notification_priority": "PRIORITY_HIGH",
+            "click_action": "FLUTTER_NOTIFICATION_CLICK"
+          }
+        },
+        "apns": {
+          "headers": {
+            "apns-priority": "10",
+            "apns-push-type": "alert"
+          },
+          "payload": {
+            "aps": {
+              "alert": {
+                "title": "Xác nhận cọc tiền thành công",
+                "body": "Khoản ký quỹ 5,000,000 VND đã vào hợp đồng bảo chứng. Sẵn sàng mở két Digital Vault."
+              },
+              "badge": 1,
+              "sound": "default",
+              "content-available": 1
+            }
+          }
+        }
+      }
+    },
+    "scenario_3_vault_unlocked": {
+      "description": "Kich ban 3: Nguoi mua mo ket Digital Vault AES-256-GCM / Bat dau dong kiem -> Dieu huong /vault",
+      "message": {
+        "token": "<DEVICE_FCM_TOKEN>",
+        "notification": {
+          "title": "Két số đã mở - Bắt đầu đồng kiểm",
+          "body": "Digital Vault AES-256-GCM đã được giải mã. Cửa sổ nghiệm thu đang đếm ngược."
+        },
+        "data": {
+          "type": "VAULT_UNLOCKED",
+          "dealId": "d798a623-289b-4467-bc18-2e21b711a19f",
+          "dealTitle": "Cloud Enterprise - Tier 3",
+          "vaultId": "vlt_8921bca9104",
+          "inspectionDeadline": "2026-11-12T16:30:00.000Z",
+          "route": "/vault",
+          "action": "START_INSPECTION"
+        },
+        "android": {
+          "priority": "HIGH",
+          "notification": {
+            "channel_id": "trustpassz_escrow_alerts",
+            "color": "#10B981",
+            "icon": "ic_notification",
+            "sound": "default",
+            "default_sound": true,
+            "default_vibrate_timings": true,
+            "notification_priority": "PRIORITY_HIGH",
+            "click_action": "FLUTTER_NOTIFICATION_CLICK"
+          }
+        },
+        "apns": {
+          "headers": {
+            "apns-priority": "10",
+            "apns-push-type": "alert"
+          },
+          "payload": {
+            "aps": {
+              "alert": {
+                "title": "Két số đã mở - Bắt đầu đồng kiểm",
+                "body": "Digital Vault AES-256-GCM đã được giải mã. Cửa sổ nghiệm thu đang đếm ngược."
+              },
+              "badge": 1,
+              "sound": "default",
+              "content-available": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

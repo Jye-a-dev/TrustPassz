@@ -27,6 +27,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { FiatOnrampModule } from './modules/fiat-onramp/fiat-onramp.module';
+import { EmergencyAlertModule } from './modules/emergency-alert/emergency-alert.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { FiatOnrampModule } from './modules/fiat-onramp/fiat-onramp.module';
     AnalyticsModule,
     AuditLogModule,
     FiatOnrampModule,
+    EmergencyAlertModule,
   ],
   controllers: [AppController],
   providers: [

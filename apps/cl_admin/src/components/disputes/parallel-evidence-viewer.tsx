@@ -79,7 +79,7 @@ export function ParallelEvidenceViewer({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Control Header: Sync scroll & PII Masking Switch */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-3 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 text-xs shadow-xs">
         <div className="flex items-center space-x-2">
           <Button
             type="button"
@@ -87,13 +87,13 @@ export function ParallelEvidenceViewer({
             size="sm"
             onClick={() => setIsSyncScroll(!isSyncScroll)}
             className={cn(
-              'min-h-[44px] border-slate-800 text-xs font-mono gap-1.5 transition-all',
+              'min-h-[40px] text-xs font-mono gap-1.5 transition-all shadow-2xs',
               isSyncScroll
-                ? 'border-cyan-500/60 bg-cyan-950/40 text-cyan-300'
-                : 'bg-[#0B0F17] text-slate-400 hover:text-slate-200'
+                ? 'border-slate-300 bg-slate-100 text-slate-900 font-semibold'
+                : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             )}
           >
-            {isSyncScroll ? <Link2 className="h-4 w-4 text-cyan-400" /> : <Unlink className="h-4 w-4 text-slate-500" />}
+            {isSyncScroll ? <Link2 className="h-4 w-4 text-slate-900" /> : <Unlink className="h-4 w-4 text-slate-400" />}
             <span>{isSyncScroll ? 'Đồng bộ cuộn: BẬT' : 'Đồng bộ cuộn: TẮT'}</span>
           </Button>
 
@@ -112,9 +112,9 @@ export function ParallelEvidenceViewer({
               variant="outline"
               size="sm"
               onClick={() => setIsPiiUnlocked(false)}
-              className="min-h-[44px] border-amber-600/60 bg-amber-950/40 text-amber-300 hover:bg-amber-900/50 text-xs font-mono gap-1.5"
+              className="min-h-[40px] border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-mono gap-1.5"
             >
-              <EyeOff className="h-4 w-4 text-amber-400" />
+              <EyeOff className="h-4 w-4 text-amber-600" />
               <span>Khóa lại PII (Che thông tin)</span>
             </Button>
           ) : (
@@ -123,9 +123,9 @@ export function ParallelEvidenceViewer({
               variant="outline"
               size="sm"
               onClick={() => setUnlockConfirmOpen(true)}
-              className="min-h-[44px] border-slate-700 bg-[#0B0F17] hover:border-amber-500/60 text-slate-300 text-xs font-mono gap-1.5"
+              className="min-h-[40px] border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-mono gap-1.5 shadow-2xs"
             >
-              <Lock className="h-4 w-4 text-amber-400" />
+              <Lock className="h-4 w-4 text-slate-600" />
               <span>Mở khóa xem PII (Ghi log Audit)</span>
             </Button>
           )}
@@ -133,15 +133,15 @@ export function ParallelEvidenceViewer({
       </div>
 
       {/* Mobile Tab Switcher */}
-      <div className="flex lg:hidden rounded-lg border border-slate-800 bg-[#0F172A] p-1">
+      <div className="flex lg:hidden rounded-lg border border-slate-200 bg-slate-100 p-1">
         <button
           type="button"
           onClick={() => setActiveMobileTab('seller')}
           className={cn(
-            'flex-1 min-h-[44px] rounded-md text-xs font-medium transition-all',
+            'flex-1 min-h-[40px] rounded-md text-xs font-medium transition-all',
             activeMobileTab === 'seller'
-              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/40'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+              : 'text-slate-500 hover:text-slate-900'
           )}
         >
           Cam Kết Seller
@@ -150,13 +150,13 @@ export function ParallelEvidenceViewer({
           type="button"
           onClick={() => setActiveMobileTab('buyer')}
           className={cn(
-            'flex-1 min-h-[44px] rounded-md text-xs font-medium transition-all',
+            'flex-1 min-h-[40px] rounded-md text-xs font-medium transition-all',
             activeMobileTab === 'buyer'
-              ? 'bg-amber-950/80 text-amber-300 border border-amber-800/40'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+              : 'text-slate-500 hover:text-slate-900'
           )}
         >
-          Chứng Cứ Buyer
+          Bằng Chứng Buyer
         </button>
       </div>
 

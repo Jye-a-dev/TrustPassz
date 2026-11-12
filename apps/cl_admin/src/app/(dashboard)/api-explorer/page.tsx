@@ -32,7 +32,7 @@ const PRESETS: PresetEndpoint[] = [
     endpoint: '/api/v1/deals/count',
   },
   {
-    name: '2. Danh sách Kèo Escrow (GET)',
+    name: '2. Danh sách Giao dịch Escrow (GET)',
     method: 'GET',
     endpoint: '/api/v1/deals?page=1&limit=5',
   },
@@ -159,45 +159,56 @@ export default function ApiExplorerPage() {
   const getMethodBadgeClass = (m: HttpMethod) => {
     switch (m) {
       case 'GET':
-        return 'border-emerald-800 text-emerald-400 bg-emerald-950/40';
+        return 'border-emerald-200 text-emerald-700 bg-emerald-50';
       case 'POST':
-        return 'border-cyan-800 text-cyan-400 bg-cyan-950/40';
+        return 'border-cyan-200 text-cyan-700 bg-cyan-50';
       case 'PATCH':
-        return 'border-amber-800 text-amber-400 bg-amber-950/40';
+        return 'border-amber-200 text-amber-700 bg-amber-50';
       case 'DELETE':
-        return 'border-rose-800 text-rose-400 bg-rose-950/40';
+        return 'border-rose-200 text-rose-700 bg-rose-50';
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
-            <Terminal className="h-6 w-6 text-cyan-400" />
-            Universal Super Admin API Explorer
-          </h2>
-          <p className="text-xs text-slate-400">
-            Trực tiếp gọi và kiểm tra các endpoint RESTful `/api/v1/*` của Backend NestJS (:3001) với JWT Admin.
-          </p>
+      {/* Top Header & Breadcrumb */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3">
+        <div className="flex items-center gap-2 text-xs font-medium">
+          <span className="text-slate-500 hover:text-slate-800 transition-colors">Hạ Tầng</span>
+          <span className="text-slate-400">/</span>
+          <span className="text-slate-900 font-semibold">Super API Explorer</span>
         </div>
-        <Badge variant="outline" className="border-cyan-800 text-cyan-400 font-mono text-xs w-fit">
-          Super Admin CRUD Root
-        </Badge>
+
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleExecute}
+            disabled={isLoading}
+            className="h-8.5 px-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs gap-1.5 shadow-2xs"
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Play className="h-4 w-4 text-white" />}
+            <span>Send Request</span>
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-base font-bold text-slate-900">Super API Explorer &amp; REST Console</h2>
+        <p className="text-xs text-slate-500">
+          Kiểm thử trực tiếp các endpoint RESTful `/api/v1/*` của Backend NestJS (:3001) với JWT Admin.
+        </p>
       </div>
 
       {/* Preset Quick Selectors */}
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-3 text-xs space-y-2">
-        <span className="font-semibold text-slate-300">Quick Presets (Các mẫu yêu cầu thường dùng):</span>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs space-y-2 shadow-xs">
+        <span className="font-semibold text-slate-700">Quick Presets (Các mẫu yêu cầu thường dùng):</span>
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((p, idx) => (
             <button
               key={idx}
               onClick={() => applyPreset(p)}
-              className="rounded-md border border-slate-800 bg-[#080C14] hover:bg-slate-800 px-2.5 py-1 text-[11px] text-slate-300 transition-colors flex items-center gap-1.5"
+              className="rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 text-[11px] text-slate-700 transition-colors flex items-center gap-1.5 shadow-2xs"
             >
-              <span className={`font-mono font-bold text-[9px] px-1 rounded ${getMethodBadgeClass(p.method)}`}>
+              <span className={`font-mono font-bold text-[9px] px-1.5 py-0.5 rounded border ${getMethodBadgeClass(p.method)}`}>
                 {p.method}
               </span>
               <span>{p.name}</span>
@@ -207,19 +218,19 @@ export default function ApiExplorerPage() {
       </div>
 
       {/* Query Request Builder */}
-      <Card className="border-slate-800 bg-[#0F172A] shadow-md">
-        <CardHeader className="pb-3 border-b border-slate-800">
-          <CardTitle className="text-sm font-semibold text-white">
+      <Card className="rounded-xl border border-slate-200 bg-white shadow-xs p-5 space-y-4">
+        <div className="pb-3 border-b border-slate-100">
+          <CardTitle className="text-xs font-bold text-slate-900">
             Bộ Soạn Thảo Yêu Cầu (Request Builder)
           </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-4 text-xs">
+        </div>
+        <div className="space-y-4 text-xs">
           {/* Method and Endpoint Input */}
           <div className="flex flex-col sm:flex-row gap-2">
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value as HttpMethod)}
-              className="w-full sm:w-32 h-10 rounded-md border border-slate-800 bg-[#080C14] px-3 font-mono text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full sm:w-32 h-9.5 rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-400"
             >
               <option value="GET">GET</option>
               <option value="POST">POST</option>
@@ -231,23 +242,14 @@ export default function ApiExplorerPage() {
               value={endpoint}
               onChange={(e) => setEndpoint(e.target.value)}
               placeholder="/api/v1/deals/count"
-              className="flex-1 font-mono text-xs border-slate-800 bg-[#080C14] text-cyan-300 h-10"
+              className="flex-1 font-mono text-xs border-slate-200 bg-slate-50 text-slate-900 h-9.5 focus:bg-white"
             />
-
-            <Button
-              onClick={handleExecute}
-              disabled={isLoading}
-              className="bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs h-10 px-5 gap-1.5 shrink-0"
-            >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-              <span>Thực Thi (Send)</span>
-            </Button>
           </div>
 
           {/* JSON Body (for POST/PATCH) */}
           {(method === 'POST' || method === 'PATCH') && (
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">
+              <label className="font-semibold text-slate-700">
                 Payload JSON Body (POST / PATCH):
               </label>
               <textarea
@@ -255,52 +257,51 @@ export default function ApiExplorerPage() {
                 value={payload}
                 onChange={(e) => setPayload(e.target.value)}
                 placeholder='{\n  "key": "value"\n}'
-                className="w-full rounded-md border border-slate-800 bg-[#080C14] p-3 font-mono text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white leading-relaxed"
               />
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
 
       {/* Response Display */}
       {responseStatus !== null && (
-        <Card className="border-slate-800 bg-[#0F172A] shadow-md">
-          <CardHeader className="pb-3 border-b border-slate-800 flex flex-row items-center justify-between">
+        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs p-5 space-y-3">
+          <div className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
             <div className="flex items-center space-x-3">
-              <CardTitle className="text-sm font-semibold text-white">
+              <CardTitle className="text-xs font-bold text-slate-900">
                 Phản Hồi (Response)
               </CardTitle>
-              <Badge
-                variant="outline"
-                className={`font-mono text-xs ${
+              <span
+                className={`font-mono text-xs px-2 py-0.5 rounded-full border font-semibold ${
                   responseStatus >= 200 && responseStatus < 300
-                    ? 'border-emerald-800 text-emerald-400 bg-emerald-950/40'
-                    : 'border-rose-800 text-rose-400 bg-rose-950/40'
+                    ? 'border-emerald-200 text-emerald-700 bg-emerald-50'
+                    : 'border-rose-200 text-rose-700 bg-rose-50'
                 }`}
               >
                 HTTP {responseStatus}
-              </Badge>
+              </span>
               {latencyMs !== null && (
-                <span className="font-mono text-slate-400 text-xs">{latencyMs} ms</span>
+                <span className="font-mono text-slate-500 text-xs tabular-nums">{latencyMs} ms</span>
               )}
             </div>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleCopy}
-              className="text-xs text-slate-300 hover:text-white h-8 gap-1.5"
+              className="border-slate-200 bg-white hover:bg-slate-50 text-xs text-slate-700 h-8 gap-1.5 shadow-2xs font-medium"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
               <span>{copied ? 'Đã chép' : 'Sao chép JSON'}</span>
             </Button>
-          </CardHeader>
+          </div>
 
-          <CardContent className="pt-4">
-            <pre className="rounded-lg border border-slate-800 bg-[#080C14] p-4 font-mono text-xs text-slate-200 overflow-x-auto max-h-96">
+          <div className="pt-1">
+            <pre className="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-800 overflow-x-auto max-h-96 leading-relaxed">
               {JSON.stringify(responseData, null, 2)}
             </pre>
-          </CardContent>
+          </div>
         </Card>
       )}
     </div>

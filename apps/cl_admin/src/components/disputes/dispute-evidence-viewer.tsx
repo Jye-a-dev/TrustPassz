@@ -52,7 +52,7 @@ export function DisputeEvidenceViewer({ deal, dispute }: DisputeEvidenceViewerPr
         <CardContent className="space-y-4 pt-4 flex-1">
           {/* Product description & commitments */}
           <div className="space-y-1 text-xs">
-            <span className="font-semibold text-slate-300">Tên sản phẩm / Kèo:</span>
+            <span className="font-semibold text-slate-300">Tên sản phẩm / Giao dịch:</span>
             <p className="font-medium text-white">{deal.title}</p>
           </div>
 

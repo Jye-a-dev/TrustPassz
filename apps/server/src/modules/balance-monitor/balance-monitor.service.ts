@@ -25,6 +25,7 @@ import {
   loadBalanceMonitorConfig,
   type BalanceMonitorConfig,
 } from './balance-monitor.config';
+import { EmergencyAlertService } from '../emergency-alert/emergency-alert.service';
 
 export interface ChainBalanceResult {
   chain: 'base-sepolia' | 'solana';
@@ -62,33 +63,15 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
   private solanaConnection!: Connection;
   private cronJob?: CronJob;
 
-  private readonly alertStates = new Map<
-    'base-sepolia' | 'solana',
-    ChainAlertState
-  >([
-    [
-      'base-sepolia',
-      {
-        chain: 'base-sepolia',
-        isAlertActive: false,
-        lastAlertTimestamp: 0,
-        lastReportedBalance: 0,
-      },
-    ],
-    [
-      'solana',
-      {
-        chain: 'solana',
-        isAlertActive: false,
-        lastAlertTimestamp: 0,
-        lastReportedBalance: 0,
-      },
-    ],
+  private readonly alertStates = new Map<'base-sepolia' | 'solana', ChainAlertState>([
+    ['base-sepolia', { chain: 'base-sepolia', isAlertActive: false, lastAlertTimestamp: 0, lastReportedBalance: 0 }],
+    ['solana', { chain: 'solana', isAlertActive: false, lastAlertTimestamp: 0, lastReportedBalance: 0 }],
   ]);
 
   constructor(
     private readonly configService: ConfigService,
     @Optional() private readonly schedulerRegistry?: SchedulerRegistry,
+    @Optional() private readonly emergencyAlertService?: EmergencyAlertService,
   ) {}
 
   onModuleInit(): void {
@@ -329,47 +312,30 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
         },
       );
 
-      const telegramHtml =
-        `🚨 <b>[RELAYER GAS ALERT]</b>\n<b>Chain:</b> ${chainName}\n<b>Wallet:</b> <code>${result.address}</code>\n` +
-        `<b>Current Balance:</b> <code>${result.formattedBalance} ${unit}</code>\n<b>Threshold:</b> <code>${result.threshold} ${unit}</code>\n` +
-        `<b>Est. Remaining Txs:</b> ~${result.estimatedTxRemaining} txs\n<b>Explorer:</b> <a href="${explorerUrl}">View on Explorer</a>\n` +
-        `<b>Action:</b> Refill relayer gas immediately to prevent escrow transaction stalling.`;
-
-      const discordEmbed = {
-        title,
-        description:
-          'Oracle Relayer gas is critically low. Refill wallet immediately.',
-        color: 0xef4444,
-        fields: [
-          { name: 'Chain', value: chainName, inline: true },
-          {
-            name: 'Current Balance',
-            value: `${result.formattedBalance} ${unit}`,
-            inline: true,
+      // Exclusive Emergency Alert via Gmail
+      if (this.emergencyAlertService) {
+        await this.emergencyAlertService.triggerCriticalAlert({
+          service: 'BalanceMonitorService',
+          errorCode:
+            result.chain === 'base-sepolia'
+              ? 'ORACLE_RELAYER_LOW_BALANCE_EVM'
+              : 'ORACLE_RELAYER_LOW_BALANCE_SVM',
+          summary: `Số Dư Ví Oracle Relayer ${chainName} Dưới Ngưỡng An Toàn`,
+          message:
+            `Ví ký tự động Oracle Relayer (${result.chain}) hiện có số dư: ${result.formattedBalance} ${unit}, ` +
+            `thấp hơn ngưỡng an toàn tối thiểu (${result.threshold} ${unit}). ` +
+            `Số lượng giao dịch ước tính còn lại: ~${result.estimatedTxRemaining} txs. ` +
+            `Cần nạp gas ngay lập tức để tránh ách tắc giao dịch ký quỹ Escrow.`,
+          metadata: {
+            chain: result.chain,
+            walletAddress: result.address,
+            currentBalance: `${result.formattedBalance} ${unit}`,
+            threshold: `${result.threshold} ${unit}`,
+            estimatedTxRemaining: result.estimatedTxRemaining,
+            explorerUrl,
           },
-          {
-            name: 'Threshold',
-            value: `${result.threshold} ${unit}`,
-            inline: true,
-          },
-          {
-            name: 'Est. Remaining Txs',
-            value: `~${result.estimatedTxRemaining} txs`,
-            inline: true,
-          },
-          {
-            name: 'Wallet Address',
-            value: `[\`${result.address}\`](${explorerUrl})`,
-          },
-        ],
-        timestamp: new Date().toISOString(),
-        footer: { text: 'TrustPassz Reliability Engine' },
-      };
-
-      await Promise.allSettled([
-        this.sendTelegram(telegramHtml),
-        this.sendDiscord(discordEmbed),
-      ]);
+        });
+      }
     } else if (state.isAlertActive) {
       state.isAlertActive = false;
       state.lastAlertTimestamp = 0;
@@ -378,39 +344,6 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(
         `[Recovery] Relayer wallet ${result.chain} refilled to ${result.formattedBalance} ${unit}. Cooldown reset.`,
       );
-
-      const telegramRecovery =
-        `✅ <b>[RELAYER GAS RECOVERED]</b>\n<b>Status:</b> RESOLVED / FUNDED\n<b>Chain:</b> ${chainName}\n` +
-        `<b>Wallet:</b> <code>${result.address}</code>\n<b>Current Balance:</b> <code>${result.formattedBalance} ${unit}</code> (Threshold: ${result.threshold} ${unit})\n` +
-        `<b>Notice:</b> Ví Relayer đã được nạp đủ số dư an toàn. Cooldown cảnh báo đã được reset.`;
-
-      const discordRecovery = {
-        title: `✅ [RELAYER GAS RECOVERED] ${chainName}`,
-        description:
-          'RESOLVED / FUNDED: Ví Relayer đã được nạp đủ số dư an toàn.',
-        color: 0x10b981,
-        fields: [
-          { name: 'Chain', value: chainName, inline: true },
-          {
-            name: 'Balance',
-            value: `${result.formattedBalance} ${unit}`,
-            inline: true,
-          },
-          {
-            name: 'Threshold',
-            value: `${result.threshold} ${unit}`,
-            inline: true,
-          },
-          { name: 'Wallet', value: `[\`${result.address}\`](${explorerUrl})` },
-        ],
-        timestamp: new Date().toISOString(),
-        footer: { text: 'TrustPassz Reliability Engine' },
-      };
-
-      await Promise.allSettled([
-        this.sendTelegram(telegramRecovery),
-        this.sendDiscord(discordRecovery),
-      ]);
     }
   }
 
@@ -447,44 +380,6 @@ export class BalanceMonitorService implements OnModuleInit, OnModuleDestroy {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.warn(`Failed to dispatch Sentry telemetry: ${msg}`);
-    }
-  }
-
-  private async sendTelegram(htmlText: string): Promise<void> {
-    if (!this.config.telegramBotToken || !this.config.telegramChatId) return;
-    try {
-      const endpoint = `https://api.telegram.org/bot${this.config.telegramBotToken}/sendMessage`;
-      await axios.post(
-        endpoint,
-        {
-          chat_id: this.config.telegramChatId,
-          text: htmlText,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true,
-        },
-        { timeout: 8000 },
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      this.logger.error(`Failed to send Telegram alert: ${msg}`);
-    }
-  }
-
-  private async sendDiscord(embed: Record<string, unknown>): Promise<void> {
-    if (!this.config.discordWebhookUrl) return;
-    try {
-      await axios.post(
-        this.config.discordWebhookUrl,
-        {
-          username: 'TrustPassz Relayer Sentinel',
-          avatar_url: 'https://trustpassz.io/favicon.ico',
-          embeds: [embed],
-        },
-        { timeout: 8000 },
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      this.logger.error(`Failed to send Discord alert: ${msg}`);
     }
   }
 }

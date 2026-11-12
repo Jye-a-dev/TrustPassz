@@ -20,11 +20,11 @@ export function AiSuggestionPanel({
   onApplyRules,
 }: AiSuggestionPanelProps) {
   return (
-    <div className="rounded-lg border border-cyan-500/30 bg-slate-950/90 p-3.5 space-y-3 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+    <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 space-y-3 animate-in fade-in duration-300">
+      <div className="flex items-center justify-between border-b border-rose-100 pb-2">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-cyan-400" />
-          <span className="text-xs font-semibold text-cyan-300">
+          <Sparkles className="w-4 h-4 text-rose-600" />
+          <span className="text-xs font-bold text-rose-700">
             Trợ lý AI gợi ý điều khoản an toàn
           </span>
         </div>
@@ -32,34 +32,34 @@ export function AiSuggestionPanel({
           variant="outline"
           className={`text-[10px] uppercase font-bold tracking-wider ${
             suggestion.risk_level === "LOW"
-              ? "border-emerald-500/50 text-emerald-400 bg-emerald-950/20"
+              ? "border-emerald-300 text-emerald-800 bg-emerald-50"
               : suggestion.risk_level === "MEDIUM"
-              ? "border-amber-500/50 text-amber-400 bg-amber-950/20"
-              : "border-rose-500/50 text-rose-400 bg-rose-950/20"
+              ? "border-amber-300 text-amber-800 bg-amber-50"
+              : "border-rose-300 text-rose-800 bg-rose-50"
           }`}
         >
-          Mức độ an toàn: {suggestion.risk_level === "LOW" ? "Cao" : suggestion.risk_level === "MEDIUM" ? "Trung bình" : "Cần lưu ý"}
+          Mức an toàn: {suggestion.risk_level === "LOW" ? "Cao" : suggestion.risk_level === "MEDIUM" ? "Trung bình" : "Cần lưu ý"}
         </Badge>
       </div>
 
-      <p className="text-xs text-slate-300 italic">{suggestion.reasoning}</p>
+      <p className="text-xs text-slate-700 italic">{suggestion.reasoning}</p>
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-mono">
         <div className="flex items-center gap-1.5">
-          <Coins className="w-3.5 h-3.5 text-cyan-400" />
+          <Coins className="w-3.5 h-3.5 text-rose-600" />
           <span>
-            Khoảng giá gợi ý:{" "}
-            <strong className="text-slate-200">
+            Khoảng giá:{" "}
+            <strong className="text-slate-900">
               {suggestion.suggested_min_price.toLocaleString("vi-VN")} ₫ –{" "}
               {suggestion.suggested_max_price.toLocaleString("vi-VN")} ₫
             </strong>
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 text-cyan-400" />
+          <Clock className="w-3.5 h-3.5 text-rose-600" />
           <span>
-            Thời gian kiểm tra hàng:{" "}
-            <strong className="text-slate-200">
+            Kiểm tra hàng:{" "}
+            <strong className="text-slate-900">
               {suggestion.suggested_inspection_hours} giờ
             </strong>
           </span>
@@ -68,8 +68,8 @@ export function AiSuggestionPanel({
 
       {/* Checkbox recommendations */}
       <div className="space-y-1.5 pt-1">
-        <span className="text-[11px] font-semibold text-slate-300">
-          Điều khoản bảo vệ giao dịch được đề xuất:
+        <span className="text-[11px] font-bold text-slate-700">
+          Điều khoản bảo vệ đề xuất:
         </span>
         <div className="space-y-1.5">
           {suggestion.recommended_rules.map((rule, idx) => {
@@ -77,13 +77,13 @@ export function AiSuggestionPanel({
             return (
               <label
                 key={idx}
-                className="flex items-start gap-2.5 p-2 rounded bg-slate-900/60 border border-slate-800/60 hover:border-slate-700 cursor-pointer text-xs text-slate-300"
+                className="flex items-start gap-2.5 p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-300 cursor-pointer text-xs text-slate-700 shadow-2xs"
               >
                 <input
                   type="checkbox"
                   checked={isChecked}
                   onChange={() => onToggleRule(rule)}
-                  className="mt-0.5 rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-cyan-500"
+                  className="mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
                 />
                 <span className="leading-snug">{rule}</span>
               </label>
@@ -93,10 +93,10 @@ export function AiSuggestionPanel({
 
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={onApplyRules}
-          className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 h-7 px-2 cursor-pointer"
+          className="mt-2 text-xs text-rose-600 hover:text-rose-700 bg-white border border-rose-200 hover:border-rose-300 h-8 px-2.5 rounded-lg cursor-pointer font-semibold shadow-xs"
         >
           + Thêm điều khoản vào mô tả giao dịch
         </Button>

@@ -1,0 +1,47 @@
+/**
+ * TrustPassz Centralized Design Tokens
+ * Supports seamless Light / Night(Dark) mode transitions.
+ */
+
+:root,
+html:not(.dark) {
+  /* Canvas & Surfaces */
+  --bg-canvas: #FFFFFF;
+  --bg-surface: #F8FAFC;
+  --bg-input: #F1F5F9;
+
+  /* Borders */
+  --border-subtle: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  /* Typography */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+
+  /* Brand Accents */
+  --accent-pink: #FF1866;
+  --accent-pink-hover: #E11D48;
+  --accent-pink-tint: #FFF1F2;
+}
+
+.dark {
+  /* Canvas & Surfaces */
+  --bg-canvas: #0B0F17;
+  --bg-surface: #0F172A;
+  --bg-input: #070A10;
+
+  /* Borders */
+  --border-subtle: #1E293B;
+  --border-strong: #334155;
+
+  /* Typography */
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  /* Brand Accents */
+  --accent-pink: #FF2D78;
+  --accent-pink-hover: #FF1866;
+  --accent-pink-tint: #3F0D1C;
+}

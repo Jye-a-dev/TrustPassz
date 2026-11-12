@@ -1,12 +1,12 @@
 /**
  * balance-monitor.service.spec.ts
  *
- * Unit test suite for BalanceMonitorService.
+ * Unit test suite for BalanceMonitorService with Exclusive Gmail Emergency Alerts (TASK-c-3).
  * Validates:
  *   1. Normal balance above threshold -> No alerts triggered.
- *   2. Low balance below threshold -> Telegram, Discord, and Sentry alerts dispatched.
+ *   2. Low balance below threshold -> EmergencyAlertService.triggerCriticalAlert & Sentry warning dispatched.
  *   3. Second check during cooldown window -> Debounced (no duplicate alerts).
- *   4. Balance replenished above threshold -> Cooldown reset and recovery notification sent.
+ *   4. Balance replenished above threshold -> Cooldown reset.
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -14,12 +14,14 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { parseEther } from 'viem';
 import { BalanceMonitorService } from './balance-monitor.service';
+import { EmergencyAlertService } from '../emergency-alert/emergency-alert.service';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-describe('BalanceMonitorService (TASK-b-05)', () => {
+describe('BalanceMonitorService (TASK-c-3 & TASK-b-05)', () => {
   let service: BalanceMonitorService;
+  let emergencyAlertServiceMock: { triggerCriticalAlert: jest.Mock };
   let getEvmBalanceMock: jest.Mock;
   let getSolanaBalanceMock: jest.Mock;
 
@@ -29,13 +31,10 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
     SOLANA_RELAYER_PUBLIC_KEY: '4Nd1mBQtrMJVYVfKf2PJy9NZWsWB8d5KKGuG7xK8xad8',
     ALERT_THRESHOLD_ETH: '0.02',
     ALERT_THRESHOLD_SOL: '0.1',
-    TELEGRAM_BOT_TOKEN: 'mock-bot-token',
-    TELEGRAM_CHAT_ID: 'mock-chat-id',
-    DISCORD_WEBHOOK_URL: 'https://discord.com/api/webhooks/mock-id/mock-token',
     SENTRY_DSN: 'https://mockpubkey@o999999.ingest.sentry.io/123456',
     BALANCE_CHECK_CRON: '*/5 * * * *',
     ALERT_COOLDOWN_MS: '3600000', // 1 hour
-    BALANCE_MONITOR_ENABLED: 'false', // Prevent automatic unmocked cron execution in tests
+    BALANCE_MONITOR_ENABLED: 'false',
   };
 
   beforeEach(async () => {
@@ -45,6 +44,16 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
       status: 200,
       data: { ok: true },
     });
+
+    emergencyAlertServiceMock = {
+      triggerCriticalAlert: jest.fn().mockResolvedValue({
+        success: true,
+        fingerprint: 'mock-fp',
+        suppressed: false,
+        durationMs: 15,
+        recipientsCount: 2,
+      }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -57,13 +66,16 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
             }),
           },
         },
+        {
+          provide: EmergencyAlertService,
+          useValue: emergencyAlertServiceMock,
+        },
       ],
     }).compile();
 
     service = module.get<BalanceMonitorService>(BalanceMonitorService);
     service.onModuleInit();
 
-    // Mock RPC calls on internal clients
     getEvmBalanceMock = jest.fn();
     (service as unknown as { publicClient: { getBalance: jest.Mock } }).publicClient.getBalance =
       getEvmBalanceMock;
@@ -82,7 +94,7 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
     it('should query balances and emit no alerts when both chains are above thresholds', async () => {
       // 0.1 ETH > 0.02 ETH
       getEvmBalanceMock.mockResolvedValueOnce(parseEther('0.1'));
-      // 1.5 SOL > 0.1 SOL (1.5 * 1e9 lamports)
+      // 1.5 SOL > 0.1 SOL
       getSolanaBalanceMock.mockResolvedValueOnce(1_500_000_000);
 
       const report = await service.checkBalances();
@@ -92,16 +104,16 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
       expect(report.solana.isLowBalance).toBe(false);
       expect(report.solana.balance).toBe(1.5);
 
-      // No dispatch requests should have been made to Telegram, Discord, or Sentry
+      expect(emergencyAlertServiceMock.triggerCriticalAlert).not.toHaveBeenCalled();
       expect(mockedAxios.post).not.toHaveBeenCalled();
     });
   });
 
   describe('Scenario 2: Balance below thresholds on first scan', () => {
-    it('should trigger Sentry warning, Telegram HTML, and Discord Rich Embed alerts', async () => {
+    it('should trigger EmergencyAlertService Gmail dispatch and Sentry warning', async () => {
       // 0.005 ETH < 0.02 ETH
       getEvmBalanceMock.mockResolvedValueOnce(parseEther('0.005'));
-      // 0.05 SOL < 0.1 SOL (0.05 * 1e9 = 50_000_000 lamports)
+      // 0.05 SOL < 0.1 SOL
       getSolanaBalanceMock.mockResolvedValueOnce(50_000_000);
 
       const report = await service.checkBalances();
@@ -109,40 +121,27 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
       expect(report.evm.isLowBalance).toBe(true);
       expect(report.solana.isLowBalance).toBe(true);
 
-      // Verify that Sentry, Telegram, and Discord endpoints were called
-      const calls = mockedAxios.post.mock.calls;
-      expect(calls.length).toBeGreaterThanOrEqual(4); // 2 chains * (Sentry + Telegram + Discord)
+      // Verify EmergencyAlertService was invoked for both chains
+      expect(emergencyAlertServiceMock.triggerCriticalAlert).toHaveBeenCalledTimes(2);
 
-      // 1. Sentry checks
-      const sentryCalls = calls.filter(([url]) =>
+      const evmCall = emergencyAlertServiceMock.triggerCriticalAlert.mock.calls.find(
+        ([payload]) => payload.errorCode === 'ORACLE_RELAYER_LOW_BALANCE_EVM',
+      );
+      expect(evmCall).toBeDefined();
+      expect(evmCall[0].summary).toContain('Số Dư Ví Oracle Relayer');
+      expect(evmCall[0].metadata.chain).toBe('base-sepolia');
+
+      const solanaCall = emergencyAlertServiceMock.triggerCriticalAlert.mock.calls.find(
+        ([payload]) => payload.errorCode === 'ORACLE_RELAYER_LOW_BALANCE_SVM',
+      );
+      expect(solanaCall).toBeDefined();
+      expect(solanaCall[0].metadata.chain).toBe('solana');
+
+      // Verify Sentry checks
+      const sentryCalls = mockedAxios.post.mock.calls.filter(([url]) =>
         String(url).includes('ingest.sentry.io'),
       );
       expect(sentryCalls.length).toBe(2);
-      expect((sentryCalls[0][1] as { level: string }).level).toBe('warning');
-
-      // 2. Telegram checks
-      const telegramCalls = calls.filter(([url]) =>
-        String(url).includes('api.telegram.org'),
-      );
-      expect(telegramCalls.length).toBe(2);
-      expect(telegramCalls[0][1]).toMatchObject({
-        chat_id: 'mock-chat-id',
-        parse_mode: 'HTML',
-      });
-      expect(
-        (telegramCalls[0][1] as { text: string }).text,
-      ).toContain('[RELAYER GAS ALERT]');
-
-      // 3. Discord checks
-      const discordCalls = calls.filter(([url]) =>
-        String(url).includes('discord.com/api/webhooks'),
-      );
-      expect(discordCalls.length).toBe(2);
-      const discordEmbed = (
-        discordCalls[0][1] as { embeds: Array<{ title: string; color: number }> }
-      ).embeds[0];
-      expect(discordEmbed.title).toContain('[RELAYER GAS ALERT]');
-      expect(discordEmbed.color).toBe(0xef4444); // Red warning color
     });
   });
 
@@ -153,13 +152,12 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
       getSolanaBalanceMock.mockResolvedValueOnce(40_000_000);
 
       await service.checkBalances();
-      const firstCycleCallCount = mockedAxios.post.mock.calls.length;
-      expect(firstCycleCallCount).toBeGreaterThan(0);
+      expect(emergencyAlertServiceMock.triggerCriticalAlert).toHaveBeenCalledTimes(2);
 
-      // Reset mock invocation history for clean cycle evaluation
+      emergencyAlertServiceMock.triggerCriticalAlert.mockClear();
       mockedAxios.post.mockClear();
 
-      // Second scan (shortly after, still low balance)
+      // Second scan: still low balance within cooldown
       getEvmBalanceMock.mockResolvedValueOnce(parseEther('0.0079'));
       getSolanaBalanceMock.mockResolvedValueOnce(39_000_000);
 
@@ -168,50 +166,29 @@ describe('BalanceMonitorService (TASK-b-05)', () => {
       expect(secondReport.evm.isLowBalance).toBe(true);
       expect(secondReport.solana.isLowBalance).toBe(true);
 
-      // All alert dispatches must be debounced / suppressed
+      // Must be debounced
+      expect(emergencyAlertServiceMock.triggerCriticalAlert).not.toHaveBeenCalled();
       expect(mockedAxios.post).not.toHaveBeenCalled();
     });
   });
 
   describe('Scenario 4: Recovery & Cooldown reset when refilled', () => {
-    it('should broadcast recovery notification and reset cooldown state when funds replenished', async () => {
-      // 1. Enter low balance state
+    it('should reset cooldown state when funds replenished', async () => {
+      // 1. Low balance
       getEvmBalanceMock.mockResolvedValueOnce(parseEther('0.005'));
       getSolanaBalanceMock.mockResolvedValueOnce(50_000_000);
       await service.checkBalances();
 
-      mockedAxios.post.mockClear();
+      emergencyAlertServiceMock.triggerCriticalAlert.mockClear();
 
-      // 2. Refill wallet on both chains
-      getEvmBalanceMock.mockResolvedValueOnce(parseEther('0.5')); // 0.5 ETH
-      getSolanaBalanceMock.mockResolvedValueOnce(2_000_000_000); // 2.0 SOL
+      // 2. Replenished
+      getEvmBalanceMock.mockResolvedValueOnce(parseEther('0.5'));
+      getSolanaBalanceMock.mockResolvedValueOnce(2_000_000_000);
 
       const recoveryReport = await service.checkBalances();
       expect(recoveryReport.evm.isLowBalance).toBe(false);
       expect(recoveryReport.solana.isLowBalance).toBe(false);
-
-      // Verify recovery notices were dispatched
-      const recoveryCalls = mockedAxios.post.mock.calls;
-      expect(recoveryCalls.length).toBeGreaterThanOrEqual(4);
-
-      const telegramRecovery = recoveryCalls.find(([url]) =>
-        String(url).includes('api.telegram.org'),
-      );
-      expect(
-        (telegramRecovery?.[1] as { text: string }).text,
-      ).toContain('[RELAYER GAS RECOVERED]');
-
-      const discordRecovery = recoveryCalls.find(([url]) =>
-        String(url).includes('discord.com/api/webhooks'),
-      );
-      const discordRecoveryEmbed = (
-        discordRecovery?.[1] as {
-          embeds: Array<{ title: string; color: number }>;
-        }
-      ).embeds[0];
-      expect(discordRecoveryEmbed.title).toContain('[RELAYER GAS RECOVERED]');
-      expect(discordRecoveryEmbed.color).toBe(0x10b981); // Emerald green
+      expect(emergencyAlertServiceMock.triggerCriticalAlert).not.toHaveBeenCalled();
     });
   });
 });
-

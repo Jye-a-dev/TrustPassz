@@ -30,7 +30,7 @@ export type { DealState, DealDetail, BuyerBargainStatus } from "@/components/dea
 export default function DealRoomPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const dealId = (params?.id as string) || "";
 
   const [deal, setDeal] = React.useState<DealDetail | null>(null);
@@ -64,11 +64,7 @@ export default function DealRoomPage() {
       : null,
     onDealStateChange: (newState) => {
       setDeal((prev) => (prev ? { ...prev, state: newState as DealState } : prev));
-      toast.success(
-        newState === "SETTLED"
-          ? "Giao dịch đã được giải ngân thành công!"
-          : "Két bảo chứng đã xác nhận nạp tiền an toàn!"
-      );
+      toast.success(newState === "SETTLED" ? "Giao dịch đã được giải ngân thành công!" : "Két bảo chứng đã xác nhận nạp tiền an toàn!");
     },
   });
 
@@ -188,6 +184,11 @@ export default function DealRoomPage() {
   // Instant Buy Flow: Navigates straight to Checkout without seller approval
   const handleInstantBuy = () => {
     if (!deal) return;
+    if (!isAuthenticated) {
+      toast.info("Vui lòng đăng nhập để tiến hành mua hàng.");
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/deals/${deal.id}`)}`);
+      return;
+    }
     if (isSeller) {
       toast.error("Bạn không thể tự mua sản phẩm của chính mình.");
       return;
@@ -203,8 +204,9 @@ export default function DealRoomPage() {
       toast.error("Bạn không thể tự mua hoặc thương lượng sản phẩm của chính mình.");
       return;
     }
-    if (!currentUserId) {
+    if (!isAuthenticated || !currentUserId) {
       toast.error("Vui lòng đăng nhập để gửi đề xuất trả giá.");
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/deals/${deal.id}`)}`);
       return;
     }
 
@@ -216,17 +218,13 @@ export default function DealRoomPage() {
           productId: deal.order?.productId,
           buyerId: currentUserId,
           offeredPrice: newOffer,
-          negotiationData: {
-            dealId: deal.id,
-          },
+          negotiationData: { dealId: deal.id },
         }),
       });
 
       setProposedPrice(newOffer);
       setBargainStatus("PENDING_SELLER_CONFIRMATION");
-      toast.info(
-        `Đã gửi đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫ đến Người bán. Vui lòng chờ duyệt.`
-      );
+      toast.info(`Đã gửi đề xuất trả giá ${newOffer.toLocaleString("vi-VN")} ₫ đến Người bán. Vui lòng chờ duyệt.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gửi đề xuất trả giá thất bại";
       toast.error(`Lỗi: ${msg}`);
@@ -244,10 +242,10 @@ export default function DealRoomPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0B0F17] flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-canvas flex items-center justify-center text-secondary">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-          <p className="text-xs font-mono">Đang đồng bộ dữ liệu giao dịch bảo vệ tự động...</p>
+          <Loader2 className="w-8 h-8 text-brand-pink animate-spin" />
+          <p className="text-xs font-mono text-muted">Đang đồng bộ dữ liệu giao dịch bảo chứng...</p>
         </div>
       </div>
     );
@@ -255,14 +253,14 @@ export default function DealRoomPage() {
 
   if (error || !deal) {
     return (
-      <div className="min-h-screen bg-[#0B0F17] flex items-center justify-center p-4">
-        <div className="max-w-md w-full rounded-2xl border border-rose-500/30 bg-slate-900/80 p-6 text-center space-y-4">
-          <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
-          <h2 className="text-lg font-bold text-white">Không tìm thấy giao dịch</h2>
-          <p className="text-xs text-slate-400">
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
+        <div className="max-w-md w-full rounded-2xl border border-brand-pink/30 bg-surface p-6 text-center space-y-4 shadow-sm">
+          <AlertCircle className="w-10 h-10 text-brand-pink mx-auto" />
+          <h2 className="text-lg font-bold text-primary">Không tìm thấy giao dịch</h2>
+          <p className="text-xs text-secondary">
             {error || `Mã giao dịch ${dealId} không tồn tại hoặc bạn không có quyền truy cập.`}
           </p>
-          <Button asChild variant="outline" className="border-slate-700 text-xs">
+          <Button asChild variant="outline" className="border-strong bg-surface hover:bg-input-bg text-primary min-h-11 rounded-xl text-xs font-medium">
             <Link href="/user/deals">Quay lại danh sách giao dịch</Link>
           </Button>
         </div>
@@ -278,8 +276,8 @@ export default function DealRoomPage() {
     : Math.round(basePrice * 0.7);
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 overflow-x-hidden">
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/5 blur-[140px] pointer-events-none" />
+    <div className="min-h-screen bg-canvas text-primary overflow-x-hidden">
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-rose-500/5 blur-[140px] pointer-events-none" />
 
       {/* Transfer Success Realtime Modal */}
       <TransferSuccessModal
@@ -293,7 +291,7 @@ export default function DealRoomPage() {
         chainType={modalData?.chainType}
         timestamp={modalData?.timestamp}
         type={modalData?.type || (deal.state === "SETTLED" ? "SETTLEMENT" : "DEPOSIT")}
-        primaryActionText={modalData?.type === "SETTLEMENT" || deal.state === "SETTLED" ? "Xem chi tiết giao dịch" : "Vào két Digital Vault"}
+        primaryActionText={modalData?.type === "SETTLEMENT" || deal.state === "SETTLED" ? "Xem chi tiết" : "Vào két Digital Vault"}
         onPrimaryAction={() => {
           if (modalData?.type === "SETTLEMENT" || deal.state === "SETTLED") {
             setIsSuccessModalOpen(false);
@@ -310,7 +308,7 @@ export default function DealRoomPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/user/deals"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-rose-600 transition-colors py-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Quay lại danh sách
@@ -318,7 +316,7 @@ export default function DealRoomPage() {
 
           <div className="flex items-center gap-2">
             {isSeller && (
-              <Badge className="bg-cyan-950/80 border-cyan-500/40 text-cyan-300 text-xs font-bold uppercase tracking-wider">
+              <Badge className="bg-rose-50 border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider">
                 Sản phẩm của bạn (Người bán)
               </Badge>
             )}

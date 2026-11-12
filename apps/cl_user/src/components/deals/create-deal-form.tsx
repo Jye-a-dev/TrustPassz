@@ -21,6 +21,7 @@ import { AssetTypeSelector } from "./asset-type-selector";
 import { AiSuggestionPanel } from "./ai-suggestion-panel";
 import { EscrowTermsSection } from "./escrow-terms-section";
 import { DigitalVaultSection } from "./digital-vault-section";
+import { DealImageGalleryUploader } from "./deal-image-gallery-uploader";
 
 // Re-export types for backward compatibility across cl_user
 export type { AssetCategory, DealRuleSuggestion, VaultAuditData };
@@ -39,6 +40,8 @@ export function CreateDealForm() {
   const [rawSecret, setRawSecret] = React.useState("");
   const [passphrase, setPassphrase] = React.useState("");
   const [buyerId, setBuyerId] = React.useState("");
+  const [mediaGallery, setMediaGallery] = React.useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = React.useState<number>(0);
 
   // AI Magic Fill states
   const [isAiLoading, setIsAiLoading] = React.useState(false);
@@ -187,6 +190,7 @@ export function CreateDealForm() {
           buyerId,
           sellerId: user?.id,
           idempotencyKey,
+          mediaGallery,
         });
 
       setVaultAudit(audit);
@@ -230,47 +234,49 @@ export function CreateDealForm() {
       />
 
       {/* 2. Title & Description with Magic Fill Trigger */}
-      <div className="space-y-4 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <label htmlFor="deal-title" className="text-sm font-semibold text-slate-200">
-            Tiêu đề giao dịch <span className="text-cyan-400">*</span>
-          </label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleMagicFill}
-            disabled={isAiLoading || isSubmitting}
-            className="h-8 px-2.5 text-xs font-medium border-cyan-500/50 bg-cyan-950/20 text-cyan-300 hover:bg-cyan-900/40 hover:text-cyan-200 transition-all flex items-center gap-1.5 shadow-sm shadow-cyan-950 cursor-pointer"
-          >
-            {isAiLoading ? (
-              <Loader2 className="size-3.5 animate-spin text-cyan-400" />
-            ) : (
-              <Sparkles className="size-3.5 text-cyan-400" />
-            )}
-            AI Gợi Ý Giá &amp; Thời Gian Tự Động
-          </Button>
+      <div className="space-y-4 pt-4 border-t border-slate-100">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="deal-title" className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+              2. TÊN SẢN PHẨM / TIÊU ĐỀ GIAO DỊCH <span className="text-rose-600">*</span>
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleMagicFill}
+              disabled={isAiLoading || isSubmitting}
+              className="h-8 px-3 text-xs font-bold border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all flex items-center gap-1.5 shadow-2xs rounded-lg cursor-pointer"
+            >
+              {isAiLoading ? (
+                <Loader2 className="size-3.5 animate-spin text-rose-500" />
+              ) : (
+                <Sparkles className="size-3.5 text-rose-500" />
+              )}
+              AI Gợi Ý Tiêu Đề &amp; Thời Gian
+            </Button>
+          </div>
+
+          <Input
+            id="deal-title"
+            placeholder={
+              assetType === "PHYSICAL_ITEM"
+                ? "Ví dụ: Áo khoác dọn tủ, Bàn phím cơ Keychron, Tai nghe không dây..."
+                : assetType === "DOCUMENT"
+                ? "Ví dụ: Tài liệu học tập PDF, Ebook tài chính, File mẫu thiết kế..."
+                : "Ví dụ: Fullstack Next.js SaaS Boilerplate (Supabase, Clean Arch)..."
+            }
+            value={title}
+            disabled={isSubmitting}
+            onChange={(e) => setTitle(e.target.value)}
+            className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-100 min-h-[44px] shadow-2xs"
+            required
+          />
         </div>
 
-        <Input
-          id="deal-title"
-          placeholder={
-            assetType === "PHYSICAL_ITEM"
-              ? "Ví dụ: Áo khoác dọn tủ, Bàn phím cơ Keychron, Tai nghe không dây..."
-              : assetType === "DOCUMENT"
-              ? "Ví dụ: Tài liệu học tập PDF, Ebook tài chính, File mẫu thiết kế..."
-              : "Ví dụ: Mã nguồn ứng dụng, Bản quyền phần mềm, Tài khoản..."
-          }
-          value={title}
-          disabled={isSubmitting}
-          onChange={(e) => setTitle(e.target.value)}
-          className="bg-slate-950/80 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 min-h-11"
-          required
-        />
-
         <div className="space-y-1.5">
-          <label htmlFor="deal-desc" className="text-xs font-medium text-slate-300">
-            Mô tả chi tiết và phạm vi bàn giao
+          <label htmlFor="deal-desc" className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+            MÔ TẢ CHI TIẾT &amp; CAM KẾT BẢO HÀNH
           </label>
           <textarea
             id="deal-desc"
@@ -283,7 +289,7 @@ export function CreateDealForm() {
             }
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-y"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-100 focus:border-rose-500 resize-y shadow-2xs leading-relaxed"
           />
         </div>
 
@@ -296,6 +302,17 @@ export function CreateDealForm() {
             onApplyRules={applySelectedRulesToDescription}
           />
         )}
+
+        {/* Media Gallery Uploader */}
+        <DealImageGalleryUploader
+          mediaGallery={mediaGallery}
+          coverIndex={coverIndex}
+          onChange={(images, cover) => {
+            setMediaGallery(images);
+            setCoverIndex(cover);
+          }}
+          disabled={isSubmitting || isRedirecting}
+        />
       </div>
 
       {/* 3. Escrow Terms: Amount, Duration & Buyer */}
@@ -322,33 +339,35 @@ export function CreateDealForm() {
       />
 
       {/* 5. Submit Button with anti-double-click & redirect protection */}
-      <Button
-        type="submit"
-        disabled={isSubmitting || isRedirecting}
-        aria-busy={isSubmitting || isRedirecting}
-        className={`w-full min-h-12 text-base font-bold bg-linear-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 shadow-lg shadow-cyan-950/50 transition-all ${
-          isSubmitting || isRedirecting
-            ? "cursor-not-allowed opacity-70 pointer-events-none"
-            : "cursor-pointer"
-        }`}
-      >
-        {isRedirecting ? (
-          <>
-            <Loader2 className="size-5 animate-spin mr-2" />
-            Đang chuyển hướng tới giao dịch...
-          </>
-        ) : isSubmitting ? (
-          <>
-            <Loader2 className="size-5 animate-spin mr-2" />
-            Đang khóa an toàn &amp; Tạo Giao Dịch...
-          </>
-        ) : (
-          <>
-            <ShieldCheck className="size-5 mr-2" />
-            Xác Nhận &amp; Tạo Giao Dịch Mới
-          </>
-        )}
-      </Button>
+      <div className="pt-2">
+        <Button
+          type="submit"
+          disabled={isSubmitting || isRedirecting}
+          aria-busy={isSubmitting || isRedirecting}
+          className={`w-full min-h-[50px] text-sm sm:text-base font-black bg-rose-500 hover:bg-rose-600 text-white rounded-xl shadow-sm border border-rose-600 transition-all flex items-center justify-center gap-2 active:translate-y-0.5 ${
+            isSubmitting || isRedirecting
+              ? "cursor-not-allowed opacity-70 pointer-events-none"
+              : "cursor-pointer"
+          }`}
+        >
+          {isRedirecting ? (
+            <>
+              <Loader2 className="size-5 animate-spin mr-2" />
+              Đang chuyển hướng tới giao dịch...
+            </>
+          ) : isSubmitting ? (
+            <>
+              <Loader2 className="size-5 animate-spin mr-2" />
+              Đang mã hóa &amp; Lưu két bảo mật...
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="size-5 mr-1" />
+              Khóa Vào Két &amp; Khởi Tạo Giao Dịch An Toàn
+            </>
+          )}
+        </Button>
+      </div>
     </form>
   );
 }

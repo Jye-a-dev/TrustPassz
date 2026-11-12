@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Menu,
-  Bell,
   Coins,
   Lock,
   User,
@@ -16,6 +15,7 @@ import {
   Plus,
   CheckCircle2,
 } from "lucide-react";
+import { NotificationCenter } from "@/components/layout/notification-center";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/lib/auth-store";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { getSmartAvatarUrl } from "@/lib/avatar-helper";
 
 interface UserNavbarProps {
   onOpenMobileMenu?: () => void;
@@ -50,6 +52,7 @@ export function UserNavbar({
 
   const displayName =
     user?.displayName || user?.email?.split("@")[0] || "Trần Quốc Toản";
+  const smartAvatarUrl = getSmartAvatarUrl(user);
   const userInitials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -62,15 +65,15 @@ export function UserNavbar({
     : "0x8B4f...3a29";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-800/80 bg-[#070A10]/90 px-4 sm:px-6 backdrop-blur-2xl">
-      {/* Left: Mobile hamburger & Brand */}
+    <div className="flex h-16 w-full items-center justify-between border-b border-subtle bg-surface/95 dark:bg-slate-950/95 px-4 sm:px-6 backdrop-blur-md transition-colors duration-150">
+      {/* Left: Mobile hamburger, Brand & Quick Links */}
       <div className="flex items-center gap-3">
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={onOpenMobileMenu}
-          className="md:hidden min-h-11 min-w-11 text-slate-300 hover:text-white"
+          className="md:hidden min-h-11 min-w-11 border border-subtle bg-surface text-primary hover:bg-input-bg shadow-sm"
           aria-label="Mở bảng điều hướng"
         >
           <Menu className="size-5" />
@@ -80,76 +83,63 @@ export function UserNavbar({
           href="/user"
           className="flex items-center gap-2.5 transition-transform hover:scale-[1.02] md:hidden"
         >
-          <div className="flex size-9 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500/25 via-cyan-500/20 to-emerald-500/10 border border-emerald-500/50 text-emerald-400">
-            <ShieldCheck className="size-5 text-emerald-400" />
+          <div className="flex size-9 items-center justify-center rounded-xl bg-brand-pink-tint border border-brand-pink/30 text-brand-pink shadow-sm">
+            <ShieldCheck className="size-5 text-brand-pink" />
           </div>
-          <span className="font-extrabold text-base tracking-tight text-white">
+          <span className="font-extrabold text-base tracking-tight text-primary">
             TrustPassz
           </span>
         </Link>
 
-        {/* Desktop Left: Live Status Radar & Pre-Release Testnet Badge */}
-        <div className="hidden md:flex items-center gap-2.5 text-xs text-slate-400">
-          <div className="flex items-center gap-1.5 rounded-full border border-amber-500/50 bg-amber-950/40 px-2.5 py-1 font-mono text-[11px] font-bold text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
-            </span>
-            <span>[PRE-RELEASE TESTNET - BASE SEPOLIA]</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/80 px-2.5 py-1 font-mono text-[11px]">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-          </div>
+        {/* Desktop Quick Nav to Explore */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-subtle bg-surface hover:bg-input-bg text-secondary hover:text-brand-pink text-xs font-semibold shadow-2xs transition-all active:translate-y-0.5"
+          >
+            <span>Khám phá Sàn</span>
+          </Link>
         </div>
       </div>
 
-
       {/* Right Action Widgets */}
-      <div className="flex items-center gap-2 sm:gap-3.5">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Quick Launch "Tạo Giao Dịch" CTA */}
         <Button
           asChild
           size="sm"
-          className="hidden sm:inline-flex min-h-9 px-3.5 rounded-lg bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
+          className="hidden sm:inline-flex min-h-9 px-3.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs gap-1.5 border border-rose-600 shadow-sm active:translate-y-0.5 cursor-pointer"
         >
           <Link href="/user/deals/create">
             <Plus className="size-3.5 stroke-3" />
-            <span>+ Tạo Giao Dịch</span>
+            <span>+ Tạo Kèo Mới</span>
           </Link>
         </Button>
 
         {/* Escrow Locked Balance Widget */}
-        <div className="hidden lg:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-950/25 px-3 py-1.5 shadow-[0_0_15px_rgba(6,182,212,0.18)]">
-          <div className="p-1 rounded bg-cyan-950/90 border border-cyan-500/40 text-cyan-400">
+        <Link
+          href="/user/deals"
+          className="hidden lg:inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 shadow-2xs hover:bg-emerald-100/70 transition-colors"
+          title="Két giữ tiền bảo chứng tự động"
+        >
+          <div className="p-1 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-700">
             <Lock className="size-3.5" />
           </div>
           <div className="flex flex-col text-left">
-            <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-400 leading-none font-mono">
-              Két Giữ Tiền An Toàn
+            <span className="text-[9px] uppercase tracking-wider font-semibold text-emerald-800 leading-none font-mono">
+              Két Giữ Tiền
             </span>
-            <span className="font-mono text-xs font-bold text-cyan-300 leading-tight">
+            <span className="font-mono text-xs font-bold text-emerald-800 leading-tight">
               {lockedBalanceVND.toLocaleString("vi-VN")} ₫
             </span>
           </div>
-        </div>
+        </Link>
 
-        {/* Realtime Notification Bell */}
-        <button
-          type="button"
-          className="relative flex size-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
-          title="Thông báo biến động giao dịch"
-          aria-label="Thông báo"
-        >
-          <Bell className="size-4" />
-          <span className="absolute -top-0.5 -right-0.5 flex size-2.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-            <span className="relative inline-flex size-2.5 rounded-full bg-cyan-500" />
-          </span>
-        </button>
+        {/* Theme Toggle (Light / Dark / System) */}
+        <ThemeToggle />
+
+        {/* Realtime Notification Center */}
+        <NotificationCenter />
 
         {/* User Profile Avatar Dropdown */}
         {mounted && (
@@ -157,23 +147,32 @@ export function UserNavbar({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 p-1 sm:px-2.5 sm:py-1 hover:border-cyan-500/40 hover:bg-slate-800 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500/40"
+                className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 sm:px-2.5 sm:py-1 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all cursor-pointer outline-none focus:ring-2 focus:ring-rose-200"
               >
                 <div className="relative">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-emerald-500 text-xs font-black text-slate-950 shadow-sm">
-                    {userInitials || "U"}
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 size-2 bg-emerald-400 border border-slate-900 rounded-full" />
+                  {smartAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={smartAvatarUrl}
+                      alt={displayName}
+                      className="size-7 rounded-lg object-cover border border-rose-600/40 bg-slate-100 dark:bg-slate-800"
+                    />
+                  ) : (
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-r from-rose-500 to-amber-500 text-xs font-black text-white border border-rose-600 shadow-xs">
+                      {userInitials || "U"}
+                    </div>
+                  )}
+                  <span className="absolute -bottom-0.5 -right-0.5 size-2 bg-emerald-500 border border-white dark:border-slate-950 rounded-full" />
                 </div>
 
                 <div className="hidden sm:flex flex-col text-left">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold text-slate-100 max-w-28 truncate leading-tight">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 max-w-28 truncate leading-tight">
                       {displayName}
                     </span>
-                    <CheckCircle2 className="size-3 text-cyan-400 shrink-0" />
+                    <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
                   </div>
-                  <span className="text-[10px] text-slate-400 font-mono leading-none">
+                  <span className="text-[10px] text-slate-500 font-mono leading-none">
                     {formattedWallet}
                   </span>
                 </div>
@@ -181,53 +180,52 @@ export function UserNavbar({
               </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-60 mt-1 border-slate-800 bg-[#0B0F17]/95 backdrop-blur-2xl">
-              <DropdownMenuLabel className="flex flex-col gap-1 p-3 bg-slate-950/70 rounded-t-lg">
+            <DropdownMenuContent align="end" className="w-60 mt-1 border-slate-200 bg-white shadow-xl rounded-xl">
+              <DropdownMenuLabel className="flex flex-col gap-1 p-3 bg-slate-50 rounded-t-lg border-b border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">{displayName}</span>
-                  <Badge variant="outline" className="text-[9px] border-emerald-500/40 text-emerald-300 font-mono px-1.5 py-0">
+                  <span className="font-bold text-slate-900 text-xs">{displayName}</span>
+                  <Badge variant="outline" className="text-[9px] border-emerald-300 text-emerald-800 bg-emerald-50 font-mono px-1.5 py-0">
                     {user?.role || "USER"}
                   </Badge>
                 </div>
-                <span className="text-[10px] font-mono text-cyan-400 truncate">
+                <span className="text-[10px] font-mono text-rose-600 truncate">
                   {user?.email || formattedWallet}
                 </span>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-slate-800" />
 
               <DropdownMenuItem asChild>
-                <Link href="/user" className="flex items-center gap-2 cursor-pointer py-2">
-                  <User className="size-3.5 text-slate-400" />
+                <Link href="/user" className="flex items-center gap-2 cursor-pointer py-2 text-slate-700 hover:bg-slate-50">
+                  <User className="size-3.5 text-slate-500" />
                   <span>Bàn điều hành cá nhân</span>
                 </Link>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <Link href="/user/orders" className="flex items-center gap-2 cursor-pointer py-2">
-                  <Coins className="size-3.5 text-slate-400" />
+                <Link href="/user/orders" className="flex items-center gap-2 cursor-pointer py-2 text-slate-700 hover:bg-slate-50">
+                  <Coins className="size-3.5 text-slate-500" />
                   <span>Lịch sử đơn &amp; Biên lai</span>
                 </Link>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <Link href="/user/settings" className="flex items-center gap-2 cursor-pointer py-2">
-                  <Settings className="size-3.5 text-slate-400" />
-                  <span>Cài đặt STK VietQR &amp; Passkey</span>
+                <Link href="/user/settings" className="flex items-center gap-2 cursor-pointer py-2 text-slate-700 hover:bg-slate-50">
+                  <Settings className="size-3.5 text-slate-500" />
+                  <span>Cài đặt STK VietQR</span>
                 </Link>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <Link href="/deals/demo" className="flex items-center gap-2 cursor-pointer py-2">
-                  <Sparkles className="size-3.5 text-emerald-400" />
+                <Link href="/deals/demo" className="flex items-center gap-2 cursor-pointer py-2 text-slate-700 hover:bg-slate-50">
+                  <Sparkles className="size-3.5 text-rose-500" />
                   <span>Thương lượng giao dịch mẫu</span>
                 </Link>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="bg-slate-800" />
+              <DropdownMenuSeparator className="bg-slate-100" />
 
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="text-rose-400 focus:text-rose-300 focus:bg-rose-950/40 cursor-pointer flex items-center gap-2 py-2"
+                className="text-rose-600 focus:text-rose-700 focus:bg-rose-50 cursor-pointer flex items-center gap-2 py-2"
               >
                 <LogOut className="size-3.5" />
                 <span>Đăng xuất phiên làm việc</span>
@@ -236,6 +234,6 @@ export function UserNavbar({
           </DropdownMenu>
         )}
       </div>
-    </header>
+    </div>
   );
 }

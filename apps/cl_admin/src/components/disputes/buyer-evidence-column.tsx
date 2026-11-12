@@ -1,9 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { AlertTriangle, Video, FileText, Maximize2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Video } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { useOptimizedEvidence } from '@/hooks/use-optimized-evidence';
 import { cn } from '@/lib/utils';
 import type { DisputeLog } from '@/types';
@@ -58,123 +57,105 @@ export function BuyerEvidenceColumn({
   ];
 
   return (
-    <Card className={cn('border-slate-800 bg-[#0F172A] shadow-lg flex flex-col', className)}>
-      <CardHeader className="border-b border-slate-800 pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-950/60 text-amber-400 border border-amber-800/40">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-            <CardTitle className="text-sm font-semibold text-white">
-              Cột Phải: Bằng Chứng Khiếu Nại của Buyer
-            </CardTitle>
-          </div>
-          <Badge variant="outline" className="border-amber-800 bg-amber-950/40 text-amber-400 text-[10px] font-mono">
-            Dispute Evidence
-          </Badge>
-        </div>
-      </CardHeader>
+    <Card className={cn('rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-3 flex flex-col h-105', className)}>
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+        <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+          <AlertTriangle className="size-4.5 text-rose-600" />
+          Bằng Chứng Khiếu Nại Của Buyer
+        </span>
+        <span className="rounded bg-rose-50 text-rose-700 px-2 py-0.5 text-[10px] font-mono border border-rose-200">
+          Dispute Evidence
+        </span>
+      </div>
 
-      <CardContent
+      <div
         ref={scrollRef}
         onScroll={onScroll}
-        className="space-y-4 pt-4 flex-1 max-h-[580px] overflow-y-auto"
+        className="space-y-3 flex-1 overflow-y-auto scrollbar-thin text-xs"
       >
         {/* Buyer Claim */}
-        <div className="space-y-1 text-xs">
-          <span className="font-semibold text-slate-300">Lý do khiếu nại (Buyer Claim):</span>
-          <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 p-3 text-amber-200 leading-relaxed text-xs">
+        <div className="space-y-1">
+          <span className="font-semibold text-slate-700 text-xs">Lý do khiếu nại (Buyer Claim):</span>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 leading-relaxed text-xs">
             &ldquo;{dispute.reason}&rdquo;
           </div>
         </div>
 
         {/* 3 Unboxing Keyframes */}
         <div className="space-y-2 text-xs">
-          <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-            <Video className="h-4 w-4 text-cyan-400" />
+          <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+            <Video className="h-4 w-4 text-slate-600" />
             3 Keyframes Unbox trích xuất từ Video:
           </span>
           <div className="grid grid-cols-3 gap-2">
             {unboxKeyframes.map((kf, idx) => (
               <div
                 key={idx}
-                onClick={() =>
-                  onSelectImage({ src: kf.url, title: `Keyframe ${kf.time}: ${kf.label}` })
-                }
-                className="group relative cursor-pointer overflow-hidden rounded-lg border border-slate-800 bg-[#080C14] p-1.5 transition-all hover:border-cyan-500/50"
+                className="group relative cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+                onClick={() => onSelectImage({ src: kf.url, title: `Unbox Video: ${kf.label} (${kf.time})` })}
               >
-                <div className="relative h-20 w-full overflow-hidden rounded bg-slate-900">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={getMediaUrl(kf.url)}
-                    alt={kf.label}
-                    onLoad={() => markAsLoaded(kf.url)}
-                    className={cn(
-                      'h-full w-full object-cover transition-opacity duration-300 group-hover:scale-105',
-                      loadedMap[kf.url] ? 'opacity-100' : 'opacity-40 blur-xs'
-                    )}
-                    style={{ backgroundImage: `url(${blurPlaceholder})` }}
-                  />
-                  <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 py-0.2 font-mono text-[9px] text-cyan-300">
-                    {kf.time}
-                  </span>
-                </div>
-                <p className="mt-1 font-mono text-[10px] text-slate-300 truncate">{kf.label}</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={kf.url}
+                  alt={kf.label}
+                  className="h-16 w-full object-cover transition-transform group-hover:scale-105"
+                />
+                <span className="absolute bottom-1 right-1 rounded bg-slate-900/80 px-1 py-0.2 font-mono text-[9px] text-white">
+                  {kf.time}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Error Screenshots */}
-        <div className="space-y-2 text-xs">
-          <span className="font-semibold text-slate-300 flex items-center justify-between">
-            <span>Ảnh chụp màn hình lỗi (Supabase Storage):</span>
-            <span className="text-[10px] text-slate-500">Click để soi phóng đại</span>
+        {/* Terminal log output */}
+        <div className="space-y-1.5 text-xs">
+          <span className="font-semibold text-slate-700 block">
+            Nhật ký thực thi (Terminal / Stacktrace Output):
           </span>
-          <div className="grid grid-cols-2 gap-3">
-            {buyerScreenshots.map((scr, idx) => {
-              const mediaUrl = getMediaUrl(scr);
-              return (
-                <div
-                  key={idx}
-                  onClick={() => onSelectImage({ src: mediaUrl, title: `Ảnh lỗi ${idx + 1}` })}
-                  className="group relative cursor-pointer rounded-lg border border-slate-800 bg-[#080C14] p-2 transition-all hover:border-cyan-500/50"
-                >
-                  <div className="h-28 w-full rounded bg-slate-900 flex flex-col items-center justify-center text-slate-500 border border-slate-800 text-[11px] gap-1 group-hover:bg-slate-800/60">
-                    <FileText className="h-6 w-6 text-rose-400" />
-                    <span className="font-mono text-[10px] text-slate-300 truncate max-w-[140px]">
-                      evidence_{idx + 1}.png
-                    </span>
-                    <span className="text-[9px] text-slate-500 font-mono">Supabase Storage</span>
-                  </div>
-                  <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400">
-                    <span>Chi tiết lỗi #{idx + 1}</span>
-                    <span className="text-cyan-400 group-hover:underline flex items-center gap-0.5">
-                      <Maximize2 className="h-3 w-3" /> Phóng to
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="rounded-lg border border-slate-200 bg-[#F1F5F9] p-3 font-mono text-[11px] text-slate-800 space-y-1 overflow-x-auto max-h-[160px] scrollbar-thin">
+            <pre className="whitespace-pre-wrap font-mono">
+              {isPiiUnlocked ? rawLogs : redactedLogs}
+            </pre>
           </div>
         </div>
 
-        {/* Raw Terminal Log with PII mask */}
-        <div className="space-y-1 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-300">Raw Terminal / Exception Log:</span>
-            {isPiiUnlocked && (
-              <Badge variant="amber" className="text-[9px] font-mono py-0">
-                PII ĐÃ MỞ KHÓA
-              </Badge>
-            )}
+        {/* Raw Screenshots */}
+        {buyerScreenshots.length > 0 && (
+          <div className="space-y-2 text-xs">
+            <span className="font-semibold text-slate-700">Ảnh chụp màn hình lỗi (Screenshots):</span>
+            <div className="grid grid-cols-2 gap-2">
+              {buyerScreenshots.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="relative rounded-lg border border-slate-200 bg-slate-100 p-2 text-center cursor-pointer group"
+                  onClick={() =>
+                    onSelectImage({
+                      src: getMediaUrl(url),
+                      title: `Bằng chứng Buyer #${idx + 1}`,
+                    })
+                  }
+                >
+                  <div className="h-24 bg-slate-900 rounded-md flex items-center justify-center text-slate-300 font-mono text-xs overflow-hidden relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={loadedMap[url] ? getMediaUrl(url) : blurPlaceholder}
+                      alt={`Evidence ${idx + 1}`}
+                      onLoad={() => markAsLoaded(url)}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="px-2 py-1 bg-white text-slate-900 rounded border border-slate-200 text-[11px] font-medium shadow-xs">
+                        Soi Canvas 3x
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <pre className="rounded-lg border border-slate-800 bg-[#080C14] p-3 text-[10px] font-mono text-rose-300 overflow-x-auto max-h-36 leading-relaxed">
-            {isPiiUnlocked ? rawLogs : redactedLogs}
-          </pre>
-        </div>
-      </CardContent>
+        )}
+      </div>
     </Card>
   );
 }
-

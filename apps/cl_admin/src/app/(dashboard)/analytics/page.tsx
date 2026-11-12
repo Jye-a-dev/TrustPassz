@@ -164,31 +164,28 @@ export default function AnalyticsDashboardPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Top Header & Refresh Bar */}
-      <div className="flex flex-col gap-4 rounded-xl border border-slate-800/80 bg-cyber-surface/90 p-5 shadow-xl backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-slate-200/80 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold tracking-tight text-slate-100 sm:text-2xl">
-              Phân tích Dữ liệu & Thống kê Escrow
-            </h1>
-            <span className="rounded-full bg-emerald-950/60 border border-emerald-700/50 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
-              Live Engine
-            </span>
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span className="text-slate-500">Command Center</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-900 font-semibold">Phân tích &amp; Thống kê</span>
           </div>
-          <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+          <p className="mt-1 text-xs text-slate-500">
             Hệ thống đối soát dòng tiền ký quỹ, trạng thái luân chuyển và chất lượng phán quyết AI Arbitrator
           </p>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-400">
-            <Clock className="h-3.5 w-3.5 text-cyan-400" />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-500">
+            <Clock className="h-3.5 w-3.5 text-slate-600" />
             <span>Cache:</span>
-            <span className="font-mono font-semibold text-slate-200">
+            <span className="font-mono font-semibold text-slate-800">
               {countdown}s
             </span>
             {lastSyncTime && (
-              <span className="hidden sm:inline text-slate-500">
+              <span className="hidden sm:inline text-slate-400 font-mono">
                 • {lastSyncTime}
               </span>
             )}
@@ -199,10 +196,10 @@ export default function AnalyticsDashboardPage() {
             size="sm"
             onClick={() => void fetchData(true)}
             disabled={isRefreshing}
-            className="border-slate-700/80 bg-slate-800/80 hover:bg-slate-700 hover:text-white text-slate-200 gap-2 min-h-11 min-w-11 px-3.5 touch-manipulation"
+            className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 gap-1.5 h-8.5 px-3 text-xs shadow-2xs cursor-pointer"
           >
             <RotateCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin text-cyan-400" : ""}`}
+              className={`h-3.5 w-3.5 text-slate-600 ${isRefreshing ? "animate-spin text-slate-900" : ""}`}
             />
             <span className="text-xs font-medium">Làm mới</span>
           </Button>
@@ -212,104 +209,84 @@ export default function AnalyticsDashboardPage() {
       {/* 4 Executive KPI Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* KPI 1: Locked TVL */}
-        <div className="relative overflow-hidden rounded-xl border border-slate-800/80 bg-cyber-surface/90 p-5 shadow-xl backdrop-blur-md">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-500 font-mono uppercase tracking-wider">
               TVL Đang Khóa Ký Quỹ
             </span>
-            <div className="rounded-lg bg-cyan-950/60 border border-cyan-800/40 p-2 text-cyan-400">
+            <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-1.5 text-emerald-700">
               <Lock className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 font-mono text-xl font-bold tracking-tight text-cyan-300">
+          <div className="mt-2 font-mono text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
             {formatVndCurrency(kpis.lockedTvlVnd)}
           </div>
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="font-mono text-slate-400">
-              + {formatEthCurrency(kpis.lockedTvlEth)}
-            </span>
-            <span className="text-slate-500">
-              {kpis.activeEscrowDeals} deal giữ quỹ
-            </span>
+          <div className="mt-1 flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>+ {formatEthCurrency(kpis.lockedTvlEth)}</span>
+            <span>{kpis.activeEscrowDeals} deal giữ quỹ</span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-cyan-500/0 via-cyan-500 to-cyan-500/0" />
         </div>
 
         {/* KPI 2: Total Volume */}
-        <div className="relative overflow-hidden rounded-xl border border-slate-800/80 bg-cyber-surface/90 p-5 shadow-xl backdrop-blur-md">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">
-              Volume Luân Chuyển Lũy Kế
+            <span className="text-xs font-medium text-slate-500 font-mono uppercase tracking-wider">
+              Volume Luân Chuyển
             </span>
-            <div className="rounded-lg bg-emerald-950/60 border border-emerald-800/40 p-2 text-emerald-400">
+            <div className="rounded-lg bg-slate-100 border border-slate-200 p-1.5 text-slate-700">
               <TrendingUp className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 font-mono text-xl font-bold tracking-tight text-emerald-300">
+          <div className="mt-2 font-mono text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
             {formatVndCurrency(kpis.totalVolumeVnd)}
           </div>
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="font-mono text-slate-400">
-              + {formatEthCurrency(kpis.totalVolumeEth)}
-            </span>
-            <span className="text-slate-500">
-              {kpis.totalDeals} deals toàn sàn
-            </span>
+          <div className="mt-1 flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>+ {formatEthCurrency(kpis.totalVolumeEth)}</span>
+            <span>{kpis.totalDeals} deals toàn sàn</span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-emerald-500/0 via-emerald-500 to-emerald-500/0" />
         </div>
 
         {/* KPI 3: Dispute Rate */}
-        <div className="relative overflow-hidden rounded-xl border border-slate-800/80 bg-cyber-surface/90 p-5 shadow-xl backdrop-blur-md">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-500 font-mono uppercase tracking-wider">
               Tỷ Lệ Tranh Chấp Sàn
             </span>
-            <div className="rounded-lg bg-amber-950/60 border border-amber-800/40 p-2 text-amber-400">
+            <div className="rounded-lg bg-amber-50 border border-amber-200 p-1.5 text-amber-700">
               <ShieldAlert className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 font-mono text-xl font-bold tracking-tight text-amber-300">
+          <div className="mt-2 font-mono text-2xl font-bold tracking-tight text-amber-600 tabular-nums">
             {kpis.disputeRatePct}%
           </div>
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              {disputeMetrics.totalDisputes} ca khiếu nại
-            </span>
-            <span className="text-slate-500">
-              {disputeMetrics.resolutionRatePct}% đã khép lại
-            </span>
+          <div className="mt-1 flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>{disputeMetrics.totalDisputes} ca khiếu nại</span>
+            <span className="text-slate-600 font-semibold">{disputeMetrics.resolutionRatePct}% giải quyết</span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-amber-500/0 via-amber-500 to-amber-500/0" />
         </div>
 
         {/* KPI 4: Autonomous Resolution Rate */}
-        <div className="relative overflow-hidden rounded-xl border border-slate-800/80 bg-cyber-surface/90 p-5 shadow-xl backdrop-blur-md">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-500 font-mono uppercase tracking-wider">
               Tự Động Phán Quyết (AI)
             </span>
-            <div className="rounded-lg bg-cyan-950/60 border border-cyan-800/40 p-2 text-cyan-400">
+            <div className="rounded-lg bg-indigo-50 border border-indigo-200 p-1.5 text-indigo-700">
               <Bot className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 font-mono text-xl font-bold tracking-tight text-cyan-300">
+          <div className="mt-2 font-mono text-2xl font-bold tracking-tight text-indigo-600 tabular-nums">
             {kpis.autonomousResolutionRatePct}%
           </div>
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              {disputeMetrics.confidenceTiers.high.count} ca chuẩn ≥ 0.75
-            </span>
-            <span className="text-slate-500">
-              Override {disputeMetrics.adminOverrideRatePct}%
-            </span>
+          <div className="mt-1 flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>{disputeMetrics.confidenceTiers.high.count} ca chuẩn ≥ 0.75</span>
+            <span>Override {disputeMetrics.adminOverrideRatePct}%</span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-cyan-500/0 via-cyan-500 to-cyan-500/0" />
         </div>
       </div>
 
       {/* Main Row: TVL Timeseries Area Chart */}
-      <div>
+      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <TvlAreaChart
           data={tvlTimeseries}
           timeframe={timeframe}
@@ -320,14 +297,18 @@ export default function AnalyticsDashboardPage() {
 
       {/* Secondary Row: Deal Lifecycle Distribution + AI Dispute Arbitration */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <DealDistributionChart
-          data={dealDistribution}
-          isLoading={isLoading}
-        />
-        <AiDisputeMetricsCard
-          metrics={disputeMetrics}
-          isLoading={isLoading}
-        />
+        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+          <DealDistributionChart
+            data={dealDistribution}
+            isLoading={isLoading}
+          />
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+          <AiDisputeMetricsCard
+            metrics={disputeMetrics}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );

@@ -82,6 +82,12 @@ export class AuthVerifierService {
    * Disallows unverified decode fallbacks to prevent token forgery.
    */
   async verifyGoogleIdToken(token: string) {
+    if (!token || token.trim().split('.').length !== 3) {
+      throw new BadRequestException(
+        'Định dạng Token không hợp lệ (yêu cầu chuỗi JWT 3 đoạn)',
+      );
+    }
+
     try {
       const allowedAudiences = [
         process.env.GOOGLE_CLIENT_ID,
@@ -92,13 +98,13 @@ export class AuthVerifierService {
       ].filter((aud): aud is string => Boolean(aud && aud.trim().length > 0));
 
       const ticket = await this.googleClient.verifyIdToken({
-        idToken: token,
+        idToken: token.trim(),
         audience: allowedAudiences.length > 0 ? allowedAudiences : undefined,
       });
 
       const payload = ticket.getPayload();
       if (!payload || !payload.email) {
-        throw new UnauthorizedException('Chữ ký Google Token không hợp lệ');
+        throw new UnauthorizedException('Chữ ký Google Token không hợp lệ hoặc thiếu email');
       }
 
       return {
@@ -109,8 +115,16 @@ export class AuthVerifierService {
         avatarUrl: payload.picture,
       };
     } catch (verifyErr) {
-      this.logger.warn(`Google verifyIdToken failed: ${verifyErr}`);
-      throw new UnauthorizedException('Xác thực Google thất bại');
+      if (
+        verifyErr instanceof BadRequestException ||
+        verifyErr instanceof UnauthorizedException
+      ) {
+        throw verifyErr;
+      }
+      const msg =
+        verifyErr instanceof Error ? verifyErr.message : String(verifyErr);
+      this.logger.warn(`Google verifyIdToken failed: ${msg}`);
+      throw new UnauthorizedException(`Xác thực Google thất bại: ${msg}`);
     }
   }
 
@@ -122,13 +136,20 @@ export class AuthVerifierService {
     normalizedProvider: string,
     dto: VerifyAuthDto,
   ): Promise<DecodedAuthPayload> {
-    if (!rawToken) {
+    if (!rawToken || !rawToken.trim()) {
       throw new BadRequestException('Authentication token is required');
+    }
+
+    const trimmed = rawToken.trim();
+    if (trimmed.split('.').length !== 3) {
+      throw new BadRequestException(
+        'Định dạng Token không hợp lệ (yêu cầu chuỗi JWT 3 đoạn)',
+      );
     }
 
     try {
       const { decode } = await import('jsonwebtoken');
-      const unverified = decode(rawToken, { complete: true }) as {
+      const unverified = decode(trimmed, { complete: true }) as {
         payload: {
           sub?: string;
           email?: string;
@@ -146,7 +167,9 @@ export class AuthVerifierService {
       } | null;
 
       if (!unverified || !unverified.payload) {
-        throw new UnauthorizedException('Malformed authentication token');
+        throw new BadRequestException(
+          'Định dạng Token không hợp lệ (yêu cầu chuỗi JWT 3 đoạn)',
+        );
       }
 
       const payload = unverified.payload;
@@ -180,7 +203,12 @@ export class AuthVerifierService {
         avatarUrl: payload.avatarUrl || payload.picture || dto.avatarUrl,
       };
     } catch (error: unknown) {
-      if (error instanceof UnauthorizedException) throw error;
+      if (
+        error instanceof BadRequestException ||
+        error instanceof UnauthorizedException
+      ) {
+        throw error;
+      }
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Token parsing failed: ${message}`);
       throw new UnauthorizedException(

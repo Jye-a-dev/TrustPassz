@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kích Hoạt Quyền Trọng Tài | TrustPassz Governance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              bg: '#080C14',
+              surface: '#0B0F17',
+              card: '#0F172A',
+              border: '#1E293B',
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #080C14;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #080C14; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; border: 1px solid rgba(15, 23, 42, 0.6); }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="bg-[#080C14] text-slate-100 min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+  <div class="relative flex min-h-screen flex-col items-center justify-center bg-[#070A12] px-4 py-12 overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div class="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 size-150 rounded-full bg-cyan-500/10 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-40 right-1/4 size-100 rounded-full bg-blue-600/10 blur-3xl"></div>
+
+    <div class="relative mb-6 flex flex-col items-center text-center">
+      <div class="mb-3 flex items-center gap-3">
+        <div class="flex size-11 items-center justify-center rounded-2xl border border-cyan-500/40 bg-gradient-to-br from-cyan-500/20 via-cyan-950/60 to-emerald-500/10 text-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)]">
+          <svg class="size-6 text-cyan-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="text-left">
+          <div class="flex items-center gap-2">
+            <h1 class="font-mono text-xl font-extrabold tracking-tight text-white">TrustPassz</h1>
+            <span class="rounded-md border border-cyan-500/50 bg-cyan-950/80 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-300 uppercase tracking-widest shadow-[0_0_10px_rgba(6,182,212,0.2)]">GOVERNANCE</span>
+          </div>
+          <p class="text-[11px] font-medium text-slate-400">Autonomous Escrow & Arbitrator Command Center</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-[11px] font-mono text-slate-400">
+        <span class="relative flex size-2">
+          <span class="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+        </span>
+        <span class="text-slate-300 font-semibold">Node Status: Online</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-cyan-400/90 font-mono text-[10px]">Base Sepolia Escrow v2.4</span>
+      </div>
+    </div>
+
+    <div class="relative w-full max-w-lg">
+      
+    <div class="rounded-2xl border border-slate-800 bg-[#0F172A] shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="text-xl font-bold tracking-tight text-white font-mono">Kích Hoạt Quyền Trọng Tài</h2>
+          <p class="text-xs text-slate-400">Chỉ chấp thuận cho thành viên hội đồng phân xử có Master Secret Key.</p>
+        </div>
+        <svg class="size-6 text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+
+      <div class="space-y-3.5">
+        <div class="space-y-1">
+          <label class="text-xs font-medium text-slate-300">Họ và tên / Bí danh *</label>
+          <input type="text" value="Lead Arbitrator Alex" placeholder="e.g. Lead Arbitrator Alex" class="w-full h-10 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white">
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-medium text-slate-300">Email công vụ *</label>
+          <input type="email" value="alex.arbitrator@trustpassz.io" placeholder="admin@example.com" class="w-full h-10 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white">
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-medium text-slate-300">Địa chỉ ví EVM (Base Sepolia)</label>
+          <input type="text" value="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" placeholder="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" class="w-full h-10 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white font-mono">
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-medium text-slate-300">Vai trò kích hoạt</label>
+          <select class="w-full h-10 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
+            <option value="ARBITRATOR" selected>ARBITRATOR (Trọng tài viên phân xử khiếu nại)</option>
+            <option value="ADMIN">ADMIN (Super Admin toàn quyền hệ thống)</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium text-slate-300">Master Secret Key / Invite Token *</label>
+            <span class="text-[10px] text-cyan-400 font-mono">Demo: TPZ_ADMIN_MASTER_KEY_2026</span>
+          </div>
+          <input type="password" value="TPZ_ADMIN_MASTER_KEY_2026" placeholder="Nhập secret key của bạn" class="w-full h-10 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white font-mono">
+        </div>
+      </div>
+
+      <div class="border-t border-slate-800 pt-4 space-y-3">
+        <button type="button" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs h-11 rounded-lg flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+          <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-1.5 1.5L14 9l-1.5-1.5L10 10l1.5 1.5L9 14l-1.5-1.5L5 15l2 2-4 4 3 3 4-4 2 2 2.5-2.5L13 18l2.5-2.5-1.5-1.5 2.5-2.5-1.5-1.5L20 5l2-2Z"/></svg>
+          <span>Xác thực & Gia nhập Hội đồng</span>
+        </button>
+
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Đã có tài khoản?</span>
+          <a href="#" class="text-cyan-400 hover:underline">Đăng nhập ngay &rarr;</a>
+        </div>
+      </div>
+    </div>
+  
+    </div>
+
+    <div class="relative mt-8 flex items-center gap-2 text-center text-xs text-slate-500 font-mono">
+      <svg class="size-3 text-cyan-500/70" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Base Sepolia Multi-Sig: 0x165B...f783</span>
+      <span>•</span>
+      <span>Secured by Ed25519 & Keccak-256 RBAC Gate</span>
+    </div>
+  </div>
+</body>
+</html>

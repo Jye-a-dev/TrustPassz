@@ -2,7 +2,7 @@
 export const DIGITAL_ESCROW_CONTRACT_NAME = "DigitalEscrow" as const;
 export const DIGITAL_ESCROW_CHAIN_ID = 84532 as const;
 export const DIGITAL_ESCROW_NETWORK = "base-sepolia" as const;
-export const DIGITAL_ESCROW_ADDRESS = "0xef976eb14fdba8cb722789b451e2b9f903005c26" as const;
+export const DIGITAL_ESCROW_ADDRESS = "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15" as const;
 
 export const DIGITAL_ESCROW_ABI = [
   {

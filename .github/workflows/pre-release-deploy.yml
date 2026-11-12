@@ -41,36 +41,45 @@ jobs:
       - name: Generate Prisma Client
         working-directory: apps/server
         env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
-          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public' }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public' }}
         run: npx prisma generate
 
       - name: Run Server Unit & Integration Tests
-        run: npm run test --prefix apps/server || echo "Unit test suite completed with fallback"
         env:
           NODE_ENV: test
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
-          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
-          JWT_SECRET: "mock-jwt-secret-for-ci-build-purposes-min-32-chars"
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public' }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public' }}
           BASE_SEPOLIA_RPC_URL: https://sepolia.base.org
-          ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          ESCROW_CONTRACT_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
           ORACLE_RELAYER_PRIVATE_KEY: ${{ secrets.ORACLE_RELAYER_PRIVATE_KEY }}
+        run: |
+          JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          if [ -z "$JWT_SECRET" ]; then
+            JWT_SECRET=$(openssl rand -hex 32)
+          fi
+          export JWT_SECRET
+          npm test --workspace=apps/server
 
       - name: Build Server
-        working-directory: apps/server
         env:
           NODE_ENV: production
           NODE_OPTIONS: "--max-old-space-size=4096"
-          JWT_SECRET: "mock-jwt-secret-for-ci-build-purposes-min-32-chars"
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
-          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public"
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public' }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_test?schema=public' }}
           BASE_SEPOLIA_RPC_URL: https://sepolia.base.org
-          ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+          ESCROW_CONTRACT_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
           ORACLE_RELAYER_PRIVATE_KEY: ${{ secrets.ORACLE_RELAYER_PRIVATE_KEY }}
-        run: npm run build
+        run: |
+          JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          if [ -z "$JWT_SECRET" ]; then
+            JWT_SECRET=$(openssl rand -hex 32)
+          fi
+          export JWT_SECRET
+          npm run build --workspace=apps/server
 
   # ----------------------------------------------------------------------------
-  # Job 2: Frontend Compilation & Typecheck (User & Admin Portals)
+  # Job 2: Frontend Compilation & Unit Tests (cl_user & cl_admin)
   # ----------------------------------------------------------------------------
   verify-frontends:
     name: Verify Frontends (cl_user & cl_admin)
@@ -80,7 +89,7 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_APP_URL: "http://localhost:5000"
       NEXT_PUBLIC_API_URL: "https://mock-api.trustpassz.com"
-      NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x165B47291B87569b91696DCE6f1207eE15C9f783"
+      NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS: "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
       NEXT_PUBLIC_CHAIN_ID: "84532"
       NEXT_PUBLIC_RPC_URL: "https://sepolia.base.org"
       NEXT_PUBLIC_SUPABASE_URL: "https://placeholder-project.supabase.co"
@@ -108,6 +117,9 @@ jobs:
             npm install --no-audit --no-fund
           fi
 
+      - name: Run Frontend Unit Tests (cl_user)
+        run: npm test --workspace=apps/cl_user
+
       - name: Build cl_user
         working-directory: apps/cl_user
         run: npm run build
@@ -117,7 +129,42 @@ jobs:
         run: npm run build
 
   # ----------------------------------------------------------------------------
-  # Job 3: Docker Build & Security Scan
+  # Job 3: AI Pipeline Verification (FastAPI & Pytest Suite)
+  # ----------------------------------------------------------------------------
+  verify-ai-pipeline:
+    name: Verify AI Pipeline (Python 3.11)
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: test
+      GEMINI_API_KEY: "mock-ci-key"
+      AI_MODEL_PATH: "Qwen/Qwen2-VL-2B-Instruct"
+      AI_DEVICE: "cpu"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python Dependencies
+        working-directory: apps/ai_pipeline
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run AI Pipeline Unit & Integration Tests
+        run: |
+          PYTHONPATH=apps/ai_pipeline pytest apps/ai_pipeline/tests apps/ai_pipeline/test_suggestion.py -v
+
+  # ----------------------------------------------------------------------------
+  # Job 4: Docker Build & Security Scan
   # ----------------------------------------------------------------------------
   verify-containers:
     name: Validate Container Images (Multi-Stage Docker)
@@ -131,6 +178,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate Dynamic Runtime Keys for Build
+        id: runtime-keys
+        run: |
+          JWT_SEC="${{ secrets.JWT_SECRET }}"
+          if [ -z "$JWT_SEC" ]; then
+            JWT_SEC=$(openssl rand -hex 32)
+          fi
+          echo "jwt_secret=$JWT_SEC" >> $GITHUB_OUTPUT
+
       - name: Build Server Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -139,11 +195,11 @@ jobs:
           push: false
           tags: trustpassz/server:pre-release
           build-args: |
-            DATABASE_URL=postgresql://postgres:postgres@localhost:5432/trustpassz_build?schema=public
-            DIRECT_URL=postgresql://postgres:postgres@localhost:5432/trustpassz_build?schema=public
-            JWT_SECRET=mock-jwt-secret-for-ci-build-purposes-min-32-chars
+            DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_build?schema=public' }}
+            DIRECT_URL=${{ secrets.DIRECT_URL || 'postgresql://postgres:postgres@localhost:5432/trustpassz_build?schema=public' }}
+            JWT_SECRET=${{ steps.runtime-keys.outputs.jwt_secret }}
             BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-            ESCROW_CONTRACT_ADDRESS=0x165B47291B87569b91696DCE6f1207eE15C9f783
+            ESCROW_CONTRACT_ADDRESS=0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15
             ORACLE_RELAYER_PRIVATE_KEY=${{ secrets.ORACLE_RELAYER_PRIVATE_KEY }}
             NODE_OPTIONS=--max-old-space-size=4096
           cache-from: type=gha
@@ -158,3 +214,63 @@ jobs:
           tags: trustpassz/ai-pipeline:pre-release
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # ----------------------------------------------------------------------------
+  # Job 5: Cloud Pre-release Automated Deployment
+  # ----------------------------------------------------------------------------
+  deploy-pre-release:
+    name: Deploy Cloud Pre-release Services
+    runs-on: ubuntu-latest
+    needs: [verify-server, verify-frontends, verify-ai-pipeline, verify-containers]
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Deploy Render Backend Server (NestJS)
+        run: |
+          HOOK="${{ secrets.RENDER_SERVER_DEPLOY_HOOK || secrets.RENDER_SERVER_DEPLOY_HOOK_URL }}"
+          if [ -n "$HOOK" ]; then
+            echo "Dispatching deployment hook to Render Server..."
+            curl -fsSL -X POST "$HOOK"
+          else
+            echo "::warning ::RENDER_SERVER_DEPLOY_HOOK not configured in repository secrets."
+          fi
+
+      - name: Deploy Render AI Pipeline (FastAPI)
+        run: |
+          HOOK="${{ secrets.RENDER_PIPELINE_DEPLOY_HOOK || secrets.RENDER_PIPELINE_DEPLOY_HOOK_URL }}"
+          if [ -n "$HOOK" ]; then
+            echo "Dispatching deployment hook to Render AI Pipeline..."
+            curl -fsSL -X POST "$HOOK"
+          else
+            echo "::warning ::RENDER_PIPELINE_DEPLOY_HOOK not configured in repository secrets."
+          fi
+
+      - name: Deploy Vercel User Web (cl_user)
+        run: |
+          HOOK="${{ secrets.VERCEL_USER_DEPLOY_HOOK || secrets.VERCEL_USER_DEPLOY_HOOK_URL }}"
+          if [ -n "$HOOK" ]; then
+            echo "Dispatching deploy hook to Vercel User Web..."
+            curl -fsSL -X POST "$HOOK"
+          elif [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "Deploying cl_user via Vercel CLI..."
+            npx vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
+          else
+            echo "::warning ::Neither VERCEL_USER_DEPLOY_HOOK nor VERCEL_TOKEN configured."
+          fi
+
+      - name: Deploy Vercel Admin Web (cl_admin)
+        run: |
+          HOOK="${{ secrets.VERCEL_ADMIN_DEPLOY_HOOK || secrets.VERCEL_ADMIN_DEPLOY_HOOK_URL }}"
+          if [ -n "$HOOK" ]; then
+            echo "Dispatching deploy hook to Vercel Admin Web..."
+            curl -fsSL -X POST "$HOOK"
+          elif [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "Deploying cl_admin via Vercel CLI..."
+            npx vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
+          else
+            echo "::warning ::Neither VERCEL_ADMIN_DEPLOY_HOOK nor VERCEL_TOKEN configured."
+          fi

@@ -52,7 +52,7 @@ jest.mock('./oracle-relayer.config', () => ({
 
 const MOCK_PRIVATE_KEY =
   `0x${'a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef'}` as `0x${string}`;
-const MOCK_CONTRACT = '0x165B47291B87569b91696DCE6f1207eE15C9f783' as const;
+const MOCK_CONTRACT = '0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15' as const;
 const MOCK_RPC = 'https://sepolia.base.org' as const;
 const MOCK_ACCOUNT_ADDRESS =
   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' as const;

@@ -8,45 +8,39 @@ import { Badge } from "@/components/ui/badge";
 
 export default function UserCreateDealPage() {
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Navigation Breadcrumb */}
-      <div className="flex items-center justify-between">
-        <Link
-          href="/user/deals"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors py-2"
-        >
-          <ArrowLeft className="size-4" />
-          <span>Quay lại Giao dịch của tôi</span>
-        </Link>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+            <Link href="/user" className="hover:text-rose-600 transition-colors">Bàn điều hành</Link>
+            <span>/</span>
+            <Link href="/user/deals" className="hover:text-rose-600 transition-colors">Giao dịch của tôi</Link>
+            <span>/</span>
+            <span className="text-slate-900 font-medium">Đăng bán sản phẩm mới</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <span className="flex size-8 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-sm font-bold">
+              +
+            </span>
+            <span>Khởi Tạo Thỏa Thuận Ký Quỹ</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Khóa thông tin bàn giao vào két, thiết lập giá bán và chọn thời hạn để người mua dùng thử / nghiệm thu.
+          </p>
+        </div>
 
         <Badge
           variant="outline"
-          className="border-cyan-500/40 text-cyan-300 bg-cyan-950/20 text-xs px-2.5 py-1 flex items-center gap-1.5"
+          className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 self-start sm:self-auto shrink-0"
         >
-          <Lock className="size-3 text-cyan-400" />
-          Kho Lưu Trữ Bảo Mật
+          <Lock className="size-3.5 text-emerald-600" />
+          <span>Kho AES-256 Bảo Mật</span>
         </Badge>
       </div>
 
-      {/* Header Title Section */}
-      <div className="space-y-2 border-b border-slate-800/80 pb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="p-2 rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-cyan-400">
-            <Shield className="size-5" />
-          </span>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-              Tạo Giao Dịch Mới
-            </h1>
-            <p className="text-xs text-slate-400">
-              Lưu trữ thông tin bàn giao an toàn, định giá và thiết lập thời gian cho người mua kiểm tra hàng.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Main Form Component */}
-      <div className="rounded-2xl border border-slate-800/90 bg-slate-900/40 p-4 sm:p-6 backdrop-blur-sm shadow-xl">
+      <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 md:p-10 shadow-sm">
         <CreateDealForm />
       </div>
     </div>

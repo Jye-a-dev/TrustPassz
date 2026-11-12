@@ -116,42 +116,41 @@ export function ProfileSecurityCard() {
   };
 
   return (
-    <Card id="security" className="border-slate-800 bg-[#0F172A] p-5 shadow-xl scroll-mt-20">
-      <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-5">
-        <div className="flex size-10 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-950/40 text-emerald-400">
-          <KeyRound className="size-5" />
+    <Card id="security" className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4 scroll-mt-20">
+      <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+          <KeyRound className="size-4.5" />
         </div>
         <div>
-          <h3 className="font-mono text-sm font-semibold text-white">
-            2. Bảo Mật Cấp Cao & Ký Duyệt On-chain
+          <h3 className="text-xs font-bold text-slate-900">
+            2. Cấu Hình Bảo Mật On-Chain &amp; PIN 2FA
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-[11px] text-slate-400">
             Mã PIN 2FA override tranh chấp, liên kết ví chữ ký và quản lý mật khẩu.
           </p>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 pt-1">
         {/* Sub-block A: 6-digit PIN for dispute override */}
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 space-y-3">
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-semibold text-white flex items-center gap-2">
-              <ShieldAlert className="size-4 text-amber-400" />
-              Mã PIN 2FA (6 chữ số) Ký Duyệt Can Thiệp Kèo
+            <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
+              <ShieldAlert className="size-4 text-amber-600" />
+              Mã PIN 2FA Smart Contract:
             </span>
-            <Badge
-              variant="outline"
+            <span
               className={
                 isPinConfigured
-                  ? "border-emerald-800 bg-emerald-950/50 text-emerald-400 text-[10px]"
-                  : "border-amber-800 bg-amber-950/50 text-amber-400 text-[10px]"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  : "border border-amber-200 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-full"
               }
             >
-              {isPinConfigured ? "Đã Kích Hoạt" : "Chưa Thiết Lập"}
-            </Badge>
+              {isPinConfigured ? "ĐÃ KÍCH HOẠT" : "CHƯA THIẾT LẬP"}
+            </span>
           </div>
-          <p className="text-[11px] text-slate-400">
-            Bắt buộc nhập khi Arbitrator/Admin thực hiện thao tác Override AI Verdict, hoàn tiền bảo lãnh hoặc đóng băng tài sản.
+          <p className="text-[11px] text-slate-500">
+            Bắt buộc khi can thiệp cưỡng chế hợp đồng thông minh, giải ngân hoặc hoàn tiền bảo lãnh.
           </p>
 
           <form onSubmit={handleSavePin} className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -162,7 +161,7 @@ export function ProfileSecurityCard() {
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
               placeholder="PIN 6 số mới..."
-              className="bg-slate-950 border-slate-800 text-xs font-mono tracking-widest min-h-[44px]"
+              className="bg-white border-slate-200 text-xs font-mono tracking-widest h-9"
               required
             />
             <Input
@@ -172,13 +171,13 @@ export function ProfileSecurityCard() {
               value={confirmPin}
               onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
               placeholder="Xác nhận PIN..."
-              className="bg-slate-950 border-slate-800 text-xs font-mono tracking-widest min-h-[44px]"
+              className="bg-white border-slate-200 text-xs font-mono tracking-widest h-9"
               required
             />
             <Button
               type="submit"
               disabled={isSavingPin || pin.length !== 6 || confirmPin.length !== 6}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs min-h-[44px]"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 shadow-2xs"
             >
               {isSavingPin ? <Loader2 className="size-4 animate-spin" /> : "Cập Nhật PIN 2FA"}
             </Button>
@@ -186,12 +185,12 @@ export function ProfileSecurityCard() {
         </div>
 
         {/* Sub-block B: Linked Personal Wallet for On-chain Signing */}
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 space-y-3">
-          <span className="font-mono text-xs font-semibold text-white flex items-center gap-2">
-            <Wallet className="size-4 text-cyan-400" />
-            Ví Cá Nhân Ký Phán Quyết On-Chain (EVM 0x hoặc Solana Base58)
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+          <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
+            <Wallet className="size-4 text-slate-700" />
+            Ví Ký Cá Nhân (EIP-712):
           </span>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500">
             Địa chỉ ví của chính bạn dùng để xác thực chữ ký Multi-sig hoặc cấp quyền phán xử trong smart contract.
           </p>
 
@@ -200,13 +199,13 @@ export function ProfileSecurityCard() {
               value={walletAddress}
               onChange={(e) => setWalletAddress(e.target.value)}
               placeholder="0x... (Base Sepolia) hoặc Base58 (Solana)..."
-              className="bg-slate-950 border-slate-800 text-xs font-mono min-h-[44px] flex-1"
+              className="bg-white border-slate-200 text-xs font-mono h-9 flex-1"
               required
             />
             <Button
               type="submit"
               disabled={isSavingWallet || !walletAddress}
-              className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs min-h-[44px] shrink-0"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 shrink-0 shadow-2xs"
             >
               {isSavingWallet ? <Loader2 className="size-4 animate-spin" /> : "Lưu Ví Ký Duyệt"}
             </Button>
@@ -214,9 +213,9 @@ export function ProfileSecurityCard() {
         </div>
 
         {/* Sub-block C: Password Management */}
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 space-y-3">
-          <span className="font-mono text-xs font-semibold text-white flex items-center gap-2">
-            <Lock className="size-4 text-slate-300" />
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+          <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
+            <Lock className="size-4 text-slate-700" />
             Đổi Mật Khẩu Quản Trị Viên
           </span>
           <form onSubmit={handleSavePassword} className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -225,20 +224,20 @@ export function ProfileSecurityCard() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Mật khẩu hiện tại..."
-              className="bg-slate-950 border-slate-800 text-xs min-h-[44px]"
+              className="bg-white border-slate-200 text-xs h-9"
             />
             <Input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Mật khẩu mới (>= 8 ký tự)..."
-              className="bg-slate-950 border-slate-800 text-xs min-h-[44px]"
+              className="bg-white border-slate-200 text-xs h-9"
             />
             <Button
               type="submit"
               disabled={isSavingPassword || !newPassword}
               variant="outline"
-              className="border-slate-700 bg-slate-950 hover:bg-slate-800 text-slate-200 font-mono text-xs min-h-[44px]"
+              className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs h-9 shadow-2xs"
             >
               {isSavingPassword ? <Loader2 className="size-4 animate-spin" /> : "Đổi Mật Khẩu"}
             </Button>

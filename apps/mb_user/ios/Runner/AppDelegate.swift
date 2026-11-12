@@ -17,7 +17,11 @@ import FirebaseMessaging
     let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
     UNUserNotificationCenter.current().requestAuthorization(
       options: authOptions,
-      completionHandler: { _, _ in }
+      completionHandler: { _, error in
+        if let error = error {
+          NSLog("[TrustPassz APNs] Authorization error: \(error.localizedDescription)")
+        }
+      }
     )
 
     application.registerForRemoteNotifications()
@@ -37,6 +41,14 @@ import FirebaseMessaging
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
 
+  override func application(
+    _ application: UIApplication,
+    didFailToRegisterForRemoteNotificationsWithError error: Error
+  ) {
+    NSLog("[TrustPassz APNs] Failed to register for remote notifications: \(error.localizedDescription)")
+    super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+  }
+
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
     let dataDict: [String: String] = ["token": fcmToken ?? ""]
     NotificationCenter.default.post(
@@ -44,5 +56,13 @@ import FirebaseMessaging
       object: nil,
       userInfo: dataDict
     )
+  }
+
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    super.userNotificationCenter(center, willPresent: notification, withCompletionHandler: completionHandler)
   }
 }

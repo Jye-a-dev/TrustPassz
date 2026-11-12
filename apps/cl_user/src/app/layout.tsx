@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
 import { Providers } from "@/components/shared/providers";
-import { PreReleaseBanner } from "@/components/shared/pre-release-banner";
 import "@/styles/globals.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -15,7 +14,7 @@ const inter = Inter({
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0B0F17" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
     { media: "(prefers-color-scheme: dark)", color: "#0B0F17" },
   ],
   width: "device-width",
@@ -73,9 +72,8 @@ export default function RootLayout({
       className={inter.variable}
       data-scroll-behavior="smooth"
     >
-      <body className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0B0F17] dark:text-slate-100 font-sans antialiased flex flex-col overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-900 dark:selection:text-cyan-200 transition-colors duration-150">
+      <body className="min-h-screen bg-canvas text-primary font-sans antialiased flex flex-col overflow-x-hidden selection:bg-brand-pink/20 selection:text-brand-pink transition-colors duration-150">
         <Providers>
-          <PreReleaseBanner />
           <Header />
           <main className="flex-1 flex flex-col">{children}</main>
           <Footer />

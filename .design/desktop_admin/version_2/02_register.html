@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kích Hoạt Quyền Trọng Tài Viên | TrustPassz Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #F8FAFC; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen antialiased selection:bg-slate-200 selection:text-slate-900">
+
+  <div class="relative flex min-h-screen flex-col items-center justify-center bg-[#F8FAFC] px-4 py-12 selection:bg-slate-200 selection:text-slate-900">
+    <div class="relative mb-5 flex flex-col items-center text-center">
+      <div class="mb-2 flex items-center gap-2.5">
+        <div class="flex size-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs">
+          <svg class="size-4.5 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <h1 class="text-base font-bold text-slate-900">TrustPassz Governance</h1>
+      </div>
+      <p class="text-xs text-slate-500">Kích hoạt trọng tài viên độc lập thông qua Master Secret Key</p>
+    </div>
+
+    <div class="relative w-full max-w-lg">
+      <div class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm space-y-4 text-xs">
+        <div class="border-b border-slate-100 pb-3 space-y-1">
+          <h2 class="text-sm font-bold text-slate-900">Nhập Mã Ủy Quyền Hội Đồng (Master Secret Token)</h2>
+          <p class="text-slate-500 text-[11px]">Mã kích hoạt chỉ được cấp từ Ban Điều Hành Quỹ Tự Trị DAO.</p>
+        </div>
+
+        <form class="space-y-3.5">
+          <div class="space-y-1.5">
+            <label class="font-medium text-slate-700">Master Secret Token:</label>
+            <div class="relative">
+              <input type="text" value="TPZ-ARB-2026-99F1-SECKEY-X88" class="w-full h-10 px-3 pr-8 rounded-lg border border-slate-300 bg-slate-50 text-xs font-mono text-slate-900 font-semibold" readonly>
+              <span class="absolute right-2.5 top-1/2 -translate-y-1/2"><svg class="size-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            </div>
+            <p class="text-[11px] text-emerald-700 font-mono">Token hợp lệ: Quyền Trọng tài viên Cấp 1 (Dispute Level 1-2)</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1.5">
+              <label class="font-medium text-slate-700">Tên hiển thị:</label>
+              <input type="text" value="Nguyen Van Arbitrator" class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-800" readonly>
+            </div>
+            <div class="space-y-1.5">
+              <label class="font-medium text-slate-700">Email công vụ:</label>
+              <input type="email" value="arbitrator.vn01@trustpassz.io" class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 font-mono" readonly>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="font-medium text-slate-700">Địa chỉ ví cá nhân ký On-chain (EVM / Solana):</label>
+            <input type="text" value="0x892aF014b29C35C91e84A5C108e411F52796F41e" class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 font-mono" readonly>
+            <p class="text-[11px] text-slate-400 font-mono">Dùng để ký EIP-712 xác nhận kết quả phân xử vào Smart Contract</p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="font-medium text-slate-700 flex items-center justify-between">
+              <span>Thiết lập mã PIN 2FA khẩn cấp (6 số):</span>
+              <span class="text-slate-400 font-mono text-[10px]">Bắt buộc khi Override</span>
+            </label>
+            <div class="grid grid-cols-6 gap-2 font-mono text-center">
+              <input type="text" value="8" class="h-10 rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-900 text-center" readonly>
+              <input type="text" value="4" class="h-10 rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-900 text-center" readonly>
+              <input type="text" value="9" class="h-10 rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-900 text-center" readonly>
+              <input type="text" value="2" class="h-10 rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-900 text-center" readonly>
+              <input type="text" value="0" class="h-10 rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-900 text-center" readonly>
+              <input type="text" value="1" class="h-10 rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-900 text-center" readonly>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-slate-600 space-y-1 text-[11px]">
+            <p class="font-semibold text-slate-800">Cam kết trọng tài viên độc lập:</p>
+            <p class="leading-relaxed">Tôi cam kết phân xử công tâm dựa trên bằng chứng kỹ thuật và checksum của Digital Vault, không thiên vị bất kỳ bên nào.</p>
+          </div>
+
+          <a href="01_login.html" class="w-full h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-xs transition-colors">
+            <span>Kích Hoạt Tài Khoản & Ký Ủy Quyền On-Chain</span>
+            <svg class="size-3.5 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+
+          <div class="text-center pt-1 text-[11px] text-slate-400">
+            Đã có tài khoản? <a href="01_login.html" class="text-slate-800 underline font-semibold">Đăng nhập</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

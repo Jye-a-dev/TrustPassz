@@ -8,21 +8,21 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-cyan-800/60 bg-cyan-950/40 text-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.15)]",
+          "border-slate-200 bg-slate-100 text-slate-800 shadow-2xs",
         emerald:
-          "border-emerald-800/60 bg-emerald-950/40 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.15)]",
+          "border-emerald-200 bg-emerald-50 text-emerald-700 shadow-2xs",
         cyan:
-          "border-cyan-800/60 bg-cyan-950/40 text-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.15)]",
+          "border-cyan-200 bg-cyan-50 text-cyan-700 shadow-2xs",
         amber:
-          "border-amber-800/60 bg-amber-950/40 text-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.15)]",
+          "border-amber-200 bg-amber-50 text-amber-700 shadow-2xs",
         rose:
-          "border-rose-800/60 bg-rose-950/40 text-rose-400 shadow-[0_0_8px_rgba(239,68,68,0.15)]",
+          "border-rose-200 bg-rose-50 text-rose-700 shadow-2xs",
         destructive:
-          "border-rose-800/60 bg-rose-950/40 text-rose-400 shadow-[0_0_8px_rgba(239,68,68,0.15)]",
+          "border-rose-200 bg-rose-50 text-rose-700 shadow-2xs",
         secondary:
-          "border-slate-800 bg-slate-800/70 text-slate-300",
+          "border-slate-200 bg-slate-100 text-slate-700 shadow-2xs",
         outline:
-          "border-slate-800 bg-[#0F172A] text-slate-300",
+          "border-slate-200 bg-white text-slate-700 shadow-2xs",
       },
     },
     defaultVariants: {

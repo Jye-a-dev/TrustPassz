@@ -19,6 +19,7 @@ export interface EncryptDealInput {
   buyerId?: string;
   sellerId?: string;
   idempotencyKey?: string;
+  mediaGallery?: string[];
 }
 
 export interface PreparedDealPayload {
@@ -31,6 +32,7 @@ export interface PreparedDealPayload {
     currency: string;
     inspectionDuration: number;
     idempotencyKey?: string;
+    mediaGallery?: string[];
     digitalAsset: {
       assetType: BackendAssetType;
       encryptedContent: string;
@@ -151,6 +153,7 @@ export class CreateDealService {
       currency: "VND",
       inspectionDuration: Number(input.inspectionDuration),
       idempotencyKey: input.idempotencyKey?.trim() || undefined,
+      mediaGallery: input.mediaGallery || [],
       digitalAsset: {
         assetType: mapAssetCategoryToBackend(input.assetType),
         encryptedContent: vaultPayload.encryptedContent,

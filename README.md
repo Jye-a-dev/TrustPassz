@@ -6,7 +6,7 @@ Autonomous Web3 & AI-Driven Digital Escrow Platform.
 
 - Project Version: 0.0.2 (Pre-release Testnet)
 - Target Network: Base Sepolia Testnet (Chain ID: 84532)
-- Smart Contract (DigitalEscrow): `0x165B47291B87569b91696DCE6f1207eE15C9f783`
+- Smart Contract (DigitalEscrow): `0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15`
 - Workspaces Breakdown:
   - `apps/server`: v0.0.1 (NestJS 11, Prisma 6, Neon PostgreSQL, Supabase BaaS, Viem Relayer, PayOS)
   - `apps/cl_user`: v0.1.0 (Next.js 16, React 19, Tailwind CSS v4, TanStack Query v5, Zustand)
@@ -40,7 +40,7 @@ Autonomous Web3 & AI-Driven Digital Escrow Platform.
   - Endpoints: Health Check (`/health`), Arbitration (`/arbitration`), OpenAPI Docs (`/docs`)
 - packages/contracts:
   - Framework: Foundry (`forge`)
-  - Target Network: Base Sepolia (`0x165B47291B87569b91696DCE6f1207eE15C9f783`)
+  - Target Network: Base Sepolia (`0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15`)
 
 ## 3. System Requirements
 
@@ -90,7 +90,7 @@ Cấu hình các trường:
 - `DIRECT_URL`: Connection string PostgreSQL trực tiếp (Prisma migrations).
 - `SUPABASE_URL` & `SUPABASE_SERVICE_ROLE_KEY`: Quản lý lưu trữ bằng chứng (dispute evidence storage).
 - `BASE_SEPOLIA_RPC_URL`: RPC endpoint cho Base Sepolia.
-- `ESCROW_CONTRACT_ADDRESS`: Địa chỉ hợp đồng DigitalEscrow (`0x165B47291B87569b91696DCE6f1207eE15C9f783`).
+- `ESCROW_CONTRACT_ADDRESS`: Địa chỉ hợp đồng DigitalEscrow (`0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15`).
 - `ORACLE_RELAYER_PRIVATE_KEY`: Private key của ví Relayer thực thi quyết định trọng tài on-chain.
 - `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`: Thông tin kết nối cổng thanh toán PayOS VietQR.
 - `AI_PIPELINE_URL`: Endpoint tới AI Pipeline (`http://localhost:3100` trong dev).
@@ -101,13 +101,13 @@ cp apps/cl_user/.env.example apps/cl_user/.env.local
 ```
 Cấu hình:
 - `NEXT_PUBLIC_API_URL="http://localhost:3001"`
-- `NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"`
+- `NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"`
 - `NEXT_PUBLIC_CHAIN_ID="84532"`
 - `NEXT_PUBLIC_RPC_URL="https://sepolia.base.org"`
 
 3. Admin Web Client (`apps/cl_admin/.env.local`):
 - `NEXT_PUBLIC_API_URL="http://localhost:3001"`
-- `NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"`
+- `NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"`
 - `NEXT_PUBLIC_CHAIN_ID="84532"`
 - `NEXT_PUBLIC_RPC_URL="https://sepolia.base.org"`
 

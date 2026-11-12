@@ -5,30 +5,35 @@ import Link from "next/link";
 import { LifeBuoy, FileText, CheckCircle2, Terminal, ExternalLink } from "lucide-react";
 
 export function UserFooter() {
+  const contractAddress =
+    process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS ||
+    "0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15";
+  const displayAddress = `${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`;
+
   return (
-    <footer className="border-t border-slate-800/80 bg-[#070A10]/95 text-slate-400 py-3.5 px-4 sm:px-6 mt-auto">
+    <footer className="border-t border-slate-200 bg-white text-slate-500 py-3.5 px-4 sm:px-6 mt-auto">
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs max-w-7xl mx-auto">
         {/* Left: Smart contract status */}
-        <div className="flex flex-wrap items-center gap-2 text-slate-400 font-mono text-[11px]">
-          <div className="flex size-4 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+        <div className="flex flex-wrap items-center gap-2 text-slate-600 font-mono text-[11px]">
+          <div className="flex size-4 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
             <CheckCircle2 className="size-3" />
           </div>
-          <span className="text-slate-400">HỆ THỐNG BẢO VỆ:</span>
+          <span className="text-slate-600">HỆ THỐNG BẢO VỆ:</span>
           <Link
-            href="https://sepolia.basescan.org/address/0x165B47291B87569b91696DCE6f1207eE15C9f783"
+            href={`https://sepolia.basescan.org/address/${contractAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-cyan-400 hover:text-cyan-300 hover:underline bg-slate-900/90 px-2 py-0.5 rounded border border-slate-800 inline-flex items-center gap-1 shadow-sm"
+            className="font-mono text-rose-600 hover:text-rose-700 hover:underline bg-slate-50 px-2 py-0.5 rounded border border-slate-200 inline-flex items-center gap-1 shadow-2xs"
           >
-            <span>0x165B...f783</span>
-            <ExternalLink className="size-2.5 text-cyan-500" />
+            <span>{displayAddress}</span>
+            <ExternalLink className="size-2.5 text-rose-500" />
           </Link>
-          <span className="text-slate-500">• Tự Động 24/7</span>
+          <span className="text-slate-400">• Tự Động 24/7</span>
         </div>
 
         {/* Center: Enclave Status */}
-        <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-          <Terminal className="size-3 text-cyan-400" />
+        <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
+          <Terminal className="size-3 text-slate-400" />
           <span>HỆ THỐNG BẢO MẬT &amp; MÃ HÓA TỰ ĐỘNG</span>
         </div>
 
@@ -36,19 +41,19 @@ export function UserFooter() {
         <div className="flex items-center gap-4 text-[11px] font-medium">
           <Link
             href="/user/disputes"
-            className="inline-flex items-center gap-1.5 text-slate-400 hover:text-amber-400 transition-colors"
+            className="inline-flex items-center gap-1.5 text-slate-600 hover:text-rose-600 transition-colors"
           >
-            <LifeBuoy className="size-3.5 text-amber-400" />
+            <LifeBuoy className="size-3.5 text-rose-500" />
             <span>Trợ Lý Phân Xử 24/7</span>
           </Link>
 
-          <span className="text-slate-800">•</span>
+          <span className="text-slate-300">•</span>
 
           <Link
             href="/deals/demo"
-            className="inline-flex items-center gap-1 text-slate-400 hover:text-cyan-400 transition-colors"
+            className="inline-flex items-center gap-1 text-slate-600 hover:text-rose-600 transition-colors"
           >
-            <FileText className="size-3.5 text-cyan-400" />
+            <FileText className="size-3.5 text-slate-400" />
             <span>Quy Chế Giữ Tiền An Toàn</span>
           </Link>
         </div>

@@ -2,73 +2,37 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
-  ArrowRight,
   PlusCircle,
-  Lock,
-  Clock,
   Tag,
   AlertCircle,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { apiClient } from "@/lib/api-client";
+import { ExploreDealCard, type ExploreDeal } from "@/components/explore/explore-deal-card";
 
-interface ExploreDeal {
-  id: string;
-  title: string;
-  amount: string | number;
-  currency: string;
-  state: "PENDING" | "DEPOSITED" | "IN_INSPECTION" | "SETTLED" | "REFUNDED" | "DISPUTED";
-  inspectionDuration: number;
-  seller?: {
-    id: string;
-    displayName: string;
-  };
-  digitalAsset?: {
-    assetType?: string;
-  } | null;
-}
+function ExplorePageContent() {
+  const searchParams = useSearchParams();
+  const qParam = searchParams.get("q");
 
-const STATE_MAPPINGS: Record<
-  string,
-  { label: string; color: string; vault: string }
-> = {
-  PENDING: {
-    label: "Chờ thanh toán",
-    color: "border-amber-500/40 bg-amber-950/40 text-amber-300",
-    vault: "Đang khóa bảo mật",
-  },
-  DEPOSITED: {
-    label: "Tiền đã giữ an toàn",
-    color: "border-cyan-500/40 bg-cyan-950/40 text-cyan-300",
-    vault: "Sẵn sàng bàn giao",
-  },
-  IN_INSPECTION: {
-    label: "Đang kiểm tra hàng",
-    color: "border-blue-500/40 bg-blue-950/40 text-blue-300",
-    vault: "Đang mở kiểm tra",
-  },
-  SETTLED: {
-    label: "Giao dịch hoàn tất",
-    color: "border-emerald-500/40 bg-emerald-950/40 text-emerald-300",
-    vault: "Đã bàn giao",
-  },
-  DISPUTED: {
-    label: "Đang khiếu nại",
-    color: "border-rose-500/40 bg-rose-950/40 text-rose-300",
-    vault: "Đang tạm khóa",
-  },
-};
-
-export default function ExplorePage() {
   const [deals, setDeals] = React.useState<ExploreDeal[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = React.useState(qParam || "");
+  const [selectedCategory, setSelectedCategory] = React.useState("ALL");
+  const [minPrice, setMinPrice] = React.useState("");
+  const [maxPrice, setMaxPrice] = React.useState("");
+  const [sortBy, setSortBy] = React.useState<"popular" | "newest" | "price_asc" | "price_desc">("popular");
+
+  // Synchronize keyword when URL query param changes
+  React.useEffect(() => {
+    if (qParam !== null) {
+      setSearch(qParam);
+    }
+  }, [qParam]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -104,167 +68,306 @@ export default function ExplorePage() {
   }, []);
 
   const filteredDeals = React.useMemo(() => {
-    return deals.filter((d) =>
-      d.title.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [deals, search]);
+    return deals
+      .filter((d) => {
+        const matchSearch = d.title.toLowerCase().includes(search.toLowerCase());
+        const matchCategory =
+          selectedCategory === "ALL" ||
+          (d.digitalAsset?.assetType &&
+            d.digitalAsset.assetType.toUpperCase().includes(selectedCategory));
+        const amountNum = Number(d.amount || 0);
+        const matchMin = !minPrice || amountNum >= Number(minPrice);
+        const matchMax = !maxPrice || amountNum <= Number(maxPrice);
+        return matchSearch && matchCategory && matchMin && matchMax;
+      })
+      .sort((a, b) => {
+        if (sortBy === "price_asc") return Number(a.amount || 0) - Number(b.amount || 0);
+        if (sortBy === "price_desc") return Number(b.amount || 0) - Number(a.amount || 0);
+        return 0;
+      });
+  }, [deals, search, selectedCategory, minPrice, maxPrice, sortBy]);
+
+  const categories = [
+    { id: "ALL", label: "Tất Cả", icon: "🔥" },
+    { id: "CODE", label: "Mã Nguồn / Code", icon: "💻" },
+    { id: "LICENSE", label: "Bản Quyền / Key", icon: "🔑" },
+    { id: "DESIGN", label: "File Thiết Kế", icon: "🎨" },
+    { id: "DOCUMENT", label: "Tài Liệu Số", icon: "📄" },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 overflow-x-hidden">
-      {/* Glow highlight */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-64 bg-cyan-500/5 blur-[120px] pointer-events-none" />
-
-      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
-          <div className="space-y-2">
-            <Badge
-              variant="outline"
-              className="border-emerald-500/40 text-emerald-300 bg-emerald-950/20 text-xs px-2.5 py-1"
-            >
-              Nền Tảng Giao Dịch An Toàn
-            </Badge>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Khám Phá Giao Dịch Mới Nhất
+    <div className="min-h-screen bg-canvas text-primary overflow-x-hidden">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        {/* Breadcrumb & Header Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-subtle gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs text-muted mb-1">
+              <Link href="/" className="hover:text-brand-pink transition-colors">Trang chủ</Link>
+              <span>/</span>
+              <span className="text-primary font-medium">Khám phá sàn giao dịch</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-primary tracking-tight">
+              Sàn Mua Bán &amp; Giữ Tiền An Toàn ({filteredDeals.length} Kèo)
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400">
-              Giao dịch an toàn với thanh toán VietQR tự động và kho lưu trữ bảo mật.
+            <p className="text-xs sm:text-sm text-secondary mt-0.5">
+              Tất cả sản phẩm đều được thanh toán qua mã VietQR định danh và lưu trữ trong két số bảo chứng.
             </p>
           </div>
 
-          <Button
-            asChild
-            className="self-start md:self-auto min-h-11 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:brightness-110 shadow-lg cursor-pointer"
-          >
-            <Link href="/user/deals/create" className="flex items-center gap-2">
-              <PlusCircle className="size-4" />
-              <span>+ Tạo Giao Dịch</span>
-            </Link>
-          </Button>
-        </div>
-
-        {/* Filter & Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm giao dịch theo tên sản phẩm, tài liệu, tài khoản..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50"
-            />
+          <div className="flex items-center gap-2">
+            <Button
+              asChild
+              className="min-h-11 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 shadow-sm transition-all border border-slate-950 cursor-pointer"
+            >
+              <Link href="/user/deals/create">
+                <PlusCircle className="size-4 text-emerald-400" />
+                <span>+ Tạo Kèo Mới</span>
+              </Link>
+            </Button>
           </div>
         </div>
 
-        {error && (
-          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-950/30 flex items-center gap-2 text-rose-300 text-xs">
-            <AlertCircle className="size-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+        {/* Category Pills Quick Scroll */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`min-h-11 px-4 rounded-full font-bold transition-all shadow-xs shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                selectedCategory === cat.id
+                  ? "bg-rose-600 text-white border border-rose-700 shadow-sm"
+                  : "bg-white text-slate-700 border border-slate-200 hover:border-rose-400 hover:text-rose-600"
+              }`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
 
-        {/* Deals Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="h-48 rounded-2xl border border-slate-800 bg-slate-900/40 p-5 animate-pulse space-y-3"
+        {/* 2-Column Responsive Layout: Left Filter Sidebar + Right Deal Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* ================= LEFT FILTER SIDEBAR (lg:col-span-3) ================= */}
+          <aside className="lg:col-span-3 bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 space-y-6 shadow-sm">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <Tag className="size-4 text-rose-600" />
+                <span>Bộ Lọc Sàn</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setSelectedCategory("ALL");
+                  setMinPrice("");
+                  setMaxPrice("");
+                  setSortBy("popular");
+                }}
+                className="text-xs text-rose-600 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg border border-slate-200 hover:border-rose-300 transition-colors cursor-pointer"
               >
-                <div className="h-5 bg-slate-800 rounded w-1/3" />
-                <div className="h-6 bg-slate-800 rounded w-3/4" />
-                <div className="h-4 bg-slate-800 rounded w-1/2" />
+                Xóa lọc
+              </button>
+            </div>
+
+            {/* Keyword Search */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono block">
+                TỪ KHÓA TÌM KIẾM
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Tên tài nguyên, kèo..."
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
+                />
               </div>
-            ))}
-          </div>
-        ) : filteredDeals.length === 0 ? (
-          <EmptyState
-            title="Không tìm thấy giao dịch phù hợp"
-            description="Hiện chưa có giao dịch nào khớp với tiêu chí tìm kiếm của bạn."
-            actionLabel="Tạo Giao Dịch Mới"
-            actionHref="/user/deals/create"
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {filteredDeals.map((deal) => {
-              const stateInfo =
-                STATE_MAPPINGS[deal.state] || STATE_MAPPINGS.PENDING;
-              const amountNum = Number(deal.amount || 0);
-              const inspectionHours = Math.round(
-                (deal.inspectionDuration || 43200) / 3600
-              );
-              const category =
-                deal.digitalAsset?.assetType || "Sản Phẩm";
+            </div>
 
-              return (
-                <Card
-                  key={deal.id}
-                  className="border-slate-800 bg-slate-900/40 hover:bg-slate-900/70 hover:border-slate-700/80 transition-all rounded-2xl flex flex-col justify-between shadow-md"
+            {/* Filter 1: Khoảng Giá (VNĐ) */}
+            <div className="space-y-3 pt-3 border-t border-slate-100">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono block">
+                KHOẢNG GIÁ (VNĐ)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  placeholder="Tối thiểu"
+                  className="min-h-10 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50 focus:bg-white focus:outline-none focus:border-rose-500"
+                />
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="Tối đa"
+                  className="min-h-10 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50 focus:bg-white focus:outline-none focus:border-rose-500"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setMinPrice("0"); setMaxPrice("500000"); }}
+                  className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-50 hover:bg-rose-50 hover:text-rose-600 text-slate-700 border border-slate-200 hover:border-rose-200 transition-colors cursor-pointer"
                 >
-                  <CardHeader className="space-y-3 pb-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge
-                        variant="outline"
-                        className={`text-[11px] font-semibold ${stateInfo.color}`}
-                      >
-                        {stateInfo.label}
-                      </Badge>
-                      <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-                        <Lock className="size-3 text-cyan-400" />
-                        {stateInfo.vault}
-                      </span>
-                    </div>
+                  Dưới 500k
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMinPrice("500000"); setMaxPrice("2000000"); }}
+                  className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-50 hover:bg-rose-50 hover:text-rose-600 text-slate-700 border border-slate-200 hover:border-rose-200 transition-colors cursor-pointer"
+                >
+                  500k - 2tr
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMinPrice("2000000"); setMaxPrice(""); }}
+                  className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-50 hover:bg-rose-50 hover:text-rose-600 text-slate-700 border border-slate-200 hover:border-rose-200 transition-colors cursor-pointer"
+                >
+                  Trên 2tr
+                </button>
+              </div>
+            </div>
 
-                    <CardTitle className="text-base sm:text-lg font-bold text-white hover:text-cyan-300 transition-colors">
-                      <Link href={`/deals/${deal.id}`}>{deal.title}</Link>
-                    </CardTitle>
+            {/* Filter 2: Bảo Chứng */}
+            <div className="space-y-2.5 pt-3 border-t border-slate-100">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono block">
+                HÌNH THỨC BẢO VỆ
+              </label>
+              <div className="space-y-2 text-xs text-slate-700">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" defaultChecked className="size-4 rounded border-slate-300 text-emerald-600" />
+                  <span className="flex items-center gap-1 text-emerald-800 font-semibold">🛡️ Ký quỹ VietQR 100%</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" defaultChecked className="size-4 rounded border-slate-300 text-rose-600" />
+                  <span>⚡ Mở khóa kho số tức thì</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" defaultChecked className="size-4 rounded border-slate-300 text-rose-600" />
+                  <span>🤝 Cho phép mặc cả giá</span>
+                </label>
+              </div>
+            </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <Tag className="size-3 text-slate-500" />
-                        {category}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3 text-slate-500" />
-                        Kiểm tra: {inspectionHours}h
-                      </span>
-                      {deal.seller?.displayName && (
-                        <>
-                          <span>•</span>
-                          <span>Người bán: {deal.seller.displayName}</span>
-                        </>
-                      )}
-                    </div>
-                  </CardHeader>
+            <Button
+              type="button"
+              className="w-full min-h-11 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-sm transition-all border border-rose-600 cursor-pointer"
+            >
+              Áp Dụng Bộ Lọc
+            </Button>
+          </aside>
 
-                  <CardContent className="pt-2 border-t border-slate-800/60 mt-auto flex items-center justify-between">
-                    <div>
-                      <div className="text-[11px] text-slate-400">Giá giao dịch</div>
-                      <div className="text-lg font-extrabold text-transparent bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text font-mono">
-                        {amountNum.toLocaleString("vi-VN")} ₫
-                      </div>
-                    </div>
+          {/* ================= RIGHT MAIN AREA (lg:col-span-9) ================= */}
+          <section className="lg:col-span-9 space-y-4">
+            {/* Sorting & Filter Summary Bar */}
+            <div className="bg-white rounded-xl border border-slate-200/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+              <div className="flex items-center gap-2 text-slate-600">
+                <span>Sắp xếp:</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setSortBy("popular")}
+                    className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                      sortBy === "popular"
+                        ? "bg-rose-50 text-rose-600 border border-rose-200"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                    }`}
+                  >
+                    Phổ biến nhất
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSortBy("newest")}
+                    className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                      sortBy === "newest"
+                        ? "bg-rose-50 text-rose-600 border border-rose-200"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                    }`}
+                  >
+                    Mới nhất
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSortBy("price_asc")}
+                    className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                      sortBy === "price_asc"
+                        ? "bg-rose-50 text-rose-600 border border-rose-200"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                    }`}
+                  >
+                    Giá tăng dần
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSortBy("price_desc")}
+                    className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                      sortBy === "price_desc"
+                        ? "bg-rose-50 text-rose-600 border border-rose-200"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                    }`}
+                  >
+                    Giá giảm dần
+                  </button>
+                </div>
+              </div>
 
-                    <Button
-                      asChild
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 min-h-9.5 px-3.5 gap-1.5 cursor-pointer"
-                    >
-                      <Link href={`/deals/${deal.id}`}>
-                        <span>Vào Giao Dịch</span>
-                        <ArrowRight className="size-3.5" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+              <div className="text-slate-500 font-mono text-[11px]">
+                Hiển thị {filteredDeals.length} kết quả
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50 flex items-center gap-2 text-rose-700 text-xs">
+                <AlertCircle className="size-4 shrink-0 text-rose-600" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Deals Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="h-64 rounded-2xl border border-slate-200 bg-white p-5 animate-pulse space-y-3"
+                  >
+                    <div className="h-28 bg-slate-100 rounded-xl w-full" />
+                    <div className="h-5 bg-slate-100 rounded w-1/3" />
+                    <div className="h-5 bg-slate-100 rounded w-3/4" />
+                    <div className="h-4 bg-slate-100 rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredDeals.length === 0 ? (
+              <EmptyState
+                title="Không tìm thấy giao dịch phù hợp"
+                description="Hiện chưa có giao dịch nào khớp với tiêu chí tìm kiếm của bạn."
+                actionLabel="Tạo Giao Dịch Mới"
+                actionHref="/user/deals/create"
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+                {filteredDeals.map((deal) => (
+                  <ExploreDealCard key={deal.id} deal={deal} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-canvas" />}>
+      <ExplorePageContent />
+    </React.Suspense>
   );
 }

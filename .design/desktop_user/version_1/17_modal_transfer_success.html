@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>TrustPassz - 17 Modal Chuyển Tiền Thành Công (Figma Ready)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: '#080C14',
+              surface: '#0B0F17',
+              card: '#0F172A',
+              border: '#1E293B',
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #080C14;
+      color: #F1F5F9;
+      min-width: 1440px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#080C14] text-slate-100 flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200 relative overflow-hidden">
+
+  <!-- ================= BACKGROUND BASE VIEW (BLURRED IN FIGMA) ================= -->
+  <div class="w-[1440px] mx-auto min-h-screen p-8 opacity-25 blur-sm pointer-events-none">
+    <header class="flex h-16 items-center justify-between border-b border-slate-800">
+      <span class="font-bold text-lg text-white">TrustPassz Workspace</span>
+      <span class="text-xs text-slate-400 font-mono">0x8B4f...3a29</span>
+    </header>
+    <div class="py-12 space-y-6">
+      <div class="h-40 rounded-3xl bg-slate-900 border border-slate-800"></div>
+      <div class="h-96 rounded-3xl bg-slate-900 border border-slate-800"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL OVERLAY & POPUP ================= -->
+  <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+    <!-- Ambient Holographic Glow behind Modal -->
+    <div class="absolute size-96 rounded-full bg-emerald-500/15 blur-[140px] pointer-events-none"></div>
+
+    <!-- Centered Success Modal Card -->
+    <div class="relative w-full max-w-lg rounded-3xl border border-emerald-500/50 bg-gradient-to-b from-[#0F172A] via-[#0B0F17] to-slate-950 p-8 shadow-[0_0_60px_rgba(16,185,129,0.25)] space-y-6">
+      <!-- Close Button -->
+      <button type="button" class="absolute top-5 right-5 size-9 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white flex items-center justify-center">
+        ✕
+      </button>
+
+      <!-- Center Icon -->
+      <div class="flex flex-col items-center text-center space-y-3">
+        <div class="relative flex size-20 items-center justify-center rounded-2xl border-2 border-emerald-500/60 bg-gradient-to-br from-emerald-500/20 via-cyan-500/20 to-emerald-500/10 text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.4)]">
+          <svg class="size-10 text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.8)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+
+        <div class="space-y-1">
+          <h2 class="text-2xl font-black tracking-tight text-white">
+            Thanh Toán Ký Quỹ Thành Công
+          </h2>
+          <p class="text-xs text-slate-400">
+            Tiền đã được giữ an toàn trong Két bảo chứng TrustPassz.
+          </p>
+        </div>
+      </div>
+
+      <!-- Amount Highlight Box -->
+      <div class="rounded-2xl border border-emerald-500/40 bg-emerald-950/20 p-5 text-center space-y-1 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+        <span class="text-[10px] uppercase font-mono font-bold text-emerald-400 tracking-wider">
+          SỐ TIỀN ĐÃ KHÓA AN TOÀN TRONG KÉT
+        </span>
+        <div class="font-mono text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text">
+          1.500.000 ₫
+        </div>
+        <p class="text-xs text-slate-300 font-medium truncate pt-1">
+          Fullstack Next.js SaaS Boilerplate (Clean Architecture)
+        </p>
+      </div>
+
+      <!-- Audit Metadata Strip -->
+      <div class="space-y-2.5 text-xs font-mono">
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+          <span class="text-slate-400 text-[11px]">MÃ GIAO DỊCH (TXHASH):</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-cyan-300 font-bold">PAYOS-88992014</span>
+            <svg class="size-3.5 text-slate-400 cursor-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+          <span class="text-slate-400 text-[11px]">MÃ KÈO (DEAL ID):</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-white font-bold">TPZ-84920</span>
+            <svg class="size-3.5 text-slate-400 cursor-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+          <span class="text-slate-400 text-[11px]">CỔNG THANH TOÁN:</span>
+          <span class="text-emerald-400 font-bold">VietQR Napas 24/7 (MBBank)</span>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+          <span class="text-slate-400 text-[11px]">THỜI GIAN KHÓA KÉT:</span>
+          <span class="text-slate-300">07/11/2026 20:14:32</span>
+        </div>
+      </div>
+
+      <!-- Action Cluster -->
+      <div class="space-y-2.5 pt-2">
+        <a href="#" class="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(16,185,129,0.35)] flex items-center justify-center gap-2 hover:brightness-110">
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Vào Két Digital Vault Để Nhận Hàng</span>
+        </a>
+
+        <a href="#" class="w-full h-11 rounded-xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold flex items-center justify-center">
+          <span>Xem Danh Sách Giao Dịch</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

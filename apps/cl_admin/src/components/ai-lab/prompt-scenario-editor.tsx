@@ -76,65 +76,64 @@ export function PromptScenarioEditor() {
   const getVerdictBadge = (verdict: PromptRuleScenario['targetVerdict']) => {
     switch (verdict) {
       case 'TRIGGER_REFUND':
-        return 'border-rose-800 text-rose-400 bg-rose-950/40';
+        return 'border-rose-200 text-rose-700 bg-rose-50';
       case 'APPROVE_PAYOUT':
-        return 'border-emerald-800 text-emerald-400 bg-emerald-950/40';
+        return 'border-emerald-200 text-emerald-700 bg-emerald-50';
       default:
-        return 'border-amber-800 text-amber-400 bg-amber-950/40';
+        return 'border-amber-200 text-amber-700 bg-amber-50';
     }
   };
 
   return (
-    <Card className="border-slate-800 bg-[#0F172A] shadow-md">
-      <CardHeader className="border-b border-slate-800 pb-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
-              <FileText className="h-4 w-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm font-semibold text-white">
-                Context Rules & 5 Kịch Bản Vi Phạm Trọng Tài
-              </CardTitle>
-              <p className="text-[11px] text-slate-400">
-                Nhúng bộ quy tắc kiểm định vào System Prompt sVLM và Outlines FSM Regex
-              </p>
-            </div>
+    <Card className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-2.5 gap-2">
+        <div className="flex items-center space-x-2">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <FileText className="h-4 w-4" />
           </div>
-          <Badge variant="outline" className="border-cyan-800 text-cyan-400 text-xs w-fit">
-            5 / 5 Kịch bản sẵn sàng
-          </Badge>
+          <div>
+            <CardTitle className="text-xs font-bold text-slate-900">
+              Context Rules &amp; 5 Kịch Bản Vi Phạm Trọng Tài
+            </CardTitle>
+            <p className="text-[11px] text-slate-400">
+              Nhúng bộ quy tắc kiểm định vào System Prompt sVLM và Outlines FSM Regex
+            </p>
+          </div>
         </div>
-      </CardHeader>
+        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 text-xs w-fit font-mono">
+          5 / 5 Kịch bản sẵn sàng
+        </Badge>
+      </div>
 
-      <CardContent className="space-y-3 pt-4">
+      <div className="space-y-3 pt-1">
         {scenarios.map((sc) => (
           <div
             key={sc.id}
-            className={`rounded-lg border p-3 transition-colors ${
+            className={`rounded-lg border p-3.5 transition-colors ${
               sc.isActive
-                ? 'border-slate-800 bg-[#080C14]'
-                : 'border-slate-900 bg-slate-950/40 opacity-50'
+                ? 'border-slate-200 bg-slate-50'
+                : 'border-slate-200 bg-slate-100/60 opacity-50'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-xs text-white">{sc.name}</span>
-                  <Badge variant="outline" className={`font-mono text-[9px] ${getVerdictBadge(sc.targetVerdict)}`}>
+                  <span className="font-semibold text-xs text-slate-900">{sc.name}</span>
+                  <span className={`font-mono text-[9px] px-2 py-0.5 rounded-full border font-semibold ${getVerdictBadge(sc.targetVerdict)}`}>
                     Phán quyết: {sc.targetVerdict}
-                  </Badge>
+                  </span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">{sc.description}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{sc.description}</p>
               </div>
 
               <div className="flex items-center space-x-2 shrink-0">
                 <button
+                  type="button"
                   onClick={() => toggleActive(sc.id)}
-                  className={`rounded px-2.5 py-1 text-[11px] font-mono border transition-colors ${
+                  className={`rounded-md px-2.5 py-1 text-[11px] font-mono border transition-colors shadow-2xs font-semibold ${
                     sc.isActive
-                      ? 'border-emerald-800 text-emerald-400 bg-emerald-950/30'
-                      : 'border-slate-800 text-slate-500 bg-slate-900'
+                      ? 'border-emerald-200 text-emerald-700 bg-emerald-50'
+                      : 'border-slate-200 text-slate-400 bg-white'
                   }`}
                 >
                   {sc.isActive ? 'Active' : 'Disabled'}
@@ -143,7 +142,7 @@ export function PromptScenarioEditor() {
             </div>
           </div>
         ))}
-      </CardContent>
+      </div>
     </Card>
   );
 }

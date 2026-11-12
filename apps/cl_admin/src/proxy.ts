@@ -1,22 +1,31 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-interface JwtPayload {
+export interface AdminEdgeJwtPayload {
   id?: string;
   sub?: string;
   role?: string;
   exp?: number;
-  email?: string;
+  email?: string | null;
+  [key: string]: unknown;
 }
 
-function parseJwtEdge(token: string): JwtPayload | null {
+/**
+ * Parses JWT payload using Web standard APIs for Edge Runtime compatibility.
+ * Strictly avoids Node.js built-ins (crypto, buffer, stream).
+ */
+function parseEdgeJwt(token: string): AdminEdgeJwtPayload | null {
   try {
     const cleanToken = token
       .replace(/^Bearer\s+/i, '')
       .replace(/^"|"$/g, '')
       .trim();
 
-    // Dev/Sandbox/Web3 mock tokens support for staging & demo environments
+    if (!cleanToken || cleanToken === 'undefined' || cleanToken === 'null') {
+      return null;
+    }
+
+    // Support dev mock tokens if present in local sandbox environments
     if (
       cleanToken.startsWith('dev-sandbox-') ||
       cleanToken.startsWith('sec-sig-')
@@ -29,117 +38,124 @@ function parseJwtEdge(token: string): JwtPayload | null {
       };
     }
 
-    const parts = cleanToken.split('.');
-    if (parts.length !== 3) return null;
+    const segments = cleanToken.split('.');
+    if (segments.length !== 3) {
+      return null;
+    }
 
-    const base64Url = parts[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const padLength = (4 - (base64.length % 4)) % 4;
-    const padded = base64 + '='.repeat(padLength);
+    let base64 = segments[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4 !== 0) {
+      base64 += '=';
+    }
 
-    const jsonPayload = decodeURIComponent(
-      atob(padded)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join(''),
-    );
-    return JSON.parse(jsonPayload) as JwtPayload;
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const jsonStr = new TextDecoder().decode(bytes);
+    return JSON.parse(jsonStr) as AdminEdgeJwtPayload;
   } catch {
     return null;
   }
 }
 
+/**
+ * Next.js Edge Middleware & Network Proxy for Admin Portal (cl_admin).
+ * Enforces Zero-Trust RBAC: strictly guards administrative routes against unauthenticated
+ * or unauthorized (non-ADMIN / non-ARBITRATOR) sessions via HTTP 307 pre-render redirects.
+ */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const rawCookieToken = request.cookies.get('access_token')?.value;
   const authHeader = request.headers.get('authorization');
   const headerToken = authHeader?.startsWith('Bearer ')
-    ? authHeader.substring(7)
+    ? authHeader.substring(7).trim()
     : null;
   const token = rawCookieToken || headerToken;
 
-  const payload = token ? parseJwtEdge(token) : null;
+  const payload = token ? parseEdgeJwt(token) : null;
   const nowInSeconds = Math.floor(Date.now() / 1000);
   const isExpired = !payload || !payload.exp || payload.exp < nowInSeconds;
+  const isAuthenticated = Boolean(token && !isExpired);
 
   const userRole = (payload?.role || '').toUpperCase();
   const isPrivilegedAdmin =
     userRole === 'ADMIN' ||
-    userRole === 'SUPER_ADMIN' ||
-    userRole === 'ARBITRATOR';
+    userRole === 'ARBITRATOR' ||
+    userRole === 'SUPER_ADMIN';
 
-  // Handle Root URL redirect
+  // 1. Root route handling: redirect to /dashboard if privileged, else /login
   if (pathname === '/') {
-    const targetUrl = request.nextUrl.clone();
-    targetUrl.pathname = !isExpired && isPrivilegedAdmin ? '/dashboard' : '/login';
-    targetUrl.search = '';
-    return NextResponse.redirect(targetUrl);
+    const targetPath = isAuthenticated && isPrivilegedAdmin ? '/dashboard' : '/login';
+    return NextResponse.redirect(new URL(targetPath, request.url), 307);
   }
 
-  const isAuthRoute =
-    pathname.startsWith('/login') || pathname.startsWith('/register');
+  // 2. Auth Route (/login)
+  if (pathname === '/login') {
+    const isForceLogin =
+      request.nextUrl.searchParams.get('force') === '1' ||
+      request.nextUrl.searchParams.get('prompt') === 'login' ||
+      request.nextUrl.searchParams.get('logout') === '1' ||
+      request.nextUrl.searchParams.get('expired') === '1';
 
-  const isProtectedAdminRoute =
+    if (isForceLogin || !isAuthenticated || !isPrivilegedAdmin) {
+      const response = NextResponse.next();
+      if (token && (isForceLogin || isExpired || !isPrivilegedAdmin)) {
+        response.cookies.delete('access_token');
+      }
+      return response;
+    }
+
+    // Already authenticated with valid admin privileges -> redirect into /dashboard
+    return NextResponse.redirect(new URL('/dashboard', request.url), 307);
+  }
+
+  // 3. Protected Admin Routes
+  const isProtectedRoute =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/deals') ||
     pathname.startsWith('/disputes') ||
-    pathname.startsWith('/ai-lab') ||
-    pathname.startsWith('/system-status') ||
     pathname.startsWith('/users') ||
-    pathname.startsWith('/api-explorer') ||
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/funding') ||
-    pathname.startsWith('/analytics');
+    pathname.startsWith('/system-status') ||
+    pathname.startsWith('/ai-lab') ||
+    pathname.startsWith('/api-explorer');
 
-  // Authenticated admin accessing login/register -> redirect to dashboard
-  if (isAuthRoute && !isExpired && isPrivilegedAdmin) {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = '/dashboard';
-    dashboardUrl.search = '';
-    return NextResponse.redirect(dashboardUrl);
-  }
+  if (isProtectedRoute) {
+    // 3a. Missing or expired session -> Redirect to /login
+    if (!isAuthenticated) {
+      const loginUrl = new URL('/login', request.url);
+      const callbackTarget = pathname + (request.nextUrl.search || '');
+      loginUrl.searchParams.set('callbackUrl', encodeURIComponent(callbackTarget));
 
-  // Protect all administrative and financial routes
-  if (isProtectedAdminRoute) {
-    if (!token || isExpired) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      const response = NextResponse.redirect(loginUrl);
+      const response = NextResponse.redirect(loginUrl, 307);
       if (token) {
         response.cookies.delete('access_token');
       }
       return response;
     }
 
+    // 3b. Insufficient privilege (role is not ADMIN or ARBITRATOR) -> Redirect to /403
     if (!isPrivilegedAdmin) {
-      const forbiddenUrl = request.nextUrl.clone();
-      forbiddenUrl.pathname = '/login';
-      forbiddenUrl.searchParams.set('error', 'forbidden');
-      const response = NextResponse.redirect(forbiddenUrl);
-      response.cookies.delete('access_token');
-      return response;
+      const forbiddenUrl = new URL('/403', request.url);
+      return NextResponse.redirect(forbiddenUrl, 307);
     }
   }
 
   return NextResponse.next();
 }
 
+export const middleware = proxy;
+export default proxy;
+
 export const config = {
   matcher: [
     '/',
-    '/login',
-    '/register',
     '/dashboard/:path*',
     '/deals/:path*',
     '/disputes/:path*',
-    '/ai-lab/:path*',
-    '/system-status/:path*',
     '/users/:path*',
+    '/system-status/:path*',
+    '/ai-lab/:path*',
     '/api-explorer/:path*',
-    '/admin/:path*',
-    '/funding/:path*',
-    '/analytics/:path*',
+    '/login',
   ],
 };

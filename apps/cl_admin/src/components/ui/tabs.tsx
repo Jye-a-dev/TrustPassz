@@ -74,7 +74,7 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
 );
 Tabs.displayName = "Tabs";
 
-export interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type TabsListProps = React.HTMLAttributes<HTMLDivElement>
 
 const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
   ({ className, children, ...props }, ref) => {
@@ -86,7 +86,7 @@ const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
         role="tablist"
         aria-orientation={orientation}
         className={cn(
-          "inline-flex items-center justify-start rounded-xl border border-slate-800 bg-[#0B0F17] p-1 text-slate-400 gap-1 overflow-x-auto max-w-full scrollbar-none",
+          "inline-flex items-center justify-start rounded-xl border border-slate-200 bg-slate-100 p-1 text-slate-500 gap-1 overflow-x-auto max-w-full scrollbar-none",
           className
         )}
         {...props}
@@ -120,10 +120,10 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
           onValueChange(value);
         }}
         className={cn(
-          "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-2 text-xs font-mono font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50 disabled:pointer-events-none disabled:opacity-50 min-h-[38px] select-none cursor-pointer",
+          "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs font-mono font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 min-h-9 select-none cursor-pointer",
           isSelected
-            ? "border border-cyan-800/80 bg-cyan-950/60 text-cyan-300 font-semibold shadow-[0_0_12px_rgba(6,182,212,0.18)]"
-            : "border border-transparent text-slate-400 hover:bg-slate-800/50 hover:text-slate-200",
+            ? "bg-white text-slate-900 font-semibold shadow-2xs border border-slate-200/80"
+            : "border border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50",
           className
         )}
         {...props}

@@ -8,7 +8,7 @@
     "start": "next start -p 5000",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "npx tsx --test src/__tests__/crypto.test.ts src/__tests__/bargain-slider.test.tsx src/__tests__/quick-bid-presets.test.tsx src/__tests__/countdown-timer.test.ts src/__tests__/session-lifecycle.test.ts src/__tests__/transfer-success-modal.test.ts src/__tests__/transfer-success-modal.test.tsx"
+    "test": "npx tsx --test src/__tests__/crypto.test.ts src/__tests__/bargain-slider.test.tsx src/__tests__/quick-bid-presets.test.tsx src/__tests__/countdown-timer.test.ts src/__tests__/session-lifecycle.test.ts src/__tests__/transfer-success-modal.test.ts src/__tests__/transfer-success-modal.test.tsx src/__tests__/route-matrix-audit.test.ts src/__tests__/notifications-center.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

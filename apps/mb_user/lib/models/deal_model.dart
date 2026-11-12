@@ -85,7 +85,7 @@ class DigitalAsset {
     return DigitalAsset(
       id: json['id'] as String? ?? '',
       dealId: json['dealId'] as String? ?? '',
-      assetType: json['assetType'] as String? ?? 'FILE',
+      assetType: json['assetType'] as String? ?? 'SOURCE_CODE',
       fileName: json['fileName'] as String? ?? 'vault_file.zip',
       fileSizeBytes: json['fileSizeBytes']?.toString(),
       encryptedContent: json['encryptedContent'] as String?,
@@ -122,6 +122,12 @@ class DealModel {
   final int inspectionDuration;
   final String? createdAt;
   final String? updatedAt;
+  final String? inspectionDeadline;
+  final String? depositTxHash;
+  final String? settleTxHash;
+  final String? onchainDealId;
+  final String? sellerName;
+  final String? buyerName;
   final DigitalAsset? digitalAsset;
 
   const DealModel({
@@ -136,8 +142,17 @@ class DealModel {
     required this.inspectionDuration,
     this.createdAt,
     this.updatedAt,
+    this.inspectionDeadline,
+    this.depositTxHash,
+    this.settleTxHash,
+    this.onchainDealId,
+    this.sellerName,
+    this.buyerName,
     this.digitalAsset,
   });
+
+  String? get primaryTxHash =>
+      settleTxHash ?? depositTxHash ?? onchainDealId;
 
   factory DealModel.fromJson(Map<String, dynamic> json) {
     final rawAmount = json['amount'] ?? json['price'];
@@ -145,11 +160,14 @@ class DealModel {
         ? rawAmount.toDouble()
         : double.tryParse(rawAmount?.toString() ?? '0') ?? 0.0;
 
+    final sellerObj = json['seller'];
+    final buyerObj = json['buyer'];
+
     return DealModel(
       id: json['id'] as String? ?? '',
       sellerId: json['sellerId'] as String? ?? '',
       buyerId: json['buyerId'] as String?,
-      title: json['title'] as String? ?? 'Untitled Deal',
+      title: json['title'] as String? ?? 'Giao dịch ký quỹ',
       description: json['description'] as String?,
       amount: parsedAmount,
       currency: json['currency'] as String? ?? 'VND',
@@ -157,6 +175,16 @@ class DealModel {
       inspectionDuration: (json['inspectionDuration'] as num?)?.toInt() ?? 86400,
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
+      inspectionDeadline: json['inspectionDeadline'] as String?,
+      depositTxHash: json['depositTxHash'] as String?,
+      settleTxHash: json['settleTxHash'] as String?,
+      onchainDealId: json['onchainDealId'] as String?,
+      sellerName: sellerObj is Map<String, dynamic>
+          ? sellerObj['displayName'] as String?
+          : json['sellerName'] as String?,
+      buyerName: buyerObj is Map<String, dynamic>
+          ? buyerObj['displayName'] as String?
+          : json['buyerName'] as String?,
       digitalAsset: json['digitalAsset'] != null
           ? DigitalAsset.fromJson(json['digitalAsset'] as Map<String, dynamic>)
           : null,
@@ -176,6 +204,12 @@ class DealModel {
       'inspectionDuration': inspectionDuration,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'inspectionDeadline': inspectionDeadline,
+      'depositTxHash': depositTxHash,
+      'settleTxHash': settleTxHash,
+      'onchainDealId': onchainDealId,
+      'sellerName': sellerName,
+      'buyerName': buyerName,
       'digitalAsset': digitalAsset?.toJson(),
     };
   }
@@ -209,11 +243,12 @@ class UnlockedVaultPayload {
   factory UnlockedVaultPayload.fromJson(Map<String, dynamic> json) {
     return UnlockedVaultPayload(
       dealId: json['dealId'] as String? ?? '',
-      assetType: json['assetType'] as String? ?? 'FILE',
+      assetType: json['assetType'] as String? ?? 'SOURCE_CODE',
       fileName: json['fileName'] as String? ?? 'unlocked_asset',
       fileSizeBytes: json['fileSizeBytes']?.toString(),
-      encryptedPayload: json['encryptedPayload'] as String?,
-      iv: json['iv'] as String?,
+      encryptedPayload: (json['encryptedPayload'] ?? json['encryptedContent'])
+          as String?,
+      iv: (json['iv'] ?? json['encryptionIv']) as String?,
       authTag: json['authTag'] as String?,
       accessCount: (json['accessCount'] as num?)?.toInt() ?? 1,
       maxAccessLimit: (json['maxAccessLimit'] as num?)?.toInt() ?? 5,
@@ -222,3 +257,56 @@ class UnlockedVaultPayload {
   }
 }
 
+class VietQrCheckoutData {
+  final String? qrCodeUrl;
+  final String? paymentUrl;
+  final int? orderCode;
+  final double amount;
+  final String memo;
+  final String bin;
+  final String bankName;
+  final String accountNumber;
+  final String accountName;
+  final String? status;
+
+  const VietQrCheckoutData({
+    this.qrCodeUrl,
+    this.paymentUrl,
+    this.orderCode,
+    required this.amount,
+    required this.memo,
+    this.bin = '970422',
+    this.bankName = 'MBBank (Quân Đội)',
+    this.accountNumber = '0385966888',
+    this.accountName = 'TRUSTPASSZ ESCROW',
+    this.status,
+  });
+
+  String get deepLink =>
+      'vietqr://pay?acc=$accountNumber&bin=$bin&amount=${amount.toInt()}&memo=${Uri.encodeComponent(memo)}';
+
+  factory VietQrCheckoutData.fromJson(Map<String, dynamic> json) {
+    final rawAmount = json['amount'];
+    final parsedAmount = (rawAmount is num)
+        ? rawAmount.toDouble()
+        : double.tryParse(rawAmount?.toString() ?? '0') ?? 0.0;
+    final bin = json['bin'] as String? ?? '970422';
+    final bankName = bin == '970415'
+        ? 'VietinBank (ICB)'
+        : bin == '970422'
+            ? 'MBBank (Quân Đội)'
+            : 'Napas 24/7 ($bin)';
+    return VietQrCheckoutData(
+      qrCodeUrl: json['qrCodeUrl'] as String?,
+      paymentUrl: json['paymentUrl'] as String?,
+      orderCode: (json['orderCode'] as num?)?.toInt(),
+      amount: parsedAmount,
+      memo: json['memo'] as String? ?? 'TPZ ESCROW',
+      bin: bin,
+      bankName: bankName,
+      accountNumber: json['accountNumber'] as String? ?? '0385966888',
+      accountName: json['accountName'] as String? ?? 'TRUSTPASSZ ESCROW',
+      status: json['status'] as String?,
+    );
+  }
+}

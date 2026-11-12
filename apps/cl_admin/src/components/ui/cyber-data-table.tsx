@@ -80,12 +80,12 @@ export function CyberDataTable<T extends { id?: string | number }>({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {onSearchChange && (
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-500 pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-text-muted pointer-events-none" />
               <Input
                 value={internalSearch}
                 onChange={(e) => setInternalSearch(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="pl-10 h-11 min-h-[44px] border-slate-800 bg-[#0F172A] text-xs text-white placeholder:text-slate-500 focus-visible:ring-cyan-500/50"
+                className="pl-10 h-10 min-h-10 sm:min-h-11 border-border-subtle bg-surface text-xs text-text-primary placeholder:text-text-muted focus-visible:ring-1 focus-visible:ring-cyan-500"
               />
             </div>
           )}
@@ -93,20 +93,20 @@ export function CyberDataTable<T extends { id?: string | number }>({
         </div>
       )}
 
-      {/* Main Table Container (Responsive Horizontal Scroll) */}
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] shadow-xl overflow-hidden">
+      {/* Main Table Container */}
+      <div className="rounded-xl border border-border-subtle bg-surface shadow-xs overflow-hidden">
         {/* Optional Mobile Card View on small screens */}
         {renderMobileCard && (
-          <div className="block lg:hidden divide-y divide-slate-800/80 p-2">
+          <div className="block lg:hidden divide-y divide-border-subtle p-2">
             {isLoading ? (
               <div className="space-y-3 p-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full rounded-lg bg-slate-800/50" />
+                  <Skeleton key={i} className="h-24 w-full rounded-lg bg-muted" />
                 ))}
               </div>
             ) : data.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
-                <Inbox className="size-8 text-slate-600 mb-2" />
+              <div className="flex flex-col items-center justify-center py-12 text-center text-text-muted">
+                <Inbox className="size-8 text-text-muted mb-2" />
                 <p className="text-xs">{emptyMessage}</p>
               </div>
             ) : (
@@ -119,16 +119,16 @@ export function CyberDataTable<T extends { id?: string | number }>({
           </div>
         )}
 
-        {/* Standard Table (always rendered on lg, optionally hidden on mobile if custom card supplied) */}
+        {/* Standard Table */}
         <div className={cn("relative w-full overflow-x-auto", renderMobileCard && "hidden lg:block")}>
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-slate-800 bg-[#0B0F17]/90">
+              <TableRow className="border-b border-border-subtle bg-muted/40">
                 {columns.map((col) => (
                   <TableHead
                     key={col.key}
                     className={cn(
-                      "font-mono text-xs uppercase tracking-wider text-slate-400 py-3.5 px-4",
+                      "font-mono text-xs font-semibold uppercase tracking-wider text-text-muted py-3.5 px-4",
                       col.headerClassName
                     )}
                   >
@@ -140,10 +140,10 @@ export function CyberDataTable<T extends { id?: string | number }>({
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, rowIndex) => (
-                  <TableRow key={rowIndex} className="border-b border-slate-800/60">
+                  <TableRow key={rowIndex} className="border-b border-border-subtle">
                     {columns.map((col, colIndex) => (
                       <TableCell key={col.key || colIndex} className="py-4 px-4">
-                        <Skeleton className="h-4 w-3/4 rounded bg-slate-800/60" />
+                        <Skeleton className="h-4 w-3/4 rounded bg-muted" />
                       </TableCell>
                     ))}
                   </TableRow>
@@ -152,10 +152,10 @@ export function CyberDataTable<T extends { id?: string | number }>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="py-12 text-center text-slate-500"
+                    className="py-12 text-center text-text-muted"
                   >
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <Inbox className="size-8 text-slate-600" />
+                      <Inbox className="size-8 text-text-muted" />
                       <p className="text-xs font-mono">{emptyMessage}</p>
                     </div>
                   </TableCell>
@@ -164,10 +164,10 @@ export function CyberDataTable<T extends { id?: string | number }>({
                 data.map((item, index) => (
                   <TableRow
                     key={item.id ? String(item.id) : index}
-                    className="border-b border-slate-800/60 transition-colors hover:bg-slate-800/40"
+                    className="border-b border-border-subtle transition-colors hover:bg-muted/40"
                   >
                     {columns.map((col) => (
-                      <TableCell key={col.key} className={cn("py-3.5 px-4", col.className)}>
+                      <TableCell key={col.key} className={cn("py-3.5 px-4 text-text-secondary", col.className)}>
                         {col.cell(item, index)}
                       </TableCell>
                     ))}
@@ -180,17 +180,17 @@ export function CyberDataTable<T extends { id?: string | number }>({
 
         {/* Pagination Bar */}
         {pagination && (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-slate-800 bg-[#0B0F17]/80 px-4 py-3">
-            <span className="text-xs text-slate-400 font-mono">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-border-subtle bg-muted/20 px-4 py-3">
+            <span className="text-xs text-text-muted font-mono">
               Hiển thị{" "}
-              <strong className="text-white">
+              <strong className="text-text-primary">
                 {pagination.totalCount === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1}
               </strong>{" "}
               -{" "}
-              <strong className="text-white">
+              <strong className="text-text-primary">
                 {Math.min((pagination.pageIndex + 1) * pagination.pageSize, pagination.totalCount)}
               </strong>{" "}
-              trên tổng số <strong className="text-cyan-400">{pagination.totalCount}</strong> mục
+              trên tổng số <strong className="text-text-primary">{pagination.totalCount}</strong> mục
             </span>
 
             <div className="flex items-center gap-2">
@@ -200,11 +200,11 @@ export function CyberDataTable<T extends { id?: string | number }>({
                 onClick={() => pagination.onPageChange(Math.max(0, pagination.pageIndex - 1))}
                 disabled={pagination.pageIndex === 0 || isLoading}
                 aria-label="Trang trước"
-                className="size-11 min-h-[44px] min-w-[44px] border-slate-800 bg-[#0F172A] hover:bg-slate-800"
+                className="size-9 sm:size-10 min-h-9 sm:min-h-10 border-border-subtle bg-surface hover:bg-muted text-text-primary cursor-pointer"
               >
                 <ChevronLeft className="size-4" />
               </Button>
-              <span className="px-3 py-1 text-xs font-mono text-slate-300">
+              <span className="px-3 py-1 text-xs font-mono text-text-secondary">
                 Trang {pagination.pageIndex + 1} / {totalPages}
               </span>
               <Button
@@ -213,7 +213,7 @@ export function CyberDataTable<T extends { id?: string | number }>({
                 onClick={() => pagination.onPageChange(pagination.pageIndex + 1)}
                 disabled={pagination.pageIndex + 1 >= totalPages || isLoading}
                 aria-label="Trang kế tiếp"
-                className="size-11 min-h-[44px] min-w-[44px] border-slate-800 bg-[#0F172A] hover:bg-slate-800"
+                className="size-9 sm:size-10 min-h-9 sm:min-h-10 border-border-subtle bg-surface hover:bg-muted text-text-primary cursor-pointer"
               >
                 <ChevronRight className="size-4" />
               </Button>
@@ -224,4 +224,3 @@ export function CyberDataTable<T extends { id?: string | number }>({
     </div>
   );
 }
-

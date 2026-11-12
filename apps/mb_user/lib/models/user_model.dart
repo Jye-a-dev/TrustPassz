@@ -56,12 +56,14 @@ class UserModel {
 class AuthResponse {
   final String tokenType;
   final String accessToken;
+  final String? refreshToken;
   final int expiresIn;
   final UserModel user;
 
   const AuthResponse({
     required this.tokenType,
     required this.accessToken,
+    this.refreshToken,
     required this.expiresIn,
     required this.user,
   });
@@ -70,6 +72,7 @@ class AuthResponse {
     return AuthResponse(
       tokenType: json['tokenType'] as String? ?? 'Bearer',
       accessToken: json['accessToken'] as String? ?? '',
+      refreshToken: json['refreshToken'] as String?,
       expiresIn: (json['expiresIn'] as num?)?.toInt() ?? 86400,
       user: UserModel.fromJson(
         (json['user'] as Map<String, dynamic>?) ?? <String, dynamic>{},

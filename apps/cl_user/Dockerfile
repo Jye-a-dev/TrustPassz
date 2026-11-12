@@ -18,7 +18,7 @@ WORKDIR /app
 # Build arguments for Next.js static prerendering
 ARG NEXT_PUBLIC_APP_URL="http://localhost:5000"
 ARG NEXT_PUBLIC_API_URL="https://mock-api.trustpassz.com"
-ARG NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+ARG NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 ARG NEXT_PUBLIC_CHAIN_ID="84532"
 ARG NEXT_PUBLIC_RPC_URL="https://sepolia.base.org"
 ARG NEXT_PUBLIC_SUPABASE_URL="https://placeholder-project.supabase.co"

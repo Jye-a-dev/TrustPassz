@@ -49,7 +49,7 @@ export default function DealsPage() {
           toast.success("Đã đồng bộ dữ liệu với PostgreSQL & Base Sepolia");
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Lỗi truy vấn danh sách kèo";
+        const msg = err instanceof Error ? err.message : "Lỗi truy vấn danh sách giao dịch";
         toast.error(msg);
       } finally {
         setIsLoading(false);
@@ -74,12 +74,12 @@ export default function DealsPage() {
   const columns: ColumnDef<Deal>[] = [
     {
       key: "title",
-      header: "Tiêu đề Kèo",
+      header: "Tiêu đề Giao dịch",
       className: "w-72",
       cell: (deal) => (
-        <div className="space-y-1">
-          <p className="font-medium text-slate-200 line-clamp-1">{deal.title}</p>
-          <p className="font-mono text-[10px] text-slate-500 truncate max-w-64">
+        <div className="space-y-0.5">
+          <p className="font-semibold text-slate-900 text-xs line-clamp-1">{deal.title}</p>
+          <p className="font-mono text-[10px] text-slate-400 truncate max-w-64">
             ID: {deal.id}
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function DealsPage() {
       key: "amount",
       header: "Số tiền",
       cell: (deal) => (
-        <span className="font-mono font-semibold text-cyan-400 text-xs">
+        <span className="font-mono font-bold text-slate-900 text-xs tabular-nums">
           {Number(deal.amount).toLocaleString("vi-VN")} {deal.currency}
         </span>
       ),
@@ -103,9 +103,9 @@ export default function DealsPage() {
       key: "parties",
       header: "Người Bán / Mua",
       cell: (deal) => (
-        <div className="text-xs text-slate-300">
-          <p className="text-slate-200 font-medium">{deal.seller?.displayName || "Seller"}</p>
-          <p className="text-[10px] text-slate-500">{deal.buyer?.displayName || "Chưa nhận"}</p>
+        <div className="text-xs">
+          <p className="text-slate-800 font-medium">{deal.seller?.displayName || "Seller"}</p>
+          <p className="text-[10px] text-slate-400">{deal.buyer?.displayName || "Chưa nhận"}</p>
         </div>
       ),
     },
@@ -113,7 +113,7 @@ export default function DealsPage() {
       key: "inspection",
       header: "Nghiệm thu",
       cell: (deal) => (
-        <span className="text-xs font-mono text-slate-400">
+        <span className="text-xs font-mono text-slate-600">
           {Math.round(deal.inspectionDuration / 3600)}h
         </span>
       ),
@@ -125,23 +125,23 @@ export default function DealsPage() {
       cell: (deal) => (
         <div className="flex items-center justify-end gap-1.5">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => setSelectedDrawerDeal(deal)}
-            className="h-8 px-2.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800"
+            className="h-8 px-2.5 text-xs border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
             title="Xem chi tiết"
           >
-            <Eye className="size-3.5 mr-1" />
+            <Eye className="size-3.5 mr-1 text-slate-500" />
             Chi tiết
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSelectedOverrideDeal(deal)}
-            className="h-8 px-2.5 text-xs border-amber-800/80 bg-amber-950/30 hover:bg-amber-900/40 text-amber-300"
+            className="h-8 px-2.5 text-xs border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium shadow-2xs"
             title="Super Admin Override"
           >
-            <ShieldAlert className="size-3.5 mr-1" />
+            <ShieldAlert className="size-3.5 mr-1 text-amber-700" />
             Override
           </Button>
         </div>
@@ -152,18 +152,19 @@ export default function DealsPage() {
   return (
     <div className="space-y-6">
       {/* Page Title & Counter */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
-            <Scale className="size-6 text-cyan-400" />
-            Quản Lý Kèo & Escrow State
-          </h2>
-          <p className="text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span className="text-slate-500">Command Center</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-900 font-semibold">Giao dịch &amp; Escrow State</span>
+          </div>
+          <p className="mt-1 text-xs text-slate-500">
             Giám sát toàn bộ trạng thái ký quỹ, chi tiết Digital Vault và quyền can thiệp Super Admin.
           </p>
         </div>
-        <Badge variant="cyan" className="font-mono text-xs w-fit">
-          Tổng cộng: {deals.length} kèo
+        <Badge variant="outline" className="font-mono text-xs w-fit border-slate-200 bg-white text-slate-700">
+          Tổng cộng: {deals.length} giao dịch
         </Badge>
       </div>
 
@@ -185,17 +186,17 @@ export default function DealsPage() {
         isLoading={isLoading}
         searchQuery={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Tìm theo tiêu đề kèo, UUID hoặc người bán..."
-        emptyMessage="Không tìm thấy kèo ký quỹ nào phù hợp với bộ lọc."
+        searchPlaceholder="Tìm theo tiêu đề giao dịch, UUID hoặc người bán..."
+        emptyMessage="Không tìm thấy giao dịch ký quỹ nào phù hợp với bộ lọc."
         actionsSlot={
           <Button
             variant="outline"
             size="sm"
             disabled={isLoading}
             onClick={() => fetchDeals(true)}
-            className="border-slate-800 bg-cyber-card hover:bg-slate-800 text-slate-300 text-xs h-11 min-h-11 gap-1.5"
+            className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs h-10 min-h-[40px] gap-1.5 shadow-2xs"
           >
-            <RefreshCw className={`size-3.5 ${isLoading ? "animate-spin text-cyan-400" : ""}`} />
+            <RefreshCw className={`size-3.5 ${isLoading ? "animate-spin text-slate-800" : "text-slate-500"}`} />
             Làm mới
           </Button>
         }
@@ -206,26 +207,26 @@ export default function DealsPage() {
           onPageChange: setPage,
         }}
         renderMobileCard={(deal) => (
-          <div className="rounded-xl border border-slate-800 bg-cyber-surface p-3.5 space-y-2.5">
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-2.5 shadow-2xs">
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
-                <p className="font-medium text-slate-200 text-xs line-clamp-1">{deal.title}</p>
-                <p className="font-mono text-[10px] text-slate-500">ID: {deal.id.slice(0, 8)}...</p>
+                <p className="font-semibold text-slate-900 text-xs line-clamp-1">{deal.title}</p>
+                <p className="font-mono text-[10px] text-slate-400">ID: {deal.id.slice(0, 8)}...</p>
               </div>
               <DealStatusBadge state={deal.state} />
             </div>
-            <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800/60 font-mono">
-              <span className="text-cyan-400 font-semibold">
+            <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 font-mono">
+              <span className="text-slate-900 font-bold tabular-nums">
                 {Number(deal.amount).toLocaleString("vi-VN")} {deal.currency}
               </span>
-              <span className="text-slate-400">{Math.round(deal.inspectionDuration / 3600)}h kiểm định</span>
+              <span className="text-slate-500">{Math.round(deal.inspectionDuration / 3600)}h kiểm định</span>
             </div>
             <div className="flex items-center justify-end gap-2 pt-1">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedDrawerDeal(deal)}
-                className="h-9 px-3 text-xs text-slate-300"
+                className="h-8 px-3 text-xs border-slate-200 bg-white text-slate-700"
               >
                 Chi tiết
               </Button>
@@ -233,7 +234,7 @@ export default function DealsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedOverrideDeal(deal)}
-                className="h-9 px-3 text-xs border-amber-800 text-amber-300 bg-amber-950/30"
+                className="h-8 px-3 text-xs border-amber-300 text-amber-800 bg-amber-50"
               >
                 Override
               </Button>

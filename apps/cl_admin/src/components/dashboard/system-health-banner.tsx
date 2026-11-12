@@ -20,62 +20,38 @@ export function SystemHealthBanner() {
     };
   }, []);
 
-  const healthyCount = pillars.filter((p) => p.status === 'healthy').length;
-  const totalCount = pillars.length || 5;
-
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm gap-4">
-      <div className="flex items-center space-x-3.5">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${
-          healthyCount === totalCount
-            ? 'border-emerald-500/30 bg-emerald-950/40 text-emerald-400'
-            : 'border-amber-500/30 bg-amber-950/40 text-amber-400'
-        }`}>
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="flex items-center space-x-2">
-            <h4 className="text-sm font-semibold text-white">
-              Hệ Thống Trực Tuyến & Đồng Bộ
-            </h4>
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-mono ${
-              healthyCount === totalCount
-                ? 'bg-emerald-950 border-emerald-800 text-emerald-400'
-                : 'bg-amber-950 border-amber-800 text-amber-400'
-            }`}>
-              {pillars.length ? `${healthyCount}/${totalCount} Operational` : 'Checking...'}
-            </span>
+    <div className="rounded-xl border border-border-subtle bg-surface p-4 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center gap-6 text-xs font-mono">
+        {pillars.length === 0 ? (
+          <div className="flex items-center gap-2 text-text-muted font-sans">
+            <span className="size-2 rounded-full bg-border-strong animate-pulse" />
+            <span>Đang kiểm tra ma trận trụ cột hệ thống...</span>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-            {pillars.map((p) => (
-              <span key={p.id} className="flex items-center space-x-1.5">
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    p.status === 'healthy'
-                      ? 'bg-emerald-400'
-                      : p.status === 'degraded'
-                      ? 'bg-amber-400'
-                      : 'bg-rose-400'
-                  }`}
-                />
-                <span className="text-[11px] font-mono">
-                  {p.name.split(' ')[0]} ({p.latencyMs}ms)
-                </span>
-              </span>
-            ))}
-          </div>
-        </div>
+        ) : (
+          pillars.slice(0, 5).map((p) => (
+            <div key={p.id} className="flex items-center gap-2">
+              <span
+                className={`size-2 rounded-full ${
+                  p.status === 'healthy'
+                    ? 'bg-emerald-500'
+                    : p.status === 'degraded'
+                    ? 'bg-amber-500'
+                    : 'bg-rose-500'
+                }`}
+              />
+              <span className="font-semibold text-text-primary font-sans">{p.name.split(' (')[0]}:</span>
+              <span className="text-text-muted tabular-nums">{p.latencyMs}ms</span>
+            </div>
+          ))
+        )}
       </div>
-
-      <Link href="/system-status" className="shrink-0">
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-slate-800 bg-[#080C14] hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 text-xs h-9 gap-1.5"
-        >
-          <span>Chi tiết Ma trận 5 Trụ cột</span>
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Button>
+      <Link
+        href="/system-status"
+        className="text-xs font-medium text-text-secondary hover:text-text-primary flex items-center gap-1 shrink-0 font-sans transition-colors"
+      >
+        <span>Chi tiết ma trận</span>
+        <ArrowRight className="size-3.5 text-text-muted" />
       </Link>
     </div>
   );

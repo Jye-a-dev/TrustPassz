@@ -5,108 +5,89 @@ import {
   NotFoundException,
   Optional,
 } from '@nestjs/common';
+import { BargainStatus, DealState, Prisma } from '@prisma/client';
+import { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../database/prisma.service';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
-import { RequestUser } from '../../common/decorators/current-user.decorator';
+import { NotificationsService } from '../notifications/notifications.service';
+import {
+  findDealForBargain,
+  resolveOrProvisionDealProduct,
+} from './bargains-deal.helper';
 import {
   CreateBargainDto,
   QueryBargainDto,
   RespondBargainDto,
 } from './dto/bargain.dto';
-import { BargainStatus, DealState, Prisma } from '@prisma/client';
 
 @Injectable()
 export class BargainsService {
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly supabaseService?: SupabaseService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
 
   async create(dto: CreateBargainDto) {
     let effectiveProductId = dto.productId;
+    const requestedDealId = dto.dealId?.trim();
+    const deal = requestedDealId
+      ? await this.prisma.deal.findUnique({
+          where: { id: requestedDealId },
+          include: { order: true },
+        })
+      : null;
 
-    if (!effectiveProductId && dto.dealId) {
-      const deal = await this.prisma.deal.findUnique({
-        where: { id: dto.dealId },
-        include: { order: true },
-      });
-      if (deal?.order?.productId) {
-        effectiveProductId = deal.order.productId;
-      } else if (deal) {
-        let product = await this.prisma.product.findFirst({
-          where: { sellerId: deal.sellerId },
-        });
-        if (!product) {
-          product = await this.prisma.product.create({
-            data: {
-              sellerId: deal.sellerId,
-              title: deal.title,
-              category: 'DIGITAL_ASSET',
-              basePrice: deal.amount,
-            },
-          });
-        }
-        effectiveProductId = product.id;
-        await this.prisma.order.upsert({
-          where: { dealId: deal.id },
-          create: {
-            orderNumber: `ORD-${deal.id.slice(0, 8).toUpperCase()}`,
-            dealId: deal.id,
-            buyerId: dto.buyerId,
-            sellerId: deal.sellerId,
-            productId: product.id,
-            totalAmount: deal.amount,
-          },
-          update: {
-            productId: product.id,
-          },
-        });
-      }
+    if (!effectiveProductId && deal) {
+      effectiveProductId = await resolveOrProvisionDealProduct(
+        this.prisma,
+        deal,
+        dto.buyerId,
+      );
     }
 
     if (!effectiveProductId) {
-      throw new BadRequestException('Phải cung cấp productId hoặc dealId hợp lệ.');
+      throw new BadRequestException(
+        'Phải cung cấp productId hoặc dealId hợp lệ.',
+      );
     }
 
     const product = await this.prisma.product.findUnique({
       where: { id: effectiveProductId },
     });
-
     if (!product) {
       throw new NotFoundException(`Product ${effectiveProductId} not found`);
     }
-
     if (product.status !== 'ACTIVE') {
       throw new BadRequestException('Product is not active for bargaining');
     }
-
     if (product.sellerId === dto.buyerId) {
       throw new ForbiddenException(
         'Bạn không thể tự mua sản phẩm của chính mình.',
       );
     }
 
-    const ruleConfig = (product.ruleConfig as any) ?? {};
+    const ruleConfig =
+      (product.ruleConfig as Record<string, unknown> | null) ?? {};
     if (ruleConfig.allow_bargain === false) {
       throw new BadRequestException('Bargaining is disabled for this product');
     }
 
     const hours = dto.validHours ?? 24;
     const expiresAt = new Date(Date.now() + hours * 3600 * 1000);
-
     const mergedNegotiationData: Record<string, unknown> = {
       ...((dto.negotiationData as Record<string, unknown>) ?? {}),
-      ...(dto.dealId ? { dealId: dto.dealId } : {}),
+      ...(deal?.id ? { dealId: deal.id } : {}),
     };
 
-    return this.prisma.bargainOffer.create({
+    const offer = await this.prisma.bargainOffer.create({
       data: {
         productId: effectiveProductId,
         buyerId: dto.buyerId,
         offeredPrice: new Prisma.Decimal(dto.offeredPrice),
         status: BargainStatus.PENDING,
         expiresAt,
-        negotiationData: mergedNegotiationData as any,
+        negotiationData: mergedNegotiationData as Prisma.InputJsonValue,
       },
       include: {
         product: {
@@ -117,6 +98,19 @@ export class BargainsService {
         },
       },
     });
+
+    // Chốt chặn xác thực: chỉ gửi push deep-link /deal-room khi Deal thực sự tồn tại.
+    if (deal?.id) {
+      this.notificationsService?.notifyOfferUpdated(product.sellerId, {
+        dealId: deal.id,
+        dealTitle: product.title,
+        price: dto.offeredPrice,
+        currency: product.currency,
+        proposedBy: dto.buyerId,
+      });
+    }
+
+    return offer;
   }
 
   async findAll(query: QueryBargainDto) {
@@ -152,9 +146,7 @@ export class BargainsService {
           product: {
             select: { id: true, title: true, basePrice: true, sellerId: true },
           },
-          buyer: {
-            select: { id: true, displayName: true },
-          },
+          buyer: { select: { id: true, displayName: true } },
         },
       }),
     ]);
@@ -176,9 +168,7 @@ export class BargainsService {
       include: {
         product: {
           include: {
-            seller: {
-              select: { id: true, displayName: true, email: true },
-            },
+            seller: { select: { id: true, displayName: true, email: true } },
           },
         },
         buyer: {
@@ -191,28 +181,37 @@ export class BargainsService {
         },
       },
     });
-
     if (!bargain) {
       throw new NotFoundException(`Bargain offer ${id} not found`);
     }
+    return bargain;
+  }
 
+  private async validateSellerPendingOffer(
+    id: string,
+    actionLabel: 'chấp thuận' | 'từ chối',
+    currentUser?: RequestUser,
+  ) {
+    const bargain = await this.findOne(id);
+    if (currentUser && currentUser.id !== bargain.product.sellerId) {
+      throw new ForbiddenException(
+        `Chỉ người bán của sản phẩm mới có quyền ${actionLabel} đề xuất trả giá.`,
+      );
+    }
+    if (bargain.status !== 'PENDING') {
+      throw new BadRequestException(
+        `Không thể ${actionLabel} đề xuất ở trạng thái ${bargain.status}`,
+      );
+    }
     return bargain;
   }
 
   async acceptOffer(id: string, currentUser?: RequestUser) {
-    const bargain = await this.findOne(id);
-
-    if (currentUser && currentUser.id !== bargain.product.sellerId) {
-      throw new ForbiddenException(
-        'Chỉ người bán của sản phẩm mới có quyền chấp thuận đề xuất trả giá.',
-      );
-    }
-
-    if (bargain.status !== 'PENDING') {
-      throw new BadRequestException(
-        `Không thể chấp thuận đề xuất ở trạng thái ${bargain.status}`,
-      );
-    }
+    const bargain = await this.validateSellerPendingOffer(
+      id,
+      'chấp thuận',
+      currentUser,
+    );
 
     if (new Date() > bargain.expiresAt) {
       await this.prisma.bargainOffer.update({
@@ -224,7 +223,6 @@ export class BargainsService {
 
     const { updatedOffer, targetDeal } = await this.prisma.$transaction(
       async (tx) => {
-        // 1. Chuyển trạng thái offer hiện tại sang ACCEPTED
         const accepted = await tx.bargainOffer.update({
           where: { id },
           data: {
@@ -236,64 +234,37 @@ export class BargainsService {
           },
         });
 
-        // 2. Từ chối tất cả các offer pending còn lại cho sản phẩm này
         await tx.bargainOffer.updateMany({
           where: {
             productId: bargain.productId,
             id: { not: id },
             status: BargainStatus.PENDING,
           },
-          data: {
-            status: BargainStatus.REJECTED,
-          },
+          data: { status: BargainStatus.REJECTED },
         });
 
-        // 3. Tìm deal tương ứng hoặc tạo mới, và cập nhật deal.amount = offer.offeredPrice
-        const dealIdFromNote = (
-          bargain.negotiationData as Record<string, unknown>
-        )?.dealId as string | undefined;
-
-        let deal = dealIdFromNote
-          ? await tx.deal.findUnique({ where: { id: dealIdFromNote } })
-          : null;
-
-        if (!deal) {
-          deal = await tx.deal.findFirst({
-            where: {
-              sellerId: bargain.product.sellerId,
-              buyerId: bargain.buyerId,
-              state: DealState.PENDING,
-            },
-            orderBy: { createdAt: 'desc' },
-          });
-        }
-
-        if (deal) {
-          deal = await tx.deal.update({
-            where: { id: deal.id },
-            data: {
-              amount: bargain.offeredPrice,
-            },
-          });
-        } else {
-          deal = await tx.deal.create({
-            data: {
-              sellerId: bargain.product.sellerId,
-              buyerId: bargain.buyerId,
-              title: `Bargain Deal: ${bargain.product.title}`,
-              amount: bargain.offeredPrice,
-              currency: bargain.product.currency,
-              state: DealState.PENDING,
-            },
-          });
-        }
+        const existingDeal = await findDealForBargain(tx, bargain);
+        const deal = existingDeal
+          ? await tx.deal.update({
+              where: { id: existingDeal.id },
+              data: { amount: bargain.offeredPrice },
+            })
+          : await tx.deal.create({
+              data: {
+                sellerId: bargain.product.sellerId,
+                buyerId: bargain.buyerId,
+                title: `Bargain Deal: ${bargain.product.title}`,
+                amount: bargain.offeredPrice,
+                currency: bargain.product.currency,
+                state: DealState.PENDING,
+              },
+            });
 
         return { updatedOffer: accepted, targetDeal: deal };
       },
     );
 
-    // 4. Broadcast sự kiện bargain:offer_accepted qua Supabase Realtime channel deal-room:${dealId}
-    if (targetDeal && this.supabaseService) {
+    if (targetDeal?.id && this.supabaseService) {
       await this.supabaseService.broadcastBargainEvent(
         targetDeal.id,
         'bargain:offer_accepted',
@@ -308,27 +279,25 @@ export class BargainsService {
       );
     }
 
-    return {
-      success: true,
-      bargain: updatedOffer,
-      deal: targetDeal,
-    };
+    if (targetDeal?.id) {
+      this.notificationsService?.notifyOfferUpdated(bargain.buyerId, {
+        dealId: targetDeal.id,
+        dealTitle: targetDeal.title,
+        price: Number(bargain.offeredPrice),
+        currency: targetDeal.currency,
+        status: 'ACCEPTED',
+      });
+    }
+
+    return { success: true, bargain: updatedOffer, deal: targetDeal };
   }
 
   async rejectOffer(id: string, currentUser?: RequestUser) {
-    const bargain = await this.findOne(id);
-
-    if (currentUser && currentUser.id !== bargain.product.sellerId) {
-      throw new ForbiddenException(
-        'Chỉ người bán của sản phẩm mới có quyền từ chối đề xuất trả giá.',
-      );
-    }
-
-    if (bargain.status !== 'PENDING') {
-      throw new BadRequestException(
-        `Không thể từ chối đề xuất ở trạng thái ${bargain.status}`,
-      );
-    }
+    const bargain = await this.validateSellerPendingOffer(
+      id,
+      'từ chối',
+      currentUser,
+    );
 
     const updatedOffer = await this.prisma.bargainOffer.update({
       where: { id },
@@ -341,22 +310,8 @@ export class BargainsService {
       },
     });
 
-    const dealIdFromNote = (
-      bargain.negotiationData as Record<string, unknown>
-    )?.dealId as string | undefined;
-
-    const targetDeal = dealIdFromNote
-      ? await this.prisma.deal.findUnique({ where: { id: dealIdFromNote } })
-      : await this.prisma.deal.findFirst({
-          where: {
-            sellerId: bargain.product.sellerId,
-            buyerId: bargain.buyerId,
-            state: DealState.PENDING,
-          },
-          orderBy: { createdAt: 'desc' },
-        });
-
-    if (targetDeal && this.supabaseService) {
+    const targetDeal = await findDealForBargain(this.prisma, bargain);
+    if (targetDeal?.id && this.supabaseService) {
       await this.supabaseService.broadcastBargainEvent(
         targetDeal.id,
         'bargain:offer_rejected',
@@ -370,18 +325,20 @@ export class BargainsService {
       );
     }
 
-    return {
-      success: true,
-      bargain: updatedOffer,
-      deal: targetDeal,
-    };
+    if (targetDeal?.id) {
+      this.notificationsService?.notifyOfferUpdated(bargain.buyerId, {
+        dealId: targetDeal.id,
+        dealTitle: targetDeal.title,
+        price: Number(bargain.offeredPrice),
+        currency: targetDeal.currency,
+        status: 'REJECTED',
+      });
+    }
+
+    return { success: true, bargain: updatedOffer, deal: targetDeal };
   }
 
-  async respond(
-    id: string,
-    dto: RespondBargainDto,
-    currentUser?: RequestUser,
-  ) {
+  async respond(id: string, dto: RespondBargainDto, currentUser?: RequestUser) {
     if (dto.status === 'ACCEPTED') {
       return this.acceptOffer(id, currentUser);
     }

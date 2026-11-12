@@ -98,21 +98,21 @@ export default function DashboardPage() {
         time: disp.createdAt ? new Date(disp.createdAt).toLocaleTimeString('vi-VN') : 'Gần đây',
         dealId: disp.dealId,
         badgeColor: disp.status === 'CLOSED'
-          ? 'border-emerald-800 text-emerald-400 bg-emerald-950/40'
-          : 'border-amber-800 text-amber-400 bg-amber-950/40',
+          ? 'border-emerald-200 text-emerald-700 bg-emerald-50'
+          : 'border-amber-200 text-amber-700 bg-amber-50',
       });
     });
 
     deals.forEach((deal) => {
       let type: RecentEvent['type'] = 'DEAL_DEPOSITED';
-      let badgeColor = 'border-slate-800 text-slate-400 bg-slate-900';
+      let badgeColor = 'border-slate-200 text-slate-700 bg-slate-100';
 
       if (deal.state === 'SETTLED') {
         type = 'SETTLED';
-        badgeColor = 'border-emerald-800 text-emerald-400 bg-emerald-950/40';
+        badgeColor = 'border-emerald-200 text-emerald-700 bg-emerald-50';
       } else if (deal.state === 'IN_INSPECTION') {
         type = 'INSPECTION_STARTED';
-        badgeColor = 'border-cyan-800 text-cyan-400 bg-cyan-950/40';
+        badgeColor = 'border-cyan-200 text-cyan-700 bg-cyan-50';
       }
 
       list.push({
@@ -130,9 +130,9 @@ export default function DashboardPage() {
   }, [deals, disputes]);
 
   const stateDistribution = [
-    { label: 'PENDING', count: breakdown.PENDING, color: 'bg-slate-500' },
+    { label: 'PENDING', count: breakdown.PENDING, color: 'bg-slate-400' },
     { label: 'DEPOSITED', count: breakdown.DEPOSITED, color: 'bg-cyan-500' },
-    { label: 'INSPECT', count: breakdown.IN_INSPECTION, color: 'bg-blue-500' },
+    { label: 'INSPECT', count: breakdown.IN_INSPECTION, color: 'bg-indigo-500' },
     { label: 'SETTLED', count: breakdown.SETTLED, color: 'bg-emerald-500' },
     { label: 'REFUND', count: breakdown.REFUNDED, color: 'bg-rose-500' },
     { label: 'DISPUTE', count: breakdown.DISPUTED, color: 'bg-amber-500' },
@@ -142,43 +142,40 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white font-mono">
-            Trung Tâm Điều Hành Escrow
-          </h2>
-          <p className="text-xs text-slate-400">
-            Tổng quan tài chính ký quỹ, tình trạng phán quyết AI và an ninh hợp đồng Base Sepolia.
-          </p>
+      {/* Top Header / Breadcrumb & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3">
+        <div className="flex items-center gap-2 text-xs font-medium">
+          <span className="text-slate-500">Command Center</span>
+          <span className="text-slate-300">/</span>
+          <span className="text-slate-900 font-semibold">Tổng quan điều hành</span>
         </div>
         <div className="flex items-center space-x-2">
           <Link href="/deals">
             <Button
               variant="outline"
               size="sm"
-              className="border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-200 text-xs h-9"
+              className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs h-8.5 shadow-2xs"
             >
-              <Scale className="mr-1.5 h-3.5 w-3.5 text-cyan-400" />
-              Quản lý Kèo
+              <Scale className="mr-1.5 h-3.5 w-3.5 text-slate-500" />
+              Quản lý Giao dịch
             </Button>
           </Link>
           <Link href="/disputes">
             <Button
               size="sm"
-              className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-semibold text-xs h-9"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-8.5 shadow-2xs"
             >
               <ShieldAlert className="mr-1.5 h-3.5 w-3.5" />
-              Dispute Queue ({breakdown.DISPUTED})
+              Hàng đợi Khiếu nại ({breakdown.DISPUTED})
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* 5-Pillar Health Banner */}
+      {/* 5-Pillar Health Bar (Compact) */}
       <SystemHealthBanner />
 
-      {/* Realtime KPI Grid */}
+      {/* Realtime 4-KPI Grid */}
       <KpiMetricsGrid
         data={{
           tvlVnd,
@@ -189,54 +186,53 @@ export default function DashboardPage() {
         }}
       />
 
-      {/* Two Column Layout: Throughput & Recent Events */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-7">
-        {/* Left: Transaction Throughput & State Distribution (4 Cols) */}
-        <Card className="border-slate-800 bg-[#0F172A] lg:col-span-4 shadow-md">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-semibold text-white">
-                  Phân Bổ Kèo Ký Quỹ & Tranh Chấp Thực Tế
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Dữ liệu thời gian thực từ Neon PostgreSQL Database
-                </CardDescription>
-              </div>
-              <Badge variant="outline" className="border-cyan-800 bg-cyan-950/40 text-cyan-400 text-[10px]">
-                PostgreSQL Live
-              </Badge>
+      {/* Two Column Layout: 65% Left (Throughput / State) / 35% Right (Event Feed) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left: Transaction Throughput & State Distribution (8 Cols ~ 65%) */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4 lg:col-span-8">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Phân Bổ Giao Dịch Ký Quỹ &amp; Tranh Chấp Thực Tế
+              </h3>
+              <p className="text-xs text-slate-500">
+                Dữ liệu đồng bộ trực tiếp từ Neon PostgreSQL Database
+              </p>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Live Throughput & State Visualizer */}
-            <div className="rounded-xl border border-slate-800 bg-[#080C14] p-4">
+            <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 text-[10px] font-mono">
+              Live Database
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            {/* Live State Visualizer */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-end justify-between gap-2 h-36 pt-4 pb-2">
                 {stateDistribution.map((item, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
                     <div className="w-full flex items-end justify-center h-28">
                       <div
                         style={{ height: `${Math.max((item.count / maxCount) * 100, 10)}%` }}
-                        className={`w-6 rounded-t ${item.color} transition-all duration-300`}
+                        className={`w-6 rounded-t ${item.color} transition-all duration-300 shadow-2xs`}
                         title={`${item.label}: ${item.count}`}
                       />
                     </div>
-                    <span className="text-[9px] font-mono text-slate-400 truncate">{item.label}</span>
-                    <span className="text-[10px] font-mono font-bold text-white">{item.count}</span>
+                    <span className="text-[10px] font-mono text-slate-500 truncate">{item.label}</span>
+                    <span className="text-[11px] font-mono font-bold text-slate-900">{item.count}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-center space-x-6 border-t border-slate-800 pt-3 text-[11px] text-slate-400">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 border-t border-slate-200 pt-3 text-[11px] text-slate-500">
                 <span className="flex items-center space-x-1.5">
-                  <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                  <span className="h-2 w-2 rounded-full bg-cyan-500" />
                   <span>Ký quỹ Hoạt động ({breakdown.DEPOSITED + breakdown.IN_INSPECTION})</span>
                 </span>
                 <span className="flex items-center space-x-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   <span>Nghiệm thu ({breakdown.SETTLED})</span>
                 </span>
                 <span className="flex items-center space-x-1.5">
-                  <span className="h-2 w-2 rounded-full bg-amber-400" />
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />
                   <span>Khiếu nại ({breakdown.DISPUTED})</span>
                 </span>
               </div>
@@ -244,71 +240,70 @@ export default function DashboardPage() {
 
             {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg border border-slate-800 bg-[#080C14] p-2.5">
-                <span className="text-[10px] text-slate-400">Tỷ lệ Tranh chấp</span>
-                <p className="font-mono text-sm font-bold text-amber-400">{disputeRate}%</p>
+              <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
+                <span className="text-[10px] text-slate-500">Tỷ lệ Tranh chấp</span>
+                <p className="font-mono text-sm font-bold text-amber-600 tabular-nums">{disputeRate}%</p>
               </div>
-              <div className="rounded-lg border border-slate-800 bg-[#080C14] p-2.5">
-                <span className="text-[10px] text-slate-400">Tổng Deal Hoàn tất</span>
-                <p className="font-mono text-sm font-bold text-emerald-400">{breakdown.SETTLED}</p>
+              <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
+                <span className="text-[10px] text-slate-500">Tổng Deal Hoàn tất</span>
+                <p className="font-mono text-sm font-bold text-emerald-600 tabular-nums">{breakdown.SETTLED}</p>
               </div>
-              <div className="rounded-lg border border-slate-800 bg-[#080C14] p-2.5">
-                <span className="text-[10px] text-slate-400">Tài sản Ký Quỹ</span>
-                <p className="font-mono text-sm font-bold text-cyan-400">{totalDeals} kèo</p>
+              <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
+                <span className="text-[10px] text-slate-500">Tài sản Ký Quỹ</span>
+                <p className="font-mono text-sm font-bold text-slate-900 tabular-nums">{totalDeals} giao dịch</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Right: Live Event Feed (3 Cols) */}
-        <Card className="border-slate-800 bg-[#0F172A] lg:col-span-3 shadow-md flex flex-col">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-semibold text-white">
-                  Nhật Ký Sự Kiện Thời Gian Thực
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Hoạt động ký quỹ & tranh chấp mới nhất
-                </CardDescription>
-              </div>
-              <Link href="/deals" className="text-xs text-cyan-400 hover:underline">
-                Xem tất cả
-              </Link>
+        {/* Right: Live Event Feed (4 Cols ~ 35%) */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col lg:col-span-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Nhật Ký Sự Kiện Realtime
+              </h3>
+              <p className="text-xs text-slate-500">
+                Hoạt động ký quỹ &amp; tranh chấp mới nhất
+              </p>
             </div>
-          </CardHeader>
-          <CardContent className="flex-1 space-y-3">
+            <Link href="/deals" className="text-xs font-semibold text-slate-900 hover:underline">
+              Xem tất cả &rarr;
+            </Link>
+          </div>
+
+          <div className="flex-1 space-y-2.5">
             {recentEvents.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
+              <div className="py-8 text-center text-xs text-slate-400">
                 Chưa có sự kiện giao dịch mới nào.
               </div>
             ) : (
               recentEvents.map((evt) => (
                 <div
                   key={evt.id}
-                  className="flex items-start justify-between rounded-lg border border-slate-800/80 bg-[#080C14] p-3 hover:border-slate-700 transition-colors"
+                  className="flex items-start justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-3 hover:bg-slate-50 transition-colors"
                 >
                   <div className="space-y-1 pr-2">
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline" className={`text-[9px] font-mono ${evt.badgeColor}`}>
                         {evt.type}
                       </Badge>
-                      <span className="text-[10px] text-slate-500">{evt.time}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{evt.time}</span>
                     </div>
-                    <p className="text-xs font-medium text-slate-200 line-clamp-1">{evt.title}</p>
-                    <p className="font-mono text-[11px] font-semibold text-cyan-400">{evt.amount}</p>
+                    <p className="text-xs font-medium text-slate-800 line-clamp-1">{evt.title}</p>
+                    <p className="font-mono text-[11px] font-semibold text-slate-900 tabular-nums">{evt.amount}</p>
                   </div>
                   <Link
                     href={evt.type === 'DISPUTE_OPENED' ? `/disputes/${evt.dealId}` : `/deals`}
-                    className="shrink-0 p-1 text-slate-500 hover:text-cyan-400"
+                    className="shrink-0 p-1 text-slate-400 hover:text-slate-800"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

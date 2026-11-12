@@ -25,51 +25,14 @@ export function RegisterFastTab({
 }: RegisterFastTabProps) {
   return (
     <div className="space-y-4">
-      {/* 1. SOLANA ONBOARDING */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
-        <div className="flex items-center gap-2 text-xs font-bold text-white">
-          <Wallet className="size-4 text-purple-400" />
-          <span>Đăng ký tức thì qua Ví Solana</span>
-        </div>
-        <p className="text-[11px] text-slate-400 leading-relaxed">
-          Tự động tạo tài khoản an toàn, không cần nhớ mật khẩu rườm rà. Xác
-          thực đăng nhập nhanh chóng chỉ với 1 thao tác chạm.
-        </p>
-
-        <Button
-          type="button"
-          onClick={onSolanaRegister}
-          disabled={isSolanaLoading}
-          className="w-full bg-linear-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold h-11 rounded-lg border border-purple-400/30 shadow-[0_0_20px_rgba(99,102,241,0.25)] gap-2 text-xs sm:text-sm cursor-pointer"
-        >
-          {isSolanaLoading ? (
-            <>
-              <Loader2 className="size-4 animate-spin text-cyan-300" />
-              <span>Đang xác nhận chữ ký tạo tài khoản...</span>
-            </>
-          ) : (
-            <>
-              <Wallet className="size-4 text-cyan-200" />
-              <span>
-                {connected
-                  ? "Xác nhận đăng ký bằng ví"
-                  : "Kết nối ví để Đăng ký"}
-              </span>
-              <ArrowRight className="size-3.5 ml-auto text-cyan-200" />
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* 2. GOOGLE ONBOARDING */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
-        <div className="flex items-center gap-2 text-xs font-bold text-white">
-          <CheckCircle2 className="size-4 text-emerald-400" />
+      {/* 1. GOOGLE ONBOARDING */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-2.5">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+          <CheckCircle2 className="size-4 text-emerald-600" />
           <span>Đăng ký 1 chạm bằng Google</span>
         </div>
-        <p className="text-[11px] text-slate-400 leading-relaxed">
-          Liên kết tài khoản Google, nhận thông báo giao dịch và mã mở kho
-          lưu trữ trực tiếp qua email.
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          Tự động thiết lập tài khoản, nhận thông báo giao dịch và mã két an toàn qua email.
         </p>
 
         <div className="w-full flex justify-center py-1">
@@ -78,8 +41,8 @@ export function RegisterFastTab({
             onError={() => {
               toast.error("Không thể kết nối dịch vụ Google OAuth");
             }}
-            theme="filled_black"
-            shape="pill"
+            theme="outline"
+            shape="rectangular"
             size="large"
             text="signup_with"
             width={360}
@@ -87,22 +50,57 @@ export function RegisterFastTab({
         </div>
       </div>
 
+      {/* 2. SOLANA ONBOARDING */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-2.5">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+          <Wallet className="size-4 text-indigo-600" />
+          <span>Đăng ký qua Ví Solana</span>
+        </div>
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          Tạo tài khoản phi tập trung tức thì với Phantom hoặc Solflare.
+        </p>
+
+        <Button
+          type="button"
+          onClick={onSolanaRegister}
+          disabled={isSolanaLoading}
+          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold min-h-[44px] rounded-xl border border-slate-950 shadow-sm gap-2 text-xs sm:text-sm cursor-pointer"
+        >
+          {isSolanaLoading ? (
+            <>
+              <Loader2 className="size-4 animate-spin text-white" />
+              <span>Đang xác nhận chữ ký tạo tài khoản...</span>
+            </>
+          ) : (
+            <>
+              <Wallet className="size-4 text-slate-300" />
+              <span>
+                {connected
+                  ? "Xác nhận đăng ký bằng ví"
+                  : "Kết nối ví để Đăng ký"}
+              </span>
+              <ArrowRight className="size-3.5 ml-auto text-slate-300" />
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Terms Checkbox for 1-Click Onboarding */}
-      <div className="flex items-start gap-2 pt-2">
+      <div className="flex items-start gap-2 pt-1">
         <input
           id="agree-fast"
           type="checkbox"
           checked={agreeFastTerms}
           onChange={(e) => onAgreeFastTermsChange(e.target.checked)}
-          className="mt-1 size-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500/20"
+          className="mt-0.5 size-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500/20"
         />
         <label
           htmlFor="agree-fast"
-          className="text-xs text-slate-400 select-none cursor-pointer leading-tight"
+          className="text-xs text-slate-600 select-none cursor-pointer leading-tight"
         >
           Tôi đồng ý với{" "}
-          <span className="text-cyan-400 underline underline-offset-2">
-            Quy chế Giữ Tiền An Toàn &amp; Bảo Mật Giao Dịch của TrustPassz
+          <span className="text-rose-600 underline underline-offset-2 font-medium">
+            Quy chế Giữ Tiền An Toàn &amp; Bảo Mật Giao Dịch TrustPassz
           </span>
           .
         </label>

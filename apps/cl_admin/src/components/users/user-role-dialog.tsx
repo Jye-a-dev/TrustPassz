@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { Loader2, Shield, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -56,20 +55,29 @@ export function UserRoleDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="border-slate-800 bg-[#0F172A] text-slate-100 max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base text-cyan-400 font-mono">
-            <Shield className="h-5 w-5" />
-            Cập Nhật Quyền Hạn RBAC Người Dùng
-          </DialogTitle>
-          <DialogDescription className="text-xs text-slate-400">
+      <DialogContent className="border-slate-200 bg-white text-slate-900 max-w-md rounded-2xl shadow-xl p-6 text-xs">
+        <DialogHeader className="border-b border-slate-100 pb-3">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-4 w-4 text-slate-700" />
+            <DialogTitle className="text-base font-bold text-slate-900">
+              Cập Nhật Quyền Hạn RBAC Người Dùng
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs text-slate-500 pt-1">
             Thay đổi vai trò cho tài khoản {user?.displayName || user?.email}. Mọi hành động đều được kiểm toán lưu vết.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div>
-            <label className="text-xs text-slate-300 font-mono mb-1.5 block">Chọn vai trò hệ thống mới:</label>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-1">
+            <p className="font-bold text-slate-900">{user?.displayName || 'Tài khoản'} ({user?.email})</p>
+            <p className="text-[11px] text-slate-500 font-mono">
+              Vai trò hiện tại: <span className="font-semibold text-slate-800">{user?.role}</span>
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 block">Chọn vai trò hệ thống mới:</label>
             <div className="grid grid-cols-3 gap-2">
               {(['USER', 'ARBITRATOR', 'ADMIN'] as UserRole[]).map((r) => (
                 <Button
@@ -77,10 +85,10 @@ export function UserRoleDialog({
                   type="button"
                   variant={targetRole === r ? 'default' : 'outline'}
                   onClick={() => setTargetRole(r)}
-                  className={`min-h-[44px] text-xs font-mono ${
+                  className={`h-10 text-xs font-medium rounded-lg border ${
                     targetRole === r
-                      ? 'bg-cyan-600 text-white hover:bg-cyan-500'
-                      : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                      ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   {r}
@@ -89,34 +97,35 @@ export function UserRoleDialog({
             </div>
           </div>
 
-          <div>
-            <label className="text-xs text-slate-300 font-mono mb-1.5 block">
-              Lý do kiểm toán can thiệp (<span className="text-amber-400">tối thiểu 10 ký tự</span>):
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 block">
+              Lý do kiểm toán can thiệp (<span className="text-amber-600 font-medium">tối thiểu 10 ký tự</span>):
             </label>
-            <Input
+            <textarea
+              rows={3}
               value={roleReason}
               onChange={(e) => setRoleReason(e.target.value)}
               placeholder="Nhập lý do phân quyền..."
-              className="bg-slate-900 border-slate-800 text-xs min-h-[44px]"
+              className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400 placeholder:text-slate-400 leading-relaxed"
             />
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 pt-2 border-t border-slate-100">
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="border-slate-800 min-h-[44px] text-xs"
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
           >
-            Hủy
+            Hủy Bỏ
           </Button>
           <Button
-            variant="default"
-            size="sm"
+            type="button"
             disabled={isSubmitting || roleReason.trim().length < 10}
             onClick={handleConfirm}
-            className="bg-cyan-600 hover:bg-cyan-500 text-white min-h-[44px] text-xs gap-1.5"
+            className="h-10 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium gap-1.5"
           >
             {isSubmitting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -130,4 +139,3 @@ export function UserRoleDialog({
     </Dialog>
   );
 }
-

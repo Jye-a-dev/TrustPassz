@@ -1,10 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "apps/cl_admin",
-    "apps/cl_user",
-    "apps/server",
-    "apps/ai_pipeline",
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
@@ -15,6 +12,8 @@
     "lint": "turbo run lint",
     "prisma:generate": "npm run prisma:generate --workspace=server",
     "mb": "node packages/tooling/scripts/run-mb.js",
+    "mb:clean": "node apps/mb_user/scripts/dev-clean.mjs",
+    "mb:dev": "node apps/mb_user/scripts/dev-runner.mjs",
     "user": "npm --prefix apps/cl_user run dev",
     "admin": "npm --prefix apps/cl_admin run dev",
     "server": "npm --prefix apps/server run dev",

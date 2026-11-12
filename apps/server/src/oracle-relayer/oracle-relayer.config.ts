@@ -80,7 +80,9 @@ export function loadOracleRelayerConfig(): OracleRelayerConfig {
     }
   }
 
-  const rawContractAddress = requireEnv('ESCROW_CONTRACT_ADDRESS');
+  const rawContractAddress =
+    process.env.ESCROW_CONTRACT_ADDRESS?.trim() ||
+    '0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15';
   const rpcUrl = requireEnv('BASE_SEPOLIA_RPC_URL');
 
   const privateKey = validateHex(rawPrivateKey, 'ORACLE_RELAYER_PRIVATE_KEY');

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile - Chào Mừng & Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- PHONE DEVICE FRAME WRAPPER (iPhone 393px x 852px) -->
+  <div class="w-[393px] h-[852px] bg-[#080C14] text-slate-100 rounded-[52px] border-[10px] border-slate-800/90 shadow-2xl relative overflow-hidden flex flex-col font-sans select-none justify-between">
+    
+    <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
+    <div class="h-11 w-full pt-2 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+      <span class="font-semibold text-sm tracking-tight">9:41</span>
+      <div class="w-28 h-7 bg-black rounded-full mx-auto -mt-1 flex items-center justify-between px-3 shadow-inner">
+        <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/30 border border-emerald-500/80 animate-pulse"></div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
+        <svg class="w-4 h-4 fill-slate-200" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.22c3.43 0 6.55 1.39 8.84 3.64l-8.84 8.84-8.84-8.84C5.45 8.61 8.57 7.22 12 7.22z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-300 rounded-sm p-0.5 flex items-center"><div class="w-3.5 h-1.5 bg-slate-100 rounded-2xs"></div></div>
+      </div>
+    </div>
+
+    <!-- MAIN SCREEN CONTENT (CAROUSEL 1-CARD STEPPER) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-6 pt-3 pb-4 justify-between">
+      
+      <!-- Top Brand Header (TP Gradient Square Logo as in greeting_screen.dart) -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-[14px] bg-gradient-to-r from-[#22D3EE] to-[#34D399] flex items-center justify-center shadow-lg shadow-cyan-950/40">
+            <span class="text-slate-950 font-black text-lg tracking-tight">TP</span>
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-white tracking-wide">TrustPassz</h1>
+            <p class="text-[10px] font-mono text-slate-400">Bảo Vệ Giao Dịch Tài Sản Số</p>
+          </div>
+        </div>
+
+        <span class="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+          v2.4
+        </span>
+      </div>
+
+      <!-- CENTER: SINGLE ACTIVE STEP CARD (Step 1: VietQR-to-Escrow) -->
+      <div class="my-auto py-2">
+        <div class="p-6 rounded-[28px] bg-[#0F172A] border border-emerald-500/40 shadow-[0_15px_40px_rgba(16,185,129,0.12)] space-y-4 relative overflow-hidden">
+          
+          <!-- Background Glow Accent -->
+          <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none"></div>
+
+          <!-- Icon & Badge Header -->
+          <div class="flex items-center justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-[#080C14] border border-slate-800 flex items-center justify-center text-emerald-400 shadow-md">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                <path d="M7 7h3v3H7zM14 7h3v3h-3zM7 14h3v3H7zM14 14h.01M17 14h.01M14 17h.01M17 17h.01"/>
+              </svg>
+            </div>
+            
+            <span class="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+              Napas 247 Instant
+            </span>
+          </div>
+
+          <!-- Step Titles & Content -->
+          <div class="pt-2">
+            <h2 class="text-xl font-black text-white tracking-tight">VietQR-to-Escrow</h2>
+            <p class="text-xs font-semibold text-emerald-400 mt-0.5">Napas 247 Khóa Tiền Tự Động</p>
+            <p class="text-xs text-slate-300 mt-3 leading-relaxed">
+              Thanh toán App-to-App qua chuẩn VietQR động. Tiền được đóng băng an toàn trong hợp đồng thông minh hoặc tài khoản ký quỹ cho đến khi người mua đồng kiểm.
+            </p>
+          </div>
+
+          <!-- Pillar Metrics Strip -->
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>Độ trễ đối soát: <strong class="text-cyan-400">&lt; 1s</strong></span>
+            <span>Khóa quỹ: <strong class="text-emerald-400">100%</strong></span>
+          </div>
+
+        </div>
+
+        <!-- DOT STEPPERS (3 Dots, Active pill stretched w-8) -->
+        <div class="flex items-center justify-center gap-2 mt-6">
+          <div class="w-8 h-2 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full shadow-sm shadow-cyan-500/50 transition-all duration-200"></div>
+          <div class="size-2 bg-slate-700 rounded-full"></div>
+          <div class="size-2 bg-slate-700 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ACTION BUTTONS -->
+      <div class="space-y-3 pb-1">
+        <!-- Primary CTA >= 48px -->
+        <button type="button" class="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-sm tracking-wide shadow-lg shadow-cyan-950/60 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]">
+          <span>Tiếp Tục →</span>
+        </button>
+
+        <!-- Skip / Secondary Link -->
+        <div class="text-center">
+          <a href="02_login_auth.html" class="inline-block py-2 text-xs font-medium text-slate-400 hover:text-slate-200 cursor-pointer min-h-[44px] flex items-center justify-center">
+            Bỏ qua &amp; Đăng nhập ngay
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM HOME INDICATOR -->
+    <div class="w-full shrink-0 z-50">
+      <div class="w-32 h-1 bg-slate-600 rounded-full mx-auto my-2"></div>
+    </div>
+
+  </div>
+
+</body>
+</html>

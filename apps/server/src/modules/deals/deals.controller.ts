@@ -106,6 +106,28 @@ export class DealsController {
     return this.dealsService.findAll(query);
   }
 
+  @Get('my-deals')
+  @ApiOperation({
+    summary: 'List deals for the current authenticated user',
+    description: 'Retrieves deals where current user is seller or buyer.',
+  })
+  @ApiResponse({ status: 200, description: 'User deals list.' })
+  async findMyDeals(
+    @CurrentUser('id') userId: string,
+    @Query() query: QueryDealDto,
+  ) {
+    return this.dealsService.findMyDeals(userId, query);
+  }
+
+  @Get('my-balance')
+  @ApiOperation({
+    summary: 'Calculate current user escrow balance breakdown',
+  })
+  @ApiResponse({ status: 200, description: 'User escrow balance summary.' })
+  async getMyBalance(@CurrentUser('id') userId: string) {
+    return this.dealsService.calculateUserEscrowBalance(userId);
+  }
+
   @Public()
   @Get(':id')
   @ApiOperation({

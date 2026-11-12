@@ -84,30 +84,30 @@ export function DealEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-slate-800 bg-slate-900 text-slate-100 max-w-md">
+      <DialogContent className="border-slate-200 bg-white text-slate-900 max-w-md rounded-2xl shadow-xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-            <Edit3 className="size-5 text-cyan-400" />
-            Chỉnh Sửa Thông Tin Kèo
+          <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <Edit3 className="size-5 text-rose-500" />
+            Chỉnh Sửa Thông Tin Giao Dịch
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSaveDeal} className="space-y-4 pt-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-slate-700">
               Tiêu đề giao dịch
             </label>
             <Input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="bg-slate-950 border-slate-800 text-slate-100 text-sm"
+              className="bg-white border-slate-300 text-slate-900 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 min-h-[44px] rounded-xl"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">
+              <label className="text-xs font-semibold text-slate-700">
                 Giá bán (VNĐ)
               </label>
               <Input
@@ -118,19 +118,19 @@ export function DealEditDialog({
                 onChange={(e) =>
                   setEditAmount(e.target.value === "" ? "" : Number(e.target.value))
                 }
-                className="bg-slate-950 border-slate-800 text-slate-100 text-sm font-mono"
+                className="bg-white border-slate-300 text-slate-900 text-sm font-mono focus:border-rose-500 focus:ring-2 focus:ring-rose-100 min-h-[44px] rounded-xl"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">
+              <label className="text-xs font-semibold text-slate-700">
                 Thời gian kiểm tra
               </label>
               <select
                 value={editDuration}
                 onChange={(e) => setEditDuration(Number(e.target.value))}
-                className="w-full h-9 rounded-md border border-slate-800 bg-slate-950 px-3 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full h-11 rounded-xl border border-slate-300 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
               >
                 <option value={21600}>6 Giờ (Nhanh)</option>
                 <option value={43200}>12 Giờ (Tiêu chuẩn)</option>
@@ -141,14 +141,14 @@ export function DealEditDialog({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-slate-700">
               Mô tả chi tiết
             </label>
             <textarea
               rows={3}
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
-              className="w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 resize-y"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 resize-y"
               placeholder="Mô tả phạm vi bàn giao..."
             />
           </div>
@@ -159,7 +159,7 @@ export function DealEditDialog({
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
-              className="border-slate-700 text-slate-300 text-xs"
+              className="border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium min-h-[44px] rounded-xl px-4"
             >
               Hủy
             </Button>
@@ -167,7 +167,7 @@ export function DealEditDialog({
               type="submit"
               size="sm"
               disabled={isSaving}
-              className="bg-linear-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-xs"
+              className="bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs border border-rose-600 shadow-sm min-h-[44px] rounded-xl px-5"
             >
               {isSaving ? "Đang lưu..." : "Lưu Thay Đổi"}
             </Button>

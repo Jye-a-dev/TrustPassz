@@ -23,41 +23,41 @@ export function VaultUnlockForm({
   digitalAsset,
 }: VaultUnlockFormProps) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 space-y-6 shadow-xl">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 space-y-6 shadow-sm">
       {/* Section Header */}
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-cyan-400">
+          <div className="p-2.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600">
             <KeyRound className="size-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               Mở Khóa Kho Lưu Trữ Nhận Hàng
               <Badge
                 variant="outline"
-                className="text-[10px] border-emerald-500/40 text-emerald-300 font-mono"
+                className="text-[10px] border-emerald-200 bg-emerald-50 text-emerald-700 font-bold"
               >
-                Khóa bảo mật
+                Khóa bảo mật AES-256
               </Badge>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Dữ liệu được khóa an toàn, chỉ bạn và người bán có thể mở.
             </p>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
-          <ShieldCheck className="size-4 text-emerald-400" />
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
+          <ShieldCheck className="size-4 text-emerald-600" />
           <span>Bảo Mật Tuyệt Đối</span>
         </div>
       </div>
 
       {/* Passphrase Input & Unlock Button */}
       <div className="space-y-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 space-y-3">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
           <label
             htmlFor="passphrase-input"
-            className="text-xs font-semibold text-slate-300 block"
+            className="text-xs font-semibold text-slate-700 block"
           >
             Mật khẩu mở khóa nhận hàng
           </label>
@@ -69,14 +69,14 @@ export function VaultUnlockForm({
               value={passphrase}
               onChange={(e) => onPassphraseChange(e.target.value)}
               placeholder="Nhập mật khẩu mở khóa do người bán cung cấp..."
-              className="bg-slate-900 border-slate-700 text-xs font-mono min-h-11"
+              className="bg-white border-slate-300 text-xs font-mono min-h-11 rounded-xl text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
             />
 
             <Button
               type="button"
               onClick={onUnlock}
               disabled={isUnlocking || !passphrase}
-              className="min-h-11 sm:min-w-44 bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs shadow-md cursor-pointer"
+              className="min-h-11 sm:min-w-44 bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs border border-rose-600 shadow-sm rounded-xl cursor-pointer"
             >
               {isUnlocking ? (
                 <span>Đang mở khóa...</span>
@@ -89,7 +89,7 @@ export function VaultUnlockForm({
             </Button>
           </div>
 
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500">
             Gợi ý: Hệ thống đã tự động điền sẵn mật khẩu mở khóa của giao dịch này để bạn thử nghiệm nhanh.
           </p>
         </div>
@@ -97,29 +97,29 @@ export function VaultUnlockForm({
         {/* Locked Vault Metadata Preview */}
         {digitalAsset && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono">
-            <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800">
-              <span className="text-[10px] text-slate-400 block font-sans">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-[10px] text-slate-500 block font-sans">
                 Định dạng
               </span>
-              <span className="text-cyan-300 font-bold">
+              <span className="text-slate-900 font-bold">
                 {digitalAsset.assetType}
               </span>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 truncate">
-              <span className="text-[10px] text-slate-400 block font-sans">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 truncate">
+              <span className="text-[10px] text-slate-500 block font-sans">
                 Mã xác thực 1
               </span>
-              <span className="text-slate-300">
+              <span className="text-slate-700">
                 {digitalAsset.encryptionIv}
               </span>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 truncate">
-              <span className="text-[10px] text-slate-400 block font-sans">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 truncate">
+              <span className="text-[10px] text-slate-500 block font-sans">
                 Mã xác thực 2
               </span>
-              <span className="text-slate-300">
+              <span className="text-slate-700">
                 {digitalAsset.authTag}
               </span>
             </div>

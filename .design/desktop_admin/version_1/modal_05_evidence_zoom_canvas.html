@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soi Chi Tiết Bằng Chứng Kỹ Thuật Số Canvas | TrustPassz Governance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              bg: '#080C14',
+              surface: '#0B0F17',
+              card: '#0F172A',
+              border: '#1E293B',
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #080C14;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #080C14; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; border: 1px solid rgba(15, 23, 42, 0.6); }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="bg-[#080C14] text-slate-100 min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+  <div class="relative min-w-[1440px] w-full min-h-screen bg-[#080C14] text-slate-100 flex flex-col font-sans select-none antialiased">
+    <!-- Background page with blur filter -->
+    <div class="filter blur-sm pointer-events-none select-none opacity-50 flex flex-col flex-1">
+      
+    <header class="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-800 bg-[#080C14]/90 px-4 md:px-6 backdrop-blur-md shrink-0">
+      <div class="flex items-center space-x-3 md:space-x-4">
+        <!-- Mobile Trigger Icon -->
+        <button type="button" class="lg:hidden flex size-10 items-center justify-center rounded-lg border border-slate-800 bg-[#0F172A] text-slate-300 hover:text-white">
+          <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+
+        <!-- Branding Logo -->
+        <a href="#" class="flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 transition-colors">
+          <div class="flex size-10 items-center justify-center rounded-lg border border-cyan-500/30 bg-cyan-950/40 text-cyan-400 shadow-sm shadow-cyan-900/40">
+            <svg class="size-5 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <span class="font-mono font-bold tracking-tight text-white text-sm">
+            TrustPassz <span class="text-cyan-400 text-xs px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/50">ADMIN</span>
+          </span>
+        </a>
+
+        <!-- Base Sepolia RPC Status Pill -->
+        <div class="hidden xl:flex items-center gap-1.5 rounded-full border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs font-mono">
+          <span class="relative flex size-2">
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+          </span>
+          <span class="text-slate-400">Base Sepolia:</span>
+          <a href="#" class="text-cyan-400 hover:underline flex items-center gap-1 font-semibold">
+            0x165B...f783
+            <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <!-- Dual-Chain Relayer Gas Pill -->
+        <div class="flex items-center space-x-2 rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs text-slate-300 min-h-[40px]">
+          <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>
+          <div class="flex items-center gap-2 font-mono text-[11px] sm:text-xs">
+            <span class="text-white font-semibold">⛽ Base: 0.485 ETH</span>
+            <span class="text-slate-600">|</span>
+            <span class="text-emerald-400 font-semibold">◎ Sol: 4.820 SOL</span>
+          </div>
+          <button type="button" class="ml-1 p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-cyan-400">
+            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          </button>
+        </div>
+
+        <!-- Notifications Bell -->
+        <div class="relative">
+          <button type="button" class="relative flex size-10 items-center justify-center rounded-lg border border-slate-800 bg-[#0F172A] text-slate-300 hover:bg-slate-800">
+            <svg class="size-4 text-slate-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.674C19.41 13.84 18 12.48 18 8A6 6 0 0 0 6 8c0 4.48-1.41 5.84-2.738 7.326"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/><path d="M22 8c0-2.3-.8-4.3-2-6"/></svg>
+            <span class="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-mono font-bold text-white">2</span>
+          </button>
+        </div>
+
+        <!-- User Dropdown Menu -->
+        <button type="button" class="flex items-center gap-2.5 rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs hover:bg-slate-800 min-h-[40px]">
+          <div class="flex size-7 items-center justify-center rounded-full bg-cyan-950 text-cyan-400 font-bold text-xs border border-cyan-800">
+            JY
+          </div>
+          <div class="text-left hidden sm:block">
+            <p class="font-medium text-slate-200 leading-tight">Jyye yee</p>
+            <p class="text-[10px] text-cyan-400 leading-none font-mono">ADMIN / ARBITRATOR</p>
+          </div>
+          <svg class="size-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+    </header>
+  
+      <div class="flex flex-1 min-h-0 overflow-hidden">
+        
+    <aside class="hidden lg:flex relative flex-col border-r border-slate-800 bg-[#0B0F17] w-64 select-none z-30 shrink-0">
+      <div class="flex h-16 items-center justify-between border-b border-slate-800 px-4">
+        <span class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
+          Admin Portal
+        </span>
+        <button type="button" class="size-8 flex items-center justify-center rounded text-slate-400 hover:bg-slate-800 hover:text-white">
+          <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 space-y-1.5 p-3 overflow-y-auto scrollbar-none">
+        
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Tổng quan điều hành</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Phân tích & Thống kê</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Kèo & Escrow State</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 bg-cyan-950/40 text-cyan-400 border border-cyan-800/50 font-semibold shadow-[0_0_12px_rgba(6,182,212,0.12)]">
+        <span class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-cyan-400 shadow-[0_0_8px_#06B6D4]"></span>
+        <svg class="size-5 text-cyan-400 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Hàng đợi tranh chấp</span>
+        <span class="rounded bg-amber-950/80 text-amber-300 border border-amber-800/50 text-[10px] py-0.5 px-1.5 font-mono">AI Queue</span>
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Kiểm định AI Lab</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.22 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.46 12H2"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">5 Trụ cột Hệ thống</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Người dùng & RBAC</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-.8"/><path d="m16.8 12.3-.4-.8"/><path d="m14.3 16.6.8-.4"/><path d="m20.7 13.8.8-.4"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Hồ sơ & Bảo mật</span>
+        
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.674C19.41 13.84 18 12.48 18 8A6 6 0 0 0 6 8c0 4.48-1.41 5.84-2.738 7.326"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/><path d="M22 8c0-2.3-.8-4.3-2-6"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Cảnh báo Khẩn cấp</span>
+        <span class="rounded bg-amber-950/80 text-amber-300 border border-amber-800/50 text-[10px] py-0.5 px-1.5 font-mono">2FA</span>
+      </a>
+    
+      <a href="#" class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-11 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+        
+        <svg class="size-5 text-slate-400 group-hover:text-slate-200 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+        <span class="flex-1 truncate tracking-tight text-xs font-sans">Super API Explorer</span>
+        
+      </a>
+    
+      </nav>
+
+      <div class="border-t border-slate-800 p-3 bg-[#080C14]/50">
+        <div class="rounded-lg border border-slate-800/80 bg-[#0B0F17] p-2.5 text-[11px] text-slate-400">
+          <div class="flex items-center justify-between text-slate-300">
+            <span class="font-semibold">TrustPassz Core</span>
+            <span class="font-mono text-emerald-400 text-[10px]">v1.2.0</span>
+          </div>
+          <p class="mt-1 text-[10px] text-slate-500 font-mono">
+            Base Sepolia & AI Arbitrator
+          </p>
+        </div>
+      </div>
+    </aside>
+  
+        <main class="flex-1 p-6 lg:p-8">
+          <div class="mx-auto max-w-7xl space-y-6">
+            
+    <div class="space-y-6 pb-12">
+      <!-- Breadcrumb & Header -->
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center space-x-3">
+          <a href="#" class="rounded-lg border border-slate-800 bg-[#0F172A] hover:bg-slate-800 text-slate-300 text-xs px-3 py-2 flex items-center gap-1.5 font-mono">
+            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <span>Trở về Hàng đợi</span>
+          </a>
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono flex items-center gap-2">
+              <span>Hồ Sơ Phân Xử:</span>
+              <span class="text-cyan-400 font-mono text-sm">DISP-8842-A1</span>
+            </h2>
+            <p class="text-xs text-slate-400">
+              Kèo Escrow: <strong class="text-slate-200">Source Code Web3 Trading Bot v2.4 (Python & Solana)</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <span class="rounded border border-cyan-800 bg-cyan-950/40 text-cyan-400 font-mono text-xs px-2.5 py-1">Trạng thái Deal: DISPUTED</span>
+          <span class="rounded border border-amber-800 bg-amber-950/40 text-amber-400 font-mono text-xs px-2.5 py-1">Dispute: ADMIN_ESCALATED</span>
+        </div>
+      </div>
+
+      <!-- Escrow Dispute Overview Banner -->
+      <div class="flex flex-col sm:flex-row items-center justify-between rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-md gap-3">
+        <div class="flex items-center space-x-2 text-xs text-slate-300">
+          <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+          <span class="font-semibold text-white">Quyền Phán Quyết Trọng Tài (Arbitrator Override):</span>
+          <span class="text-slate-400">
+            Số tiền ký quỹ: <strong class="text-cyan-400 font-mono">25,000,000 ₫ (≈ 0.294 ETH)</strong>
+          </span>
+        </div>
+        <div class="text-[11px] font-mono text-slate-400">
+          Người khiếu nại: <strong class="text-slate-200">Buyer (0x892a...4b12)</strong>
+        </div>
+      </div>
+
+      <!-- Module 1: AI Verdict Evaluation Card -->
+      <div class="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-lg space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center space-x-2.5">
+            <div class="flex size-8 items-center justify-center rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
+              <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-white flex items-center gap-1.5">
+                <span>Khung Đánh Giá AI Arbitrator (sVLM Engine)</span>
+                <svg class="size-3.5 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+              </h3>
+              <p class="text-[11px] text-slate-400">Model: Qwen2-VL-2B-Instruct • Outlines Structured Output Engine</p>
+            </div>
+          </div>
+          <span class="rounded border border-rose-800 text-rose-400 bg-rose-950/40 font-mono text-xs px-2.5 py-1">
+            Đề Xuất: Hoàn Tiền Cho Buyer (TRIGGER_REFUND)
+          </span>
+        </div>
+
+        <!-- Confidence Bar -->
+        <div class="space-y-1.5 rounded-lg border border-slate-800 bg-[#080C14] p-3 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-slate-300">Chỉ số độ tin cậy AI (Confidence Score):</span>
+            <span class="font-mono font-bold text-sm text-amber-400">74.0% (0.7400)</span>
+          </div>
+          <div class="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+            <div class="h-full rounded-full bg-amber-500" style="width: 74%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>0.00 (Không chắc chắn)</span>
+            <span class="text-slate-400 font-semibold">Ngưỡng chuẩn: 0.75</span>
+            <span>1.00 (Chắc chắn tuyệt đối)</span>
+          </div>
+          <div class="mt-2 flex items-center space-x-1.5 text-amber-400 text-[11px] bg-amber-950/40 p-2 rounded border border-amber-800/40">
+            <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Cảnh báo: Confidence &lt; 0.75. Hệ thống đã tự động kích hoạt hàng đợi ESCALATE_TO_ADMIN.</span>
+          </div>
+        </div>
+
+        <!-- Reasoning -->
+        <div class="space-y-1.5 text-xs">
+          <span class="font-semibold text-slate-300">Tóm tắt giải trình suy luận (Reasoning Summary):</span>
+          <div class="rounded-lg border border-slate-800 bg-[#080C14] p-3 text-slate-300 leading-relaxed font-sans">
+            AI sVLM Qwen2-VL phân tích ảnh chụp màn hình unbox và phát hiện crash nghiêm trọng <code>TypeError: Cannot read properties of undefined (reading 'privateKey')</code> tại entrypoint. Sản phẩm không thể khởi động theo đúng cam kết trong cam kết kỹ thuật của Seller.
+          </div>
+        </div>
+
+        <!-- Violated Rules -->
+        <div class="space-y-1.5 text-xs">
+          <span class="font-semibold text-slate-300">Danh sách điều khoản / kịch bản vi phạm phát hiện:</span>
+          <div class="space-y-1.5">
+            <div class="flex items-center space-x-2 rounded-md border border-rose-900/40 bg-rose-950/20 px-3 py-2 text-rose-300 text-xs">
+              <svg class="size-3.5 shrink-0 text-rose-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>R-01: Runtime Crash - Mã nguồn không thực thi được ở môi trường chuẩn Node 20</span>
+            </div>
+            <div class="flex items-center space-x-2 rounded-md border border-rose-900/40 bg-rose-950/20 px-3 py-2 text-rose-300 text-xs">
+              <svg class="size-3.5 shrink-0 text-rose-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>R-04: False Advertisement - Cam kết mã nguồn không lỗi nhưng có exception nghiêm trọng</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 2: Parallel Evidence Viewer (Side by Side) -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between rounded-xl border border-slate-800 bg-[#0F172A] p-3 text-xs">
+          <div class="flex items-center space-x-2">
+            <button type="button" class="px-3 py-1.5 rounded-lg border border-slate-800 bg-[#080C14] text-slate-300 flex items-center gap-1.5 font-mono">
+              <svg class="size-4 text-slate-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18.84 12.25 1.72-1.71a5 5 0 0 0-7.07-7.08l-1.72 1.71"/><path d="m5.16 11.75-1.72 1.71a5 5 0 0 0 7.07 7.08l1.72-1.71"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+              <span>Đồng bộ cuộn: TẮT</span>
+            </button>
+            <span class="rounded bg-amber-950 text-amber-300 border border-amber-800 text-[10px] px-2 py-0.5 font-mono">Phát hiện 2 trường PII nhạy cảm</span>
+          </div>
+          <button type="button" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-[#080C14] text-slate-300 flex items-center gap-1.5 font-mono">
+            <svg class="size-4 text-amber-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Mở khóa xem PII (Ghi log Audit)</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <!-- Left: Seller Commitment Column -->
+          <div class="rounded-xl border border-slate-800 bg-[#0F172A] p-4 space-y-3 flex flex-col h-115">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="font-bold text-white text-xs font-mono flex items-center gap-1.5">
+                <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></svg>
+                Cam Kết Ban Đầu Của Seller
+              </span>
+              <span class="rounded bg-cyan-950 text-cyan-300 border border-cyan-800/40 text-[10px] px-2 py-0.5 font-mono">Digital Vault</span>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
+              <div class="rounded-lg border border-slate-800 bg-[#080C14] p-3 space-y-2">
+                <span class="text-slate-400 block font-mono text-[11px]">Thông số kỹ thuật cam kết:</span>
+                <ul class="list-disc pl-4 space-y-1 text-slate-300 text-xs">
+                  <li>Hỗ trợ Node.js v20.x và Python 3.11</li>
+                  <li>Tự động thực thi smart swap qua Raydium & Orca</li>
+                  <li>Mã nguồn nguyên gốc 100% không lỗi compile/runtime</li>
+                </ul>
+              </div>
+              <div class="rounded-lg border border-slate-800 bg-[#080C14] p-3 space-y-1 font-mono text-[11px]">
+                <span class="text-slate-500 block">SHA-256 Checksum:</span>
+                <p class="text-cyan-400 break-all">a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Buyer Evidence Column -->
+          <div class="rounded-xl border border-slate-800 bg-[#0F172A] p-4 space-y-3 flex flex-col h-115">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="font-bold text-white text-xs font-mono flex items-center gap-1.5">
+                <svg class="size-4 text-amber-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                Bằng Chứng Khiếu Nại Của Buyer
+              </span>
+              <span class="rounded bg-rose-950 text-rose-300 border border-rose-800/40 text-[10px] px-2 py-0.5 font-mono">1 Ảnh + Stacktrace</span>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
+              <div class="rounded-lg border border-slate-800 bg-[#080C14] p-3 font-mono text-[11px] text-rose-300 space-y-1 overflow-x-auto">
+                <div class="text-slate-500">[14:22:01] Starting Escrow Service runner...</div>
+                <div class="text-slate-500">[14:22:02] Loaded configuration with JWT: eyJhb...[PII REDACTED]</div>
+                <div class="text-rose-400 font-bold">[FATAL] TypeError: Cannot read properties of undefined (reading 'privateKey')</div>
+                <div class="text-rose-400">    at EscrowService.init (dist/escrow.service.js:42:18)</div>
+                <div class="text-rose-400 font-bold">[FATAL] Server crashed during startup with exit code 1.</div>
+              </div>
+              <!-- Image evidence mockup with zoom trigger -->
+              <div class="rounded-lg border border-slate-800 bg-[#080C14] p-2 space-y-2">
+                <div class="relative h-36 bg-slate-950 rounded flex items-center justify-center border border-slate-800 overflow-hidden">
+                  <div class="text-center font-mono text-[11px] text-slate-400">
+                    <span class="text-rose-400 block font-bold">Screenshot: crash_terminal_output.png</span>
+                    <span class="text-[10px] text-slate-500">Kích thước: 1920x1080 (384 KB)</span>
+                  </div>
+                  <button type="button" class="absolute bottom-2 right-2 px-2.5 py-1 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 rounded text-[11px] font-mono flex items-center gap-1">
+                    <svg class="size-3 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></svg>
+                    <span>Soi Canvas 3x</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 3: Dispute Audit Notes & Override Actions -->
+      <div class="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-lg space-y-4">
+        <h3 class="text-sm font-semibold text-white">Biên Bản Thẩm Định & Phán Quyết Trọng Tài</h3>
+        <div class="space-y-1.5">
+          <label class="text-xs font-medium text-slate-300">Biên bản giải trình kiểm toán (Bắt buộc):</label>
+          <textarea rows="3" class="w-full rounded-md border border-slate-800 bg-[#080C14] p-3 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500" placeholder="Nhập lý do thẩm định, cơ sở điều khoản vi phạm và chỉ định hướng giải ngân...">Xác nhận mã nguồn của Người bán bị crash fatal exception khi khởi động (vi phạm R-01). Chấp thuận hoàn lại 100% tiền ký quỹ cho Người mua.</textarea>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button type="button" class="bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs px-5 py-2.5 rounded-lg flex items-center gap-1.5 shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            <span>Duyệt Hoàn Tiền Cho Buyer (Refund Escrow)</span>
+          </button>
+          <button type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-5 py-2.5 rounded-lg flex items-center gap-1.5">
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Duyệt Giải Ngân Cho Seller (Settle Escrow)</span>
+          </button>
+          <button type="button" class="border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5">
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span>Yêu Cầu Bổ Sung Chứng Cứ (24h)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Module 4: Oracle Protocol Info -->
+      <div class="rounded-xl border border-slate-800 bg-[#0F172A] p-4 text-xs space-y-2">
+        <div class="flex items-center justify-between text-slate-300">
+          <span class="font-semibold text-white flex items-center gap-1.5 font-mono">
+            <svg class="size-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>
+            Oracle Relayer Signing Protocol (Base Sepolia)
+          </span>
+          <span class="font-mono text-emerald-400 text-[11px]">Ready to Broadcast</span>
+        </div>
+        <p class="text-slate-400 text-[11px] leading-relaxed">
+          Mọi quyết định phán quyết giải ngân hoặc hoàn tiền sẽ được ký trực tiếp bởi tài khoản Relayer ủy quyền
+          (<code class="text-cyan-300 font-mono">0x70997970C51812dc3A010C7d01b50e0d17dc79C8</code>) gọi hàm
+          <code class="text-cyan-300 font-mono">DigitalEscrow.resolveDispute(dealId, isRefund)</code>.
+        </p>
+      </div>
+    </div>
+  
+          </div>
+        </main>
+      </div>
+      
+    <footer class="border-t border-slate-800 bg-[#080C14] px-4 py-3 text-xs text-slate-500 shrink-0">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="flex items-center space-x-2">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+          <span>TrustPassz Autonomous AI Escrow Management System</span>
+          <span class="text-slate-700">•</span>
+          <span class="font-mono text-slate-400">Base Sepolia: 0x88a82FE4...ec15</span>
+        </div>
+        <div class="flex items-center space-x-4 text-slate-400 font-mono text-[11px]">
+          <span>Port: 5100</span>
+          <span>API: :3001</span>
+          <span>sVLM: :3100</span>
+          <span>Build: 2026.09-v1.2</span>
+        </div>
+      </div>
+    </footer>
+  
+    </div>
+
+    <!-- Active Modal Layer -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+      
+    <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-[#0B0F17] shadow-2xl overflow-hidden flex flex-col h-[680px]">
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 px-6 py-3.5 bg-[#0F172A]">
+        <div class="flex items-center space-x-3">
+          <span class="size-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          <div>
+            <h3 class="text-xs font-bold text-white font-mono">Bằng Chứng: crash_terminal_output.png</h3>
+            <p class="text-[10px] text-slate-400 font-mono">Độ phóng đại hiện tại: <strong class="text-cyan-400 font-bold">3.00x</strong></p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button type="button" class="p-1.5 text-slate-400 hover:text-white"><svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg></button>
+          <button type="button" class="p-1.5 text-slate-400 hover:text-rose-400"><svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Canvas Area at 3x scale -->
+      <div class="flex-1 relative bg-[#05070D] overflow-hidden flex items-center justify-center p-8">
+        <!-- SVG Grid Background -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06B6D4 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+        <!-- Zoomed Simulated Image -->
+        <div class="relative scale-125 border border-cyan-500/40 rounded-lg p-6 bg-[#080C14] text-rose-300 font-mono text-xs space-y-1.5 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+          <div class="text-slate-500">[14:22:01] Starting Escrow Service runner...</div>
+          <div class="text-slate-500">[14:22:02] Loaded configuration with JWT: eyJhbGciOi...</div>
+          <div class="text-rose-400 font-bold">[FATAL] TypeError: Cannot read properties of undefined (reading 'privateKey')</div>
+          <div class="text-rose-400">    at EscrowService.init (dist/escrow.service.js:42:18)</div>
+          <div class="text-rose-400 font-bold">[FATAL] Server crashed during startup with exit code 1.</div>
+        </div>
+
+        <div class="absolute bottom-4 left-6 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-[10px] font-mono text-slate-400">
+          Giữ chuột trái để kéo rê (Pan) • Con lăn để thu/phóng
+        </div>
+      </div>
+
+      <!-- Bottom Inspector Toolbar -->
+      <div class="border-t border-slate-800 bg-[#0F172A] p-4 px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center text-xs">
+          <!-- Zoom Controls -->
+          <div class="flex items-center space-x-2 font-mono">
+            <span class="text-slate-400">Zoom:</span>
+            <button type="button" class="size-8 rounded border border-slate-800 bg-[#080C14] flex items-center justify-center text-slate-300">-</button>
+            <button type="button" class="px-2 py-1 rounded border border-slate-800 bg-[#080C14] text-slate-400">1x</button>
+            <button type="button" class="px-2 py-1 rounded border border-slate-800 bg-[#080C14] text-slate-400">2x</button>
+            <button type="button" class="px-2 py-1 rounded border border-cyan-500 bg-cyan-950/60 text-cyan-300 font-bold">3x</button>
+            <button type="button" class="px-2 py-1 rounded border border-slate-800 bg-[#080C14] text-slate-400">5x</button>
+            <button type="button" class="size-8 rounded border border-slate-800 bg-[#080C14] flex items-center justify-center text-slate-300">+</button>
+          </div>
+
+          <!-- Brightness & Contrast -->
+          <div class="flex items-center space-x-4">
+            <div class="flex-1 space-y-1">
+              <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                <span>Độ sáng</span>
+                <span>100%</span>
+              </div>
+              <input type="range" min="50" max="150" value="100" class="w-full accent-amber-400">
+            </div>
+            <div class="flex-1 space-y-1">
+              <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                <span>Tương phản</span>
+                <span>125%</span>
+              </div>
+              <input type="range" min="50" max="200" value="125" class="w-full accent-cyan-400">
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="button" class="px-4 py-2 rounded-lg border border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-300 font-mono text-xs flex items-center gap-1.5">
+              <svg class="size-3.5 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Reset View</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    </div>
+  </div>
+</body>
+</html>

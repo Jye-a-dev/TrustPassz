@@ -28,7 +28,7 @@ Cấu hình tại: **GitHub Repository → Settings → Secrets and variables �
 | Tên Secret | Giá trị mẫu | Mục đích |
 | :--- | :--- | :--- |
 | `BASE_SEPOLIA_RPC_URL` | `https://sepolia.base.org` | RPC endpoint Base Sepolia (hoặc Alchemy/Infura) |
-| `ORACLE_RELAYER_ADDRESS` | `0x165B47291B87569b91696DCE6f1207eE15C9f783` | Địa chỉ ví EVM Relayer trên Base Sepolia |
+| `ORACLE_RELAYER_ADDRESS` | `0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15` | Địa chỉ ví EVM Relayer trên Base Sepolia |
 | `SOLANA_RPC_URL` | `https://api.devnet.solana.com` | RPC Solana Devnet |
 | `SOLANA_RELAYER_PUBLIC_KEY`| `F9zXgYmojDjHnjiRCtNLb46ruUorjrWeEDBxF2dFkJjn` | Public key ví Solana Relayer |
 | `ORACLE_ALERT_THRESHOLD_ETH`| `0.02` | Ngưỡng cảnh báo số dư Base Sepolia (ETH) |
@@ -54,7 +54,7 @@ DATABASE_URL="postgresql://user:pass@ep-cool-pooler.us-east-2.aws.neon.tech/trus
 DIRECT_URL="postgresql://user:pass@ep-cool.us-east-2.aws.neon.tech/trustpassz?sslmode=require"
 JWT_SECRET="your-high-entropy-jwt-secret-at-least-32-chars"
 BASE_SEPOLIA_RPC_URL="https://sepolia.base.org"
-ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 ORACLE_RELAYER_PRIVATE_KEY="0x..." # Khóa ký Oracle Relayer
 SOLANA_NETWORK="devnet"
 SOLANA_RPC_URL="https://api.devnet.solana.com"
@@ -77,7 +77,7 @@ NEXT_PUBLIC_ENVIRONMENT="pre-release" # Bắt buộc để hiển thị banner [
 NEXT_PUBLIC_API_URL="https://trustpassz-server.onrender.com"
 NEXT_PUBLIC_CHAIN_ID="84532"
 NEXT_PUBLIC_RPC_URL="https://sepolia.base.org"
-NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x165B47291B87569b91696DCE6f1207eE15C9f783"
+NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS="0x88a82fe4f3be44bb493fa6e7efd68313e7c2ec15"
 NEXT_PUBLIC_SOLANA_NETWORK="devnet"
 NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
 ```

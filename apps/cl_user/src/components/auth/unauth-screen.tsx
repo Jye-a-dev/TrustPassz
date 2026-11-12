@@ -66,43 +66,39 @@ export function UnauthScreen({
   };
 
   return (
-    <div className="relative flex min-h-[75vh] w-full flex-col items-center justify-center p-6 text-center bg-[#0B0F17] text-slate-100 overflow-hidden">
-      {/* Amber Ambient Radial Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-80 sm:size-96 rounded-full bg-amber-500/10 blur-[110px] pointer-events-none" />
-
-      {/* Cyber-Escrow Badge */}
+    <div className="relative flex min-h-[75vh] w-full flex-col items-center justify-center p-6 text-center bg-[#FAFAFB] text-slate-800 overflow-hidden">
+      {/* Badge */}
       <div className="relative z-10 mb-6">
         <Badge
           variant="outline"
-          className="border-amber-500/40 bg-amber-950/40 text-amber-300 px-3.5 py-1 text-xs font-semibold gap-1.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+          className="border-amber-300 bg-amber-50 text-amber-800 px-3.5 py-1 text-xs font-semibold gap-1.5 rounded-full shadow-2xs"
         >
-          <Lock className="size-3.5 text-amber-400" />
-          <span>YÊU CẦU ĐĂNG NHẬP AN TOÀN</span>
+          <Lock className="size-3.5 text-amber-600" />
+          <span>YÊU CẦU ĐĂNG NHẬP</span>
         </Badge>
       </div>
 
-      {/* Glowing Amber Shield Icon */}
-      <div className="relative z-10 mb-6 flex size-20 sm:size-24 items-center justify-center rounded-2xl border border-amber-500/40 bg-amber-950/30 text-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.25)]">
-        <span className="absolute -inset-1 rounded-2xl border border-amber-500/25 animate-pulse pointer-events-none" />
-        <ShieldAlert className="size-10 sm:size-12 text-amber-400 drop-shadow-[0_0_12px_rgba(245,158,11,0.4)]" />
+      {/* Amber Shield Icon */}
+      <div className="relative z-10 mb-6 flex size-20 sm:size-24 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600 shadow-sm">
+        <ShieldAlert className="size-10 sm:size-12 text-amber-600" />
       </div>
 
       {/* Typography */}
       <div className="relative z-10 max-w-md space-y-3">
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
           {title}
         </h2>
-        <p className="text-sm sm:text-base text-slate-300 leading-relaxed text-balance">
+        <p className="text-sm sm:text-base text-slate-600 leading-relaxed text-balance">
           {description}
         </p>
       </div>
 
-      {/* Action Buttons with touch targets min-height >= 48px */}
+      {/* Action Buttons with touch targets min-height >= 44px */}
       <div className="relative z-10 mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
         <Button
           asChild
           size="lg"
-          className="w-full sm:w-auto min-h-12 px-8 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow-[0_0_25px_rgba(245,158,11,0.35)] transition-all duration-200 border-0 cursor-pointer"
+          className="w-full sm:w-auto min-h-12 px-8 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-sm transition-all duration-200 border border-rose-600 cursor-pointer active:translate-y-0.5"
         >
           <a
             href={loginHref}
@@ -119,24 +115,24 @@ export function UnauthScreen({
           asChild
           variant="outline"
           size="lg"
-          className="w-full sm:w-auto min-h-12 px-7 rounded-xl border-slate-800 bg-slate-900/80 hover:bg-slate-800 hover:border-slate-700 text-slate-200 hover:text-white transition-all duration-200 font-medium cursor-pointer"
+          className="w-full sm:w-auto min-h-12 px-7 rounded-xl border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-all duration-200 font-semibold cursor-pointer shadow-sm active:translate-y-0.5"
         >
           <Link
             href="/"
             onClick={handleHome}
             className="flex items-center justify-center gap-2 w-full h-full"
           >
-            <Home className="size-4 text-slate-400" />
-            <span>Trở về Trang chủ</span>
+            <Home className="size-4 text-slate-500" />
+            <span>Trang chủ</span>
           </Link>
         </Button>
 
         {customAction}
       </div>
 
-      {/* Protocol Telemetry Footer */}
-      <div className="relative z-10 mt-10 font-mono text-[11px] text-slate-500 tracking-wider">
-        HỆ THỐNG BẢO VỆ TỰ ĐỘNG · BẢO MẬT TÀI KHOẢN
+      {/* Footer */}
+      <div className="relative z-10 mt-10 font-mono text-[11px] text-slate-400 tracking-wider uppercase">
+        TrustPassz · Sàn Ký Quỹ Giao Dịch An Toàn
       </div>
     </div>
   );

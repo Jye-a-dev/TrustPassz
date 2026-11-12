@@ -2,16 +2,12 @@
 
 import * as React from 'react';
 import {
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
   Coins,
   Fuel,
   KeyRound,
   Loader2,
   Lock,
   ShieldAlert,
-  Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +19,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/api-client';
 import { useAdminAuthStore } from '@/lib/admin-auth-store';
 import { useAuditLogger } from '@/hooks/use-audit-logger';
@@ -132,66 +127,65 @@ export function TwoFactorOverrideModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="border-slate-800 bg-[#0B0F17] text-slate-100 max-w-lg shadow-2xl">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-lg border ${
-                isSettle
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                  : 'border-rose-500/30 bg-rose-500/10 text-rose-400'
-              }`}
-            >
-              <ShieldAlert className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-base font-bold font-mono text-slate-100">
-                {isSettle
-                  ? 'Xác Thực 2FA: Ghi Đè Giải Ngân Cho Seller'
-                  : 'Xác Thực 2FA: Ghi Đè Hoàn Tiền Cho Buyer'}
+      <DialogContent className="border-slate-200 bg-white text-slate-900 max-w-lg shadow-xl rounded-2xl p-6 text-xs">
+        <DialogHeader className="border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className={`h-5 w-5 ${isSettle ? 'text-emerald-600' : 'text-rose-600'}`} />
+              <DialogTitle className="text-base font-bold text-slate-900">
+                Quy Trình Phán Xử 2 Bước (Sovereign Override)
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-400">
-                Lệnh can thiệp on-chain được bảo vệ bởi xác thực đa lớp và lưu vết kiểm toán bất biến.
-              </DialogDescription>
             </div>
+            <span className="text-xs font-semibold text-slate-500">Bước 2/2: Ký On-Chain</span>
           </div>
+          <DialogDescription className="text-xs text-slate-500 pt-0.5">
+            {isSettle
+              ? 'Xác thực 2FA: Ghi đè giải ngân cho Bên Bán (Seller)'
+              : 'Xác thực 2FA: Ghi đè hoàn tiền cho Bên Mua (Buyer)'}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2 text-xs">
+        {/* Stepper bar */}
+        <div className="flex items-center gap-2 my-1">
+          <div className="flex-1 h-1 rounded bg-slate-900"></div>
+          <div className="flex-1 h-1 rounded bg-slate-900"></div>
+        </div>
+
+        <div className="space-y-4 py-1 text-xs">
           {/* Impact Summary Card */}
-          <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-              <span className="font-mono text-slate-400">Kèo Escrow:</span>
-              <span className="font-mono font-semibold text-slate-200">
-                {deal.title || `Deal #${deal.id.slice(0, 8)}`}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2.5 font-mono">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200/60 font-sans">
+              <span className="text-slate-500 font-medium">Quyết định phán xử:</span>
+              <span className={`font-bold ${isSettle ? 'text-emerald-700' : 'text-rose-700'}`}>
+                {isSettle ? 'APPROVE_PAYOUT (Giải ngân Seller)' : 'TRIGGER_REFUND (Hoàn 100% Buyer)'}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="flex items-center gap-2">
-                <Coins className="h-4 w-4 text-emerald-400 shrink-0" />
+                <Coins className="h-4 w-4 text-emerald-600 shrink-0" />
                 <div>
-                  <div className="text-[10px] text-slate-400 uppercase font-mono">Số tiền ký quỹ</div>
-                  <div className="font-mono font-bold text-slate-100 text-sm">
-                    {deal.amount} {deal.currency || 'SOL'}
+                  <div className="text-[10px] text-slate-500 uppercase font-sans">Số tiền giải phóng</div>
+                  <div className="font-mono font-bold text-slate-900 text-sm tabular-nums">
+                    {Number(deal.amount).toLocaleString('vi-VN')} {deal.currency || 'VND'}
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Fuel className="h-4 w-4 text-cyan-400 shrink-0" />
+                <Fuel className="h-4 w-4 text-indigo-600 shrink-0" />
                 <div>
-                  <div className="text-[10px] text-slate-400 uppercase font-mono">Gas On-chain</div>
-                  <div className="font-mono text-cyan-400 text-xs">~0.000005 SOL (Relayer)</div>
+                  <div className="text-[10px] text-slate-500 uppercase font-sans">Phí Gas Relayer</div>
+                  <div className="font-mono text-indigo-700 text-xs">~0.000005 SOL (Tự động)</div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-800/80">
-              <div className="text-[10px] text-slate-400 uppercase font-mono mb-1">
-                Địa chỉ ví nhận tiền ({recipientLabel}):
+            <div className="pt-2 border-t border-slate-200/60">
+              <div className="text-[10px] text-slate-500 font-sans font-medium mb-1">
+                Ví thụ hưởng ({recipientLabel}):
               </div>
-              <div className="font-mono text-xs text-cyan-300 break-all p-2 rounded bg-slate-900 border border-slate-800">
+              <div className="font-mono text-[11px] text-slate-800 break-all p-2 rounded-lg bg-white border border-slate-200 select-all">
                 {recipientWallet}
               </div>
             </div>
@@ -199,13 +193,13 @@ export function TwoFactorOverrideModal({
 
           {/* Form Fields */}
           <div className="space-y-3">
-            <div>
-              <label className="text-xs text-slate-300 font-mono flex items-center justify-between mb-1.5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <KeyRound className="h-3.5 w-3.5 text-amber-400" />
-                  Mã Xác Thực 2FA (PIN 6 Số Admin):
+                  <KeyRound className="h-3.5 w-3.5 text-slate-600" />
+                  Mã PIN 2FA khẩn cấp để ủy quyền Relayer:
                 </span>
-                <span className={isValidCode ? 'text-emerald-400' : 'text-slate-500'}>
+                <span className={`font-mono text-[11px] ${isValidCode ? 'text-emerald-600 font-bold' : 'text-slate-400'}`}>
                   {twoFactorCode.length}/6 số
                 </span>
               </label>
@@ -214,15 +208,15 @@ export function TwoFactorOverrideModal({
                 maxLength={6}
                 value={twoFactorCode}
                 onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="Nhập mã OTP/PIN 6 số..."
-                className="bg-slate-900 border-slate-800 text-center tracking-widest font-mono text-base min-h-[44px]"
+                placeholder="Nhập mã PIN 2FA 6 số..."
+                className="h-10 bg-white border-slate-200 text-center tracking-[0.3em] font-mono text-base font-bold text-slate-900 rounded-lg focus-visible:ring-slate-400"
               />
             </div>
 
-            <div>
-              <label className="text-xs text-slate-300 font-mono flex items-center justify-between mb-1.5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
                 <span>Ghi chú kiểm toán can thiệp (Audit Reason):</span>
-                <span className={isValidReason ? 'text-emerald-400' : 'text-amber-400'}>
+                <span className={`font-mono text-[11px] ${isValidReason ? 'text-emerald-600 font-bold' : 'text-amber-600'}`}>
                   {auditReason.trim().length}/20 ký tự tối thiểu
                 </span>
               </label>
@@ -230,34 +224,32 @@ export function TwoFactorOverrideModal({
                 value={auditReason}
                 onChange={(e) => setAuditReason(e.target.value)}
                 rows={3}
-                placeholder="Nêu rõ căn cứ bằng chứng, báo cáo AI hoặc đối soát khiến trọng tài phải ghi đè kết quả..."
-                className="w-full rounded-md border border-slate-800 bg-slate-900 p-2.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+                placeholder="Nêu rõ căn cứ bằng chứng, biên bản kiểm toán hoặc đối soát khiến trọng tài phải ghi đè kết quả..."
+                className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 leading-relaxed"
               />
             </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 pt-2 border-t border-slate-100">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="border-slate-800 min-h-[44px] text-xs"
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
           >
-            Hủy Bỏ
+            Quay lại
           </Button>
 
           <Button
             type="button"
-            variant={isSettle ? 'default' : 'destructive'}
-            size="sm"
             disabled={isSubmitting || !isValidCode || !isValidReason}
             onClick={handleExecuteOverride}
-            className={`min-h-[44px] text-xs gap-1.5 ${
+            className={`h-10 px-4 rounded-lg text-xs font-medium text-white gap-1.5 shadow-xs ${
               isSettle
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                : 'bg-rose-600 hover:bg-rose-500 text-white'
+                ? 'bg-slate-900 hover:bg-slate-800'
+                : 'bg-rose-600 hover:bg-rose-500'
             }`}
           >
             {isSubmitting ? (
@@ -267,10 +259,8 @@ export function TwoFactorOverrideModal({
             )}
             <span>
               {isSubmitting
-                ? 'Đang Ký Transaction...'
-                : isSettle
-                ? 'Kích Hoạt Giải Ngân On-Chain'
-                : 'Kích Hoạt Hoàn Tiền On-Chain'}
+                ? 'Đang Ký Broadcast...'
+                : 'Ký Phán Quyết & Broadcast'}
             </span>
           </Button>
         </DialogFooter>
@@ -278,4 +268,3 @@ export function TwoFactorOverrideModal({
     </Dialog>
   );
 }
-

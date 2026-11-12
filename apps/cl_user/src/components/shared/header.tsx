@@ -4,13 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import { KeyRound } from "lucide-react";
+import { KeyRound, ShoppingBag, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { SubNavbar } from "@/components/layout/sub-navbar";
+import { NotificationCenter } from "@/components/layout/notification-center";
 import { useAuthStore } from "@/lib/auth-store";
 import { apiClient } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase-client";
-import { HeaderNavLinks } from "./header-nav-links";
 import { HeaderUserMenu } from "./header-user-menu";
 import { HeaderMobileDrawer } from "./header-mobile-drawer";
 
@@ -121,85 +122,117 @@ export function Header() {
     : "0x8B...3a29";
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/85 backdrop-blur-md transition-colors duration-150">
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Logo & Desktop Nav Links */}
-        <div className="flex items-center gap-3 lg:gap-6 shrink-0">
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500/10 dark:from-emerald-500/20 via-cyan-500/10 dark:via-cyan-500/20 to-emerald-500/5 dark:to-emerald-500/10 border border-emerald-500/30 dark:border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] dark:shadow-[0_0_15px_rgba(16,185,129,0.25)] group-hover:border-cyan-500/60 transition-all shrink-0 p-1">
-              <Image src="/logo.png" alt="TrustPassz" width={28} height={28} priority className="size-7 object-contain" />
-            </div>
-            <div className="flex flex-col shrink-0">
-              <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors whitespace-nowrap">
-                TrustPassz
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400/90 leading-none whitespace-nowrap">
-                Bảo Vệ Giao Dịch An Toàn
-              </span>
-            </div>
-          </Link>
+    <header className="sticky top-0 z-40 w-full flex flex-col">
+      {/* Tầng 1 - Top Navbar */}
+      <div className="w-full bg-canvas/95 backdrop-blur-md border-b border-subtle shadow-xs transition-colors duration-150">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-3 lg:gap-6">
+            {/* Left: Brand Logo & Category Shortcut */}
+            <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+              <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-brand-pink-tint border border-brand-pink/30 flex items-center justify-center text-brand-pink shadow-sm group-hover:scale-105 transition-transform p-1">
+                  <Image src="/logo.png" alt="TrustPassz" width={28} height={28} priority className="size-6 object-contain" />
+                </div>
+                <div className="flex flex-col shrink-0">
+                  <span className="text-lg font-bold text-primary tracking-tight leading-none group-hover:text-brand-pink transition-colors">
+                    TrustPassz
+                  </span>
+                  <span className="text-[10px] text-muted font-medium tracking-wide mt-0.5">
+                    SÀN KÝ QUỸ AN TOÀN
+                  </span>
+                </div>
+              </Link>
 
-          <HeaderNavLinks isAuth={isAuth} pathname={pathname} />
-        </div>
-
-        {/* Right Action Cluster */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Network Badge: Automated Protection */}
-
-          {isAuth ? (
-            <HeaderUserMenu
-              user={user}
-              displayName={displayName}
-              userInitials={userInitials}
-              formattedWallet={formattedWallet}
-              onLogout={handleLogout}
-              lockedBalanceVND={lockedBalanceVND}
-            />
-          ) : (
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="h-9 px-3 sm:px-3.5 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-cyan-500/40 text-slate-700 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white text-xs font-semibold gap-1.5 cursor-pointer"
+              <Link
+                href="/explore"
+                className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-secondary bg-surface hover:bg-input-bg border border-strong hover:border-brand-pink/50 shadow-sm active:translate-y-0.5 transition-all shrink-0"
               >
-                <Link href="/login">
-                  <KeyRound className="size-3.5 text-cyan-600 dark:text-cyan-400" />
-                  <span>Đăng nhập</span>
-                </Link>
-              </Button>
-
-              <Button
-                asChild
-                size="sm"
-                className="h-9 px-3 sm:px-3.5 rounded-xl bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs shadow-[0_0_15px_rgba(16,185,129,0.25)] border-0 cursor-pointer"
-              >
-                <Link href="/register">
-                  <span>Đăng ký</span>
-                </Link>
-              </Button>
+                <span>Danh mục</span>
+              </Link>
             </div>
-          )}
 
-          {/* Theme Toggle Button */}
-          <div className="flex items-center">
-            <ThemeToggle />
+            {/* Right: User Actions Cluster */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {isAuth ? (
+                <>
+                  <Link
+                    href="/user/orders"
+                    className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-strong bg-surface hover:bg-input-bg text-secondary hover:text-primary text-xs font-semibold shadow-sm active:translate-y-0.5 transition-all shrink-0"
+                    title="Quản lý đơn hàng"
+                  >
+                    <ShoppingBag className="size-4 text-muted" />
+                    <span>Đơn hàng</span>
+                  </Link>
+
+                  <Link
+                    href="/user/deals/create"
+                    className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold text-xs sm:text-sm border border-brand-pink shadow-sm active:translate-y-0.5 transition-all shrink-0"
+                  >
+                    <Plus className="size-4" />
+                    <span>Đăng bán / Tạo kèo</span>
+                  </Link>
+
+                  <NotificationCenter />
+
+                  <HeaderUserMenu
+                    user={user}
+                    displayName={displayName}
+                    userInitials={userInitials}
+                    formattedWallet={formattedWallet}
+                    onLogout={handleLogout}
+                    lockedBalanceVND={lockedBalanceVND}
+                  />
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="min-h-10 px-3.5 rounded-xl border border-strong bg-surface hover:bg-input-bg text-primary text-xs font-semibold gap-1.5 cursor-pointer shadow-sm"
+                  >
+                    <Link href="/login">
+                      <KeyRound className="size-3.5 text-muted" />
+                      <span>Đăng nhập</span>
+                    </Link>
+                  </Button>
+
+                  <Button
+                    asChild
+                    size="sm"
+                    className="min-h-10 px-4 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold text-xs border border-brand-pink shadow-sm cursor-pointer"
+                  >
+                    <Link href="/register">
+                      <span>Đăng ký</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
+
+              {/* Theme Toggle Button */}
+              <div className="hidden sm:flex items-center">
+                <ThemeToggle />
+              </div>
+
+              {/* Mobile Drawer */}
+              <HeaderMobileDrawer
+                isOpen={isOpen}
+                onOpenChange={setIsOpen}
+                isAuth={isAuth}
+                displayName={displayName}
+                userInitials={userInitials}
+                formattedWallet={formattedWallet}
+                pathname={pathname}
+                onLogout={handleLogout}
+                lockedBalanceVND={lockedBalanceVND}
+              />
+            </div>
           </div>
-
-          {/* Mobile Drawer */}
-          <HeaderMobileDrawer
-            isOpen={isOpen}
-            onOpenChange={setIsOpen}
-            isAuth={isAuth}
-            displayName={displayName}
-            userInitials={userInitials}
-            formattedWallet={formattedWallet}
-            pathname={pathname}
-            onLogout={handleLogout}
-            lockedBalanceVND={lockedBalanceVND}
-          />
         </div>
       </div>
+
+      {/* Tầng 2 - Sub-Navbar (Global Search Bar & Quick Categories) */}
+      <SubNavbar />
     </header>
   );
 }

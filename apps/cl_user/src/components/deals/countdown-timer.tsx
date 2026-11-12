@@ -119,10 +119,10 @@ export function CountdownTimer({
 
   // Dynamic color theme
   let statusTheme = {
-    badgeBg: "bg-emerald-950/60",
-    badgeBorder: "border-emerald-500/40",
-    text: "text-emerald-400",
-    glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)]",
+    badgeBg: "bg-emerald-50",
+    badgeBorder: "border-emerald-200",
+    text: "text-emerald-700",
+    glow: "shadow-2xs",
     progressBg: "bg-emerald-500",
     label: "Thời Gian Kiểm Tra Hàng An Toàn",
     icon: Clock,
@@ -130,30 +130,30 @@ export function CountdownTimer({
 
   if (time.isExpired) {
     statusTheme = {
-      badgeBg: "bg-slate-900",
-      badgeBorder: "border-slate-700",
-      text: "text-slate-400",
+      badgeBg: "bg-slate-100",
+      badgeBorder: "border-slate-200",
+      text: "text-slate-500",
       glow: "shadow-none",
-      progressBg: "bg-slate-600",
+      progressBg: "bg-slate-400",
       label: "Hết Hạn Kiểm Tra (Tự Động Chuyển Tiền)",
       icon: CheckCircle,
     };
   } else if (time.isCritical) {
     statusTheme = {
-      badgeBg: "bg-rose-950/70",
-      badgeBorder: "border-rose-500/60",
-      text: "text-rose-400",
-      glow: "shadow-[0_0_25px_rgba(244,63,94,0.3)] animate-pulse",
+      badgeBg: "bg-rose-50",
+      badgeBorder: "border-rose-300",
+      text: "text-rose-600",
+      glow: "shadow-xs animate-pulse",
       progressBg: "bg-rose-500",
       label: "Sắp Hết Giờ! Cần Xác Nhận Hoặc Khiếu Nại",
       icon: ShieldAlert,
     };
   } else if (time.isWarning) {
     statusTheme = {
-      badgeBg: "bg-amber-950/60",
-      badgeBorder: "border-amber-500/50",
-      text: "text-amber-400",
-      glow: "shadow-[0_0_20px_rgba(245,158,11,0.2)]",
+      badgeBg: "bg-amber-50",
+      badgeBorder: "border-amber-300",
+      text: "text-amber-700",
+      glow: "shadow-xs",
       progressBg: "bg-amber-500",
       label: "Cảnh Báo: Còn Dưới 2 Giờ",
       icon: AlertTriangle,
@@ -166,7 +166,7 @@ export function CountdownTimer({
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-2 rounded-lg border px-3 py-1 text-xs font-mono font-bold tracking-tight",
+          "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono font-bold tracking-tight shadow-2xs",
           statusTheme.badgeBg,
           statusTheme.badgeBorder,
           statusTheme.text,
@@ -187,10 +187,8 @@ export function CountdownTimer({
     return (
       <div
         className={cn(
-          "flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border p-3 sm:px-4",
-          statusTheme.badgeBg,
+          "flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border p-3.5 sm:px-4 bg-white shadow-xs",
           statusTheme.badgeBorder,
-          statusTheme.glow,
           className
         )}
       >
@@ -200,7 +198,7 @@ export function CountdownTimer({
             <span className={cn("text-xs font-bold block", statusTheme.text)}>
               {statusTheme.label}
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-slate-500">
               {time.isExpired
                 ? "Thời gian kiểm tra đã qua. Tiền sẽ được thanh toán tự động cho người bán."
                 : "Hết thời gian kiểm tra, hệ thống sẽ tự động chuyển tiền cho người bán."}
@@ -209,15 +207,15 @@ export function CountdownTimer({
         </div>
 
         <div className="flex items-center gap-1.5 font-mono text-xl font-black">
-          <span className={cn("px-2 py-1 rounded bg-black/40 border border-slate-800", statusTheme.text)}>
+          <span className={cn("px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200", statusTheme.text)}>
             {formatUnit(time.hours)}
           </span>
-          <span className="text-slate-500">:</span>
-          <span className={cn("px-2 py-1 rounded bg-black/40 border border-slate-800", statusTheme.text)}>
+          <span className="text-slate-400">:</span>
+          <span className={cn("px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200", statusTheme.text)}>
             {formatUnit(time.minutes)}
           </span>
-          <span className="text-slate-500">:</span>
-          <span className={cn("px-2 py-1 rounded bg-black/40 border border-slate-800", statusTheme.text)}>
+          <span className="text-slate-400">:</span>
+          <span className={cn("px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200", statusTheme.text)}>
             {formatUnit(time.seconds)}
           </span>
         </div>
@@ -228,9 +226,8 @@ export function CountdownTimer({
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-[#0F172A]/90 p-5 space-y-4 transition-all duration-300",
+        "rounded-2xl border bg-white p-5 space-y-4 shadow-sm",
         statusTheme.badgeBorder,
-        statusTheme.glow,
         className
       )}
     >
@@ -248,7 +245,7 @@ export function CountdownTimer({
             <StatusIcon className="size-4.5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
               Đồng Hồ Kiểm Tra Hàng
             </h4>
             <span className={cn("text-xs font-semibold", statusTheme.text)}>
@@ -257,14 +254,14 @@ export function CountdownTimer({
           </div>
         </div>
 
-        <span className="font-mono text-xs text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-          {Math.round(totalDurationSeconds / 3600)} Giờ Kiểm Tra
+        <span className="font-mono text-xs text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 font-bold">
+          {Math.round(totalDurationSeconds / 3600)} Giờ Dùng Thử
         </span>
       </div>
 
       {/* Main Countdown Digits Display */}
       <div className="grid grid-cols-3 gap-2.5 sm:gap-4 text-center">
-        <div className="rounded-xl border border-slate-800/80 bg-slate-950/80 p-3 sm:p-4 shadow-inner">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4 shadow-2xs">
           <div
             className={cn(
               "font-mono text-2xl sm:text-4xl font-black tracking-tight",
@@ -273,12 +270,12 @@ export function CountdownTimer({
           >
             {formatUnit(time.hours)}
           </div>
-          <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 block">
             Giờ
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-800/80 bg-slate-950/80 p-3 sm:p-4 shadow-inner">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4 shadow-2xs">
           <div
             className={cn(
               "font-mono text-2xl sm:text-4xl font-black tracking-tight",
@@ -287,12 +284,12 @@ export function CountdownTimer({
           >
             {formatUnit(time.minutes)}
           </div>
-          <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 block">
             Phút
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-800/80 bg-slate-950/80 p-3 sm:p-4 shadow-inner">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4 shadow-2xs">
           <div
             className={cn(
               "font-mono text-2xl sm:text-4xl font-black tracking-tight",
@@ -301,7 +298,7 @@ export function CountdownTimer({
           >
             {formatUnit(time.seconds)}
           </div>
-          <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">
+          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 block">
             Giây
           </span>
         </div>
@@ -309,11 +306,11 @@ export function CountdownTimer({
 
       {/* Time Elapsed Progress Bar */}
       <div className="space-y-1.5 pt-1">
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
-          <span>Tiến độ kiểm tra hàng</span>
-          <span className="font-mono">{Math.round(percentage)}% thời gian còn lại</span>
+        <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+          <span>Tiến độ đồng kiểm</span>
+          <span>{Math.round(percentage)}% thời gian còn lại</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/80">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 border border-slate-200">
           <div
             className={cn(
               "h-full transition-all duration-500 rounded-full",

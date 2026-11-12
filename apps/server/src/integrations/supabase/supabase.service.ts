@@ -204,4 +204,36 @@ export class SupabaseService implements OnModuleInit {
       );
     }
   }
+
+  /**
+   * Broadcasts realtime user activity notification to user_notifications:${userId}.
+   */
+  async broadcastUserNotification(
+    userId: string,
+    notification: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      if (!this.client || !userId) return;
+      const channelName = `user_notifications:${userId}`;
+      const channel = this.client.channel(channelName);
+      const event = 'notification:new';
+
+      if (typeof channel.httpSend === 'function') {
+        await channel.httpSend(event, notification);
+      } else {
+        await channel.send({
+          type: 'broadcast',
+          event,
+          payload: notification,
+        });
+      }
+
+      this.logger.debug(`Realtime notification broadcasted to ${channelName}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(
+        `Failed to broadcast user notification on Supabase (${userId}): ${msg}`,
+      );
+    }
+  }
 }

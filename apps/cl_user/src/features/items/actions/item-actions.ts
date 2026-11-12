@@ -78,7 +78,7 @@ export async function createItemAction(
   };
 
   globalItems.unshift(newItem);
-  revalidatePath("/dashboard");
+  revalidatePath("/user");
 
   return {
     success: true,

@@ -256,22 +256,22 @@ export default function DigitalVaultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-100 flex flex-col items-center justify-center gap-3 text-slate-400">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-        <p className="text-xs font-mono">Đang kết nối kho lưu trữ bảo mật...</p>
+      <div className="min-h-100 flex flex-col items-center justify-center gap-3 text-slate-600">
+        <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+        <p className="text-xs font-mono text-slate-500">Đang kết nối kho lưu trữ bảo chứng...</p>
       </div>
     );
   }
 
   if (error || !deal) {
     return (
-      <div className="max-w-md mx-auto my-12 rounded-2xl border border-rose-500/30 bg-slate-900/80 p-6 text-center space-y-4">
-        <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
-        <h2 className="text-lg font-bold text-white">Lỗi Truy Cập Kho Lưu Trữ</h2>
-        <p className="text-xs text-slate-400">
+      <div className="max-w-md mx-auto my-12 rounded-2xl border border-rose-200 bg-white p-6 text-center space-y-4 shadow-sm">
+        <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
+        <h2 className="text-lg font-bold text-slate-900">Lỗi Truy Cập Kho Lưu Trữ</h2>
+        <p className="text-xs text-slate-600">
           {error || `Giao dịch ${dealId} không tồn tại hoặc chưa khởi tạo kho lưu trữ.`}
         </p>
-        <Button asChild variant="outline" className="border-slate-700 text-xs">
+        <Button asChild variant="outline" className="border-slate-300 bg-white hover:bg-slate-50 text-slate-700 min-h-[44px] rounded-xl text-xs font-medium">
           <Link href="/user/deals">Quay lại danh sách giao dịch</Link>
         </Button>
       </div>

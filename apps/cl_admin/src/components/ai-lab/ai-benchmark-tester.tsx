@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
@@ -100,31 +100,29 @@ export function AiBenchmarkTester() {
   };
 
   return (
-    <Card className="border-slate-800 bg-[#0F172A] shadow-md">
-      <CardHeader className="border-b border-slate-800 pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
-              <Bot className="h-4 w-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm font-semibold text-white">
-                Test Benchmark Playground (POST /api/v1/inspect)
-              </CardTitle>
-              <p className="text-[11px] text-slate-400">
-                Thử nghiệm kiểm định suy luận trực tiếp với sVLM FastAPI endpoint
-              </p>
-            </div>
+    <Card className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div className="flex items-center space-x-2">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <Bot className="h-4 w-4" />
           </div>
-          <Badge variant="outline" className="border-cyan-800 text-cyan-400 font-mono text-[10px]">
-            Engine: Outlines FSM
-          </Badge>
+          <div>
+            <CardTitle className="text-xs font-bold text-slate-900">
+              Benchmark Playground (Kịch Bản Phán Xử)
+            </CardTitle>
+            <p className="text-[11px] text-slate-400">
+              Thử nghiệm kiểm định suy luận trực tiếp với sVLM FastAPI endpoint
+            </p>
+          </div>
         </div>
-      </CardHeader>
+        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 font-mono text-[10px]">
+          Engine: Outlines FSM
+        </Badge>
+      </div>
 
-      <CardContent className="space-y-4 pt-4 text-xs">
+      <div className="space-y-4 pt-1 text-xs">
         {/* Confidence Threshold Slider */}
-        <div className="rounded-lg border border-slate-800 bg-[#080C14] p-3 space-y-2">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 space-y-2">
           <Slider
             label="Ngưỡng Tin Cậy Tự Động Giải Quyết (ARBITRATION_CONFIDENCE_THRESHOLD)"
             min={0.5}
@@ -134,15 +132,15 @@ export function AiBenchmarkTester() {
             onChange={(val) => setThreshold(val)}
             unit=""
           />
-          <p className="text-[10px] text-slate-400">
-            Nếu điểm tin cậy của AI &lt; <strong className="text-cyan-400">{threshold}</strong>, giao dịch lập tức chuyển vào queue <code className="text-amber-400">ESCALATE_TO_ADMIN</code>.
+          <p className="text-[10px] text-slate-500">
+            Nếu điểm tin cậy của AI &lt; <strong className="text-slate-900">{threshold}</strong>, giao dịch lập tức chuyển vào queue <code className="text-amber-700 font-semibold">ESCALATE_TO_ADMIN</code>.
           </p>
         </div>
 
         {/* Sample selector & Execute button */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="flex-1 w-full">
-            <label className="text-[11px] font-semibold text-slate-300 block mb-1">
+          <div className="flex-1 w-full space-y-1">
+            <label className="text-[11px] font-semibold text-slate-700 block">
               Chọn mẫu dữ liệu kiểm thử (Test Sample):
             </label>
             <select
@@ -152,7 +150,7 @@ export function AiBenchmarkTester() {
                   e.target.value as 'SAMPLE_CRASH' | 'SAMPLE_VALID_KEY' | 'SAMPLE_UNCERTAIN'
                 )
               }
-              className="w-full h-9 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:border-slate-400 font-sans"
             >
               <option value="SAMPLE_CRASH">Mẫu 1: Crash Runtime StackTrace (Kỳ vọng: REFUND)</option>
               <option value="SAMPLE_VALID_KEY">Mẫu 2: License Key Hợp Lệ (Kỳ vọng: APPROVE)</option>
@@ -163,7 +161,7 @@ export function AiBenchmarkTester() {
           <Button
             onClick={handleRunBenchmark}
             disabled={isRunning}
-            className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs h-9 mt-auto gap-1.5 shrink-0"
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 mt-auto gap-1.5 shrink-0 shadow-2xs"
           >
             {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
             <span>Chạy Kiểm Định (Inspect)</span>
@@ -172,47 +170,51 @@ export function AiBenchmarkTester() {
 
         {/* Results output */}
         {result && (
-          <div className="space-y-3 rounded-lg border border-slate-800 bg-[#080C14] p-3.5 pt-3">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="font-semibold text-white flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3.5 pt-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="font-semibold text-slate-900 flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                 Kết Quả Phán Quyết Thực Nghiệm
               </span>
-              <span className="font-mono text-[10px] text-slate-400">Latency: {result.latency_ms}ms</span>
+              <span className="font-mono text-[10px] text-slate-500">Latency: {result.latency_ms}ms</span>
             </div>
 
-            <div className="flex flex-wrap gap-2 text-[11px]">
-              <span className="font-semibold text-slate-300">Phán quyết:</span>
-              <Badge
-                variant="outline"
-                className={`font-mono text-[10px] ${
+            <div className="flex flex-wrap gap-2 text-[11px] items-center">
+              <span className="font-semibold text-slate-700">Phán quyết:</span>
+              <span
+                className={`font-mono text-[10px] px-2 py-0.5 rounded-full border font-semibold ${
                   result.verdict === 'APPROVE_PAYOUT'
-                    ? 'border-emerald-800 text-emerald-400 bg-emerald-950/40'
+                    ? 'border-emerald-200 text-emerald-700 bg-emerald-50'
                     : result.verdict === 'TRIGGER_REFUND'
-                    ? 'border-rose-800 text-rose-400 bg-rose-950/40'
-                    : 'border-amber-800 text-amber-400 bg-amber-950/40'
+                    ? 'border-rose-200 text-rose-700 bg-rose-50'
+                    : 'border-amber-200 text-amber-700 bg-amber-50'
                 }`}
               >
                 {result.verdict}
-              </Badge>
-              <span className="text-slate-400 ml-2">Độ tin cậy:</span>
-              <span className="font-mono font-bold text-cyan-400">
+              </span>
+              <span className="text-slate-500 ml-2">Độ tin cậy:</span>
+              <span className="font-mono font-bold text-slate-900">
                 {(result.confidence_score * 100).toFixed(1)}%
               </span>
             </div>
 
-            <p className="text-slate-300 text-xs leading-relaxed">{result.reasoning_summary}</p>
+            <p className="text-slate-700 text-xs leading-relaxed">{result.reasoning_summary}</p>
 
             {/* Raw JSON */}
             <div className="space-y-1">
-              <span className="text-[10px] text-slate-500 font-mono">Raw JSON Response:</span>
-              <pre className="p-2.5 rounded bg-slate-950 text-slate-300 font-mono text-[10px] overflow-x-auto max-h-36 border border-slate-900">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-500 font-mono">Structured JSON Output (Outlines Schema):</span>
+                <span className="rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-1.5 py-0.5 font-mono">
+                  Valid Schema 200 OK
+                </span>
+              </div>
+              <pre className="p-3 rounded-lg bg-white text-slate-800 font-mono text-[11px] overflow-x-auto max-h-48 border border-slate-200 leading-relaxed">
                 {JSON.stringify(result.raw_response, null, 2)}
               </pre>
             </div>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }

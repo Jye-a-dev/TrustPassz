@@ -71,7 +71,7 @@ jobs:
           TARGET="${SERVER_URL}${PATH_SUFFIX}"
           echo "[Keep-Alive] Pinging Server: ${TARGET}"
           START=$(date +%s%3N)
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 45 "$TARGET" || echo "000")
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 10 "$TARGET" || echo "000")
           END=$(date +%s%3N)
           LATENCY=$((END - START))
 
@@ -89,7 +89,7 @@ jobs:
 
           echo "[Keep-Alive] Pinging AI Pipeline: ${TARGET}"
           START=$(date +%s%3N)
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 45 "$TARGET" || echo "000")
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 10 "$TARGET" || echo "000")
           END=$(date +%s%3N)
           LATENCY=$((END - START))
 
@@ -99,4 +99,3 @@ jobs:
           else
             echo "::warning ::AI Pipeline ping returned HTTP ${HTTP_CODE} after ${LATENCY}ms."
           fi
-

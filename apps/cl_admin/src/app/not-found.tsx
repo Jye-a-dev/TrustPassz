@@ -6,27 +6,17 @@ export const dynamic = "force-dynamic";
 
 export default function NotFound() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
-      <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-4">
-        <Compass className="size-8 animate-pulse text-primary" />
-      </div>
-      <span className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
-        404 - Not Found
-      </span>
-      <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
-        Không tìm thấy trang yêu cầu
-      </h1>
-      <p className="mt-3 text-sm text-slate-400 max-w-md">
-        Đường dẫn bạn đang truy cập không tồn tại hoặc đã được di dời sang vị trí khác.
+    <div className="min-h-[50vh] flex flex-col items-center justify-center text-center space-y-4 p-6">
+      <div className="text-6xl font-bold font-mono text-slate-300 tracking-wider">404</div>
+      <h2 className="text-lg font-bold text-slate-900">Không Tìm Thấy Trang Yêu Cầu</h2>
+      <p className="text-xs text-slate-500 max-w-sm">
+        Đường dẫn bạn yêu cầu không tồn tại hoặc phiên làm việc đã bị thu hồi quyền hạn.
       </p>
-      <div className="mt-6">
-        <Button asChild className="gap-2">
-          <Link href="/">
-            <Home className="size-4" />
-            <span>Trở về Trang chủ</span>
-          </Link>
-        </Button>
-      </div>
+      <Button asChild className="h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-xs">
+        <Link href="/dashboard">
+          Về Trang Tổng Quan
+        </Link>
+      </Button>
     </div>
   );
 }

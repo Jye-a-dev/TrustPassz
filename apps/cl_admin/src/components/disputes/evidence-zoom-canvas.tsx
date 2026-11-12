@@ -7,10 +7,10 @@ import {
   RotateCcw,
   Sun,
   Contrast,
-  Move,
   X,
   Maximize2,
   Minimize2,
+  Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -37,7 +37,7 @@ const INITIAL_TRANSFORM: ZoomTransformState = {
 export function EvidenceZoomCanvas({
   src,
   alt = 'Chứng cứ tranh chấp',
-  title = 'Soi Chi Tiết Bằng Chứng Kỹ Thuật Số',
+  title = 'Soi Bằng Chứng Kỹ Thuật Số',
   isOpen,
   onClose,
   className,
@@ -72,7 +72,6 @@ export function EvidenceZoomCanvas({
   const handleZoom = (delta: number) => {
     setTransform((prev) => {
       const nextScale = Math.min(5, Math.max(1, Number((prev.scale + delta).toFixed(2))));
-      // If resetting to 1, also center offset
       if (nextScale === 1) {
         return { ...prev, scale: 1, offsetX: 0, offsetY: 0 };
       }
@@ -118,7 +117,6 @@ export function EvidenceZoomCanvas({
     setIsDragging(false);
   };
 
-  // Touch handlers for mobile pan/drag
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1 && transform.scale > 1) {
       const touch = e.touches[0];
@@ -146,36 +144,55 @@ export function EvidenceZoomCanvas({
   return (
     <div
       className={cn(
-        'fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in-0 duration-200 select-none',
+        'fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in-0 duration-200 select-none overflow-y-auto',
         isFullscreen && 'p-0',
         className
       )}
     >
       <div
         className={cn(
-          'relative flex flex-col w-full max-w-5xl h-[88vh] rounded-2xl border border-slate-800 bg-[#0B0F17] shadow-2xl overflow-hidden',
+          'relative flex flex-col w-full max-w-5xl h-[85vh] rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden text-slate-900',
           isFullscreen && 'h-screen max-w-none rounded-none border-none'
         )}
       >
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-4 py-3">
-          <div className="flex items-center space-x-2">
-            <Move className="h-4 w-4 text-cyan-400" />
-            <h3 className="text-xs sm:text-sm font-semibold text-white font-mono truncate max-w-[280px] sm:max-w-md">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-white px-5 py-3">
+          <div className="flex items-center space-x-2.5">
+            <Eye className="h-4 w-4 text-slate-700" />
+            <h3 className="text-sm font-bold text-slate-900 truncate max-w-[280px] sm:max-w-md">
               {title}
             </h3>
-            <span className="rounded bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 text-[10px] font-mono text-cyan-300">
+            <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[11px] font-mono font-medium text-slate-700">
               {transform.scale.toFixed(1)}x
             </span>
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="flex items-center space-x-2">
+            {/* Quick scale buttons */}
+            <div className="hidden sm:flex items-center gap-1">
+              {[1, 2, 3, 5].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => handleSetScale(s)}
+                  className={cn(
+                    'h-8 px-2.5 rounded-lg border text-xs font-mono font-medium transition-all',
+                    Math.round(transform.scale) === s
+                      ? 'border-slate-900 bg-slate-900 text-white font-bold'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  )}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
+
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="h-9 w-9 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
+              className="h-9 w-9 p-0 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
               title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Toàn màn hình'}
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -185,15 +202,15 @@ export function EvidenceZoomCanvas({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="h-9 w-9 p-0 text-slate-400 hover:text-rose-400 hover:bg-rose-950/20"
-              title="Đóng inspector (Esc)"
+              className="h-9 w-9 p-0 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+              title="Đóng (Esc)"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Canvas Viewing Area */}
+        {/* Canvas Viewing Area (Dark viewport for terminal/code evidence readability) */}
         <div
           ref={containerRef}
           onWheel={handleWheel}
@@ -205,7 +222,7 @@ export function EvidenceZoomCanvas({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           className={cn(
-            'relative flex-1 w-full overflow-hidden bg-[#070A0F] flex items-center justify-center',
+            'relative flex-1 w-full overflow-hidden bg-slate-950 flex items-center justify-center',
             transform.scale > 1
               ? isDragging
                 ? 'cursor-grabbing'
@@ -218,7 +235,7 @@ export function EvidenceZoomCanvas({
             className="absolute inset-0 opacity-15 pointer-events-none"
             style={{
               backgroundImage:
-                'linear-gradient(to right, #1E293B 1px, transparent 1px), linear-gradient(to bottom, #1E293B 1px, transparent 1px)',
+                'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)',
               backgroundSize: '24px 24px',
             }}
           />
@@ -241,46 +258,28 @@ export function EvidenceZoomCanvas({
 
           {/* Float Instruction Pill */}
           {transform.scale > 1 && (
-            <div className="pointer-events-none absolute bottom-3 left-4 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-[10px] font-mono text-slate-400 backdrop-blur-sm">
+            <div className="pointer-events-none absolute bottom-3 left-4 rounded-full border border-slate-800 bg-slate-900/90 px-3 py-1 text-[11px] font-mono text-slate-400 backdrop-blur-sm">
               Giữ chuột trái để kéo rê (Pan) • Con lăn để thu/phóng
             </div>
           )}
         </div>
 
         {/* Bottom Inspector Control Toolbar */}
-        <div className="border-t border-slate-800 bg-[#0F172A] p-3 sm:px-6">
+        <div className="border-t border-slate-200 bg-slate-50 px-5 py-3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
             {/* Zoom Controls */}
             <div className="flex items-center space-x-2">
-              <span className="text-[11px] font-mono text-slate-400 min-w-[42px]">Zoom:</span>
+              <span className="text-xs font-semibold text-slate-600 min-w-[42px]">Zoom:</span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => handleZoom(-0.25)}
                 disabled={transform.scale <= 1}
-                className="h-9 w-9 p-0 border-slate-800 bg-[#0B0F17] text-slate-200"
+                className="h-9 w-9 p-0 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
-
-              <div className="flex items-center space-x-1">
-                {[1, 2, 3, 5].map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => handleSetScale(s)}
-                    className={cn(
-                      'min-h-[36px] min-w-[36px] rounded border px-2 py-1 text-[11px] font-mono transition-all',
-                      transform.scale === s
-                        ? 'border-cyan-500 bg-cyan-950/60 text-cyan-300 font-bold'
-                        : 'border-slate-800 bg-[#0B0F17] text-slate-400 hover:text-slate-200'
-                    )}
-                  >
-                    {s}x
-                  </button>
-                ))}
-              </div>
 
               <Button
                 type="button"
@@ -288,7 +287,7 @@ export function EvidenceZoomCanvas({
                 size="sm"
                 onClick={() => handleZoom(0.25)}
                 disabled={transform.scale >= 5}
-                className="h-9 w-9 p-0 border-slate-800 bg-[#0B0F17] text-slate-200"
+                className="h-9 w-9 p-0 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -297,12 +296,12 @@ export function EvidenceZoomCanvas({
             {/* Brightness & Contrast Adjustments */}
             <div className="flex items-center space-x-4">
               <div className="flex-1 space-y-1">
-                <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-medium text-slate-600">
                   <span className="flex items-center gap-1">
-                    <Sun className="h-3 w-3 text-amber-400" />
+                    <Sun className="h-3.5 w-3.5 text-amber-500" />
                     Độ sáng
                   </span>
-                  <span>{transform.brightness}%</span>
+                  <span className="font-mono">{transform.brightness}%</span>
                 </div>
                 <Slider
                   min={50}
@@ -315,12 +314,12 @@ export function EvidenceZoomCanvas({
               </div>
 
               <div className="flex-1 space-y-1">
-                <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-medium text-slate-600">
                   <span className="flex items-center gap-1">
-                    <Contrast className="h-3 w-3 text-cyan-400" />
+                    <Contrast className="h-3.5 w-3.5 text-cyan-600" />
                     Tương phản
                   </span>
-                  <span>{transform.contrast}%</span>
+                  <span className="font-mono">{transform.contrast}%</span>
                 </div>
                 <Slider
                   min={50}
@@ -340,9 +339,9 @@ export function EvidenceZoomCanvas({
                 variant="outline"
                 size="sm"
                 onClick={handleReset}
-                className="min-h-[44px] border-slate-800 bg-[#0B0F17] hover:bg-slate-800 text-slate-300 text-xs gap-1.5 px-4 font-mono"
+                className="h-10 px-4 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium gap-1.5"
               >
-                <RotateCcw className="h-3.5 w-3.5 text-cyan-400" />
+                <RotateCcw className="h-3.5 w-3.5 text-slate-600" />
                 <span>Reset View</span>
               </Button>
             </div>
@@ -352,4 +351,3 @@ export function EvidenceZoomCanvas({
     </div>
   );
 }
-

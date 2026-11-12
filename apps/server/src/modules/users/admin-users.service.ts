@@ -77,12 +77,10 @@ export class AdminUsersService {
     const searchTerm = query.search?.trim();
     const where: any = {};
 
-    if (query.role) {
+    if (query.role && (query.role as string) !== 'ALL') {
       where.role = query.role;
     } else if (query.type === 'STAFF') {
-      where.role = { in: [UserRole.ADMIN, UserRole.ARBITRATOR] };
-    } else if (query.type === 'CUSTOMERS') {
-      where.role = { notIn: [UserRole.ADMIN, UserRole.ARBITRATOR] };
+      where.role = { in: [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ARBITRATOR] };
     }
 
     if (query.isFrozen !== undefined) {

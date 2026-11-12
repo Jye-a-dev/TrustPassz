@@ -140,38 +140,42 @@ function DealOverrideDialogContent({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="border-slate-800 bg-[#0F172A] text-slate-100 sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="border-slate-200 bg-white text-slate-900 sm:max-w-lg rounded-2xl shadow-xl p-6">
+        <DialogHeader className="border-b border-slate-100 pb-3">
           <div className="flex items-center space-x-2">
-            <ShieldAlert className="h-5 w-5 text-amber-400" />
-            <DialogTitle className="text-base font-bold text-white">
-              Super Admin Override: Kèo Escrow
+            <ShieldAlert className="h-5 w-5 text-amber-600" />
+            <DialogTitle className="text-base font-bold text-slate-900">
+              Super Admin Override: Giao dịch Escrow
             </DialogTitle>
           </div>
-          <DialogDescription className="text-xs text-slate-400">
-            ID: <span className="font-mono text-cyan-400">{deal.id}</span>
+          <DialogDescription className="text-xs text-slate-500 font-mono">
+            UUID: <span className="text-indigo-600 font-semibold">{deal.id}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 py-2 text-xs">
           {/* Deal Summary */}
-          <div className="rounded-lg border border-slate-800 bg-[#080C14] p-3 text-xs space-y-1">
-            <p className="font-semibold text-white">{deal.title}</p>
-            <div className="flex justify-between text-slate-400">
-              <span>Số tiền: <strong className="text-white font-mono">{Number(deal.amount).toLocaleString('vi-VN')} {deal.currency}</strong></span>
-              <span>Trạng thái hiện tại: <Badge variant="outline" className="border-cyan-800 text-cyan-400 text-[10px]">{deal.state}</Badge></span>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-1">
+            <p className="font-bold text-slate-900 text-sm">{deal.title}</p>
+            <div className="flex justify-between items-center text-slate-500 pt-1">
+              <span>
+                Số tiền: <strong className="text-slate-900 font-mono font-bold">{Number(deal.amount).toLocaleString('vi-VN')} {deal.currency}</strong>
+              </span>
+              <span>
+                Trạng thái hiện tại: <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 text-[10px] font-mono">{deal.state}</Badge>
+              </span>
             </div>
           </div>
 
           {/* Force state selector */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">
+            <label className="text-xs font-semibold text-slate-700">
               Ghi đè trạng thái (Escrow State Override)
             </label>
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value as DealState)}
-              className="w-full h-9 rounded-md border border-slate-800 bg-[#080C14] px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400"
             >
               {ALL_STATES.map((st) => (
                 <option key={st} value={st}>
@@ -183,7 +187,7 @@ function DealOverrideDialogContent({
 
           {/* Adjust inspection duration */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">
+            <label className="text-xs font-semibold text-slate-700">
               Thời gian nghiệm thu (Giờ)
             </label>
             <Input
@@ -192,28 +196,33 @@ function DealOverrideDialogContent({
               max={168}
               value={inspectionHours}
               onChange={(e) => setInspectionHours(parseInt(e.target.value) || 24)}
-              className="border-slate-800 bg-[#080C14] text-xs text-white"
+              className="h-10 border-slate-200 bg-white text-xs text-slate-800 focus-visible:ring-slate-400"
             />
           </div>
 
           {/* Audit reason */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">
+            <label className="text-xs font-semibold text-slate-700">
               Lý do can thiệp (Bắt buộc lưu Admin Audit Log) *
             </label>
             <Input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="VD: Can thiệp theo yêu cầu khiếu nại vé #1042..."
-              className="border-slate-800 bg-[#080C14] text-xs text-white"
+              className="h-10 border-slate-200 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus-visible:ring-slate-400"
             />
           </div>
 
+          {/* Warning banner */}
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800 leading-relaxed">
+            Lệnh can thiệp này có hiệu lực trực tiếp trên Smart Contract và được ghi nhận đầy đủ vào nhật ký kiểm toán hệ thống.
+          </div>
+
           {/* Fast emergency actions */}
-          <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 p-3 space-y-2">
-            <span className="text-[11px] font-semibold text-amber-300 flex items-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              Tác vụ khẩn cấp (Emergency Direct Actions)
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
+            <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+              Tác vụ khẩn cấp trực tiếp (Emergency Direct Actions)
             </span>
             <div className="flex gap-2">
               <Button
@@ -222,7 +231,7 @@ function DealOverrideDialogContent({
                 size="sm"
                 onClick={() => handleApplyOverride('FORCE_SETTLE')}
                 disabled={isSubmitting}
-                className="flex-1 border-emerald-800 bg-emerald-950/40 hover:bg-emerald-900 text-emerald-300 text-xs h-8"
+                className="flex-1 h-10 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium text-xs"
               >
                 Force Settle (Giải ngân)
               </Button>
@@ -232,7 +241,7 @@ function DealOverrideDialogContent({
                 size="sm"
                 onClick={() => handleApplyOverride('FORCE_REFUND')}
                 disabled={isSubmitting}
-                className="flex-1 border-rose-800 bg-rose-950/40 hover:bg-rose-900 text-rose-300 text-xs h-8"
+                className="flex-1 h-10 border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-800 font-medium text-xs"
               >
                 Force Refund (Hoàn tiền)
               </Button>
@@ -240,15 +249,20 @@ function DealOverrideDialogContent({
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2 sm:justify-between border-t border-slate-800 pt-3">
-          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs text-slate-400">
-            Hủy
+        <DialogFooter className="flex gap-2 sm:justify-between border-t border-slate-100 pt-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="h-10 px-4 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs"
+          >
+            Hủy Bỏ
           </Button>
           <Button
-            size="sm"
+            type="button"
             onClick={() => handleApplyOverride()}
             disabled={isSubmitting}
-            className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs h-8 gap-1.5"
+            className="h-10 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium gap-1.5"
           >
             {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Xác nhận Ghi đè State

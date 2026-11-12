@@ -51,50 +51,50 @@ export function RecentDealItem({ deal }: RecentDealItemProps) {
       (deal.inspectionDuration || 43200) * 1000;
 
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4 sm:p-5 hover:border-slate-700/80 transition-all shadow-md">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 hover:border-rose-300 transition-all shadow-xs">
       {/* Left: Info */}
       <div className="space-y-2 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] text-cyan-400 uppercase tracking-wider bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+          <span className="font-mono text-[10px] text-slate-600 font-bold uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
             ID: {deal.id.slice(0, 8)}...
           </span>
 
           {isInspection && (
-            <Badge className="bg-emerald-950/80 border-emerald-500/40 text-emerald-300 text-[10px] font-bold">
+            <Badge className="bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold">
               Đang Kiểm Tra
             </Badge>
           )}
 
           {isDeposited && (
-            <Badge className="bg-cyan-950/80 border-cyan-500/40 text-cyan-300 text-[10px] font-bold">
+            <Badge className="bg-sky-50 border border-sky-200 text-sky-800 text-[10px] font-bold">
               Tiền Đã Giữ An Toàn
             </Badge>
           )}
 
           {isPending && (
-            <Badge className="bg-amber-950/80 border-amber-500/40 text-amber-300 text-[10px] font-bold">
+            <Badge className="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
               Chờ Thanh Toán
             </Badge>
           )}
 
           {isSettled && (
-            <Badge className="bg-blue-950/80 border-blue-500/40 text-blue-300 text-[10px] font-bold">
+            <Badge className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
               Giao Dịch Hoàn Tất
             </Badge>
           )}
 
           {isDisputed && (
-            <Badge className="bg-rose-950/80 border-rose-500/40 text-rose-300 text-[10px] font-bold">
+            <Badge className="bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
               Đang Khiếu Nại
             </Badge>
           )}
 
-          <span className="text-[11px] text-slate-400">
-            Đối tác: <strong className="text-slate-200">{counterParty}</strong>
+          <span className="text-[11px] text-slate-500">
+            Đối tác: <strong className="text-slate-800">{counterParty}</strong>
           </span>
         </div>
 
-        <h3 className="font-bold text-white text-sm sm:text-base leading-snug">
+        <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
           {deal.title}
         </h3>
 
@@ -111,12 +111,12 @@ export function RecentDealItem({ deal }: RecentDealItemProps) {
       </div>
 
       {/* Right: Amount & Actions */}
-      <div className="flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800/80">
+      <div className="flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
         <div className="text-left lg:text-right">
-          <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-            Giá trị giao dịch
+          <span className="text-[10px] text-slate-400 uppercase font-bold font-mono block">
+            GIÁ TRỊ GIAO DỊCH
           </span>
-          <span className="text-lg sm:text-xl font-black font-mono text-cyan-400">
+          <span className="text-lg sm:text-xl font-bold font-mono text-rose-600 tabular-nums">
             {amountNum.toLocaleString("vi-VN")} ₫
           </span>
         </div>
@@ -126,7 +126,7 @@ export function RecentDealItem({ deal }: RecentDealItemProps) {
             <Button
               asChild
               size="sm"
-              className="min-h-10 bg-linear-to-r from-amber-500 to-cyan-500 text-slate-950 font-bold text-xs shadow-md"
+              className="min-h-[40px] bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-sm border border-rose-600 cursor-pointer"
             >
               <Link href={`/user/deals/${deal.id}/checkout`}>
                 <QrCode className="size-3.5 mr-1.5" />
@@ -139,11 +139,11 @@ export function RecentDealItem({ deal }: RecentDealItemProps) {
             <Button
               asChild
               size="sm"
-              className="min-h-10 bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold text-xs shadow-md"
+              className="min-h-[40px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm border border-emerald-700 cursor-pointer"
             >
               <Link href={`/user/deals/${deal.id}/vault`}>
                 <KeyRound className="size-3.5 mr-1.5" />
-                Mở Kho Nhận Hàng
+                Mở Két Nhận Hàng
               </Link>
             </Button>
           )}
@@ -152,7 +152,7 @@ export function RecentDealItem({ deal }: RecentDealItemProps) {
             asChild
             variant="outline"
             size="sm"
-            className="min-h-10 border-slate-700 bg-slate-800 text-slate-300 text-xs hover:bg-slate-700"
+            className="min-h-[40px] border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs cursor-pointer"
           >
             <Link href={`/deals/${deal.id}`}>Chi Tiết</Link>
           </Button>

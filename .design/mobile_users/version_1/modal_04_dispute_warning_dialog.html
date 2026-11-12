@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile - Cảnh Báo Trọng Tài AI Khiếu Nại</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- PHONE DEVICE FRAME WRAPPER (393px x 852px) -->
+  <div class="relative w-[393px] h-[852px] bg-[#0B0F17] rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between">
+    
+    <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
+    <div class="h-11 w-full pt-3 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+      <span class="font-semibold text-sm tracking-tight">9:41</span>
+      <div class="w-24 h-6 bg-black rounded-full -mt-1 shadow-inner flex items-center justify-end pr-2.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/60 animate-pulse"></div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
+        <svg class="w-4 h-4 fill-slate-200" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.22c3.43 0 6.55 1.39 8.84 3.64l-8.84 8.84-8.84-8.84C5.45 8.61 8.57 7.22 12 7.22z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-300 rounded-sm p-0.5 flex items-center"><div class="w-3.5 h-1.5 bg-slate-100 rounded-2xs"></div></div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTAINER WITH DIMMED PARENT & ACTIVE WARNING DIALOG -->
+    <div class="flex-1 overflow-hidden relative flex flex-col justify-center items-center p-4">
+      
+      <!-- DIMMED PARENT BACKGROUND SCREEN (DIGITAL VAULT) -->
+      <div class="absolute inset-0 px-4 pt-1 pb-4 flex flex-col gap-3 opacity-25 pointer-events-none select-none blur-[1.5px]">
+        <div class="h-10 bg-slate-800 rounded-xl"></div>
+        <div class="h-14 bg-emerald-950/40 rounded-2xl border border-emerald-500/30"></div>
+        <div class="h-32 bg-amber-950/40 rounded-2xl border border-amber-500/40"></div>
+        <div class="h-44 bg-[#0F172A] rounded-2xl border border-cyan-500/30"></div>
+      </div>
+
+      <!-- ACTIVE WARNING POPUP DIALOG -->
+      <div class="relative z-40 w-full max-w-[340px] bg-[#0F172A] border-1.5 border-rose-500/60 rounded-3xl p-5 shadow-[0_25px_60px_rgba(0,0,0,0.9)] flex flex-col items-center text-center space-y-3 animate-in fade-in zoom-in duration-200">
+        
+        <!-- Glowing Warning Icon Badge -->
+        <div class="relative w-14 h-14 rounded-2xl bg-rose-950/80 border border-rose-500/50 flex items-center justify-center text-rose-400 shadow-lg shadow-rose-950/60">
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+
+        <div>
+          <h2 class="text-base font-black text-white tracking-tight">Cảnh Báo Trước Khi Khiếu Nại</h2>
+          <p class="text-[11px] text-slate-400 mt-0.5">
+            Quy trình tranh chấp chịu sự giám sát của Trọng tài AI tự hành.
+          </p>
+        </div>
+
+        <!-- Terms Details Box -->
+        <div class="w-full p-3 rounded-2xl bg-[#0B0F17] border border-slate-800 text-left space-y-2 text-xs">
+          
+          <div class="flex items-start gap-2">
+            <span class="text-rose-400 font-bold shrink-0">1.</span>
+            <p class="text-[11px] text-slate-300 leading-tight">
+              Giao dịch <strong>#TPZ-8821</strong> và số tiền <strong>13.500.000 ₫</strong> sẽ bị <strong>ĐÓNG BĂNG</strong> lập tức trên hợp đồng Smart Contract.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-2 pt-1 border-t border-slate-800/80">
+            <span class="text-rose-400 font-bold shrink-0">2.</span>
+            <p class="text-[11px] text-slate-300 leading-tight">
+              AI Arbitrator sẽ đối soát video 3 khung hình client-side. Phán quyết phân xử là <strong>tự động và không thể thu hồi</strong>.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-2 pt-1 border-t border-slate-800/80">
+            <span class="text-rose-400 font-bold shrink-0">3.</span>
+            <p class="text-[11px] text-slate-300 leading-tight">
+              Hành vi khai báo gian dối sẽ bị tịch thu toàn bộ tiền bảo chứng và khóa tài khoản vĩnh viễn theo chuẩn ISO/IEC 27001.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="w-full space-y-2 pt-1">
+          <!-- Primary CTA >= 48px -->
+          <button type="button" class="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white font-bold text-xs tracking-wide shadow-lg shadow-rose-950/60 flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-[0.99]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Tôi Đã Hiểu Rõ &amp; Tiếp Tục Khiếu Nại</span>
+          </button>
+
+          <!-- Cancel CTA >= 44px -->
+          <button type="button" class="w-full h-11 rounded-xl bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-300 font-semibold text-xs tracking-wide cursor-pointer transition-colors">
+            Quay Lại Kiểm Tra Thêm Két Số
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM HOME INDICATOR -->
+    <div class="w-full shrink-0 z-50">
+      <div class="py-2 flex justify-center bg-[#0B0F17]">
+        <div class="w-32 h-1 bg-slate-600 rounded-full"></div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/deal_model.dart';
 import '../../services/deal_service.dart';
+import '../../theme/app_tokens.dart';
+import '../../utils/formatters.dart';
 
-/// PaymentPollingTimer
-/// Quản lý Timer.periodic, bộ đếm timeout và callback bắt trạng thái DEPOSITED
-/// sau khi người dùng thực hiện chuyển khoản VietQR Napas 247.
+/// Manages countdown timer and background polling for VietQR DEPOSITED confirmation.
 class PaymentPollingTimer extends StatefulWidget {
   final String? dealId;
   final int timeoutSeconds;
@@ -16,7 +16,7 @@ class PaymentPollingTimer extends StatefulWidget {
   const PaymentPollingTimer({
     super.key,
     this.dealId,
-    this.timeoutSeconds = 900, // 15 phút mặc định
+    this.timeoutSeconds = 900,
     this.pollingInterval = const Duration(milliseconds: 2500),
     this.onDepositedConfirmed,
     this.onTimeout,
@@ -58,7 +58,6 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
 
   void _startPolling() {
     if (widget.dealId == null || widget.dealId!.isEmpty) return;
-
     _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(widget.pollingInterval, (_) {
       _checkPaymentStatus();
@@ -67,11 +66,9 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
 
   Future<void> _checkPaymentStatus() async {
     if (_isDeposited || widget.dealId == null) return;
-
     try {
       final deal = await DealService.instance.fetchDealById(widget.dealId!);
       if (!mounted) return;
-
       if (deal.state == DealState.deposited ||
           deal.state == DealState.inInspection ||
           deal.state == DealState.settled) {
@@ -81,7 +78,7 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
         widget.onDepositedConfirmed?.call();
       }
     } catch (_) {
-      // Bỏ qua lỗi polling mạng ngầm để tránh ngắt quãng giao diện
+      // Ignore background poll error silently
     }
   }
 
@@ -92,28 +89,20 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
     super.dispose();
   }
 
-  String _formatDuration(int seconds) {
-    final m = (seconds ~/ 60).toString().padLeft(2, '0');
-    final s = (seconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
     final isWarning = _remainingSeconds < 180;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isWarning
-            ? const Color(0xFF451A03).withValues(alpha: 0.4)
-            : const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(10),
+        color: isWarning ? c.amberSoft : c.cyanSoft,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isWarning
-              ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
-              : const Color(0xFF0284C7).withValues(alpha: 0.4),
+          color: isWarning ? c.amberBorder : c.cyanBorder,
+          width: 1.0,
         ),
       ),
       child: Row(
@@ -126,20 +115,16 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
                 height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: isWarning
-                      ? const Color(0xFFF59E0B)
-                      : const Color(0xFF38BDF8),
+                  color: isWarning ? c.amberText : c.cyanText,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
                 'Chờ quét mã VietQR...',
                 style: TextStyle(
-                  color: isWarning
-                      ? const Color(0xFFFCD34D)
-                      : const Color(0xFF94A3B8),
+                  color: isWarning ? c.amberText : c.cyanText,
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -147,20 +132,17 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isWarning
-                  ? const Color(0xFF78350F)
-                  : const Color(0xFF0369A1).withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(6),
+              color: c.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isWarning ? c.amberBorder : c.cyanBorder,
+              ),
             ),
             child: Text(
-              _formatDuration(_remainingSeconds),
-              style: TextStyle(
-                color: isWarning
-                    ? const Color(0xFFFEF08A)
-                    : const Color(0xFF38BDF8),
+              TrustPasszFormatters.formatMmSs(_remainingSeconds),
+              style: AppTokens.monoStyle(
+                color: isWarning ? c.amberText : c.cyanText,
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'monospace',
               ),
             ),
           ),
@@ -169,4 +151,3 @@ class _PaymentPollingTimerState extends State<PaymentPollingTimer> {
     );
   }
 }
-

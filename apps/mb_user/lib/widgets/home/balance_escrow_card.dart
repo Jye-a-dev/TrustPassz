@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/deal_cache_service.dart';
+import '../../theme/app_tokens.dart';
+import '../../utils/formatters.dart';
 
 class BalanceEscrowCard extends StatelessWidget {
   final EscrowBalanceSummary balanceSummary;
@@ -13,283 +15,206 @@ class BalanceEscrowCard extends StatelessWidget {
     required this.onWithdrawTap,
   });
 
-  String _formatVnd(double amount) {
-    final intVal = amount.toInt();
-    final chars = intVal.toString().split('').reversed.toList();
-    final buffer = StringBuffer();
-    for (int i = 0; i < chars.length; i++) {
-      if (i > 0 && i % 3 == 0) {
-        buffer.write('.');
-      }
-      buffer.write(chars[i]);
-    }
-    return '${buffer.toString().split('').reversed.join()} ₫';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF1E293B)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 16,
-            offset: Offset(0, 8),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: c.isDark
+              ? const [Color(0xFF0F172A), Color(0xFF0A101D)]
+              : const [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: c.border, width: 1.0),
+        boxShadow: c.isDark
+            ? const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 16,
+                  offset: Offset(0, 6),
+                ),
+              ]
+            : const [
+                BoxShadow(
+                  color: Color(0x0F0F172A),
+                  blurRadius: 14,
+                  offset: Offset(0, 5),
+                ),
+              ],
       ),
-      child: Stack(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background Cyber Glow Accent
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF10B981).withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Escrow Badge & Protection
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.shield_outlined,
-                          size: 16,
-                          color: Color(0xFF10B981),
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'TỔNG GIÁ TRỊ KÝ QUỸ',
-                          style: TextStyle(
-                            color: Color(0xFF94A3B8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
+          // Header: Label & Napas Locked Pill
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.shield_outlined,
+                    size: 16,
+                    color: AppTokens.emerald,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'TỔNG GIÁ TRỊ KÝ QUỸ',
+                    style: AppTokens.monoStyle(
+                      color: c.textMuted,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
                     ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: c.emeraldSoft,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: c.emeraldBorder, width: 1.0),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppTokens.emerald,
+                        shape: BoxShape.circle,
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color:
-                              const Color(0xFF10B981).withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF10B981),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            '${balanceSummary.activeDealsCount} Kèo đang chạy',
-                            style: const TextStyle(
-                              color: Color(0xFF34D399),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ],
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      '${balanceSummary.activeDealsCount} Giao dịch chạy',
+                      style: AppTokens.monoStyle(
+                        color: c.emeraldText,
+                        fontSize: 10,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
 
-                // Main Escrow Total Figure (Tabular figures)
-                Text(
-                  _formatVnd(balanceSummary.totalBalance),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'monospace',
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
+          // Main Escrow Total Figure (Tabular figures)
+          Text(
+            TrustPasszFormatters.formatVnd(balanceSummary.totalBalance),
+            style: AppTokens.monoStyle(
+              color: c.textPrimary,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
 
-                // Sub Balances Grid (Locked vs Available)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF080C14),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                  ),
-                  child: Row(
+          // Sub Balances Row
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: c.surfaceSubtle,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: c.border, width: 1.0),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Locked in Escrow
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(
-                                  Icons.lock_clock_outlined,
-                                  size: 13,
-                                  color: Color(0xFFF59E0B),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Đang khóa ký quỹ',
-                                  style: TextStyle(
-                                    color: Color(0xFF94A3B8),
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatVnd(balanceSummary.lockedBalance),
-                              style: const TextStyle(
-                                color: Color(0xFFFBBF24),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ],
+                      Text(
+                        'Đang khóa đồng kiểm:',
+                        style: TextStyle(color: c.textMuted, fontSize: 11),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        TrustPasszFormatters.formatVnd(
+                          balanceSummary.lockedBalance,
                         ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 32,
-                        color: const Color(0xFF1E293B),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Available / Withdrawable
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  size: 13,
-                                  color: Color(0xFF10B981),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Khả dụng / Rút',
-                                  style: TextStyle(
-                                    color: Color(0xFF94A3B8),
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatVnd(balanceSummary.availableBalance),
-                              style: const TextStyle(
-                                color: Color(0xFF34D399),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ],
+                        style: AppTokens.monoStyle(
+                          color: c.cyanText,
+                          fontSize: 13.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-
-                // Action Buttons with touch targets >= 48x48 pt
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: ElevatedButton.icon(
-                          onPressed: onDepositTap,
-                          icon: const Icon(Icons.add_card, size: 18),
-                          label: const Text(
-                            'Nạp Ký Quỹ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF10B981),
-                            foregroundColor: const Color(0xFF020617),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                Container(width: 1, height: 30, color: c.border),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Số dư khả dụng:',
+                        style: TextStyle(color: c.textMuted, fontSize: 11),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        TrustPasszFormatters.formatVnd(
+                          balanceSummary.availableBalance,
+                        ),
+                        style: AppTokens.monoStyle(
+                          color: c.emeraldText,
+                          fontSize: 13.5,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: OutlinedButton.icon(
-                          onPressed: onWithdrawTap,
-                          icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
-                          label: const Text(
-                            'Rút Tiền',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF22D3EE),
-                            side: const BorderSide(color: Color(0xFF0891B2)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 14),
+
+          // 2 Action Buttons with Borders & Height >= 48px
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: onDepositTap,
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: const Text(
+                    'Nạp Ký Quỹ',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                  ),
+                  style: AppTokens.primaryButtonStyle(c),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onWithdrawTap,
+                  icon: const Icon(
+                    Icons.arrow_downward_rounded,
+                    size: 16,
+                  ),
+                  label: const Text(
+                    'Rút Tiền',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
+                  ),
+                  style: AppTokens.outlinedButtonStyle(
+                    c,
+                    minHeight: AppTokens.primaryButtonHeight,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
-

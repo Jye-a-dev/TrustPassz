@@ -41,35 +41,33 @@ export function ContrastSliderPanel() {
   };
 
   return (
-    <Card className="border-slate-800 bg-[#0F172A] shadow-md">
-      <CardHeader className="border-b border-slate-800 pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
-              <Sliders className="h-4 w-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm font-semibold text-white">
-                Tiền Xử Lý Hình Ảnh & Tensor sVLM (Preprocessing)
-              </CardTitle>
-              <p className="text-[11px] text-slate-400">
-                Tối ưu hóa độ tương phản và chuẩn hóa khung hình trước khi feed vào Qwen2-VL
-              </p>
-            </div>
+    <Card className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div className="flex items-center space-x-2">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <Sliders className="h-4 w-4" />
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="text-xs text-slate-400 hover:text-white h-8"
-          >
-            <RefreshCw className="h-3.5 w-3.5 mr-1" />
-            Mặc định
-          </Button>
+          <div>
+            <CardTitle className="text-xs font-bold text-slate-900">
+              Cân Chỉnh Tiền Xử Lý Hình Ảnh (OpenCV)
+            </CardTitle>
+            <p className="text-[11px] text-slate-400">
+              Tối ưu hóa độ tương phản và chuẩn hóa khung hình trước khi feed vào Qwen2-VL
+            </p>
+          </div>
         </div>
-      </CardHeader>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleReset}
+          className="text-xs text-slate-500 hover:text-slate-900 h-8"
+        >
+          <RefreshCw className="h-3.5 w-3.5 mr-1 text-slate-500" />
+          Mặc định
+        </Button>
+      </div>
 
-      <CardContent className="space-y-5 pt-4">
+      <div className="space-y-4 pt-1 text-xs">
         {/* Interactive Sliders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
@@ -97,9 +95,9 @@ export function ContrastSliderPanel() {
 
             {/* Letterbox resolution */}
             <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between font-medium text-slate-300">
+              <div className="flex justify-between font-medium text-slate-700">
                 <span>Letterbox Resize (RGB Square):</span>
-                <span className="font-mono text-cyan-400 font-semibold">
+                <span className="font-mono text-slate-900 font-semibold">
                   {config.letterboxSize}x{config.letterboxSize} px
                 </span>
               </div>
@@ -110,8 +108,8 @@ export function ContrastSliderPanel() {
                     onClick={() => setConfig((c) => ({ ...c, letterboxSize: size }))}
                     className={`flex-1 rounded-md py-1.5 text-xs font-mono border transition-colors ${
                       config.letterboxSize === size
-                        ? 'border-cyan-500 bg-cyan-950/60 text-cyan-300 font-semibold'
-                        : 'border-slate-800 bg-[#080C14] text-slate-400 hover:bg-slate-800'
+                        ? 'border-slate-400 bg-slate-100 text-slate-900 font-semibold shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                     }`}
                   >
                     {size}x{size}
@@ -122,39 +120,39 @@ export function ContrastSliderPanel() {
           </div>
 
           {/* Interactive Preview Canvas */}
-          <div className="flex flex-col items-center justify-center rounded-lg border border-slate-800 bg-[#080C14] p-4 text-xs">
-            <span className="text-slate-400 mb-2 flex items-center gap-1.5 text-[11px]">
-              <Eye className="h-3.5 w-3.5 text-cyan-400" />
+          <div className="flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs">
+            <span className="text-slate-600 mb-2 flex items-center gap-1.5 text-[11px] font-medium">
+              <Eye className="h-3.5 w-3.5 text-slate-600" />
               Mô phỏng Tensor sau khi Filter (512x512 RGB)
             </span>
             <div
               style={{
                 filter: `contrast(${config.contrast}) brightness(${1 + config.brightness / 100})`,
               }}
-              className="h-32 w-32 rounded-lg bg-gradient-to-br from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-800/40 flex flex-col items-center justify-center text-center p-2 transition-all shadow-inner"
+              className="h-32 w-32 rounded-lg bg-slate-900 border border-slate-300 flex flex-col items-center justify-center text-center p-2 transition-all shadow-inner"
             >
-              <span className="font-mono text-[10px] text-cyan-400 font-bold">Unbox Image</span>
-              <span className="font-mono text-[9px] text-slate-400 mt-1">
+              <span className="font-mono text-[10px] text-white font-bold">Unbox Image</span>
+              <span className="font-mono text-[9px] text-slate-300 mt-1">
                 C:{config.contrast}x | B:{config.brightness}
               </span>
             </div>
             <p className="mt-2 text-[10px] text-slate-500 text-center">
-              Giúp OCR & Vision Model phát hiện rõ stack trace và terminal error logs.
+              Giúp OCR &amp; Vision Model phát hiện rõ stack trace và terminal error logs.
             </p>
           </div>
         </div>
 
-        <div className="flex justify-end pt-2 border-t border-slate-800">
+        <div className="flex justify-end pt-3 border-t border-slate-100">
           <Button
             size="sm"
             onClick={handleSave}
-            className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs h-9 gap-1.5"
+            className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-9 gap-1.5 shadow-2xs font-medium"
           >
             {isSaved ? <Check className="h-4 w-4 text-emerald-300" /> : <Sparkles className="h-4 w-4" />}
             <span>{isSaved ? 'Đã lưu cấu hình' : 'Áp dụng vào Pipeline FastAPI'}</span>
           </Button>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

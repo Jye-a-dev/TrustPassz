@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { DealState, Prisma } from '@prisma/client';
 import '../../common/utils/bigint-serializer.util';
@@ -20,17 +21,23 @@ import {
   executeDealCreateTransaction,
   executeDealUpdateTransaction,
 } from './deals.helper';
+import {
+  executeCalculateUserEscrowBalance,
+  executeFindMyDeals,
+} from './my-deals.helper';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
 import { RequestUser } from '../../common/decorators/current-user.decorator';
 import { OracleRelayerService } from '../../oracle-relayer/oracle-relayer.service';
+import { NotificationsService } from '../notifications/notifications.service';
 @Injectable()
 export class DealsService {
   private readonly logger = new Logger(DealsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly oracleRelayer: OracleRelayerService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
     /** Aggregates total deals and breakdown by state with optional seller/buyer filters. */
   async countDeals(sellerId?: string, buyerId?: string) {
@@ -135,6 +142,7 @@ export class DealsService {
         );
         DealIdempotencyManager.setCache(dedupKey, created);
         DealIdempotencyManager.setCache(semanticKey, created);
+        this.notificationsService?.notifyDealCreated(created);
         return created;
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
@@ -336,16 +344,22 @@ export class DealsService {
       });
     }
 
+    this.notificationsService?.notifyVaultUnlocked(deal, updatedAsset.id);
     return formatVaultUnlockResponse(id, updatedAsset);
   }
 
-    /** Manually triggers settle on-chain for a deal. */
+  async findMyDeals(userId: string, query: QueryDealDto) {
+    return executeFindMyDeals(this.prisma, userId, query);
+  }
+
+  async calculateUserEscrowBalance(userId: string) {
+    return executeCalculateUserEscrowBalance(this.prisma, userId);
+  }
+
+  /** Manually triggers settle on-chain for a deal. */
   async triggerSettle(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
-
-    if (!deal) {
-      throw new NotFoundException(`Deal ${dealId} not found`);
-    }
+    if (!deal) throw new NotFoundException(`Deal ${dealId} not found`);
     if (
       deal.state !== DealState.IN_INSPECTION &&
       deal.state !== DealState.DEPOSITED
@@ -366,24 +380,20 @@ export class DealsService {
         `[triggerSettle] DB updated → SETTLED for deal=${dealId} (fiat / off-chain settlement)`,
       );
     }
+    this.notificationsService?.notifyDealSettled(deal, txResult?.txHash);
     return txResult || { success: true, state: DealState.SETTLED };
   }
 
-    /** Triggers the oracle relayer to start inspection on-chain explicitly. */
+  /** Triggers the oracle relayer to start inspection on-chain explicitly. */
   async triggerStartInspection(dealId: string) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
-    if (!deal) {
-      throw new NotFoundException(`Deal ${dealId} not found`);
-    }
+    if (!deal) throw new NotFoundException(`Deal ${dealId} not found`);
     if (deal.state !== DealState.DEPOSITED) {
       throw new BadRequestException(
         `Cannot start inspection for deal in state ${deal.state}. Expected DEPOSITED.`,
       );
     }
-
-    this.logger.log(
-      `[triggerStartInspection] Initiating startInspection for deal=${dealId}`,
-    );
+    this.logger.log(`[triggerStartInspection] Initiating startInspection for deal=${dealId}`);
     return this.oracleRelayer.startInspection(dealId);
   }
 }

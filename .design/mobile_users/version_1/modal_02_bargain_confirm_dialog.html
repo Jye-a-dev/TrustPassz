@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile - Xác Nhận Đề Xuất Thương Lượng Giá</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- PHONE DEVICE FRAME WRAPPER (393px x 852px) -->
+  <div class="relative w-[393px] h-[852px] bg-[#0B0F17] rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between">
+    
+    <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
+    <div class="h-11 w-full pt-3 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+      <span class="font-semibold text-sm tracking-tight">9:41</span>
+      <div class="w-24 h-6 bg-black rounded-full -mt-1 shadow-inner flex items-center justify-end pr-2.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/60 animate-pulse"></div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
+        <svg class="w-4 h-4 fill-slate-200" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.22c3.43 0 6.55 1.39 8.84 3.64l-8.84 8.84-8.84-8.84C5.45 8.61 8.57 7.22 12 7.22z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-300 rounded-sm p-0.5 flex items-center"><div class="w-3.5 h-1.5 bg-slate-100 rounded-2xs"></div></div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTAINER WITH DIMMED PARENT UNDERNEATH & ACTIVE POPUP DIALOG -->
+    <div class="flex-1 overflow-hidden relative flex flex-col justify-center items-center p-4">
+      
+      <!-- DIMMED PARENT BACKGROUND SCREEN (DEAL ROOM) -->
+      <div class="absolute inset-0 px-4 pt-1 pb-4 flex flex-col gap-3 opacity-25 pointer-events-none select-none blur-[1.5px]">
+        <div class="h-10 bg-slate-800 rounded-xl"></div>
+        <div class="h-28 bg-[#0F172A] rounded-2xl border border-slate-800"></div>
+        <div class="h-56 bg-[#0F172A] rounded-2xl border border-cyan-500/30"></div>
+        <div class="h-14 bg-emerald-950/40 rounded-xl"></div>
+      </div>
+
+      <!-- ACTIVE MODAL DIALOG POPUP -->
+      <div class="relative z-40 w-full max-w-[340px] bg-[#0F172A] border-1.5 border-cyan-500/50 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-3.5 animate-in fade-in zoom-in duration-200">
+        
+        <!-- Handshake / Bargain Icon Badge -->
+        <div class="relative w-14 h-14 rounded-2xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-lg shadow-cyan-950/50">
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.3-4.3a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0l-4.3 4.3a1 1 0 0 0 0 1.4Z"/>
+            <path d="m18 10 1-1a2 2 0 0 0 0-2.8l-1.4-1.4a2 2 0 0 0-2.8 0l-1 1"/>
+            <path d="m14 14 1 1"/>
+            <path d="m5 13-1-1a2 2 0 0 1 0-2.8l1.4-1.4a2 2 0 0 1 2.8 0l1 1"/>
+            <path d="M9 11 3 17a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l6-6"/>
+          </svg>
+        </div>
+
+        <div>
+          <h2 class="text-base font-black text-white tracking-tight">Xác Nhận Mức Giá Mới</h2>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Đề xuất này sẽ được thông báo ngay tới người bán trong Deal Room.
+          </p>
+        </div>
+
+        <!-- Price Comparison Box -->
+        <div class="w-full p-3.5 rounded-2xl bg-[#0B0F17] border border-slate-800 text-left space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-400">Giá niêm yết ban đầu:</span>
+            <span class="font-mono text-slate-400 line-through">15.000.000 ₫</span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
+            <span class="font-semibold text-slate-200">Mức giá bạn đề xuất:</span>
+            <span class="font-mono font-black text-cyan-400 text-sm">13.500.000 ₫</span>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800/80">
+            <span class="text-emerald-400 font-medium">Tiết kiệm:</span>
+            <span class="font-mono font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-500/20 px-2 py-0.5 rounded">
+              -1.500.000 ₫ (-10%)
+            </span>
+          </div>
+        </div>
+
+        <p class="text-[10px] text-slate-400 leading-normal px-1">
+          💡 Nếu người bán chấp thuận, hợp đồng ký quỹ sẽ tự động sinh mã VietQR theo mức giá <strong>13.500.000 ₫</strong>.
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="w-full space-y-2 pt-1">
+          <!-- Primary CTA >= 48px -->
+          <button type="button" class="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-xs tracking-wide shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-[0.99]">
+            <svg class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            <span>Xác Nhận &amp; Gửi Đề Xuất Giá</span>
+          </button>
+
+          <!-- Cancel / Edit CTA >= 44px -->
+          <button type="button" class="w-full h-11 rounded-xl bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-300 font-semibold text-xs tracking-wide cursor-pointer transition-colors">
+            Chỉnh Sửa Lại Mức Giá
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM HOME INDICATOR -->
+    <div class="w-full shrink-0 z-50">
+      <div class="py-2 flex justify-center bg-[#0B0F17]">
+        <div class="w-32 h-1 bg-slate-600 rounded-full"></div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

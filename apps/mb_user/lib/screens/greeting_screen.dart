@@ -1,22 +1,7 @@
 import 'package:flutter/material.dart';
-
-class PillarItem {
-  final String title;
-  final String subtitle;
-  final String desc;
-  final String icon;
-  final String badge;
-  final Color accentColor;
-
-  const PillarItem({
-    required this.title,
-    required this.subtitle,
-    required this.desc,
-    required this.icon,
-    required this.badge,
-    required this.accentColor,
-  });
-}
+import '../theme/app_tokens.dart';
+import '../theme/theme_provider.dart';
+import 'greeting/greeting_pillar_card.dart';
 
 class GreetingScreen extends StatefulWidget {
   final VoidCallback onContinue;
@@ -32,39 +17,46 @@ class _GreetingScreenState extends State<GreetingScreen> {
 
   static const List<PillarItem> pillars = [
     PillarItem(
-      title: 'VietQR-to-Escrow',
-      subtitle: 'Napas 247 Khóa Tiền Tự Động',
+      title: 'Ký Quỹ Napas 24/7',
+      subtitle: 'VietQR-to-Escrow Tự Động',
       desc:
-          'Thanh toán App-to-App qua chuẩn VietQR động. Tiền được đóng băng an toàn trong hợp đồng thông minh hoặc tài khoản ký quỹ.',
-      icon: '⚡',
-      badge: 'Napas 247 Instant',
-      accentColor: Color(0xFF10B981),
+          'Quét mã VietQR từ mọi ứng dụng ngân hàng. Tiền được đóng băng an toàn trong hợp đồng ký quỹ thông minh cho đến khi bạn kiểm tra và hài lòng với tài sản.',
+      iconData: Icons.qr_code_2_rounded,
+      stepBadge: 'Bước 1 / 3',
+      metricLeftLabel: 'Đối soát:',
+      metricLeftValue: '< 1s',
+      metricRightLabel: 'Khóa quỹ:',
+      metricRightValue: '100% Bảo đảm',
     ),
     PillarItem(
-      title: 'Digital Vault AES-256-GCM',
-      subtitle: 'Két Số Mã Hóa Đầu Cuối',
+      title: 'Két Số Digital Vault',
+      subtitle: 'Giải Mã AES-256 & Đếm Ngược',
       desc:
-          'Bàn giao License Key, source code hoặc dữ liệu số bảo mật tuyệt đối. Người mua chỉ giải mã sau khi escrow xác nhận đã khóa tiền.',
-      icon: '🔐',
-      badge: 'Zero-Knowledge Vault',
-      accentColor: Color(0xFF06B6D4),
+          'Mã nguồn, license key, tài liệu bí mật được mã hóa end-to-end. Bạn có đồng hồ kiểm thử độc lập trước khi bấm xác nhận giải ngân.',
+      iconData: Icons.lock_outline_rounded,
+      stepBadge: 'Bước 2 / 3',
+      metricLeftLabel: 'Chuẩn mã hóa:',
+      metricLeftValue: 'AES-256-GCM',
+      metricRightLabel: 'Tự hủy token:',
+      metricRightValue: '30s',
     ),
     PillarItem(
-      title: 'AI Arbitrator',
-      subtitle: 'Trọng Tài AI Phân Giải Tranh Chấp',
+      title: 'Trọng Tài AI Vision',
+      subtitle: 'Phân Xử Tranh Chấp < 15 Phút',
       desc:
-          'Phân tích video/ảnh lỗi client-side với trích xuất keyframes tự động. Đưa ra phán quyết hoàn tiền hoặc thanh toán chỉ trong vài giây.',
-      icon: '🤖',
-      badge: 'Vision AI Pipeline',
-      accentColor: Color(0xFFA855F7),
+          'Nếu tài sản lỗi hoặc sai cam kết, chụp ảnh hoặc tải video kiểm thử. Trọng tài đa phương thức đối soát tự động và hoàn tiền minh bạch.',
+      iconData: Icons.balance_rounded,
+      stepBadge: 'Bước 3 / 3',
+      metricLeftLabel: 'SLA thẩm định:',
+      metricLeftValue: '< 15 phút',
+      metricRightLabel: 'Tỷ lệ chuẩn:',
+      metricRightValue: '99.8%',
     ),
   ];
 
   void _handleNext() {
     if (_activeStep < pillars.length - 1) {
-      setState(() {
-        _activeStep++;
-      });
+      setState(() => _activeStep++);
     } else {
       widget.onContinue();
     }
@@ -72,57 +64,106 @@ class _GreetingScreenState extends State<GreetingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.tp;
     final item = pillars[_activeStep];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080C14),
+      backgroundColor: c.canvas,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Brand Header
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF22D3EE), Color(0xFF34D399)],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'TP',
-                      style: TextStyle(
-                        color: Color(0xFF020617),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        'TrustPassz',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          letterSpacing: 0.5,
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppTokens.cyan, AppTokens.emerald],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: c.emeraldBorder),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'TP',
+                          style: TextStyle(
+                            color: Color(0xFF020617),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                      Text(
-                        'Bảo Vệ Giao Dịch Tài Sản Số',
-                        style: TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 11,
-                          fontFamily: 'monospace',
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'TrustPassz',
+                            style: TextStyle(
+                              color: c.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            'Cyber-Escrow Platform v2.0',
+                            style: AppTokens.monoStyle(
+                              color: c.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: c.emeraldSoft,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: c.emeraldBorder),
+                        ),
+                        child: Text(
+                          'Napas 24/7',
+                          style: AppTokens.monoStyle(
+                            color: c.emeraldText,
+                            fontSize: 10.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: OutlinedButton(
+                          onPressed: () => ThemeProvider.instance.toggleTheme(),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(44, 44),
+                            backgroundColor: c.surface,
+                            side: BorderSide(color: c.border),
+                            shape: const CircleBorder(),
+                          ),
+                          child: Icon(
+                            c.isDark
+                                ? Icons.light_mode_outlined
+                                : Icons.dark_mode_outlined,
+                            size: 18,
+                            color: c.textSecondary,
+                          ),
                         ),
                       ),
                     ],
@@ -130,138 +171,62 @@ class _GreetingScreenState extends State<GreetingScreen> {
                 ],
               ),
               const Spacer(),
-
-              // Pillar Card
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                      color: item.accentColor.withValues(alpha: 0.4)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: item.accentColor.withValues(alpha: 0.1),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF080C14),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFF1E293B)),
-                          ),
-                          child: Text(
-                            item.icon,
-                            style: const TextStyle(fontSize: 28),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: item.accentColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: item.accentColor.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Text(
-                            item.badge,
-                            style: TextStyle(
-                              color: item.accentColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      item.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.subtitle,
-                      style: TextStyle(
-                        color: item.accentColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      item.desc,
-                      style: const TextStyle(
-                        color: Color(0xFFCBD5E1),
-                        fontSize: 13,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Dot Indicators
-              const SizedBox(height: 24),
+              GreetingPillarCard(item: item, stepIndex: _activeStep),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  pillars.length,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _activeStep == index ? 28 : 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: _activeStep == index
-                          ? const Color(0xFF22D3EE)
-                          : const Color(0xFF334155),
-                      borderRadius: BorderRadius.circular(4),
+                children: List.generate(pillars.length, (index) {
+                  final active = _activeStep == index;
+                  return InkWell(
+                    onTap: () => setState(() => _activeStep = index),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      alignment: Alignment.center,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: active ? 32 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          gradient: active
+                              ? const LinearGradient(
+                                  colors: [AppTokens.cyan, AppTokens.emerald],
+                                )
+                              : null,
+                          color: active ? null : c.borderStrong,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ),
               const Spacer(),
-
-              // Action Button
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: _handleNext,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF06B6D4),
-                  foregroundColor: const Color(0xFF020617),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 6,
-                ),
-                child: Text(
+                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                label: Text(
                   _activeStep == pillars.length - 1
                       ? 'Bắt Đầu Ngay'
-                      : 'Tiếp Tục →',
+                      : 'Tiếp Tục',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 14,
+                  ),
+                ),
+                style: AppTokens.primaryButtonStyle(c),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: widget.onContinue,
+                style: AppTokens.outlinedButtonStyle(c),
+                child: Text(
+                  'Bỏ qua và Đăng nhập ngay',
+                  style: TextStyle(
+                    color: c.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
                   ),
                 ),
               ),

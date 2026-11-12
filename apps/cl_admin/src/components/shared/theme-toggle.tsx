@@ -7,31 +7,56 @@ import { Button } from "@/components/ui/button";
 import { useMounted } from "@/hooks/use-mounted";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" aria-label="Toggle theme" disabled>
-        <Sun className="size-4 opacity-50" />
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label="Đang đồng bộ giao diện"
+        disabled
+        className="size-10 min-h-10 min-w-10 rounded-lg border-border-subtle bg-surface text-text-muted opacity-60"
+      >
+        <Sun className="size-4.5" />
       </Button>
     );
   }
 
-  const isDark = theme === "dark";
+  const isDark = resolvedTheme === "dark";
+
+  const handleToggle = () => {
+    const nextTheme = isDark ? "light" : "dark";
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem("theme", nextTheme);
+      document.cookie = `theme=${nextTheme}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {}
+  };
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-      className="relative"
+      onClick={handleToggle}
+      aria-label={
+        isDark
+          ? "Chuyển sang giao diện sáng (Light Mode)"
+          : "Chuyển sang giao diện tối (Dark Mode)"
+      }
+      title={
+        isDark
+          ? "Đang ở Dark Mode (Bấm để chuyển sang Light Mode)"
+          : "Đang ở Light Mode (Bấm để chuyển sang Dark Mode)"
+      }
+      className="size-10 min-h-10 min-w-10 rounded-lg border-border-subtle bg-surface hover:bg-muted text-text-primary transition-colors cursor-pointer"
     >
-      <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
+      {isDark ? (
+        <Sun className="size-4.5 text-amber-400 transition-transform duration-200 hover:rotate-45" />
+      ) : (
+        <Moon className="size-4.5 text-indigo-600 transition-transform duration-200 hover:-rotate-12" />
+      )}
     </Button>
   );
 }
-

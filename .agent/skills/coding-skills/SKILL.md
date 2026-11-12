@@ -90,3 +90,22 @@ Nhằm đảm bảo tính đơn nhiệm (Single Responsibility Principle) và kh
    - Quá trình biên dịch TypeScript (`tsc --noEmit`), linter (`eslint`), và build Next.js/NestJS phải đạt trạng thái **0 errors, 0 warnings**.
    - Cấm vô hiệu hóa linter bằng `// eslint-disable-next-line` vô tội vạ trừ trường hợp bất khả kháng có giải thích cụ thể.
 
+---
+
+## 6. Chính Sách Cấm Mock User & Bắt Buộc Đăng Nhập Thực (Strict Authentic Auth & Anti-Mock User Policy)
+
+Nhằm bảo vệ tính toàn vẹn bảo mật của cơ sở dữ liệu và tuân thủ chuẩn ISO/IEC 27001 và Web3 Security:
+
+1. **Cấm tuyệt đối Mock User:**
+   - Nghiêm cấm tạo, inject hoặc hardcode mock user (bao gồm `dev-tester@trustpassz.io` hoặc bất kỳ dummy test user nào) trong toàn bộ codebase, bao gồm database seeder, mock fixtures, unit/integration tests và mobile/web client.
+   - Bất kỳ tài khoản người dùng nào tồn tại trong hệ thống đều phải xuất phát từ quy trình đăng ký/đăng nhập thực tế.
+
+2. **Quy trình Kiểm thử Luồng Người dùng (User Flow Testing):**
+   - Mọi kịch bản kiểm thử (E2E, API tests, Regression tests) bắt buộc phải đăng nhập thật qua một trong các giao thức xác thực chính thức:
+     * **Google OAuth 2.0 / OpenID Connect** với ID Token hợp lệ.
+     * **FIDO2 / WebAuthn Passkeys** với chữ ký phần cứng.
+     * **Web3 SIWS (Sign-In with Solana)** hoặc **SIWE (Sign-In with Ethereum / Base)** với chữ ký mật mã từ ví thực tế.
+     * **Tài khoản Email/Mật khẩu chính thức** với cơ chế xác thực OTP / 2FA.
+   - Nghiêm cấm tạo backdoor, mock user bypass, hoặc cờ tắt kiểm tra bảo mật trong môi trường dev hay testing.
+
+

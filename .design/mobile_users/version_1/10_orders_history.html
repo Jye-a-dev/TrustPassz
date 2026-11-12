@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustPassz Mobile - Lịch Sử Đơn Hàng & Ký Quỹ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- PHONE DEVICE FRAME WRAPPER (393px x 852px) -->
+  <div class="relative w-[393px] h-[852px] bg-[#0B0F17] rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between">
+    
+    <!-- TOP STATUS BAR & DYNAMIC ISLAND -->
+    <div class="h-11 w-full pt-3 px-7 flex justify-between items-center text-xs text-slate-300 z-50 shrink-0">
+      <span class="font-semibold text-sm tracking-tight">9:41</span>
+      <div class="w-24 h-6 bg-black rounded-full -mt-1 shadow-inner flex items-center justify-end pr-2.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/60 animate-pulse"></div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm5-5h3v9H7v-9zm5-5h3v14h-3V7zm5-5h3v19h-3V2z"/></svg>
+        <svg class="w-4 h-4 fill-slate-200" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.22c3.43 0 6.55 1.39 8.84 3.64l-8.84 8.84-8.84-8.84C5.45 8.61 8.57 7.22 12 7.22z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-300 rounded-sm p-0.5 flex items-center"><div class="w-3.5 h-1.5 bg-slate-100 rounded-2xs"></div></div>
+      </div>
+    </div>
+
+    <!-- MAIN SCROLLABLE SCREEN CONTENT -->
+    <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-4 pt-1 pb-4 gap-3">
+      
+      <!-- Screen Header -->
+      <div class="pt-1">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-base font-black text-white tracking-tight">Đơn Hàng &amp; Hóa Đơn</h1>
+            <p class="text-[11px] text-slate-400">Tra cứu trạng thái mở két &amp; biên lai VietQR</p>
+          </div>
+          <button type="button" class="w-9 h-9 rounded-xl bg-[#0F172A] border border-slate-800 flex items-center justify-center text-slate-300 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-4 px-4">
+        <button type="button" class="h-8 px-3 rounded-full bg-cyan-500 text-slate-950 text-xs font-bold shrink-0 shadow-sm cursor-pointer">
+          Tất Cả (8)
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-[#0F172A] border border-slate-800 text-slate-300 text-xs font-medium shrink-0 cursor-pointer">
+          Đang Đồng Kiểm (1)
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-[#0F172A] border border-slate-800 text-slate-300 text-xs font-medium shrink-0 cursor-pointer">
+          Đã Khóa Tiền (2)
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-[#0F172A] border border-slate-800 text-slate-300 text-xs font-medium shrink-0 cursor-pointer">
+          Đã Tất Toán (4)
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-[#0F172A] border border-slate-800 text-slate-300 text-xs font-medium shrink-0 cursor-pointer">
+          Khiếu Nại (1)
+        </button>
+      </div>
+
+      <!-- Orders List -->
+      <div class="space-y-2.5">
+        
+        <!-- Order Card 1: IN_INSPECTION -->
+        <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-cyan-500/40 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-cyan-400 font-bold">#TPZ-8821</span>
+            <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2 py-0.5 rounded font-mono">
+              IN_INSPECTION
+            </span>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-white leading-tight">
+              Source Code SaaS Nuxt3 + Smart Contract
+            </h3>
+            <span class="text-[10px] text-slate-400 block mt-0.5">Bên bán: TechLead_HN • 10/11/2026</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+            <div>
+              <span class="text-xs font-black text-emerald-400 font-mono tabular-nums">13.500.000 ₫</span>
+              <span class="text-[9px] text-amber-400 font-mono block">⏱️ 05:42:18 còn lại</span>
+            </div>
+            <button type="button" class="h-8 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs cursor-pointer transition-colors">
+              Vào Két Số
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Card 2: DEPOSITED -->
+        <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-400 font-bold">#TPZ-8819</span>
+            <span class="text-[9px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">
+              DEPOSITED
+            </span>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-white leading-tight">
+              License Key JetBrains All Products 1Y
+            </h3>
+            <span class="text-[10px] text-slate-400 block mt-0.5">Bên bán: KeyMaster_VN • 09/11/2026</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+            <span class="text-xs font-black text-slate-100 font-mono tabular-nums">2.450.000 ₫</span>
+            <button type="button" class="h-8 px-3 rounded-xl bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs cursor-pointer transition-colors">
+              Mở Két Ký Quỹ
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Card 3: DISPUTED -->
+        <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-rose-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-rose-400 font-bold">#TPZ-8790</span>
+            <span class="text-[9px] font-bold text-rose-300 bg-rose-950/80 border border-rose-500/30 px-2 py-0.5 rounded font-mono">
+              DISPUTED
+            </span>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-white leading-tight">
+              Module AI Vision Object Detection YOLOv11
+            </h3>
+            <span class="text-[10px] text-slate-400 block mt-0.5">Bên bán: AILab_VN • Trọng tài AI đang thụ lý</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+            <span class="text-xs font-black text-rose-400 font-mono tabular-nums">7.800.000 ₫</span>
+            <button type="button" class="h-8 px-3 rounded-xl bg-rose-950 border border-rose-500/50 text-rose-300 font-bold text-xs cursor-pointer">
+              Xem Tiến Độ AI
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Card 4: SETTLED -->
+        <div class="p-3.5 rounded-2xl bg-[#0F172A] border border-slate-800/80 space-y-2 opacity-85">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-500 font-bold">#TPZ-8755</span>
+            <span class="text-[9px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">
+              SETTLED
+            </span>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-slate-200 leading-tight">
+              UI Kit Cyber Fintech Figma Template
+            </h3>
+            <span class="text-[10px] text-slate-500 block mt-0.5">Bán cho: FintechDev • Đã giải ngân MBBank</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+            <span class="text-xs font-bold text-slate-300 font-mono tabular-nums">18.500.000 ₫</span>
+            <button type="button" class="h-8 px-3 rounded-xl bg-[#0B0F17] text-slate-400 text-xs font-medium cursor-pointer">
+              Xem Biên Lai
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM FIXED TABBAR + HOME INDICATOR -->
+    <div class="w-full shrink-0 z-50 bg-[#0B0F17] border-t border-slate-800/80">
+      <div class="h-14 px-3 flex items-center justify-around">
+        <button type="button" class="flex flex-col items-center justify-center flex-1 h-full text-slate-500 hover:text-slate-300 cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+          <span class="text-[10px] font-medium mt-0.5">Trang chủ</span>
+        </button>
+        <button type="button" class="flex flex-col items-center justify-center flex-1 h-full text-slate-500 hover:text-slate-300 cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          <span class="text-[10px] font-medium mt-0.5">Khám phá</span>
+        </button>
+        <div class="flex items-center justify-center flex-1 -mt-4">
+          <button type="button" class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-emerald-500 text-slate-950 flex items-center justify-center shadow-lg shadow-cyan-500/30 cursor-pointer active:scale-95 transition-transform">
+            <svg class="w-6 h-6 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          </button>
+        </div>
+        <button type="button" class="flex flex-col items-center justify-center flex-1 h-full text-cyan-400 cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+          </svg>
+          <span class="text-[10px] font-bold mt-0.5">Đơn hàng</span>
+        </button>
+        <button type="button" class="flex flex-col items-center justify-center flex-1 h-full text-slate-500 hover:text-slate-300 cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="text-[10px] font-medium mt-0.5">Cài đặt</span>
+        </button>
+      </div>
+      <div class="py-1.5 flex justify-center bg-[#0B0F17]">
+        <div class="w-32 h-1 bg-slate-600 rounded-full"></div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

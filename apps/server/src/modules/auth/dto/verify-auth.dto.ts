@@ -22,13 +22,13 @@ export class VerifyAuthDto {
 
   @ApiPropertyOptional({
     description: 'Authentication provider name',
-    enum: ['google', 'privy', 'solana'],
+    enum: ['google', 'privy', 'solana', 'dev'],
     example: 'google',
     default: 'google',
   })
   @IsOptional()
   @IsString({ message: 'Provider must be a string' })
-  provider?: 'google' | 'privy' | 'solana';
+  provider?: 'google' | 'privy' | 'solana' | 'dev' | string;
 
   @ApiPropertyOptional({
     description: 'Solana Public Key (Base58 encoded wallet address)',

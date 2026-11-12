@@ -3,12 +3,14 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from '../../database/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuditActionType } from '../audit-log/dto/audit-log.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   OpenDisputeDto,
   QueryDisputeDto,
@@ -28,6 +30,7 @@ export class DisputesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
 
   /**
@@ -135,7 +138,7 @@ export class DisputesService {
       dto.reason,
     );
 
-    return this.prisma.$transaction(async (tx) => {
+    const dispute = await this.prisma.$transaction(async (tx) => {
       // Transition deal to DISPUTED
       await tx.deal.update({
         where: { id: dto.dealId },
@@ -164,6 +167,13 @@ export class DisputesService {
         },
       });
     });
+
+    this.notificationsService?.notifyDisputeRaised(
+      deal,
+      dispute,
+      dto.initiatorId,
+    );
+    return dispute;
   }
 
   async findAll(query: QueryDisputeDto) {
@@ -374,6 +384,13 @@ export class DisputesService {
             ? dispute.deal.settleTxHash || undefined
             : dispute.deal.disputeTxHash || undefined,
       });
+
+      if (dto.adminVerdict === ArbitrationVerdict.APPROVE_PAYOUT) {
+        this.notificationsService?.notifyDealSettled(
+          result.deal,
+          result.deal.settleTxHash,
+        );
+      }
     }
 
     return result;

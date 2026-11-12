@@ -3,15 +3,18 @@ import type { NextRequest } from 'next/server';
 import { isTokenExpired } from '@/lib/jwt-edge';
 
 /**
- * Next.js 16 Edge Proxy Convention (formerly Middleware).
- * Enforces session lifecycle verification, legacy aliases 307 routing, and route gating.
+ * Next.js Edge Middleware & Network Proxy for User Portal (cl_user).
+ * Pre-emptively executes 307 HTTP redirects at edge network level before page hydration
+ * to eliminate Flash of Unauthenticated Content (FOUC).
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const rawToken = request.cookies.get('access_token')?.value;
+  const hasToken = Boolean(rawToken);
   const isExpired = !rawToken || isTokenExpired(rawToken, 15);
+  const isAuthenticated = hasToken && !isExpired;
 
-  // 1. Alias redirects (307 Temporary Redirect)
+  // 1. Legacy Route Aliases (HTTP 307 Temporary Redirect)
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
     return NextResponse.redirect(new URL('/user', request.url), 307);
   }
@@ -25,15 +28,19 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/user/settings', request.url), 307);
   }
 
-  // 2. Protected Routes (/user and /user/*)
+  // 2. Protected User Routes (/user and /user/*)
   if (pathname === '/user' || pathname.startsWith('/user/')) {
-    if (isExpired) {
+    if (!isAuthenticated) {
       const loginUrl = new URL('/login', request.url);
       const callbackTarget = pathname + (request.nextUrl.search || '');
-      loginUrl.searchParams.set('callbackUrl', callbackTarget);
+      loginUrl.searchParams.set('callbackUrl', encodeURIComponent(callbackTarget));
+
+      if (hasToken && isExpired) {
+        loginUrl.searchParams.set('expired', '1');
+      }
 
       const response = NextResponse.redirect(loginUrl, 307);
-      if (rawToken) {
+      if (hasToken) {
         response.cookies.delete('access_token');
       }
       return response;
@@ -54,13 +61,37 @@ export function proxy(request: NextRequest) {
       return response;
     }
 
-    // Do NOT forcefully redirect /login to /user at the edge proxy level
-    // to prevent orphaned/httpOnly cookie bounce-back loops when client state is unauthenticated.
+    if (isAuthenticated) {
+      const rawCallbackUrl = request.nextUrl.searchParams.get('callbackUrl');
+      let targetUrl = '/user';
+
+      if (rawCallbackUrl) {
+        try {
+          const decoded = decodeURIComponent(rawCallbackUrl);
+          if (
+            decoded.startsWith('/') &&
+            !decoded.startsWith('//') &&
+            !decoded.startsWith('/login') &&
+            !decoded.startsWith('/register')
+          ) {
+            targetUrl = decoded;
+          }
+        } catch {
+          targetUrl = '/user';
+        }
+      }
+
+      return NextResponse.redirect(new URL(targetUrl, request.url), 307);
+    }
+
     return NextResponse.next();
   }
 
   return NextResponse.next();
 }
+
+export const middleware = proxy;
+export default proxy;
 
 export const config = {
   matcher: [
