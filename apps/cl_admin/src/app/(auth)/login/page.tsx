@@ -3,14 +3,19 @@
 import * as React from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { KeyRound, Cpu, Compass } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { AuthErrorBanner } from '@/components/auth/auth-error-banner';
 import { StandardLoginTab } from '@/components/auth/standard-login-tab';
 import { useAdminAuthHandlers } from '@/components/auth/use-admin-auth-handlers';
-import { useAdminAuthStore } from '@/lib/admin-auth-store';
+import { useAuthStore } from '@/lib/auth-store';
+import {
+  getAdminAuthCookie,
+  setAdminAuthCookie,
+  clearAdminAuthCookie,
+  isTokenExpired,
+} from '@/lib/jwt-edge';
 
 // Code-split Web3/Passkey tab for efficient hydration
 const Web3PasskeyTab = dynamic(
@@ -26,34 +31,12 @@ const Web3PasskeyTab = dynamic(
 
 type AuthTab = 'standard' | 'web3';
 
+const LOGIN_LOOP_GUARD_KEY = 'tp_login_loop_guard';
+
 function LoginFormContent() {
-  const [activeTab, setActiveTab] = React.useState<AuthTab>('standard');
+  const router = useRouter();
   const searchParams = useSearchParams();
-
-  React.useEffect(() => {
-    const isLogout = searchParams?.get('logout') === '1';
-    const isForce = searchParams?.get('force') === '1';
-
-    if (isLogout || isForce) {
-      if (typeof document !== 'undefined') {
-        document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
-        document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=None; Secure';
-        document.cookie = 'access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
-      }
-      try {
-        localStorage.removeItem('trustpassz-admin-auth');
-        sessionStorage.clear();
-      } catch {}
-
-      useAdminAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-
-      if (isLogout) {
-        toast.success('Đã đăng xuất tài khoản quản trị thành công.', {
-          id: 'admin-logout-toast',
-        });
-      }
-    }
-  }, [searchParams]);
+  const [activeTab, setActiveTab] = React.useState<AuthTab>('standard');
 
   const {
     connected,
@@ -72,6 +55,78 @@ function LoginFormContent() {
     handlePasskeySignIn,
     onEmailSubmit,
   } = useAdminAuthHandlers();
+
+  React.useEffect(() => {
+    const isLogout = searchParams?.get('logout') === '1';
+    const isExpired = searchParams?.get('expired') === '1';
+    const isEdgeUnauth = searchParams?.get('edge_unauth') === '1';
+    const isForce = searchParams?.get('force') === '1';
+    const hasUnauthSignal = isLogout || isExpired || isEdgeUnauth || isForce;
+
+    // 1. Session Storage Circuit Breaker: prevent ping-pong redirect loop within 4 seconds
+    try {
+      const now = Date.now();
+      const rawHistory = sessionStorage.getItem(LOGIN_LOOP_GUARD_KEY);
+      const history: number[] = rawHistory ? JSON.parse(rawHistory) : [];
+      const recent = history.filter((timestamp) => now - timestamp < 4000);
+      recent.push(now);
+      sessionStorage.setItem(LOGIN_LOOP_GUARD_KEY, JSON.stringify(recent));
+
+      if (recent.length > 2) {
+        console.warn('[Security] Redirect loop detected. Tripping circuit breaker at /login.');
+        clearAdminAuthCookie();
+        localStorage.removeItem('trustpassz-admin-auth');
+        sessionStorage.removeItem(LOGIN_LOOP_GUARD_KEY);
+        useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+        toast.error('Phát hiện vòng lặp chuyển hướng bất thường. Đã khôi phục trạng thái an toàn.');
+        return;
+      }
+    } catch {
+      // Storage access fail-safe
+    }
+
+    // 2. If unauth signals exist, PURGE state and strictly FORBID auto-redirect
+    if (hasUnauthSignal) {
+      clearAdminAuthCookie();
+      try {
+        localStorage.removeItem('trustpassz-admin-auth');
+      } catch {}
+
+      useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+
+      if (isLogout) {
+        toast.success('Đã đăng xuất tài khoản quản trị thành công.', {
+          id: 'admin-logout-toast',
+        });
+      } else if (isExpired) {
+        toast.error('Phiên đăng nhập đã hết hạn (401). Vui lòng đăng nhập lại.', {
+          id: 'admin-expired-toast',
+        });
+      } else if (isEdgeUnauth) {
+        toast.info('Yêu cầu xác thực tài khoản Quản trị viên để tiếp tục.', {
+          id: 'admin-edge-unauth-toast',
+        });
+      }
+      return;
+    }
+
+    // 3. Only auto-redirect if store has valid non-expired admin credentials
+    const { user, token, isAuthenticated } = useAuthStore.getState();
+    if (isAuthenticated && user && token && !isTokenExpired(token)) {
+      const isPrivileged =
+        user.role === 'ADMIN' ||
+        user.role === 'ARBITRATOR' ||
+        user.role === 'SUPER_ADMIN';
+
+      if (isPrivileged) {
+        const cookieToken = getAdminAuthCookie();
+        if (cookieToken !== token && token.split('.').length === 3) {
+          setAdminAuthCookie(token);
+        }
+        window.location.assign(safeCallbackUrl || '/dashboard');
+      }
+    }
+  }, [searchParams, router, safeCallbackUrl]);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5">

@@ -16,12 +16,6 @@ interface AuthGuardProps {
   fallback?: React.ReactNode;
 }
 
-/**
- * Client-Side Authorization Guard & Session Synchronizer.
- * Inspects cookie tokens, Zustand auth-store state, verifies roles, handles hydration,
- * actively performs proactive token expiry verification on tab change / window focus,
- * and recovers sessions gracefully from valid access_token cookies.
- */
 export function AuthGuard({
   children,
   requiredRoles,
@@ -33,72 +27,96 @@ export function AuthGuard({
 
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const logout = useAuthStore((s) => s.logout);
   const checkSessionExpiry = useAuthStore((s) => s.checkSessionExpiry);
-  const [mounted, setMounted] = useState(false);
+
+  const [isVerifyingServerSession, setIsVerifyingServerSession] = useState(false);
+  const [serverSessionChecked, setServerSessionChecked] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
 
-    async function recoverSession() {
-      // 1. Recover session from document.cookie (if non-httpOnly)
+    async function syncSessionWithServer() {
+      // 1. Wait until Zustand finishes reading localStorage
+      if (!hasHydrated) {
+        return;
+      }
+
+      // If already authenticated with a valid token, no need for active probe
+      const currentToken = useAuthStore.getState().token;
+      if (
+        useAuthStore.getState().isAuthenticated &&
+        useAuthStore.getState().user &&
+        (!currentToken || !isTokenExpired(currentToken, 15))
+      ) {
+        setServerSessionChecked(true);
+        return;
+      }
+
+      // 2. Cookie check
       if (typeof document !== "undefined") {
         const match = document.cookie.match(/(?:^|; )access_token=([^;]*)/);
         const cookieToken = match ? decodeURIComponent(match[1]) : null;
 
         if (cookieToken && !isTokenExpired(cookieToken, 15)) {
-          const storeState = useAuthStore.getState();
-          if (!storeState.isAuthenticated || !storeState.user) {
-            const payload = parseJwtPayload(cookieToken);
-            if (payload) {
-              storeState.setAuth(
-                {
-                  id: (payload.id as string) || (payload.sub as string) || "usr-1",
-                  email: payload.email,
-                  walletAddress: (payload.walletAddress as string) || (payload.wallet_address as string),
-                  role: (payload.role as string) || "USER",
-                  displayName:
-                    (payload.displayName as string) ||
-                    (payload.email ? payload.email.split("@")[0] : "Trader"),
-                },
-                cookieToken
-              );
+          const payload = parseJwtPayload(cookieToken);
+          if (payload) {
+            setAuth(
+              {
+                id: (payload.id as string) || (payload.sub as string) || "usr-1",
+                email: payload.email,
+                walletAddress:
+                  (payload.walletAddress as string) ||
+                  (payload.wallet_address as string),
+                role: (payload.role as string) || "USER",
+                displayName:
+                  (payload.displayName as string) ||
+                  (payload.email ? payload.email.split("@")[0] : "Trader"),
+              },
+              cookieToken
+            );
+            if (!isCancelled) {
+              setServerSessionChecked(true);
             }
+            return;
           }
         }
       }
 
-      // 2. Query /api/session to recover httpOnly cookie session from Edge
-      if (!useAuthStore.getState().isAuthenticated || !useAuthStore.getState().user) {
-        try {
-          const res = await fetch("/api/session");
-          if (res.ok && !isCancelled) {
-            const data = await res.json();
-            if (data?.authenticated && data?.user) {
-              useAuthStore.getState().setAuth(data.user, data.token);
-            }
-          }
-        } catch {
-          // Non-fatal session probe fallback
-        }
-      }
+      // 3. Fallback: Query /api/v1/auth/me to recover HttpOnly cookie session from backend Render via Next.js rewrite
+      setIsVerifyingServerSession(true);
+      try {
+        const res = await fetch("/api/v1/auth/me", {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+        });
 
-      if (!isCancelled) {
-        setMounted(true);
-        if (useAuthStore.getState().isAuthenticated) {
-          useAuthStore.getState().checkSessionExpiry();
+        if (res.ok && !isCancelled) {
+          const data = await res.json();
+          if (data?.user) {
+            setAuth(data.user, data.token || data.accessToken || null);
+          }
+        }
+      } catch {
+        // Non-fatal probe fallback
+      } finally {
+        if (!isCancelled) {
+          setIsVerifyingServerSession(false);
+          setServerSessionChecked(true);
         }
       }
     }
 
-    void recoverSession();
+    void syncSessionWithServer();
 
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [hasHydrated, setAuth]);
 
-  // Proactive check when user switches back to tab after inactive duration
+  // Proactive check when user switches back to tab
   useEffect(() => {
     const handleActiveFocus = () => {
       if (document.visibilityState === "visible" && isAuthenticated) {
@@ -115,62 +133,27 @@ export function AuthGuard({
     };
   }, [isAuthenticated, checkSessionExpiry]);
 
-  // Global listener for 401 Unauthorized API responses across the app
-  useEffect(() => {
-    const handleUnauthorizedEvent = () => {
-      logout(true);
-    };
-
-    window.addEventListener("auth:unauthorized", handleUnauthorizedEvent);
-    return () => {
-      window.removeEventListener("auth:unauthorized", handleUnauthorizedEvent);
-    };
-  }, [logout]);
-
-  // Wait for client hydration to prevent SSR mismatch
-  if (!mounted) {
+  // Wait for client store hydration and server session verification before rendering or evaluating unauth
+  if (!hasHydrated || (!serverSessionChecked && !isAuthenticated)) {
     return fallback ? (
       <>{fallback}</>
     ) : (
       <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-3">
         <div className="size-10 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin shadow-[0_0_20px_rgba(6,182,212,0.3)]" />
         <span className="text-xs font-mono text-cyan-400/80 animate-pulse tracking-wider">
-          VERIFYING SESSION ENCLAVE...
+          {isVerifyingServerSession
+            ? "SYNCHRONIZING SECURE SESSION..."
+            : "INITIALIZING AUTH ENCLAVE..."}
         </span>
       </div>
     );
   }
 
-  // Double-check cookie before declaring unauthenticated
   const activeUser = user || useAuthStore.getState().user;
   const isAuth = isAuthenticated || useAuthStore.getState().isAuthenticated;
 
   // Not authenticated: render UnauthScreen with preserved callbackUrl
   if (!isAuth || !activeUser) {
-    // Last-ditch cookie recovery check
-    if (typeof document !== "undefined") {
-      const match = document.cookie.match(/(?:^|; )access_token=([^;]*)/);
-      const cookieToken = match ? decodeURIComponent(match[1]) : null;
-      if (cookieToken && !isTokenExpired(cookieToken, 15)) {
-        const payload = parseJwtPayload(cookieToken);
-        if (payload) {
-          useAuthStore.getState().setAuth(
-            {
-              id: (payload.id as string) || (payload.sub as string) || "usr-1",
-              email: payload.email,
-              walletAddress: (payload.walletAddress as string) || (payload.wallet_address as string),
-              role: (payload.role as string) || "USER",
-              displayName:
-                (payload.displayName as string) ||
-                (payload.email ? payload.email.split("@")[0] : "Trader"),
-            },
-            cookieToken
-          );
-          return <>{children}</>;
-        }
-      }
-    }
-
     const currentQuery = searchParams?.toString();
     const fullCurrentUrl = `${pathname}${currentQuery ? `?${currentQuery}` : ""}`;
 

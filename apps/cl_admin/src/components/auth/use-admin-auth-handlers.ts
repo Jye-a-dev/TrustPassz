@@ -59,8 +59,7 @@ export function useAdminAuthHandlers() {
         toast.success(`${methodDesc} thành công!`, {
           description: `Chào mừng ${adminUser.displayName} (${role}) quay lại hệ thống.`,
         });
-        router.refresh();
-        router.push(safeCallbackUrl);
+        window.location.assign(safeCallbackUrl || '/dashboard');
         return true;
       } else {
         const msg = "Không thể cấp phiên quản trị trên thiết bị này.";

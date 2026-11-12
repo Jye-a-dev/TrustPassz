@@ -28,6 +28,10 @@ function isOnAuthPage(): boolean {
   return pathname === "/login" || pathname === "/register";
 }
 
+function isAuthEndpoint(url: string): boolean {
+  return /\/auth\/(login|verify|register|nonce|logout)/i.test(url);
+}
+
 function triggerSafeLogout(): void {
   if (isLoggingOut) {
     return;
@@ -53,19 +57,29 @@ function triggerSafeLogout(): void {
 }
 
 function resolveBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:3000`;
+    return "";
   }
-  return "http://localhost:3000";
+  return (
+    process.env.NEXT_PUBLIC_API_URL || "https://trustpassz-server.onrender.com"
+  ).replace(/\/$/, "");
 }
 
 function buildFinalUrl(
-  fullUrl: string,
+  endpoint: string,
   params?: Record<string, string | number | boolean | undefined | null>
 ): string {
+  const baseUrl = resolveBaseUrl();
+  let fullUrl: string;
+
+  if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+    fullUrl = endpoint;
+  } else if (!baseUrl) {
+    fullUrl = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  } else {
+    fullUrl = `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+  }
+
   if (!params) {
     return fullUrl;
   }
@@ -85,12 +99,6 @@ function buildFinalUrl(
   return `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}${queryString}`;
 }
 
-/**
- * Robust HTTP client with Request & Response Interceptors:
- * - Request Interceptor: Always attaches `Authorization: Bearer <token>` from Zustand store (fallback cookie)
- *   for cross-origin Vercel -> Render requests where third-party cookies are blocked.
- * - Response Interceptor: Intercepts HTTP 401 and safely invokes `logout(true)` once via `isLoggingOut` lock.
- */
 export async function apiClient<T>(
   endpoint: string,
   options: RequestOptions = {}
@@ -103,11 +111,7 @@ export async function apiClient<T>(
     ...customConfig
   } = options;
 
-  const baseUrl = resolveBaseUrl();
-  const fullUrl =
-    endpoint.startsWith("http://") || endpoint.startsWith("https://")
-      ? endpoint
-      : `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+  const finalUrl = buildFinalUrl(endpoint, params);
 
   // ==========================================
   // REQUEST INTERCEPTOR: Bearer Token & Expiry Check
@@ -118,8 +122,8 @@ export async function apiClient<T>(
 
   if (rawToken) {
     if (!isTokenExpired(rawToken, 15)) {
-      activeToken = rawToken;
-    } else if (!skipAuthCheck && store.isAuthenticated && !isOnAuthPage()) {
+      activeToken = rawToken.trim();
+    } else if (!skipAuthCheck && store.isAuthenticated && !isOnAuthPage() && !isAuthEndpoint(finalUrl)) {
       triggerSafeLogout();
       throw new ApiError(
         401,
@@ -128,7 +132,6 @@ export async function apiClient<T>(
     }
   }
 
-  const finalUrl = buildFinalUrl(fullUrl, params);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -165,16 +168,23 @@ export async function apiClient<T>(
     clearTimeout(timeoutId);
 
     // ===========================================
-    // RESPONSE INTERCEPTOR: Reactive 401 Intercept
+    // RESPONSE INTERCEPTOR: Strict Safe 401 Intercept
     // ===========================================
     if (response.status === 401) {
-      triggerSafeLogout();
+      const isAuthCall = isAuthEndpoint(finalUrl);
+      const isAuthPage = isOnAuthPage();
+
+      if (!isAuthCall && !isAuthPage) {
+        triggerSafeLogout();
+      }
+
       let errorData: unknown;
       try {
         errorData = await response.json();
       } catch {
         errorData = await response.text();
       }
+
       throw new ApiError(
         401,
         "Unauthorized: Session invalidated by server",
@@ -211,3 +221,23 @@ export async function apiClient<T>(
     );
   }
 }
+
+apiClient.get = <T>(endpoint: string, options?: RequestOptions) =>
+  apiClient<T>(endpoint, { ...options, method: "GET" });
+
+apiClient.post = <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
+  apiClient<T>(endpoint, {
+    ...options,
+    method: "POST",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+apiClient.patch = <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
+  apiClient<T>(endpoint, {
+    ...options,
+    method: "PATCH",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+apiClient.delete = <T>(endpoint: string, options?: RequestOptions) =>
+  apiClient<T>(endpoint, { ...options, method: "DELETE" });

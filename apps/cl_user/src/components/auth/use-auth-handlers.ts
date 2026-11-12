@@ -6,13 +6,13 @@
  */
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import bs58 from "bs58";
 import { verifyAuthApi, type AuthResponse } from "@/lib/auth-api";
-import { useAuthStore, generateClientSessionJwt } from "@/lib/auth-store";
+import { useAuthStore } from "@/lib/auth-store";
 import {
   clearRedirectGuard,
   resolveSafeCallbackTarget,
@@ -20,7 +20,6 @@ import {
 import type { LoginFormValues } from "@/components/auth/login-email-form";
 
 export function useAuthHandlers() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
 
@@ -40,7 +39,7 @@ export function useAuthHandlers() {
 
   const handleAuthSuccess = React.useCallback(
     (result: AuthResponse, methodDesc: string) => {
-      const token = result.accessToken || generateClientSessionJwt(result.user);
+      const token = result.accessToken || null;
       clearRedirectGuard();
       setAuth(result.user, token);
 
@@ -49,15 +48,10 @@ export function useAuthHandlers() {
       });
 
       const target = getRedirectTarget();
-      router.replace(target);
-
-      setTimeout(() => {
-        if (typeof window !== "undefined" && window.location.pathname.startsWith("/login")) {
-          window.location.replace(target);
-        }
-      }, 250);
+      // Hard navigation ensures browser transmits freshly set first-party cookies to Edge proxy
+      window.location.assign(target);
     },
-    [getRedirectTarget, router, setAuth]
+    [getRedirectTarget, setAuth]
   );
 
   const handleSolanaSignIn = async () => {
