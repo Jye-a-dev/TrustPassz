@@ -22,6 +22,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateStorefrontDto, UpdateStorefrontDto } from './dto/storefront.dto';
 import { UserRole } from '@prisma/client';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Role, Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Users & Social Storefronts')
@@ -43,8 +46,10 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({
-    summary: 'List registered users with optional role filtering',
+    summary: 'List registered users with optional role filtering (Admin only)',
     description: 'Retrieves user list ordered by registration timestamp.',
   })
   @ApiQuery({

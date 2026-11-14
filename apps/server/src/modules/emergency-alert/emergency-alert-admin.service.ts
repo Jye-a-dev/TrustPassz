@@ -43,7 +43,14 @@ export class EmergencyAlertAdminService {
    */
   public verify2FaPin(pin: string): void {
     const configuredPin =
-      this.configService.get<string>('ADMIN_2FA_PIN')?.trim() || '888999';
+      this.configService.get<string>('ADMIN_2FA_PIN')?.trim() ||
+      process.env.ADMIN_2FA_PIN?.trim();
+
+    if (!configuredPin) {
+      throw new ForbiddenException(
+        'Hệ thống chưa cấu hình mã PIN bảo mật 2FA',
+      );
+    }
 
     if (!pin || pin.trim() !== configuredPin) {
       throw new ForbiddenException(

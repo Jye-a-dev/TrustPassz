@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -20,6 +21,9 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { THROTTLE_CONFIG } from '../../config/throttle.config';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Role, Roles } from '../../common/decorators/roles.decorator';
 import {
   CurrentUser,
   RequestUser,
@@ -297,15 +301,27 @@ export class PaymentsController {
   }
 
   @Post('simulate-success/:dealId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
-    summary: 'Mô phỏng thanh toán VietQR thành công (Sandbox Dev mode)',
+    summary: 'Mô phỏng thanh toán VietQR thành công (Sandbox Dev mode, Admin only)',
   })
   @ApiParam({
     name: 'dealId',
     type: String,
     description: 'UUID của Deal',
   })
+  @ApiResponse({
+    status: 403,
+    description: 'Bị cấm trên môi trường Production hoặc người dùng không có quyền Admin.',
+  })
   async simulateSuccess(@Param('dealId', new ParseUUIDPipe()) dealId: string) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException(
+        'Simulation endpoint is disabled in production',
+      );
+    }
     return this.paymentsService.simulatePaymentSuccess(dealId);
   }
 

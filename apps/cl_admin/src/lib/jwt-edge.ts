@@ -12,7 +12,7 @@ export interface AdminEdgeJwtPayload {
  * Strictly avoids Node.js built-ins (crypto, buffer, stream).
  */
 export function parseJwtPayload<T extends Record<string, unknown> = AdminEdgeJwtPayload>(
-  token: string
+  token: string,
 ): T | null {
   try {
     const cleanToken = token
@@ -22,19 +22,6 @@ export function parseJwtPayload<T extends Record<string, unknown> = AdminEdgeJwt
 
     if (!cleanToken || cleanToken === 'undefined' || cleanToken === 'null') {
       return null;
-    }
-
-    // Support dev sandbox tokens in staging / sandbox environments
-    if (
-      cleanToken.startsWith('dev-sandbox-') ||
-      cleanToken.startsWith('sec-sig-')
-    ) {
-      const isArbitrator = cleanToken.toLowerCase().includes('arbitrator');
-      const isSuperAdmin = cleanToken.toLowerCase().includes('super');
-      return {
-        role: isSuperAdmin ? 'SUPER_ADMIN' : isArbitrator ? 'ARBITRATOR' : 'ADMIN',
-        exp: Math.floor(Date.now() / 1000) + 86400,
-      } as unknown as T;
     }
 
     const segments = cleanToken.split('.');
@@ -76,18 +63,123 @@ export function isTokenExpired(token: string, bufferSeconds = 15): boolean {
     return true;
   }
 
-  // If token is well-formed but lacks an 'exp' claim, treat it as not expired
+  // If token lacks an 'exp' claim, treat it as expired for admin safety
   if (payload.exp === undefined || payload.exp === null) {
-    return false;
+    return true;
   }
 
   const expNumber = Number(payload.exp);
   if (Number.isNaN(expNumber)) {
-    return false;
+    return true;
   }
 
   const nowInSeconds = Math.floor(Date.now() / 1000);
   return expNumber < nowInSeconds + bufferSeconds;
+}
+
+/**
+ * Verifies HMAC-SHA256 (HS256) signature of a JWT using Web Crypto API.
+ * Edge Runtime and modern browser compatible without Node.js dependencies.
+ */
+export async function verifyEdgeJwtSignature(
+  token: string,
+  secret: string,
+): Promise<boolean> {
+  try {
+    const cleanToken = token
+      .replace(/^Bearer\s+/i, '')
+      .replace(/^"|"$/g, '')
+      .trim();
+
+    const segments = cleanToken.split('.');
+    if (segments.length !== 3) {
+      return false;
+    }
+
+    const [headerB64, payloadB64, signatureB64] = segments;
+
+    // Convert Base64URL signature to Uint8Array
+    let base64 = signatureB64.trim().replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4 !== 0) {
+      base64 += '=';
+    }
+
+    const binary = atob(base64);
+    const signatureBytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      signatureBytes[i] = binary.charCodeAt(i);
+    }
+    const signatureBuffer = signatureBytes.buffer as ArrayBuffer;
+
+    const enc = new TextEncoder();
+    const keyBytes = enc.encode(secret);
+    const keyBuffer = keyBytes.buffer as ArrayBuffer;
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyBuffer,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    );
+
+    const dataBytes = enc.encode(`${headerB64}.${payloadB64}`);
+    const dataBuffer = dataBytes.buffer as ArrayBuffer;
+
+    return await crypto.subtle.verify('HMAC', key, signatureBuffer, dataBuffer);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates token expiration, role privileges, and cryptographic signature in Edge runtime.
+ */
+export async function verifyAdminEdgeToken(
+  token: string,
+  secret?: string,
+): Promise<{ valid: boolean; payload: AdminEdgeJwtPayload | null }> {
+  const cleanToken = token
+    .replace(/^Bearer\s+/i, '')
+    .replace(/^"|"$/g, '')
+    .trim();
+
+  if (!cleanToken || cleanToken.split('.').length !== 3) {
+    return { valid: false, payload: null };
+  }
+
+  const payload = parseJwtPayload<AdminEdgeJwtPayload>(cleanToken);
+  if (!payload) {
+    return { valid: false, payload: null };
+  }
+
+  // 1. Strict expiration check
+  if (isTokenExpired(cleanToken, 15)) {
+    return { valid: false, payload: null };
+  }
+
+  // 2. Strict RBAC check (ADMIN, ARBITRATOR, SUPER_ADMIN)
+  const role = (payload.role || '').toUpperCase();
+  const allowedRoles = ['ADMIN', 'ARBITRATOR', 'SUPER_ADMIN'];
+  if (!allowedRoles.includes(role)) {
+    return { valid: false, payload: null };
+  }
+
+  // 3. Cryptographic signature verification if secret is provided or in process.env
+  const jwtSecret =
+    secret ||
+    (typeof process !== 'undefined'
+      ? process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET
+      : undefined);
+
+  if (jwtSecret) {
+    const isSignatureValid = await verifyEdgeJwtSignature(cleanToken, jwtSecret);
+    if (!isSignatureValid) {
+      return { valid: false, payload: null };
+    }
+  }
+
+  return { valid: true, payload };
 }
 
 /**

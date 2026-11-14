@@ -8,25 +8,20 @@ import {
   ShieldCheck,
   AlertTriangle,
   Loader2,
+  Lock,
+  ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card';
 import { useAdminAuthStore } from '@/lib/admin-auth-store';
 import { toast } from 'sonner';
+import type { AdminUser, UserRole } from '@/types';
 
-const MASTER_KEYS = ['TPZ_ADMIN_MASTER_KEY_2026', 'BASE_SEPOLIA_ARBITRATOR_KEY'];
+const isProduction = process.env.NODE_ENV === 'production';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { setSession } = useAdminAuthStore();
+  const { setAuth } = useAdminAuthStore();
 
   const [displayName, setDisplayName] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -35,6 +30,39 @@ export default function RegisterPage() {
   const [role, setRole] = React.useState<'ARBITRATOR' | 'ADMIN'>('ARBITRATOR');
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  // In production, public registration is strictly disabled
+  if (isProduction) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5 text-xs text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 border border-amber-200">
+          <Lock className="h-6 w-6 text-amber-600" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-base font-bold text-slate-900">
+            Cổng Kích Hoạt Đã Khóa
+          </h2>
+          <p className="text-slate-600 leading-relaxed font-medium">
+            Tài khoản Quản trị &amp; Trọng tài chỉ được cấp phát nội bộ bởi Super Admin.
+          </p>
+          <p className="text-slate-400 text-[11px]">
+            Vui lòng liên hệ ban quản trị hệ thống nếu bạn cần được cấp quyền phân xử hoặc quản trị.
+          </p>
+        </div>
+        <div className="pt-2">
+          <Link href="/login">
+            <Button
+              type="button"
+              className="w-full h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Quay lại trang Đăng nhập</span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,41 +73,73 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!MASTER_KEYS.includes(inviteToken.trim())) {
-      setError('Invite Token / Master Secret Key không chính xác hoặc đã hết hạn.');
-      toast.error('Mã phân quyền không hợp lệ.');
-      return;
-    }
-
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
 
-    const id = `user-${Date.now()}`;
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(
-      JSON.stringify({
-        id,
-        sub: id,
-        email,
-        role,
-        exp: Math.floor(Date.now() / 1000) + 7 * 24 * 3600,
-      })
-    );
-    const token = `${header}.${payload}.sig_onboarded_${role.toLowerCase()}`;
+    try {
+      const apiUrl = (
+        process.env.NEXT_PUBLIC_API_URL ||
+        (typeof window !== 'undefined'
+          ? `${window.location.protocol}//${window.location.hostname}:3000`
+          : 'http://localhost:3000')
+      ).replace(/\/$/, '');
 
-    const newAdmin = {
-      id,
-      email,
-      displayName,
-      walletAddress: walletAddress || '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-      role,
-      createdAt: new Date().toISOString(),
-    };
+      const response = await fetch(`${apiUrl}/api/v1/auth/admin-invite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          displayName: displayName.trim(),
+          email: email.trim().toLowerCase(),
+          inviteToken: inviteToken.trim(),
+          walletAddress: walletAddress.trim() || undefined,
+          role,
+        }),
+      });
 
-    setSession(token, newAdmin);
-    toast.success(`Đã kích hoạt quyền ${role} thành công!`);
-    setIsLoading(false);
-    router.push('/dashboard');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message ||
+            `Xác thực thất bại (${response.status}: ${response.statusText})`
+        );
+      }
+
+      const result = await response.json();
+      const rawUser = result.user || {};
+      const userRole = (rawUser.role || role) as UserRole;
+      const accessToken = result.accessToken || result.token || null;
+
+      if (!accessToken) {
+        throw new Error('Máy chủ không trả về JWT Access Token hợp lệ.');
+      }
+
+      const adminUser: AdminUser = {
+        id: rawUser.id || `admin-${Date.now()}`,
+        email: rawUser.email || email,
+        displayName: rawUser.displayName || displayName,
+        walletAddress: rawUser.walletAddress || walletAddress || undefined,
+        avatarUrl: rawUser.avatarUrl || undefined,
+        role: userRole,
+        createdAt: rawUser.createdAt || new Date().toISOString(),
+      };
+
+      const isSet = setAuth(adminUser, accessToken);
+      if (!isSet) {
+        throw new Error('Không thể khởi tạo phiên làm việc với quyền hạn được cấp.');
+      }
+
+      toast.success(`Đã kích hoạt quyền ${userRole} thành công!`);
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Đăng ký tài khoản quản trị thất bại';
+      setError(msg);
+      toast.error('Kích hoạt thất bại', { description: msg });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -87,12 +147,12 @@ export default function RegisterPage() {
       <div className="border-b border-slate-100 pb-3 space-y-1">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-900">
-            Kích Hoạt Quyền Trọng Tài &amp; Quản Trị
+            Kích Hoạt Quyền Trọng Tài &amp; Quản Trị (Môi trường Dev/Staging)
           </h2>
           <ShieldCheck className="h-4.5 w-4.5 text-emerald-600" />
         </div>
         <p className="text-slate-500 text-[11px]">
-          Chỉ chấp thuận cho thành viên hội đồng phân xử có Master Secret Token.
+          Xác thực mã mời (Invite Token) thông qua máy chủ Backend bảo mật.
         </p>
       </div>
 
@@ -105,15 +165,12 @@ export default function RegisterPage() {
         )}
 
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="font-medium text-slate-700">Master Secret Token / Invite Token *</label>
-            <span className="text-[10px] text-slate-400 font-mono">Demo: TPZ_ADMIN_MASTER_KEY_2026</span>
-          </div>
+          <label className="font-medium text-slate-700">Mã Mời (Invite Token) *</label>
           <Input
             type="password"
             value={inviteToken}
             onChange={(e) => setInviteToken(e.target.value)}
-            placeholder="Nhập secret key của bạn"
+            placeholder="Nhập mã mời được cấp từ Super Admin"
             className="h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-900 font-mono focus-visible:ring-slate-400"
             required
           />

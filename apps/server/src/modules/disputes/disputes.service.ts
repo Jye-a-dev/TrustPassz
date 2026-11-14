@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -11,6 +12,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuditActionType } from '../audit-log/dto/audit-log.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RequestUser } from '../../common/decorators/current-user.decorator';
 import {
   OpenDisputeDto,
   QueryDisputeDto,
@@ -117,13 +119,28 @@ export class DisputesService {
     };
   }
 
-  async openDispute(dto: OpenDisputeDto) {
+  async openDispute(dto: OpenDisputeDto, currentUser?: RequestUser) {
     const deal = await this.prisma.deal.findUnique({
       where: { id: dto.dealId },
     });
 
     if (!deal) {
       throw new NotFoundException(`Deal ${dto.dealId} not found`);
+    }
+
+    if (currentUser) {
+      const isPrivileged =
+        currentUser.role === 'ADMIN' ||
+        currentUser.role === 'SUPER_ADMIN' ||
+        currentUser.role === 'ARBITRATOR';
+      const isParticipant =
+        currentUser.id === deal.buyerId || currentUser.id === deal.sellerId;
+      if (!isPrivileged && !isParticipant) {
+        throw new ForbiddenException(
+          'Bạn không phải là người mua hoặc người bán của giao dịch này.',
+        );
+      }
+      dto.initiatorId = currentUser.id;
     }
 
     if (deal.state === DealState.SETTLED || deal.state === DealState.REFUNDED) {
@@ -218,7 +235,7 @@ export class DisputesService {
     };
   }
 
-  async findByDealId(dealId: string) {
+  async findByDealId(dealId: string, currentUser?: RequestUser) {
     const dispute = await this.prisma.disputeLog.findFirst({
       where: { dealId },
       orderBy: { createdAt: 'desc' },
@@ -239,10 +256,25 @@ export class DisputesService {
       },
     });
 
+    if (dispute && currentUser) {
+      const isPrivileged =
+        currentUser.role === 'ADMIN' ||
+        currentUser.role === 'SUPER_ADMIN' ||
+        currentUser.role === 'ARBITRATOR';
+      const isParticipant =
+        currentUser.id === dispute.deal.buyerId ||
+        currentUser.id === dispute.deal.sellerId;
+      if (!isPrivileged && !isParticipant) {
+        throw new ForbiddenException(
+          'Bạn không có quyền truy cập hồ sơ tranh chấp này.',
+        );
+      }
+    }
+
     return dispute;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, currentUser?: RequestUser) {
     const dispute = await this.prisma.disputeLog.findUnique({
       where: { id },
       include: {
@@ -266,11 +298,26 @@ export class DisputesService {
       throw new NotFoundException(`Dispute log ${id} not found`);
     }
 
+    if (currentUser) {
+      const isPrivileged =
+        currentUser.role === 'ADMIN' ||
+        currentUser.role === 'SUPER_ADMIN' ||
+        currentUser.role === 'ARBITRATOR';
+      const isParticipant =
+        currentUser.id === dispute.deal.buyerId ||
+        currentUser.id === dispute.deal.sellerId;
+      if (!isPrivileged && !isParticipant) {
+        throw new ForbiddenException(
+          'Bạn không có quyền xem chi tiết tranh chấp này.',
+        );
+      }
+    }
+
     return dispute;
   }
 
-  async escalate(id: string) {
-    const dispute = await this.findOne(id);
+  async escalate(id: string, currentUser?: RequestUser) {
+    const dispute = await this.findOne(id, currentUser);
 
     if (dispute.status === DisputeStatus.CLOSED) {
       throw new BadRequestException('Cannot escalate closed dispute');
@@ -282,8 +329,16 @@ export class DisputesService {
     });
   }
 
-  async resolve(id: string, dto: ResolveDisputeDto) {
-    const dispute = await this.findOne(id);
+  async resolve(
+    id: string,
+    dto: ResolveDisputeDto,
+    currentUser?: RequestUser,
+  ) {
+    const dispute = await this.findOne(id, currentUser);
+
+    if (currentUser) {
+      dto.resolvedById = currentUser.id;
+    }
 
     if (dispute.status === DisputeStatus.CLOSED) {
       throw new BadRequestException('Dispute is already resolved and closed');
@@ -303,11 +358,17 @@ export class DisputesService {
       }
 
       const configuredPin =
-        process.env.ADMIN_2FA_PIN ||
-        process.env.TWO_FACTOR_PIN ||
-        process.env.RELAYER_FUNDING_2FA_PIN;
+        process.env.ADMIN_2FA_PIN?.trim() ||
+        process.env.TWO_FACTOR_PIN?.trim() ||
+        process.env.RELAYER_FUNDING_2FA_PIN?.trim();
 
-      if (configuredPin && code !== configuredPin) {
+      if (!configuredPin) {
+        throw new ForbiddenException(
+          'Hệ thống chưa cấu hình mã PIN bảo mật 2FA',
+        );
+      }
+
+      if (code !== configuredPin) {
         throw new UnauthorizedException(
           'Mã xác thực 2 bước không chính xác hoặc đã hết hạn.',
         );

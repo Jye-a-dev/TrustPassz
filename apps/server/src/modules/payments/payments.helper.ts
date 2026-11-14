@@ -17,8 +17,8 @@ export async function verifyPayOsSignature(
     return true;
   } catch {
     try {
-      const key = process.env.PAYOS_CHECKSUM_KEY || checksumKey;
-      if (!key) return false;
+      const key = (process.env.PAYOS_CHECKSUM_KEY || checksumKey)?.trim();
+      if (!key || key.startsWith('mock_')) return false;
 
       const dataObj = payload.data as unknown as Record<string, unknown>;
       const sortedKeys = Object.keys(dataObj).sort();

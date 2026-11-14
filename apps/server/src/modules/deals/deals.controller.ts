@@ -27,7 +27,7 @@ import { DealsService } from './deals.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role, Roles } from '../../common/decorators/roles.decorator';
@@ -39,7 +39,7 @@ import { THROTTLE_CONFIG } from '../../config/throttle.config';
 
 @ApiTags('Deals & Digital Vault')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('api/v1/deals')
 export class DealsController {
   constructor(private readonly dealsService: DealsService) {}
@@ -186,19 +186,20 @@ export class DealsController {
     deals: { limit: THROTTLE_CONFIG.dealsLimit, ttl: THROTTLE_CONFIG.dealsTtlMs },
     dealsWrite: { limit: THROTTLE_CONFIG.dealsWriteLimit, ttl: THROTTLE_CONFIG.ttlMs },
   })
-  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
+  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Unlock and retrieve encrypted Digital Vault asset payload',
   })
   @ApiParam({ name: 'id', type: String, description: 'UUID của deal' })
   @ApiResponse({ status: 200, description: 'Mở khóa thành công.' })
   @ApiResponse({ status: 400, description: 'Quota vượt quá hoặc chưa cọc.' })
+  @ApiResponse({ status: 403, description: 'Không có quyền truy cập Digital Vault.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy deal.' })
   async unlockVault(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @CurrentUser('id') _userId: string,
+    @CurrentUser() currentUser: RequestUser,
   ) {
-    return this.dealsService.unlockVault(id);
+    return this.dealsService.unlockVault(id, currentUser);
   }
 
   @Post(':id/settle')
@@ -206,16 +207,17 @@ export class DealsController {
     deals: { limit: THROTTLE_CONFIG.dealsLimit, ttl: THROTTLE_CONFIG.dealsTtlMs },
     dealsWrite: { limit: THROTTLE_CONFIG.dealsWriteLimit, ttl: THROTTLE_CONFIG.ttlMs },
   })
-  @Roles(Role.USER, Role.SELLER, Role.BUYER, Role.ADMIN)
+  @Roles(Role.USER, Role.BUYER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Settle deal escrow and release payment to seller',
   })
   @ApiParam({ name: 'id', type: String, description: 'UUID của deal' })
   @ApiResponse({ status: 200, description: 'Nghiệm thu thành công.' })
+  @ApiResponse({ status: 403, description: 'Chỉ Buyer mới có quyền xác nhận nhận hàng và giải ngân.' })
   async settle(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @CurrentUser('id') _userId: string,
+    @CurrentUser() currentUser: RequestUser,
   ) {
-    return this.dealsService.triggerSettle(id);
+    return this.dealsService.triggerSettle(id, currentUser);
   }
 }

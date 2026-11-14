@@ -23,7 +23,7 @@ const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
 const getCookieOptions = () => ({
   httpOnly: true,
   secure: isProd,
-  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
+  sameSite: 'lax' as const,
   path: '/',
   domain: cookieDomain,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms

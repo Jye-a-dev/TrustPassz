@@ -30,15 +30,14 @@ export class PaymentsService {
     @Optional() private readonly emergencyAlertService?: EmergencyAlertService,
     @Optional() private readonly notificationsService?: NotificationsService,
   ) {
-    const clientId = process.env.PAYOS_CLIENT_ID || 'mock-payos-client-id';
-    const apiKey = process.env.PAYOS_API_KEY || 'mock-payos-api-key';
-    this.checksumKey =
-      process.env.PAYOS_CHECKSUM_KEY || 'mock_checksum_key_1234567890';
+    const clientId = process.env.PAYOS_CLIENT_ID || '';
+    const apiKey = process.env.PAYOS_API_KEY || '';
+    this.checksumKey = process.env.PAYOS_CHECKSUM_KEY?.trim() || '';
 
     this.payOS = new PayOS({
-      clientId,
-      apiKey,
-      checksumKey: this.checksumKey,
+      clientId: clientId || 'unconfigured_client_id',
+      apiKey: apiKey || 'unconfigured_api_key',
+      checksumKey: this.checksumKey || 'unconfigured_checksum_key',
     });
   }
 
@@ -361,6 +360,12 @@ export class PaymentsService {
    * Sandbox only: Simulates successful VietQR deposit for development/testing.
    */
   async simulatePaymentSuccess(dealId: string) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException(
+        'Simulation endpoint is disabled in production',
+      );
+    }
+
     const deal = await this.prisma.deal.findUnique({
       where: { id: dealId },
       include: { order: true },
@@ -392,6 +397,12 @@ export class PaymentsService {
    * Validates PayOS webhook signature using SDK verify and native HMAC-SHA256 fallback.
    */
   private async verifySignature(payload: PayOSWebhookDto): Promise<boolean> {
+    if (!this.checksumKey) {
+      this.logger.error('PAYOS_CHECKSUM_KEY is not configured');
+      throw new BadRequestException(
+        'PAYOS_CHECKSUM_KEY is required to verify webhook',
+      );
+    }
     return verifyPayOsSignature(this.payOS, payload, this.checksumKey);
   }
 }

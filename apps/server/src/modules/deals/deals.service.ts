@@ -291,8 +291,8 @@ export class DealsService {
     }
   }
 
-    /** Unlocks digital asset from vault, auditing decryption attempts and enforcing access quota. */
-  async unlockVault(id: string) {
+    /** Unlocks digital asset from vault, enforcing IDOR authorization and access quota. */
+  async unlockVault(id: string, currentUser?: RequestUser) {
     const deal = await this.prisma.deal.findUnique({
       where: { id },
       include: { digitalAsset: true },
@@ -304,6 +304,33 @@ export class DealsService {
 
     if (!deal.digitalAsset) {
       throw new NotFoundException(`No digital asset attached to deal ${id}`);
+    }
+
+    // IDOR Authorization & Role Verification
+    if (currentUser) {
+      const isBuyer = currentUser.id === deal.buyerId;
+      const isSeller = currentUser.id === deal.sellerId;
+      const isAdmin =
+        currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN';
+
+      if (!isBuyer && !isSeller && !isAdmin) {
+        throw new ForbiddenException(
+          'Bạn không có quyền truy cập Digital Vault của giao dịch này.',
+        );
+      }
+
+      if (isBuyer) {
+        const allowedStates: DealState[] = [
+          DealState.DEPOSITED,
+          DealState.IN_INSPECTION,
+          DealState.SETTLED,
+        ];
+        if (!allowedStates.includes(deal.state)) {
+          throw new ForbiddenException(
+            `Người mua chỉ có thể mở khóa kho lưu trữ khi giao dịch ở trạng thái DEPOSITED, IN_INSPECTION hoặc SETTLED (Hiện tại: ${deal.state}).`,
+          );
+        }
+      }
     }
 
     if (deal.state === DealState.PENDING || deal.state === DealState.REFUNDED) {
@@ -356,10 +383,20 @@ export class DealsService {
     return executeCalculateUserEscrowBalance(this.prisma, userId);
   }
 
-  /** Manually triggers settle on-chain for a deal. */
-  async triggerSettle(dealId: string) {
+  /** Manually triggers settle on-chain for a deal (Buyer authorization only). */
+  async triggerSettle(dealId: string, currentUser?: RequestUser) {
     const deal = await this.prisma.deal.findUnique({ where: { id: dealId } });
     if (!deal) throw new NotFoundException(`Deal ${dealId} not found`);
+
+    if (currentUser) {
+      const isBuyer = currentUser.id === deal.buyerId;
+      if (!isBuyer) {
+        throw new ForbiddenException(
+          'Chỉ người mua (Buyer) mới có quyền xác nhận nhận hàng và giải ngân cho người bán.',
+        );
+      }
+    }
+
     if (
       deal.state !== DealState.IN_INSPECTION &&
       deal.state !== DealState.DEPOSITED
