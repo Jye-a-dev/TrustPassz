@@ -36,7 +36,7 @@ export class CreateEmergencyEmailDto {
   label: string;
 
   @ApiProperty({
-    example: '888999',
+    example: '123456',
     description: 'Mã PIN xác thực 2FA 6 chữ số của Super Admin',
   })
   @IsString()
@@ -68,7 +68,7 @@ export class UpdateEmergencyEmailDto {
   isActive?: boolean;
 
   @ApiProperty({
-    example: '888999',
+    example: '123456',
     description: 'Mã PIN xác thực 2FA 6 chữ số của Super Admin',
   })
   @IsString()
@@ -83,7 +83,7 @@ export class UpdateEmergencyEmailDto {
  */
 export class DeleteEmergencyEmailDto {
   @ApiProperty({
-    example: '888999',
+    example: '123456',
     description: 'Mã PIN xác thực 2FA 6 chữ số của Super Admin',
   })
   @IsString()

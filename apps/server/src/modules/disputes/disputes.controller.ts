@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -21,9 +22,17 @@ import {
   QueryDisputeDto,
   ResolveDisputeDto,
 } from './dto/dispute.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Role, Roles } from '../../common/decorators/roles.decorator';
+import {
+  CurrentUser,
+  RequestUser,
+} from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Disputes & AI Arbitration')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('api/v1/disputes')
 export class DisputesController {
   constructor(private readonly disputesService: DisputesService) {}
@@ -42,17 +51,26 @@ export class DisputesController {
     status: 400,
     description: 'Cannot dispute settled or refunded deal.',
   })
-  async openDispute(@Body() dto: OpenDisputeDto) {
-    return this.disputesService.openDispute(dto);
+  @ApiResponse({
+    status: 403,
+    description: 'User is not a participant (buyer/seller) of the deal.',
+  })
+  async openDispute(
+    @Body() dto: OpenDisputeDto,
+    @CurrentUser() currentUser: RequestUser,
+  ) {
+    return this.disputesService.openDispute(dto, currentUser);
   }
 
   @Get()
+  @Roles(Role.ADMIN, Role.ARBITRATOR, Role.SUPER_ADMIN)
   @ApiOperation({
     summary: 'List disputes with status filter and pagination',
     description:
-      'Retrieves disputes with filters for deal ID and dispute status.',
+      'Retrieves disputes with filters for deal ID and dispute status (Admin/Arbitrator only).',
   })
   @ApiResponse({ status: 200, description: 'Paginated list of disputes.' })
+  @ApiResponse({ status: 403, description: 'Forbidden: Insufficient privileges.' })
   async findAll(@Query() query: QueryDisputeDto) {
     return this.disputesService.findAll(query);
   }
@@ -65,8 +83,12 @@ export class DisputesController {
   })
   @ApiParam({ name: 'dealId', description: 'Deal UUID v4' })
   @ApiResponse({ status: 200, description: 'Dispute details or null.' })
-  async findByDeal(@Param('dealId', new ParseUUIDPipe()) dealId: string) {
-    return this.disputesService.findByDealId(dealId);
+  @ApiResponse({ status: 403, description: 'Forbidden: User is not authorized to view this dispute.' })
+  async findByDeal(
+    @Param('dealId', new ParseUUIDPipe()) dealId: string,
+    @CurrentUser() currentUser: RequestUser,
+  ) {
+    return this.disputesService.findByDealId(dealId, currentUser);
   }
 
   @Get(':id')
@@ -77,9 +99,13 @@ export class DisputesController {
   })
   @ApiParam({ name: 'id', description: 'Dispute UUID v4' })
   @ApiResponse({ status: 200, description: 'Dispute details.' })
+  @ApiResponse({ status: 403, description: 'Forbidden: User is not authorized to view this dispute.' })
   @ApiResponse({ status: 404, description: 'Dispute not found.' })
-  async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.disputesService.findOne(id);
+  async findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() currentUser: RequestUser,
+  ) {
+    return this.disputesService.findOne(id, currentUser);
   }
 
   @Post(':id/escalate')
@@ -89,11 +115,16 @@ export class DisputesController {
   })
   @ApiParam({ name: 'id', description: 'Dispute UUID v4' })
   @ApiResponse({ status: 200, description: 'Dispute escalated to admin.' })
-  async escalate(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.disputesService.escalate(id);
+  @ApiResponse({ status: 403, description: 'Forbidden: User is not authorized to escalate this dispute.' })
+  async escalate(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() currentUser: RequestUser,
+  ) {
+    return this.disputesService.escalate(id, currentUser);
   }
 
   @Patch(':id/resolve')
+  @Roles(Role.ADMIN, Role.ARBITRATOR, Role.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Submit binding arbitration resolution',
     description:
@@ -105,10 +136,12 @@ export class DisputesController {
     description: 'Dispute closed and deal state transitioned.',
   })
   @ApiResponse({ status: 400, description: 'Dispute already closed.' })
+  @ApiResponse({ status: 403, description: 'Forbidden: Insufficient privileges or invalid 2FA PIN.' })
   async resolve(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ResolveDisputeDto,
+    @CurrentUser() currentUser: RequestUser,
   ) {
-    return this.disputesService.resolve(id, dto);
+    return this.disputesService.resolve(id, dto, currentUser);
   }
 }

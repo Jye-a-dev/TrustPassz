@@ -165,7 +165,7 @@ export function TwoFactorConfirmModal({
 
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[11px] text-slate-500 text-left">
             <span>
-              Sandbox PIN mặc định: <code className="text-slate-900 font-mono font-semibold">888999</code> (hoặc cấu hình tại biến môi trường <code className="text-slate-700">ADMIN_2FA_PIN</code>).
+              Nhập mã PIN 2FA bảo mật được cấu hình cho quản trị viên hệ thống để phê duyệt thao tác.
             </span>
           </div>
         </div>

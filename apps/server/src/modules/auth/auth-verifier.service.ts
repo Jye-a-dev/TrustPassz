@@ -16,6 +16,7 @@ import {
 import { OAuth2Client } from 'google-auth-library';
 import * as nacl from 'tweetnacl';
 import bs58 from 'bs58';
+import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
 
 export interface DecodedAuthPayload {
@@ -128,8 +129,22 @@ export class AuthVerifierService {
     }
   }
 
+  private jwksClient: JWTVerifyGetKey | null = null;
+  private cachedPrivyAppId: string | null = null;
+
+  private getPrivyJWKS(appId: string): JWTVerifyGetKey {
+    if (!this.jwksClient || this.cachedPrivyAppId !== appId) {
+      this.jwksClient = createRemoteJWKSet(
+        new URL(`https://auth.privy.io/api/v1/apps/${appId}/jwks.json`),
+      );
+      this.cachedPrivyAppId = appId;
+    }
+    return this.jwksClient;
+  }
+
   /**
-   * Decodes claims from a third-party Privy or general bearer credential.
+   * Cryptographically verifies Privy auth token claims via official Privy JWKS public keys.
+   * Completely eliminates unverified decode fallbacks to prevent identity spoofing.
    */
   async parsePrivyClaims(
     rawToken: string | undefined,
@@ -147,60 +162,67 @@ export class AuthVerifierService {
       );
     }
 
+    const privyAppId =
+      process.env.PRIVY_APP_ID?.trim() ||
+      process.env.NEXT_PUBLIC_PRIVY_APP_ID?.trim() ||
+      process.env.EXPO_PUBLIC_PRIVY_APP_ID?.trim();
+
+    if (!privyAppId) {
+      this.logger.error(
+        'Missing PRIVY_APP_ID configuration for cryptographic token verification',
+      );
+      throw new UnauthorizedException(
+        'Invalid or unverified Privy token signature',
+      );
+    }
+
     try {
-      const { decode } = await import('jsonwebtoken');
-      const unverified = decode(trimmed, { complete: true }) as {
-        payload: {
-          sub?: string;
-          email?: string;
-          name?: string;
-          picture?: string;
-          walletAddress?: string;
-          wallet_address?: string;
-          displayName?: string;
-          avatarUrl?: string;
-          iss?: string;
-          privy?: unknown;
-          wallet?: { address?: string };
-          linked_accounts?: Array<{ type?: string; address?: string }>;
-        };
-      } | null;
+      const jwks = this.getPrivyJWKS(privyAppId);
+      const { payload } = await jwtVerify(trimmed, jwks, {
+        issuer: 'privy.io',
+        audience: privyAppId,
+      });
 
-      if (!unverified || !unverified.payload) {
-        throw new BadRequestException(
-          'Định dạng Token không hợp lệ (yêu cầu chuỗi JWT 3 đoạn)',
-        );
-      }
+      const claims = payload as {
+        sub?: string;
+        email?: string;
+        name?: string;
+        picture?: string;
+        wallet?: { address?: string };
+        linked_accounts?: Array<{ type?: string; address?: string }>;
+        [key: string]: unknown;
+      };
 
-      const payload = unverified.payload;
-      const isPrivy =
-        normalizedProvider === 'privy' ||
-        Boolean(payload.iss && payload.iss.includes('privy.io')) ||
-        Boolean(payload.privy);
+      const extractedEmail =
+        claims.email ||
+        claims.linked_accounts?.find((a) => a.type === 'email')?.address ||
+        dto.email;
 
-      if (isPrivy) {
-        return {
-          sub: payload.sub,
-          email:
-            payload.email ||
-            payload.linked_accounts?.find((a) => a.type === 'email')?.address,
-          walletAddress:
-            payload.wallet?.address ||
-            payload.linked_accounts?.find((a) => a.type === 'wallet')
-              ?.address ||
-            dto.walletAddress,
-          displayName: payload.name || dto.displayName,
-          avatarUrl: payload.picture || dto.avatarUrl,
-        };
-      }
+      const extractedWallet =
+        claims.wallet?.address ||
+        claims.linked_accounts?.find((a) => a.type === 'wallet')?.address ||
+        dto.walletAddress;
+
+      const extractedName =
+        claims.name ||
+        (typeof claims.displayName === 'string'
+          ? claims.displayName
+          : undefined) ||
+        dto.displayName;
+
+      const extractedAvatar =
+        claims.picture ||
+        (typeof claims.avatarUrl === 'string'
+          ? claims.avatarUrl
+          : undefined) ||
+        dto.avatarUrl;
 
       return {
-        sub: payload.sub,
-        email: payload.email || dto.email,
-        walletAddress:
-          payload.walletAddress || payload.wallet_address || dto.walletAddress,
-        displayName: payload.displayName || payload.name || dto.displayName,
-        avatarUrl: payload.avatarUrl || payload.picture || dto.avatarUrl,
+        sub: claims.sub,
+        email: extractedEmail,
+        walletAddress: extractedWallet,
+        displayName: extractedName,
+        avatarUrl: extractedAvatar,
       };
     } catch (error: unknown) {
       if (
@@ -210,9 +232,9 @@ export class AuthVerifierService {
         throw error;
       }
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Token parsing failed: ${message}`);
+      this.logger.error(`Privy token cryptographic verification failed: ${message}`);
       throw new UnauthorizedException(
-        'Invalid or expired authentication token',
+        'Invalid or unverified Privy token signature',
       );
     }
   }

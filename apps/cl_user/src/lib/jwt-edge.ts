@@ -66,8 +66,11 @@ export function parseJwtPayload<T = EdgeJwtPayload>(token: string): T | null {
     return null;
   }
 
-  // Support sandbox/test signatures
-  if (cleanToken.startsWith("dev-sandbox-") || cleanToken.startsWith("sec-sig-")) {
+  // Support sandbox/test signatures strictly in non-production environments
+  if (
+    process.env.NODE_ENV !== "production" &&
+    (cleanToken.startsWith("dev-sandbox-") || cleanToken.startsWith("sec-sig-"))
+  ) {
     return {
       role: "USER",
       exp: Math.floor(Date.now() / 1000) + DEFAULT_COOKIE_MAX_AGE_SECONDS,

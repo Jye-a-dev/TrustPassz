@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import {
   parseJwtPayload,
   isTokenExpired,
+  verifyAdminEdgeToken,
   type AdminEdgeJwtPayload,
 } from './lib/jwt-edge';
 
@@ -11,7 +12,7 @@ import {
  * Enforces Zero-Trust RBAC: strictly guards administrative routes against unauthenticated
  * or unauthorized (non-ADMIN / non-ARBITRATOR) sessions via HTTP 307 pre-render redirects.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const rawCookieToken = request.cookies.get('access_token')?.value;
@@ -21,14 +22,27 @@ export function proxy(request: NextRequest) {
     : null;
   const token = rawCookieToken || headerToken;
 
-  const hasValidSession = Boolean(token && !isTokenExpired(token, 15));
-  const payload = hasValidSession && token ? parseJwtPayload<AdminEdgeJwtPayload>(token) : null;
+  let hasValidSession = false;
+  let isPrivilegedAdmin = false;
 
-  const userRole = (payload?.role || '').toUpperCase();
-  const isPrivilegedAdmin =
-    userRole === 'ADMIN' ||
-    userRole === 'ARBITRATOR' ||
-    userRole === 'SUPER_ADMIN';
+  if (token) {
+    const edgeVerification = await verifyAdminEdgeToken(token);
+    if (edgeVerification.valid && edgeVerification.payload) {
+      hasValidSession = true;
+      isPrivilegedAdmin = true;
+    } else {
+      // Check if session is valid non-expired token format but lacks admin role
+      const payload = parseJwtPayload<AdminEdgeJwtPayload>(token);
+      if (payload && !isTokenExpired(token, 15)) {
+        hasValidSession = true;
+        const userRole = (payload.role || '').toUpperCase();
+        isPrivilegedAdmin =
+          userRole === 'ADMIN' ||
+          userRole === 'ARBITRATOR' ||
+          userRole === 'SUPER_ADMIN';
+      }
+    }
+  }
 
   // 1. Root route handling: redirect to /dashboard if privileged, else /login
   if (pathname === '/') {
@@ -58,17 +72,24 @@ export function proxy(request: NextRequest) {
   }
 
   // 3. Protected Admin Routes
-  const isProtectedRoute =
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/deals') ||
-    pathname.startsWith('/disputes') ||
-    pathname.startsWith('/users') ||
-    pathname.startsWith('/system-status') ||
-    pathname.startsWith('/ai-lab') ||
-    pathname.startsWith('/api-explorer') ||
-    pathname.startsWith('/settings') ||
-    pathname.startsWith('/profile') ||
-    pathname.startsWith('/admin');
+  const protectedRoots = [
+    '/dashboard',
+    '/analytics',
+    '/funding',
+    '/deals',
+    '/disputes',
+    '/users',
+    '/system-status',
+    '/ai-lab',
+    '/api-explorer',
+    '/settings',
+    '/profile',
+    '/admin',
+  ];
+
+  const isProtectedRoute = protectedRoots.some(
+    (root) => pathname === root || pathname.startsWith(`${root}/`)
+  );
 
   if (isProtectedRoute) {
     // 3a. Missing or expired session -> Redirect to /login with edge_unauth=1
@@ -102,6 +123,8 @@ export const config = {
   matcher: [
     '/',
     '/dashboard/:path*',
+    '/analytics/:path*',
+    '/funding/:path*',
     '/deals/:path*',
     '/disputes/:path*',
     '/users/:path*',

@@ -25,6 +25,7 @@ export function createCorsOptions(configService?: ConfigService): CorsOptions {
   // Base production origins + Capacitor mobile schemes
   const productionAllowedOrigins = [
     'https://trustpassz.vercel.app',
+    'https://trust-passz.vercel.app',
     'https://trustpassz-cl-user.vercel.app',
     'https://trustpassz-cl-admin.vercel.app',
     'https://trustpassz-user.vercel.app',
@@ -112,18 +113,7 @@ export function createCorsOptions(configService?: ConfigService): CorsOptions {
         return;
       }
 
-      // 5. Dynamic match for Vercel & Cloudflare verified previews (cl_user, cl_admin)
-      const isTrustPasszDeploy =
-        /^https:\/\/[a-z0-9-_.]*(?:vercel\.app|pages\.dev|workers\.dev)$/i.test(
-          origin,
-        ) &&
-        (origin.includes('trustpassz') ||
-          origin.includes('admin') ||
-          origin.includes('cl-user'));
-      if (isTrustPasszDeploy) {
-        callback(null, true);
-        return;
-      }
+
 
       // 6. Local development IP and subnet regex (development only)
       if (!isProd) {

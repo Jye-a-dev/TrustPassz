@@ -8,6 +8,21 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateStorefrontDto, UpdateStorefrontDto } from './dto/storefront.dto';
 import { UserRole } from '@prisma/client';
 
+const USER_SAFE_SELECT = {
+  id: true,
+  email: true,
+  phone: true,
+  walletAddress: true,
+  displayName: true,
+  avatarUrl: true,
+  role: true,
+  isFrozen: true,
+  kycStatus: true,
+  createdAt: true,
+  updatedAt: true,
+  storefront: true,
+} as const;
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -16,17 +31,15 @@ export class UsersService {
     return this.prisma.user.findMany({
       where: role ? { role } : undefined,
       orderBy: { createdAt: 'desc' },
-      include: {
-        storefront: true,
-      },
+      select: USER_SAFE_SELECT,
     });
   }
 
   async findById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: {
-        storefront: true,
+      select: {
+        ...USER_SAFE_SELECT,
         _count: {
           select: {
             sellerDeals: true,
@@ -65,9 +78,7 @@ export class UsersService {
           ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
           ...(dto.role !== undefined && { role: dto.role }),
         },
-        include: {
-          storefront: true,
-        },
+        select: USER_SAFE_SELECT,
       });
     } catch (error: any) {
       if (error?.code === 'P2002') {
@@ -82,7 +93,7 @@ export class UsersService {
   async createStorefront(dto: CreateStorefrontDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: dto.sellerId },
-      include: { storefront: true },
+      select: { id: true, storefront: true },
     });
 
     if (!user) {
